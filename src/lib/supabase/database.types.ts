@@ -56,7 +56,6 @@ export type Database = {
           offer_validity_days: number;
           payment_terms_days: number;
           logo_path: string | null;
-          signature_path: string | null;
           updated_at: string;
           updated_by: string | null;
         };

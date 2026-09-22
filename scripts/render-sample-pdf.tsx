@@ -26,7 +26,6 @@ const firm: FirmSettings = {
   offer_validity_days: 30,
   payment_terms_days: 30,
   logo_path: null,
-  signature_path: null,
   updated_at: new Date().toISOString(),
   updated_by: null,
 };

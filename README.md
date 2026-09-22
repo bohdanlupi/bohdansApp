@@ -39,9 +39,9 @@ npm run db:types     # regenerates src/lib/supabase/database.types.ts
 
 ### 3. Environment
 
-Copy `.env.example` to `.env.local` and fill in the values from **Project Settings → API Keys**.
-Add the same variables in Vercel (**Settings → Environment Variables**); set `NEXT_PUBLIC_SITE_URL` to the
-production URL there.
+Copy `.env.example` to `.env` (or `.env.local`) and fill in the three values from **Project Settings → API
+Keys**. Add the same three variables in Vercel (**Settings → Environment Variables**). No site URL variable is
+needed: email links use the Site URL from the Supabase dashboard (step 1.3).
 
 ### 4. First admin
 

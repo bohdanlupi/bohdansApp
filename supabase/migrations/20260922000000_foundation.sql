@@ -161,7 +161,6 @@ create table public.firm_settings (
   offer_validity_days  integer not null default 30,
   payment_terms_days   integer not null default 30,
   logo_path            text,
-  signature_path       text,
   updated_at           timestamptz not null default now(),
   updated_by           uuid references public.profiles (id)
 );
@@ -199,7 +198,7 @@ grant select, update on public.profiles to authenticated;
 grant select, update on public.firm_settings to authenticated;
 
 -- ---------------------------------------------------------------------------
--- Storage: private bucket for logo, signature and other firm assets
+-- Storage: private bucket for the logo and other firm assets
 -- ---------------------------------------------------------------------------
 insert into storage.buckets (id, name, public)
 values ('firm', 'firm', false)

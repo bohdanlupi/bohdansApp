@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { languageToLocale, LOCALE_COOKIE } from "@/i18n/config";
 import { assertRole, getCurrentProfile } from "@/lib/auth";
-import { siteUrl } from "@/lib/env";
 import type { FormState } from "@/lib/form-state";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 
@@ -67,9 +66,9 @@ export async function inviteUser(_prev: FormState, formData: FormData): Promise<
   const { email, full_name, role, language } = parsed.data;
   const adminClient = createAdminClient();
 
+  // The invite email template links to {{ .SiteURL }}/auth/confirm (Supabase dashboard setting).
   const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
     data: { full_name, language },
-    redirectTo: `${siteUrl()}/passwort-setzen`,
   });
   if (error || !data.user) {
     return { error: error?.code === "email_exists" ? "userExists" : "inviteFailed" };

@@ -131,7 +131,8 @@ Vergabeantrag PDF, Auftragsbestätigung / Absageschreiben letters.
 
 ## Open points
 
-- [ ] Phone number differs between templates: Excel footer `079 945 15 89`, Word `+41 79 495 15 89` – which is right?
-- [ ] Signature image (in the Excel template) – use it on letters/offers? Would be stored in the private `firm` bucket.
-- [ ] Supabase project URL + keys, Vercel project, GitHub repo
+- [x] Phone number: `079 945 15 89` (from the Excel template)
+- [x] Signature image: not used
+- [x] GitHub repo: https://github.com/bohdanlupi/bohdansApp · Vercel project created
+- [ ] Supabase keys in `.env` + migration pushed
 - [ ] Existing addresses / catalogue texts (later, format TBD)

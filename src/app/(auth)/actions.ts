@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { languageToLocale, LOCALE_COOKIE } from "@/i18n/config";
-import { siteUrl } from "@/lib/env";
 import type { FormState } from "@/lib/form-state";
 import { createClient } from "@/lib/supabase/server";
 
@@ -60,10 +59,8 @@ export async function requestPasswordReset(_prev: FormState, formData: FormData)
   if (!parsed.success) return { error: "invalidEmail" };
 
   const supabase = await createClient();
-  // The recovery email template links to /auth/confirm with a token hash.
-  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${siteUrl()}/passwort-setzen`,
-  });
+  // The recovery email template links to {{ .SiteURL }}/auth/confirm with a token hash.
+  await supabase.auth.resetPasswordForEmail(parsed.data.email);
 
   // Same answer whether or not the address exists.
   return { success: "resetEmailSent" };
