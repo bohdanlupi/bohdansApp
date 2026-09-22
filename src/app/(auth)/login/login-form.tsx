@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 
@@ -41,11 +40,7 @@ export function LoginForm({ next, linkError }: { next?: string; linkError?: stri
           <SubmitButton className="w-full" size="lg">
             {t("login")}
           </SubmitButton>
-          <p className="text-center text-sm">
-            <Link href="/passwort-vergessen" className="text-muted-foreground underline-offset-4 hover:underline">
-              {t("forgotPassword")}
-            </Link>
-          </p>
+          <p className="text-center text-sm text-muted-foreground">{t("forgotPasswordHint")}</p>
         </form>
       </CardContent>
     </Card>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
-import { InviteForm, UserRow } from "./user-forms";
+import { CreateUserForm, UserRow } from "./user-forms";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("settings.tabs");
@@ -28,7 +28,7 @@ export default async function UsersPage() {
             <CardTitle>{t("inviteTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <InviteForm />
+            <CreateUserForm />
           </CardContent>
         </Card>
       )}

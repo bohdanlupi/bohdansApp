@@ -48,7 +48,8 @@
     "newPassword": "Neues Passwort",
     "confirmPassword": "Passwort bestätigen",
     "savePassword": "Passwort speichern",
-    "changePassword": "Passwort ändern"
+    "changePassword": "Passwort ändern",
+    "forgotPasswordHint": "Passwort vergessen? Ein Administrator kann es unter Einstellungen → Benutzer neu setzen."
   },
   "forms": {
     "invalidCredentials": "E-Mail oder Passwort ist falsch.",
@@ -63,8 +64,6 @@
     "saveFailed": "Speichern fehlgeschlagen.",
     "saved": "Gespeichert.",
     "userExists": "Für diese E-Mail-Adresse existiert bereits ein Benutzer.",
-    "inviteFailed": "Die Einladung konnte nicht gesendet werden.",
-    "inviteSent": "Einladung wurde gesendet.",
     "cannotDemoteSelf": "Sie können sich nicht selbst die Administratorrechte entziehen oder sich deaktivieren.",
     "notLoggedIn": "Sie sind nicht angemeldet.",
     "deleteFailed": "Löschen fehlgeschlagen.",
@@ -77,7 +76,9 @@
     "costCodeExists": "Diesen Code gibt es in dieser Liste bereits.",
     "templateInUse": "Diese Liste wird von Projekten verwendet und kann nicht gelöscht werden.",
     "bidderExists": "Dieser Unternehmer ist bereits eingeladen.",
-    "bidderAwarded": "Diesem Unternehmer wurde das LV vergeben. Heben Sie zuerst die Vergabe auf."
+    "bidderAwarded": "Diesem Unternehmer wurde das LV vergeben. Heben Sie zuerst die Vergabe auf.",
+    "userCreated": "Benutzer wurde angelegt. Teilen Sie das Startpasswort persönlich mit.",
+    "createUserFailed": "Der Benutzer konnte nicht angelegt werden."
   },
   "projects": {
     "title": "Projekte",
@@ -296,7 +297,7 @@
       "save": "Firmendaten speichern"
     },
     "users": {
-      "inviteTitle": "Benutzer einladen",
+      "inviteTitle": "Benutzer anlegen",
       "listTitle": "Benutzer",
       "fullName": "Name",
       "role": "Rolle",
@@ -305,7 +306,11 @@
       "inactive": "Deaktiviert",
       "you": "Sie",
       "roleHelp": "Administrator: alles inkl. Benutzer und Firmendaten · Planer: Projekte bearbeiten · Nur lesen: alles ansehen, nichts ändern.",
-      "sendInvite": "Einladung senden"
+      "create": "Benutzer anlegen",
+      "initialPassword": "Startpasswort",
+      "passwordHelp": "Mindestens 10 Zeichen. Es wird keine E-Mail verschickt – teilen Sie das Passwort persönlich mit; der Benutzer kann es unter «Mein Profil» ändern.",
+      "setPassword": "Passwort setzen",
+      "setPasswordFor": "Neues Passwort für {name}"
     },
     "profile": {
       "title": "Persönliche Angaben"

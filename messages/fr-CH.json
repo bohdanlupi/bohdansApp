@@ -48,7 +48,8 @@
     "newPassword": "Nouveau mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
     "savePassword": "Enregistrer le mot de passe",
-    "changePassword": "Modifier le mot de passe"
+    "changePassword": "Modifier le mot de passe",
+    "forgotPasswordHint": "Mot de passe oublié ? Un administrateur peut le redéfinir sous Paramètres → Utilisateurs."
   },
   "forms": {
     "invalidCredentials": "E-mail ou mot de passe incorrect.",
@@ -63,8 +64,6 @@
     "saveFailed": "L'enregistrement a échoué.",
     "saved": "Enregistré.",
     "userExists": "Un utilisateur existe déjà pour cette adresse e-mail.",
-    "inviteFailed": "L'invitation n'a pas pu être envoyée.",
-    "inviteSent": "L'invitation a été envoyée.",
     "cannotDemoteSelf": "Vous ne pouvez pas retirer vos propres droits d'administrateur ni vous désactiver.",
     "notLoggedIn": "Vous n'êtes pas connecté.",
     "deleteFailed": "La suppression a échoué.",
@@ -77,7 +76,9 @@
     "costCodeExists": "Ce code existe déjà dans cette liste.",
     "templateInUse": "Cette liste est utilisée par des projets et ne peut pas être supprimée.",
     "bidderExists": "Cet entrepreneur est déjà invité.",
-    "bidderAwarded": "Le descriptif a été adjugé à cet entrepreneur. Annulez d'abord l'adjudication."
+    "bidderAwarded": "Le descriptif a été adjugé à cet entrepreneur. Annulez d'abord l'adjudication.",
+    "userCreated": "L'utilisateur a été créé. Communiquez le mot de passe initial personnellement.",
+    "createUserFailed": "L'utilisateur n'a pas pu être créé."
   },
   "projects": {
     "title": "Projets",
@@ -296,7 +297,7 @@
       "save": "Enregistrer les données de l'entreprise"
     },
     "users": {
-      "inviteTitle": "Inviter un utilisateur",
+      "inviteTitle": "Créer un utilisateur",
       "listTitle": "Utilisateurs",
       "fullName": "Nom",
       "role": "Rôle",
@@ -305,7 +306,11 @@
       "inactive": "Désactivé",
       "you": "Vous",
       "roleHelp": "Administrateur : tout, y c. utilisateurs et données de l'entreprise · Planificateur : modifier les projets · Lecture seule : tout voir, rien modifier.",
-      "sendInvite": "Envoyer l'invitation"
+      "create": "Créer l'utilisateur",
+      "initialPassword": "Mot de passe initial",
+      "passwordHelp": "Au moins 10 caractères. Aucun e-mail n'est envoyé – communiquez le mot de passe personnellement ; l'utilisateur peut le modifier sous « Mon profil ».",
+      "setPassword": "Définir le mot de passe",
+      "setPasswordFor": "Nouveau mot de passe pour {name}"
     },
     "profile": {
       "title": "Données personnelles"

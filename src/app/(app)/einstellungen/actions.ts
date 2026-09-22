@@ -46,34 +46,54 @@ export async function updateFirmSettings(_prev: FormState, formData: FormData): 
 
 const roleSchema = z.enum(["admin", "planer", "viewer"]);
 
-const inviteSchema = z.object({
+const password = z.string().min(10).max(72);
+
+const createUserSchema = z.object({
   email: z.email(),
   full_name: z.string().trim().min(1),
+  password,
   role: roleSchema,
   language: languageSchema,
 });
 
-export async function inviteUser(_prev: FormState, formData: FormData): Promise<FormState> {
+/** Creates a confirmed user with a starting password (no e-mail is sent). */
+export async function createUser(_prev: FormState, formData: FormData): Promise<FormState> {
   await assertRole("admin");
-  const parsed = inviteSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { error: "invalidInput" };
+  const parsed = createUserSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { error: parsed.error.issues.some((i) => i.path[0] === "password") ? "passwordTooShort" : "invalidInput" };
+  }
 
-  const { email, full_name, role, language } = parsed.data;
+  const { email, full_name, password: initialPassword, role, language } = parsed.data;
   const adminClient = createAdminClient();
-
-  // The invite email template links to {{ .SiteURL }}/auth/confirm (Supabase dashboard setting).
-  const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
-    data: { full_name, language },
+  const { data, error } = await adminClient.auth.admin.createUser({
+    email,
+    password: initialPassword,
+    email_confirm: true,
+    user_metadata: { full_name, language },
   });
   if (error || !data.user) {
-    return { error: error?.code === "email_exists" ? "userExists" : "inviteFailed" };
+    return { error: error?.code === "email_exists" ? "userExists" : "createUserFailed" };
   }
 
   // The profile row is created by a trigger; set the chosen role on it.
   await adminClient.from("profiles").update({ role }).eq("id", data.user.id);
 
   revalidatePath("/einstellungen/benutzer");
-  return { success: "inviteSent" };
+  return { success: "userCreated" };
+}
+
+/** Sets a new password for a user (admins only; replaces "forgot password" e-mails). */
+export async function setUserPassword(_prev: FormState, formData: FormData): Promise<FormState> {
+  await assertRole("admin");
+  const id = z.uuid().safeParse(formData.get("id"));
+  const parsed = password.safeParse(formData.get("password"));
+  if (!id.success) return { error: "invalidInput" };
+  if (!parsed.success) return { error: "passwordTooShort" };
+
+  const { error } = await createAdminClient().auth.admin.updateUserById(id.data, { password: parsed.data });
+  if (error) return { error: "passwordUpdateFailed" };
+  return { success: "passwordChanged" };
 }
 
 const userUpdateSchema = z.object({

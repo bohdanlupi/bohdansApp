@@ -48,7 +48,8 @@
     "newPassword": "Nuova password",
     "confirmPassword": "Conferma password",
     "savePassword": "Salva password",
-    "changePassword": "Cambia password"
+    "changePassword": "Cambia password",
+    "forgotPasswordHint": "Password dimenticata? Un amministratore può reimpostarla sotto Impostazioni → Utenti."
   },
   "forms": {
     "invalidCredentials": "E-mail o password errata.",
@@ -63,8 +64,6 @@
     "saveFailed": "Salvataggio non riuscito.",
     "saved": "Salvato.",
     "userExists": "Esiste già un utente con questo indirizzo e-mail.",
-    "inviteFailed": "Non è stato possibile inviare l'invito.",
-    "inviteSent": "L'invito è stato inviato.",
     "cannotDemoteSelf": "Non potete revocare i vostri diritti di amministratore né disattivarvi.",
     "notLoggedIn": "Non avete effettuato l'accesso.",
     "deleteFailed": "Eliminazione non riuscita.",
@@ -77,7 +76,9 @@
     "costCodeExists": "Questo codice esiste già in questa lista.",
     "templateInUse": "Questa lista è utilizzata da progetti e non può essere eliminata.",
     "bidderExists": "Questa impresa è già stata invitata.",
-    "bidderAwarded": "Il capitolato è stato aggiudicato a questa impresa. Annulli prima l'aggiudicazione."
+    "bidderAwarded": "Il capitolato è stato aggiudicato a questa impresa. Annulli prima l'aggiudicazione.",
+    "userCreated": "L'utente è stato creato. Comunichi la password iniziale personalmente.",
+    "createUserFailed": "Non è stato possibile creare l'utente."
   },
   "projects": {
     "title": "Progetti",
@@ -296,7 +297,7 @@
       "save": "Salva dati aziendali"
     },
     "users": {
-      "inviteTitle": "Invita utente",
+      "inviteTitle": "Crea utente",
       "listTitle": "Utenti",
       "fullName": "Nome",
       "role": "Ruolo",
@@ -305,7 +306,11 @@
       "inactive": "Disattivato",
       "you": "Voi",
       "roleHelp": "Amministratore: tutto, incl. utenti e dati aziendali · Progettista: modificare i progetti · Sola lettura: vedere tutto, non modificare nulla.",
-      "sendInvite": "Invia invito"
+      "create": "Crea utente",
+      "initialPassword": "Password iniziale",
+      "passwordHelp": "Almeno 10 caratteri. Non viene inviata alcuna e-mail – comunichi la password personalmente; l'utente può modificarla sotto «Il mio profilo».",
+      "setPassword": "Imposta password",
+      "setPasswordFor": "Nuova password per {name}"
     },
     "profile": {
       "title": "Dati personali"

@@ -1,23 +1,26 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect, useRef } from "react";
+import { KeyRound } from "lucide-react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import { FormMessage, NativeSelect, SubmitButton } from "@/components/form";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { initialFormState } from "@/lib/form-state";
 import type { Profile } from "@/lib/supabase/types";
 
-import { inviteUser, updateUser } from "../actions";
+import { createUser, setUserPassword, updateUser } from "../actions";
 
 const roles = ["admin", "planer", "viewer"] as const;
 const languages = ["de", "fr", "it"] as const;
 
-export function InviteForm() {
+export function CreateUserForm() {
   const t = useTranslations();
-  const [state, action] = useActionState(inviteUser, initialFormState);
+  const [state, action] = useActionState(createUser, initialFormState);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -35,6 +38,10 @@ export function InviteForm() {
         <div className="space-y-2">
           <Label htmlFor="invite-email">{t("auth.email")}</Label>
           <Input id="invite-email" name="email" type="email" required />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="invite-password">{t("settings.users.initialPassword")}</Label>
+          <Input id="invite-password" name="password" type="text" minLength={10} autoComplete="off" required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="invite-role">{t("settings.users.role")}</Label>
@@ -57,8 +64,9 @@ export function InviteForm() {
           </NativeSelect>
         </div>
       </div>
+      <p className="text-xs text-muted-foreground">{t("settings.users.passwordHelp")}</p>
       <p className="text-xs text-muted-foreground">{t("settings.users.roleHelp")}</p>
-      <SubmitButton>{t("settings.users.sendInvite")}</SubmitButton>
+      <SubmitButton>{t("settings.users.create")}</SubmitButton>
     </form>
   );
 }
@@ -104,10 +112,58 @@ export function UserRow({ user, editable, isSelf }: { user: Profile; editable: b
           <SubmitButton variant="outline" size="sm">
             {t("common.save")}
           </SubmitButton>
+          <PasswordDialog userId={user.id} name={user.full_name ?? user.email} />
         </>
       ) : (
         <Badge variant="outline">{t(`roles.${user.role}`)}</Badge>
       )}
+    </form>
+  );
+}
+
+function PasswordDialog({ userId, name }: { userId: string; name: string }) {
+  const t = useTranslations();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => setOpen(true)}
+        title={t("settings.users.setPassword")}
+        aria-label={t("settings.users.setPassword")}
+      >
+        <KeyRound />
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>{open && <PasswordForm userId={userId} name={name} />}</DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function PasswordForm({ userId, name }: { userId: string; name: string }) {
+  const t = useTranslations();
+  const [state, action] = useActionState(setUserPassword, initialFormState);
+
+  return (
+    <form action={action} className="grid gap-4">
+      <DialogHeader>
+        <DialogTitle>{t("settings.users.setPasswordFor", { name })}</DialogTitle>
+      </DialogHeader>
+      <input type="hidden" name="id" value={userId} />
+      <FormMessage state={state} />
+      <div className="space-y-2">
+        <Label htmlFor={`pw-${userId}`}>{t("auth.newPassword")}</Label>
+        <Input id={`pw-${userId}`} name="password" type="text" minLength={10} autoComplete="off" required autoFocus />
+        <p className="text-xs text-muted-foreground">{t("settings.users.passwordHelp")}</p>
+      </div>
+      <DialogFooter>
+        <DialogClose render={<Button type="button" variant="outline" />}>{t("common.cancel")}</DialogClose>
+        {!state.success && <SubmitButton>{t("auth.savePassword")}</SubmitButton>}
+      </DialogFooter>
     </form>
   );
 }
