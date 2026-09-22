@@ -132,21 +132,22 @@ Vergabeantrag PDF, Auftragsbestätigung / Absageschreiben letters.
 ## Current status (2026-09-22) – resume here
 
 Done:
-- Phase 0 code committed locally (3 commits on `main`), `npm run check` passes.
-- Supabase project `upcwquytpfihfpbvulbp` linked, migration `20260922000000_foundation.sql` applied,
-  types generated (`src/lib/supabase/database.types.ts`, aliases in `types.ts`).
+- Phase 0 code committed locally, `npm run check` passes.
+- Supabase project moved to **Zurich** (eu-central-2), ref `nrtmpqhfdwnfavvrqghj`: linked, migration
+  `20260922000000_foundation.sql` applied, types regenerated (unchanged).
 - Auth config applied via `node scripts/configure-auth.mjs http://localhost:3000`: sign-up off, password ≥ 10.
-- RLS verified with temporary test users (13/13 checks passed, test users deleted, 0 profiles left).
+- RLS verified with temporary test users (14/14 checks passed, test users deleted, 0 profiles left).
+- Decision: setup gets finished (login + deploy working end to end) before Phase 1 starts.
 
 Waiting on the user:
-1. **git push** – first push needs an interactive GitHub login:
+1. **First admin**: Supabase → Authentication → Users → Add user (auto-confirm). First user becomes admin.
+2. **git push** – first push needs an interactive GitHub login:
    `& "C:\Program Files\Git\cmd\git.exe" push -u origin main` (or restart VS Code so `git` is on PATH).
-2. **Vercel URL** → then run `node scripts/configure-auth.mjs <vercel-url>` (sets Site URL + redirect URLs).
-3. **SMTP** (own mailbox info@lupi-gmbh.ch or Resend/Brevo) – required to invite colleagues and to use the
+3. **Vercel**: connect the repo, set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+   `SUPABASE_SECRET_KEY` (Zurich values), deploy → then `node scripts/configure-auth.mjs <vercel-url>`.
+4. **SMTP** (own mailbox info@lupi-gmbh.ch or Resend/Brevo) – required to invite colleagues and to use the
    custom templates (free plan blocks templates without SMTP). Then re-run the script with `--templates`.
-4. **Region decision**: project is in London (eu-west-2), not Zurich. Moving is trivial now (empty DB:
-   new keys → `supabase link` + `db push` + configure-auth). Keep London or move to Zurich?
-5. **First admin**: Supabase → Authentication → Users → Add user (auto-confirm). First user becomes admin.
+5. **Delete the old London project** `upcwquytpfihfpbvulbp` once everything works in Zurich.
 
 Next after that: first real login test in the browser, Vercel deploy check, then **Phase 1 (Adressen + Projekte)**.
 
@@ -155,5 +156,5 @@ Next after that: first real login test in the browser, Vercel deploy check, then
 - [x] Phone number: `079 945 15 89` (from the Excel template)
 - [x] Signature image: not used
 - [x] GitHub repo: https://github.com/bohdanlupi/bohdansApp · Vercel project created
-- [ ] Supabase keys in `.env` + migration pushed
+- [x] Supabase keys in `.env` + migration pushed (Zurich)
 - [ ] Existing addresses / catalogue texts (later, format TBD)
