@@ -75,7 +75,9 @@
     "invalidMove": "Dieser Eintrag kann nicht dorthin verschoben werden.",
     "lvNumberExists": "Diese LV-Nummer gibt es in diesem Projekt bereits.",
     "costCodeExists": "Diesen Code gibt es in dieser Liste bereits.",
-    "templateInUse": "Diese Liste wird von Projekten verwendet und kann nicht gelöscht werden."
+    "templateInUse": "Diese Liste wird von Projekten verwendet und kann nicht gelöscht werden.",
+    "bidderExists": "Dieser Unternehmer ist bereits eingeladen.",
+    "bidderAwarded": "Diesem Unternehmer wurde das LV vergeben. Heben Sie zuerst die Vergabe auf."
   },
   "projects": {
     "title": "Projekte",
@@ -502,6 +504,94 @@
       "kv": "KV total",
       "difference": "Differenz",
       "percent": "%"
+    }
+  },
+  "offers": {
+    "bidders": "Unternehmer",
+    "addBidder": "Einladen",
+    "addBidderHint": "Unternehmer mit passendem Gewerk stehen oben in der Liste.",
+    "noBiddersShort": "Noch keine Unternehmer eingeladen.",
+    "noBidders": "Laden Sie links Unternehmer zur Offertstellung ein. Danach erfassen Sie hier die offerierten Einheitspreise.",
+    "selectBidder": "Wählen Sie links einen Unternehmer, um die Preise seiner Offerte zu erfassen.",
+    "awarded": "Vergeben",
+    "missingPrices": "{count, plural, one {# Preis fehlt} other {# Preise fehlen}}",
+    "removeBidder": "Unternehmer entfernen",
+    "removeBidderConfirm": "«{name}» mit allen erfassten Preisen entfernen?",
+    "status": {
+      "invited": "Eingeladen",
+      "offered": "Offeriert",
+      "declined": "Abgesagt"
+    },
+    "letters": {
+      "invitation": "Einladung (PDF)"
+    },
+    "fields": {
+      "status": "Status",
+      "invitedAt": "Eingeladen am",
+      "receivedAt": "Offerte vom",
+      "reference": "Offert-Nr. / Referenz",
+      "discount": "Rabatt %",
+      "skonto": "Skonto %",
+      "deductions": "Weitere Abzüge CHF",
+      "vat": "MwSt. %"
+    },
+    "columns": {
+      "position": "Pos.",
+      "text": "Bezeichnung",
+      "quantity": "Menge",
+      "estimate": "Schätzung EP",
+      "unitPrice": "Offeriert EP",
+      "amount": "Betrag"
+    },
+    "summary": {
+      "gross": "Brutto",
+      "discount": "Rabatt",
+      "deductions": "weitere Abzüge",
+      "net": "Netto",
+      "skonto": "Skonto",
+      "vat": "MwSt.",
+      "total": "Total inkl. MwSt.",
+      "estimateGross": "Kostenschätzung brutto (zum Vergleich)"
+    }
+  },
+  "comparison": {
+    "description": "Alle offerierten Angebote nebeneinander, sortiert nach Total inkl. MwSt. Grün: tiefster, Rot: höchster Einheitspreis je Position.",
+    "noOffers": "Noch keine Offerten erfasst. Erfassen Sie die Preise unter «Offerten».",
+    "pdfComparison": "PDF Angebotsvergleich",
+    "pdfAwardProposal": "PDF Vergabeantrag",
+    "estimate": "Kostenschätzung",
+    "missingHint": "Unvollständige Offerten (fehlende Preise): {names}",
+    "columns": {
+      "position": "Pos.",
+      "text": "Bezeichnung",
+      "quantity": "Menge",
+      "unitPrice": "EP",
+      "amount": "Betrag"
+    },
+    "summary": {
+      "gross": "Brutto",
+      "discount": "Rabatt",
+      "deductions": "Weitere Abzüge",
+      "net": "Netto",
+      "skonto": "Skonto",
+      "vat": "MwSt.",
+      "total": "Total inkl. MwSt.",
+      "rank": "Rang",
+      "vsCheapest": "Abweichung zum günstigsten",
+      "vsEstimate": "Abweichung zur Schätzung"
+    },
+    "award": {
+      "title": "Vergabe",
+      "description": "Bestimmen Sie den Unternehmer für die Vergabe. Das LV erhält den Status «Vergeben»; Zusage- und Absagebriefe stehen danach bereit.",
+      "bidder": "Unternehmer",
+      "none": "– noch nicht vergeben –",
+      "date": "Vergabedatum",
+      "justification": "Begründung (für den Vergabeantrag)",
+      "justificationPlaceholder": "z. B. wirtschaftlich günstigstes Angebot, Referenzen, Termine …",
+      "save": "Vergabe speichern",
+      "letters": "Briefe an die Unternehmer",
+      "awardLetter": "Zusage (PDF)",
+      "rejectionLetter": "Absage (PDF)"
     }
   }
 }

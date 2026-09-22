@@ -18,3 +18,5 @@ export type LvStatus = Enums<"lv_status">;
 export type Catalog = Tables<"catalogs">;
 export type CostPlanTemplate = Tables<"cost_plan_templates">;
 export type CostPlanItem = Tables<"cost_plan_items">;
+export type LvBidder = Tables<"lv_bidders">;
+export type BidderStatus = Enums<"bidder_status">;

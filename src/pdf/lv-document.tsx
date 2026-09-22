@@ -23,7 +23,7 @@ export type PdfNode = {
   is_lump_sum: boolean;
 };
 
-const col = { pos: 62, qty: 48, unit: 36, price: 58, amount: 70 };
+const col = { pos: 62, qty: 46, unit: 44, price: 58, amount: 70 };
 const blank = "..............";
 
 /**

@@ -75,7 +75,9 @@
     "invalidMove": "Questo elemento non può essere spostato in quella posizione.",
     "lvNumberExists": "Questo numero di capitolato esiste già in questo progetto.",
     "costCodeExists": "Questo codice esiste già in questa lista.",
-    "templateInUse": "Questa lista è utilizzata da progetti e non può essere eliminata."
+    "templateInUse": "Questa lista è utilizzata da progetti e non può essere eliminata.",
+    "bidderExists": "Questa impresa è già stata invitata.",
+    "bidderAwarded": "Il capitolato è stato aggiudicato a questa impresa. Annulli prima l'aggiudicazione."
   },
   "projects": {
     "title": "Progetti",
@@ -502,6 +504,94 @@
       "kv": "Preventivo totale",
       "difference": "Differenza",
       "percent": "%"
+    }
+  },
+  "offers": {
+    "bidders": "Imprese",
+    "addBidder": "Invita",
+    "addBidderHint": "Le imprese del settore corrispondente sono in cima all'elenco.",
+    "noBiddersShort": "Nessuna impresa invitata.",
+    "noBidders": "Inviti a sinistra le imprese a presentare un'offerta. In seguito registrerà qui i prezzi unitari offerti.",
+    "selectBidder": "Scelga un'impresa a sinistra per registrare i prezzi della sua offerta.",
+    "awarded": "Aggiudicato",
+    "missingPrices": "{count, plural, one {# prezzo mancante} other {# prezzi mancanti}}",
+    "removeBidder": "Rimuovi impresa",
+    "removeBidderConfirm": "Rimuovere «{name}» con tutti i prezzi registrati?",
+    "status": {
+      "invited": "Invitata",
+      "offered": "Offerta ricevuta",
+      "declined": "Rinuncia"
+    },
+    "letters": {
+      "invitation": "Invito (PDF)"
+    },
+    "fields": {
+      "status": "Stato",
+      "invitedAt": "Invitata il",
+      "receivedAt": "Offerta del",
+      "reference": "N. offerta / riferimento",
+      "discount": "Sconto %",
+      "skonto": "Sconto cassa %",
+      "deductions": "Altre deduzioni CHF",
+      "vat": "IVA %"
+    },
+    "columns": {
+      "position": "Pos.",
+      "text": "Designazione",
+      "quantity": "Quantità",
+      "estimate": "PU stimato",
+      "unitPrice": "PU offerto",
+      "amount": "Importo"
+    },
+    "summary": {
+      "gross": "Lordo",
+      "discount": "Sconto",
+      "deductions": "altre deduzioni",
+      "net": "Netto",
+      "skonto": "Sconto cassa",
+      "vat": "IVA",
+      "total": "Totale IVA inclusa",
+      "estimateGross": "Stima lorda (per confronto)"
+    }
+  },
+  "comparison": {
+    "description": "Tutte le offerte affiancate, ordinate secondo il totale IVA inclusa. Verde: prezzo unitario più basso, rosso: più alto per posizione.",
+    "noOffers": "Nessuna offerta registrata. Registri i prezzi sotto «Offerte».",
+    "pdfComparison": "PDF confronto offerte",
+    "pdfAwardProposal": "PDF proposta di aggiudicazione",
+    "estimate": "Stima dei costi",
+    "missingHint": "Offerte incomplete (prezzi mancanti): {names}",
+    "columns": {
+      "position": "Pos.",
+      "text": "Designazione",
+      "quantity": "Quantità",
+      "unitPrice": "PU",
+      "amount": "Importo"
+    },
+    "summary": {
+      "gross": "Lordo",
+      "discount": "Sconto",
+      "deductions": "Altre deduzioni",
+      "net": "Netto",
+      "skonto": "Sconto cassa",
+      "vat": "IVA",
+      "total": "Totale IVA inclusa",
+      "rank": "Rango",
+      "vsCheapest": "Scarto dalla più economica",
+      "vsEstimate": "Scarto dalla stima"
+    },
+    "award": {
+      "title": "Aggiudicazione",
+      "description": "Designi l'impresa aggiudicataria. Il capitolato passa allo stato «Aggiudicato»; le lettere di aggiudicazione e di rifiuto sono poi disponibili.",
+      "bidder": "Impresa",
+      "none": "– non ancora aggiudicato –",
+      "date": "Data di aggiudicazione",
+      "justification": "Motivazione (per la proposta di aggiudicazione)",
+      "justificationPlaceholder": "p. es. offerta economicamente più vantaggiosa, referenze, termini …",
+      "save": "Salva aggiudicazione",
+      "letters": "Lettere alle imprese",
+      "awardLetter": "Aggiudicazione (PDF)",
+      "rejectionLetter": "Rifiuto (PDF)"
     }
   }
 }

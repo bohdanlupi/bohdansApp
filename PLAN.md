@@ -54,33 +54,36 @@ projects            id, number (unique, suggested YYYY-NNN), name, street, zip, 
 project_participants project_id, company_id, contact_id? (must belong to the company), role, note
 company_list / project_list   search views (search_text, contact_count, client_names)
 
--- Kostenplan
-cost_plan_templates id, name (BKP 2017, eBKP-H, own…)
-cost_plan_items     id, template_id, parent_id, code (e.g. 250), name (i18n), sort
-project_cost_items  id, project_id, cost_plan_item_id | custom code/name, budget, kv_amount (computed)
+-- Kostenplan (Phase 3)
+cost_plan_templates id, key (bkp | ebkp_h | null for own lists), name
+cost_plan_items     id, template_id, parent_id (derived from the code: 242 → 24 → 2), code, name (i18n)
+projects.cost_plan_template_id, lvs.cost_plan_item_id, lv_nodes.cost_plan_item_id (override)
+project_cost_items  project_id, cost_plan_item_id, budget, manual_amount (KV not covered by LVs), note
+project_cost_lv_amounts (view)  LV estimate per project and effective code
 
--- Eigenkatalog
-catalogs            id, name, trade, version, active
-catalog_nodes       id, catalog_id, parent_id, kind (chapter|section|position),
-                    number, short_text (i18n), long_text (i18n), unit, default_price, sort
-own_prices          id, catalog_node_id, price, valid_from, source, note
+-- Eigenkatalog + LV (Phase 2) – one node model for both trees
+node_kind           group | position | r_position (LV only) | text
+catalogs            id, name, trade, description, active
+catalog_nodes       id, catalog_id, parent_id, kind, number, short_text/long_text (i18n), unit,
+                    unit_price, price_date, sort
+lvs                 id, project_id, number, title, trade, language, status (draft | tendered | awarded),
+                    description, submission_deadline, cost_plan_item_id, awarded_bidder_id, award_date,
+                    award_justification
+lv_nodes            id, lv_id, parent_id, kind, number, short_text/long_text (i18n), unit, quantity,
+                    unit_price (estimate), is_optional, is_lump_sum, source_catalog_node_id,
+                    cost_plan_item_id, sort
+lv_measurements     id, lv_node_id, description, count, factor_a/b/c, result (generated)
+                    → trigger sets lv_nodes.quantity = Σ result (Vorausmass)
+lv_list (view)      lvs + estimate_total, position_count
+Numbering: 100 / 110 / 110.101 (src/lib/tree.ts), reassigned after every structural change.
 
--- Leistungsverzeichnis
-lvs                 id, project_id, number, title, trade, cost_plan_item_id, language,
-                    status (Entwurf | Ausgeschrieben | Vergeben), catalog_ref
-lv_nodes            id, lv_id, parent_id, kind (chapter|section|position|r_position|text),
-                    number, short_text (i18n), long_text (i18n), unit, quantity,
-                    estimate_price, is_optional (Eventualposition), is_lump_sum,
-                    source_catalog_node_id, sort
-lv_measurements     id, lv_node_id, description, formula / factors (a × b × c), count, result, sort
-                    → quantity = Σ results (Vorausmass)
-
--- Ausschreibung / Offerten
-lv_bidders          id, lv_id, company_id, contact_id, invited_at, status (eingeladen | offeriert | abgesagt)
-offers              id, lv_bidder_id, received_at, discount_pct (Rabatt), skonto_pct,
-                    other_deductions, vat_pct, notes, revision
-offer_prices        offer_id, lv_node_id, unit_price, lump_sum, note
-awards              id, lv_id, offer_id, decided_at, justification  (→ Vergabeantrag)
+-- Ausschreibung / Offerten (Phase 4)
+lv_bidders          id, lv_id, company_id, contact_id, status (invited | offered | declined), invited_at,
+                    offer_received_at, offer_reference, discount_pct, skonto_pct, other_deductions,
+                    vat_pct, notes   (bidder and offer header in one row; one offer per bidder)
+offer_prices        lv_bidder_id, lv_node_id, lv_id, unit_price, note
+offer_totals (view) gross total and missing prices per bidder
+Offer math (src/lib/offer-math.ts): Brutto − Rabatt − Abzüge = Netto − Skonto + MwSt = Total (5 Rp.)
 
 -- Dokumente
 documents           id, project_id?, company_id?, storage_path, name, type, uploaded_by
@@ -115,14 +118,15 @@ users, profile), letterhead PDF preview (`/api/pdf/briefkopf`).
 CRUD for companies/contacts/projects, participants per project, search, CSV import of existing addresses.
 Project documents (upload) are not built yet – planned together with the document management.
 
-**Phase 2 – Eigenkatalog + Leistungsverzeichnis**
+**Phase 2 – Eigenkatalog + Leistungsverzeichnis** ✅ done (2026-09-22)
 Catalogue editor; LV editor with tree (drag & drop, auto-numbering), insert positions from the catalogue,
 R-positions, Eventualpositionen, Vorausmass, estimate prices from own prices; LV PDF on the firm letterhead.
 
-**Phase 3 – BKP + Kostenvoranschlag**
+**Phase 3 – BKP + Kostenvoranschlag** ✅ done (2026-09-22)
 Load the BKP template, assign LVs/positions to BKP codes, cost estimate with roll-ups, KV PDF.
 
-**Phase 4 – Offerten + Angebotsvergleich**
+**Phase 4 – Offerten + Angebotsvergleich** ✅ done (2026-09-22) – plus invitation letter and a detailed
+comparison PDF (landscape)
 Invite bidders, manual price entry per position, deductions (Rabatt, Skonto, MwSt), side-by-side
 comparison (per position + totals, ranking, deviation from estimate, highlighting of min/max),
 Vergabeantrag PDF, Auftragsbestätigung / Absageschreiben letters.
@@ -159,7 +163,18 @@ Phase 1 done (2026-09-22): migrations `20260922180000_addresses_projects.sql` an
 CSV import: semicolon/comma/tab, UTF-8 or Windows-1252, column mapping with DE/FR/IT header guessing,
 atomic via `import_addresses()` RPC. Waiting for the real address export from the user to verify.
 
-Next: **Phase 2 (Eigenkatalog + Leistungsverzeichnis)**.
+Phases 2–4 done (2026-09-22), migrations up to `20260923200000_offers.sql` applied to Zurich.
+Tested with temporary users against the live DB: tree numbering/moves, catalogue → LV copy, Vorausmass,
+estimate totals, cost codes (LV / group / position), budget/KV roll-ups, offer prices, Rabatt/Skonto/MwSt,
+ranking, all PDFs (LV tender/estimate, KV, letters DE/FR/IT, Vergabeantrag, Angebotsvergleich), all pages
+in DE/FR/IT as planer and viewer. Not yet clicked through in a real browser by the user.
+
+Open / ideas for later:
+- BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete
+  them (Einstellungen → Kostenpläne); eBKP-H element names were entered from memory.
+- CSV import for catalogue texts (format from the user still missing).
+- Project documents (upload) – together with document management.
+- Offer revisions, importing offers (SIA 451), sending letters by e-mail.
 
 ## Open points
 

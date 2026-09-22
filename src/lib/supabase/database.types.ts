@@ -408,6 +408,106 @@ export type Database = {
           },
         ]
       }
+      lv_bidders: {
+        Row: {
+          company_id: string
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          discount_pct: number
+          id: string
+          invited_at: string | null
+          lv_id: string
+          notes: string | null
+          offer_received_at: string | null
+          offer_reference: string | null
+          other_deductions: number
+          skonto_pct: number
+          status: Database["public"]["Enums"]["bidder_status"]
+          updated_at: string
+          vat_pct: number
+        }
+        Insert: {
+          company_id: string
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_pct?: number
+          id?: string
+          invited_at?: string | null
+          lv_id: string
+          notes?: string | null
+          offer_received_at?: string | null
+          offer_reference?: string | null
+          other_deductions?: number
+          skonto_pct?: number
+          status?: Database["public"]["Enums"]["bidder_status"]
+          updated_at?: string
+          vat_pct?: number
+        }
+        Update: {
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_pct?: number
+          id?: string
+          invited_at?: string | null
+          lv_id?: string
+          notes?: string | null
+          offer_received_at?: string | null
+          offer_reference?: string | null
+          other_deductions?: number
+          skonto_pct?: number
+          status?: Database["public"]["Enums"]["bidder_status"]
+          updated_at?: string
+          vat_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lv_bidders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lv_bidders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lv_bidders_contact_id_company_id_fkey"
+            columns: ["contact_id", "company_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id", "company_id"]
+          },
+          {
+            foreignKeyName: "lv_bidders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lv_bidders_lv_id_fkey"
+            columns: ["lv_id"]
+            isOneToOne: false
+            referencedRelation: "lv_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lv_bidders_lv_id_fkey"
+            columns: ["lv_id"]
+            isOneToOne: false
+            referencedRelation: "lvs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lv_measurements: {
         Row: {
           count: number
@@ -553,6 +653,9 @@ export type Database = {
       }
       lvs: {
         Row: {
+          award_date: string | null
+          award_justification: string | null
+          awarded_bidder_id: string | null
           cost_plan_item_id: string | null
           created_at: string
           created_by: string | null
@@ -568,6 +671,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          award_date?: string | null
+          award_justification?: string | null
+          awarded_bidder_id?: string | null
           cost_plan_item_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -583,6 +689,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          award_date?: string | null
+          award_justification?: string | null
+          awarded_bidder_id?: string | null
           cost_plan_item_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -598,6 +707,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "lvs_awarded_bidder_fkey"
+            columns: ["awarded_bidder_id", "id"]
+            isOneToOne: false
+            referencedRelation: "lv_bidders"
+            referencedColumns: ["id", "lv_id"]
+          },
+          {
+            foreignKeyName: "lvs_awarded_bidder_fkey"
+            columns: ["awarded_bidder_id", "id"]
+            isOneToOne: false
+            referencedRelation: "offer_totals"
+            referencedColumns: ["lv_bidder_id", "lv_id"]
+          },
           {
             foreignKeyName: "lvs_cost_plan_item_id_fkey"
             columns: ["cost_plan_item_id"]
@@ -625,6 +748,55 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_prices: {
+        Row: {
+          lv_bidder_id: string
+          lv_id: string
+          lv_node_id: string
+          note: string | null
+          unit_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          lv_bidder_id: string
+          lv_id: string
+          lv_node_id: string
+          note?: string | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          lv_bidder_id?: string
+          lv_id?: string
+          lv_node_id?: string
+          note?: string | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_prices_lv_bidder_id_lv_id_fkey"
+            columns: ["lv_bidder_id", "lv_id"]
+            isOneToOne: false
+            referencedRelation: "lv_bidders"
+            referencedColumns: ["id", "lv_id"]
+          },
+          {
+            foreignKeyName: "offer_prices_lv_bidder_id_lv_id_fkey"
+            columns: ["lv_bidder_id", "lv_id"]
+            isOneToOne: false
+            referencedRelation: "offer_totals"
+            referencedColumns: ["lv_bidder_id", "lv_id"]
+          },
+          {
+            foreignKeyName: "offer_prices_lv_node_id_lv_id_fkey"
+            columns: ["lv_node_id", "lv_id"]
+            isOneToOne: false
+            referencedRelation: "lv_nodes"
+            referencedColumns: ["id", "lv_id"]
           },
         ]
       }
@@ -945,6 +1117,9 @@ export type Database = {
       }
       lv_list: {
         Row: {
+          award_date: string | null
+          award_justification: string | null
+          awarded_bidder_id: string | null
           cost_plan_item_id: string | null
           created_at: string | null
           created_by: string | null
@@ -962,6 +1137,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          award_date?: string | null
+          award_justification?: string | null
+          awarded_bidder_id?: string | null
           cost_plan_item_id?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -979,6 +1157,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          award_date?: string | null
+          award_justification?: string | null
+          awarded_bidder_id?: string | null
           cost_plan_item_id?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -996,6 +1177,20 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lvs_awarded_bidder_fkey"
+            columns: ["awarded_bidder_id", "id"]
+            isOneToOne: false
+            referencedRelation: "lv_bidders"
+            referencedColumns: ["id", "lv_id"]
+          },
+          {
+            foreignKeyName: "lvs_awarded_bidder_fkey"
+            columns: ["awarded_bidder_id", "id"]
+            isOneToOne: false
+            referencedRelation: "offer_totals"
+            referencedColumns: ["lv_bidder_id", "lv_id"]
+          },
           {
             foreignKeyName: "lvs_cost_plan_item_id_fkey"
             columns: ["cost_plan_item_id"]
@@ -1022,6 +1217,30 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_totals: {
+        Row: {
+          gross_total: number | null
+          lv_bidder_id: string | null
+          lv_id: string | null
+          missing_prices: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lv_bidders_lv_id_fkey"
+            columns: ["lv_id"]
+            isOneToOne: false
+            referencedRelation: "lv_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lv_bidders_lv_id_fkey"
+            columns: ["lv_id"]
+            isOneToOne: false
+            referencedRelation: "lvs"
             referencedColumns: ["id"]
           },
         ]
@@ -1145,6 +1364,7 @@ export type Database = {
     Enums: {
       app_language: "de" | "fr" | "it"
       app_role: "admin" | "planer" | "viewer"
+      bidder_status: "invited" | "offered" | "declined"
       lv_status: "draft" | "tendered" | "awarded"
       node_kind: "group" | "position" | "r_position" | "text"
       project_status:
@@ -1282,6 +1502,7 @@ export const Constants = {
     Enums: {
       app_language: ["de", "fr", "it"],
       app_role: ["admin", "planer", "viewer"],
+      bidder_status: ["invited", "offered", "declined"],
       lv_status: ["draft", "tendered", "awarded"],
       node_kind: ["group", "position", "r_position", "text"],
       project_status: [

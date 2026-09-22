@@ -55,16 +55,18 @@ export function LetterPage({
   firm,
   logo,
   pageLabel,
+  orientation = "portrait",
   children,
 }: {
   firm: FirmSettings;
   logo: LogoSource | null;
+  orientation?: "portrait" | "landscape";
   /** e.g. (p, n) => `Seite ${p} von ${n}` */
   pageLabel: (page: number, total: number) => string;
   children: React.ReactNode;
 }) {
   return (
-    <Page size="A4" style={styles.page}>
+    <Page size="A4" orientation={orientation} style={styles.page}>
       <View style={styles.header} fixed>
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
         {logo && <Image src={logo} style={styles.logo} />}

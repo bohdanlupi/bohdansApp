@@ -75,7 +75,9 @@
     "invalidMove": "Cet élément ne peut pas être déplacé à cet endroit.",
     "lvNumberExists": "Ce numéro de descriptif existe déjà dans ce projet.",
     "costCodeExists": "Ce code existe déjà dans cette liste.",
-    "templateInUse": "Cette liste est utilisée par des projets et ne peut pas être supprimée."
+    "templateInUse": "Cette liste est utilisée par des projets et ne peut pas être supprimée.",
+    "bidderExists": "Cet entrepreneur est déjà invité.",
+    "bidderAwarded": "Le descriptif a été adjugé à cet entrepreneur. Annulez d'abord l'adjudication."
   },
   "projects": {
     "title": "Projets",
@@ -502,6 +504,94 @@
       "kv": "Devis total",
       "difference": "Différence",
       "percent": "%"
+    }
+  },
+  "offers": {
+    "bidders": "Entrepreneurs",
+    "addBidder": "Inviter",
+    "addBidderHint": "Les entrepreneurs du corps de métier correspondant figurent en tête de liste.",
+    "noBiddersShort": "Aucun entrepreneur invité.",
+    "noBidders": "Invitez des entrepreneurs à soumissionner à gauche. Vous saisirez ensuite ici les prix unitaires offerts.",
+    "selectBidder": "Choisissez un entrepreneur à gauche pour saisir les prix de son offre.",
+    "awarded": "Adjugé",
+    "missingPrices": "{count, plural, one {# prix manquant} other {# prix manquants}}",
+    "removeBidder": "Retirer l'entrepreneur",
+    "removeBidderConfirm": "Retirer « {name} » avec tous les prix saisis ?",
+    "status": {
+      "invited": "Invité",
+      "offered": "Offre reçue",
+      "declined": "Désisté"
+    },
+    "letters": {
+      "invitation": "Invitation (PDF)"
+    },
+    "fields": {
+      "status": "Statut",
+      "invitedAt": "Invité le",
+      "receivedAt": "Offre du",
+      "reference": "N° d'offre / référence",
+      "discount": "Rabais %",
+      "skonto": "Escompte %",
+      "deductions": "Autres déductions CHF",
+      "vat": "TVA %"
+    },
+    "columns": {
+      "position": "Pos.",
+      "text": "Désignation",
+      "quantity": "Quantité",
+      "estimate": "PU estimé",
+      "unitPrice": "PU offert",
+      "amount": "Montant"
+    },
+    "summary": {
+      "gross": "Brut",
+      "discount": "Rabais",
+      "deductions": "autres déductions",
+      "net": "Net",
+      "skonto": "Escompte",
+      "vat": "TVA",
+      "total": "Total TVA incl.",
+      "estimateGross": "Estimation brute (pour comparaison)"
+    }
+  },
+  "comparison": {
+    "description": "Toutes les offres côte à côte, triées selon le total TVA incluse. Vert : prix unitaire le plus bas, rouge : le plus élevé par position.",
+    "noOffers": "Aucune offre saisie. Saisissez les prix sous « Offres ».",
+    "pdfComparison": "PDF comparaison des offres",
+    "pdfAwardProposal": "PDF proposition d'adjudication",
+    "estimate": "Estimation des coûts",
+    "missingHint": "Offres incomplètes (prix manquants) : {names}",
+    "columns": {
+      "position": "Pos.",
+      "text": "Désignation",
+      "quantity": "Quantité",
+      "unitPrice": "PU",
+      "amount": "Montant"
+    },
+    "summary": {
+      "gross": "Brut",
+      "discount": "Rabais",
+      "deductions": "Autres déductions",
+      "net": "Net",
+      "skonto": "Escompte",
+      "vat": "TVA",
+      "total": "Total TVA incl.",
+      "rank": "Rang",
+      "vsCheapest": "Écart par rapport à la moins chère",
+      "vsEstimate": "Écart par rapport à l'estimation"
+    },
+    "award": {
+      "title": "Adjudication",
+      "description": "Désignez l'entrepreneur adjudicataire. Le descriptif passe au statut « Adjugé » ; les lettres d'adjudication et de refus sont ensuite disponibles.",
+      "bidder": "Entrepreneur",
+      "none": "– pas encore adjugé –",
+      "date": "Date d'adjudication",
+      "justification": "Justification (pour la proposition d'adjudication)",
+      "justificationPlaceholder": "p. ex. offre économiquement la plus avantageuse, références, délais …",
+      "save": "Enregistrer l'adjudication",
+      "letters": "Lettres aux entrepreneurs",
+      "awardLetter": "Adjudication (PDF)",
+      "rejectionLetter": "Refus (PDF)"
     }
   }
 }
