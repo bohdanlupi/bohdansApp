@@ -1,6 +1,6 @@
 import { Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 
-import type { FirmSettings } from "@/lib/supabase/database.types";
+import type { FirmSettings } from "@/lib/supabase/types";
 
 // Visual language of the Offerte templates in vorlagen/: Arial (→ Helvetica),
 // grey footer text, light grey table header, dark blue total bar.

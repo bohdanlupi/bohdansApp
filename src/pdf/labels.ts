@@ -1,4 +1,4 @@
-import type { AppLanguage } from "@/lib/supabase/database.types";
+import type { AppLanguage } from "@/lib/supabase/types";
 
 // Printed documents use the document's language, which can differ from the UI language.
 const labels = {

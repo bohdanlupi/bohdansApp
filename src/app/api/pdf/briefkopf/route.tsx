@@ -2,7 +2,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import type { NextRequest } from "next/server";
 
 import { getCurrentProfile } from "@/lib/auth";
-import type { AppLanguage } from "@/lib/supabase/database.types";
+import type { AppLanguage } from "@/lib/supabase/types";
 import { createClient } from "@/lib/supabase/server";
 import { loadLogo } from "@/pdf/logo";
 import { SampleLetter } from "@/pdf/sample-letter";

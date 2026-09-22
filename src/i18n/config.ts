@@ -1,4 +1,4 @@
-import type { AppLanguage } from "@/lib/supabase/database.types";
+import type { AppLanguage } from "@/lib/supabase/types";
 
 /** UI locales. Swiss variants so numbers/dates format as 1'234.50 and 22.09.2026. */
 export const locales = ["de-CH", "fr-CH", "it-CH"] as const;

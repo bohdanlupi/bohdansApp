@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { localeLabels, locales, type Locale } from "@/i18n/config";
-import type { AppRole } from "@/lib/supabase/database.types";
+import type { AppRole } from "@/lib/supabase/types";
 
 import { signOut } from "../(auth)/actions";
 import { setLocale } from "./actions";

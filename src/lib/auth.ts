@@ -3,7 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-import type { AppRole, Profile } from "@/lib/supabase/database.types";
+import type { AppRole, Profile } from "@/lib/supabase/types";
 import { createClient } from "@/lib/supabase/server";
 
 /** Profile of the logged-in user, or null. Deduplicated per request. */

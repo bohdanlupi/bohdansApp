@@ -1,6 +1,6 @@
 import { Document, Text, View } from "@react-pdf/renderer";
 
-import type { AppLanguage, FirmSettings } from "@/lib/supabase/database.types";
+import type { AppLanguage, FirmSettings } from "@/lib/supabase/types";
 
 import { formatAmount, formatChf, formatDate, formatQuantity, roundTo5Rappen } from "./format";
 import { pdfLabels } from "./labels";

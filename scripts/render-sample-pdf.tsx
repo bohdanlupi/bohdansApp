@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 import { renderToBuffer } from "@react-pdf/renderer";
 
-import type { AppLanguage, FirmSettings } from "../src/lib/supabase/database.types";
+import type { AppLanguage, FirmSettings } from "../src/lib/supabase/types";
 import { SampleLetter } from "../src/pdf/sample-letter";
 
 const firm: FirmSettings = {

@@ -19,14 +19,14 @@ See [PLAN.md](PLAN.md) for scope, data model and phases.
 
 ### 1. Supabase project
 
-1. Create a project at [supabase.com](https://supabase.com), region **Zurich (eu-central-2)**.
-2. **Authentication → Sign In / Providers**: disable "Allow new users to sign up" (the app is invite-only).
-3. **Authentication → URL Configuration**: Site URL = your Vercel URL (e.g. `https://lupi-planer.vercel.app`),
-   add `http://localhost:3000/**` to the redirect URLs.
-4. **Authentication → Emails → Templates**: paste `supabase/templates/invite.html` into *Invite user* and
-   `supabase/templates/recovery.html` into *Reset password* (they link to `/auth/confirm` with a token hash).
-5. For real use, configure custom SMTP (**Authentication → Emails → SMTP**) – Supabase's built-in mailer is
-   limited to a few emails per hour.
+1. Create a project at [supabase.com](https://supabase.com).
+2. Add `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD` to `.env` (CLI only, not for Vercel).
+3. Configure custom SMTP (**Authentication → Emails → SMTP**). Without it, Supabase only sends a few emails
+   per hour, only to members of the Supabase organisation, and custom templates are blocked on the free plan.
+4. Apply the auth settings (invite-only, password length, Site URL, email templates):
+   ```powershell
+   node scripts/configure-auth.mjs https://<your-app>.vercel.app --templates   # omit --templates without SMTP
+   ```
 
 ### 2. Database
 

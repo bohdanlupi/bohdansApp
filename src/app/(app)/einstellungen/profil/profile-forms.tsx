@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { initialFormState } from "@/lib/form-state";
-import type { Profile } from "@/lib/supabase/database.types";
+import type { Profile } from "@/lib/supabase/types";
 
 import { setPassword } from "../../../(auth)/actions";
 import { updateOwnProfile } from "../actions";

@@ -1,4 +1,4 @@
-import type { AppLanguage } from "@/lib/supabase/database.types";
+import type { AppLanguage } from "@/lib/supabase/types";
 
 /** Multilingual content as stored in jsonb columns: { de: "...", fr: "...", it: "..." }. */
 export type I18nText = Partial<Record<AppLanguage, string>>;
