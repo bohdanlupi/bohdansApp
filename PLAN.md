@@ -41,14 +41,18 @@ translation is missing, with a visible warning in the editor).
 profiles            id (=auth.users), name, role (admin | planer | viewer), language
 
 -- Adressen / CRM
-companies           id, name, street, zip, city, country, phone, email, website, uid_mwst, notes
-contacts            id, company_id?, salutation, first_name, last_name, function, phone, email, language
-company_tags        company_id, tag (Unternehmer, Bauherr, Architekt, Lieferant, …)
-company_trades      company_id, trade (Sanitär, Heizung, Lüftung, Klima, Kälte, Spengler…)
+companies           id, name, name2, street, po_box, zip, city, country, phone, email, website, uid_number,
+                    language (correspondence), categories text[], trades text[], notes, archived
+                    (every address is a company – private clients too; category/trade keys in
+                    src/lib/address-options.ts, validated by the app)
+contacts            id, company_id (required), salutation, first_name, last_name, function, phone, mobile,
+                    email, language (null = like company), notes
 
 -- Projekte
-projects            id, number, name, address, status, client_company_id, language, start/end dates
-project_contacts    project_id, company_id, contact_id?, role (Bauherr, Architekt, Unternehmer…)
+projects            id, number (unique, suggested YYYY-NNN), name, street, zip, city, status, language,
+                    start_date, end_date, description   (client = participant with role "client")
+project_participants project_id, company_id, contact_id? (must belong to the company), role, note
+company_list / project_list   search views (search_text, contact_count, client_names)
 
 -- Kostenplan
 cost_plan_templates id, name (BKP 2017, eBKP-H, own…)
@@ -102,13 +106,14 @@ can read everything; write access by role.
 
 ## Phases
 
-**Phase 0 – Foundation** ✅ code done (2026-09-22) – waiting for Supabase project + Vercel deploy
+**Phase 0 – Foundation** ✅ done (2026-09-22), live on Vercel
 Next.js 16 app, Supabase migration (profiles/roles, firm settings, storage bucket), invite-only auth
 (login, invite, password reset/set), DE/FR/IT UI with language switch, app shell, settings (firm data,
 users, profile), letterhead PDF preview (`/api/pdf/briefkopf`).
 
-**Phase 1 – Adressen + Projekte**
+**Phase 1 – Adressen + Projekte** ✅ done (2026-09-22)
 CRUD for companies/contacts/projects, participants per project, search, CSV import of existing addresses.
+Project documents (upload) are not built yet – planned together with the document management.
 
 **Phase 2 – Eigenkatalog + Leistungsverzeichnis**
 Catalogue editor; LV editor with tree (drag & drop, auto-numbering), insert positions from the catalogue,
@@ -149,7 +154,12 @@ Waiting on the user:
    Until then, colleagues can be added in Supabase → Authentication → Users (they start as viewer).
 2. **Delete the old London project** `upcwquytpfihfpbvulbp`.
 
-Next: **Phase 1 (Adressen + Projekte)**.
+Phase 1 done (2026-09-22): migrations `20260922180000_addresses_projects.sql` and
+`20260922190000_import_addresses.sql` applied to Zurich; 23 DB/RLS checks and page smoke tests passed.
+CSV import: semicolon/comma/tab, UTF-8 or Windows-1252, column mapping with DE/FR/IT header guessing,
+atomic via `import_addresses()` RPC. Waiting for the real address export from the user to verify.
+
+Next: **Phase 2 (Eigenkatalog + Leistungsverzeichnis)**.
 
 ## Open points
 
@@ -157,4 +167,4 @@ Next: **Phase 1 (Adressen + Projekte)**.
 - [x] Signature image: not used
 - [x] GitHub repo: https://github.com/bohdanlupi/bohdansApp · Vercel project created
 - [x] Supabase keys in `.env` + migration pushed (Zurich)
-- [ ] Existing addresses / catalogue texts (later, format TBD)
+- [ ] Existing addresses (CSV import ready – test with the real export) / catalogue texts (format TBD)

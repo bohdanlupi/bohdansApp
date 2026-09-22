@@ -8,11 +8,7 @@ import { languageToLocale, LOCALE_COOKIE } from "@/i18n/config";
 import { assertRole, getCurrentProfile } from "@/lib/auth";
 import type { FormState } from "@/lib/form-state";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-
-const optionalText = z
-  .string()
-  .trim()
-  .transform((v) => v || null);
+import { languageSchema, optionalText } from "@/lib/validation";
 
 const firmSchema = z.object({
   name: z.string().trim().min(1),
@@ -49,7 +45,6 @@ export async function updateFirmSettings(_prev: FormState, formData: FormData): 
 }
 
 const roleSchema = z.enum(["admin", "planer", "viewer"]);
-const languageSchema = z.enum(["de", "fr", "it"]);
 
 const inviteSchema = z.object({
   email: z.email(),

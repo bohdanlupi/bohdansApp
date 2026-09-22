@@ -1,7 +1,18 @@
 {
   "common": {
     "language": "Langue",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "reset": "Réinitialiser",
+    "back": "Retour",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pageOf": "Page {page} sur {pages}",
+    "count": "{count, plural, =0 {Aucune entrée} one {# entrée} other {# entrées}}"
   },
   "languages": {
     "de": "Allemand",
@@ -55,19 +66,166 @@
     "inviteFailed": "L'invitation n'a pas pu être envoyée.",
     "inviteSent": "L'invitation a été envoyée.",
     "cannotDemoteSelf": "Vous ne pouvez pas retirer vos propres droits d'administrateur ni vous désactiver.",
-    "notLoggedIn": "Vous n'êtes pas connecté."
+    "notLoggedIn": "Vous n'êtes pas connecté.",
+    "deleteFailed": "La suppression a échoué.",
+    "companyInUse": "Cette adresse participe à des projets et ne peut pas être supprimée. Archivez-la plutôt.",
+    "projectNumberExists": "Ce numéro de projet est déjà attribué.",
+    "participantExists": "Cette entreprise participe déjà avec ce rôle.",
+    "importFailed": "L'importation a échoué. Rien n'a été enregistré."
   },
   "projects": {
     "title": "Projets",
     "description": "Projets de construction avec intervenants, plan des coûts, descriptifs et offres.",
     "emptyTitle": "Aucun projet",
-    "comingSoon": "La gestion des projets suivra en phase 1."
+    "emptyText": "Créez le premier projet.",
+    "noResults": "Aucun projet trouvé.",
+    "newProject": "Nouveau projet",
+    "searchPlaceholder": "Numéro, nom, lieu, intervenants …",
+    "allStatuses": "Tous les statuts",
+    "columns": {
+      "number": "N°",
+      "name": "Projet",
+      "city": "Lieu",
+      "client": "Maître d'ouvrage",
+      "status": "Statut"
+    },
+    "form": {
+      "newTitle": "Nouveau projet",
+      "sections": {
+        "general": "Projet",
+        "location": "Emplacement",
+        "dates": "Dates"
+      },
+      "fields": {
+        "number": "Numéro de projet",
+        "name": "Nom du projet",
+        "street": "Rue",
+        "zip": "NPA",
+        "city": "Lieu",
+        "status": "Statut",
+        "language": "Langue des documents",
+        "start_date": "Début",
+        "end_date": "Fin",
+        "description": "Description"
+      },
+      "languageHint": "Langue des descriptifs et des lettres de ce projet.",
+      "readOnly": "Vous avez uniquement un accès en lecture.",
+      "create": "Créer le projet",
+      "delete": "Supprimer le projet",
+      "deleteConfirm": "Le projet « {name} » sera supprimé avec tous ses intervenants. Cette action est irréversible."
+    },
+    "participants": {
+      "title": "Intervenants",
+      "empty": "Aucun intervenant.",
+      "add": "Ajouter un intervenant",
+      "role": "Rôle",
+      "company": "Entreprise",
+      "contact": "Personne de contact",
+      "noContact": "– aucune –",
+      "note": "Remarque",
+      "remove": "Retirer",
+      "removeConfirm": "Retirer « {name} » des intervenants ?"
+    }
   },
   "addresses": {
     "title": "Adresses",
-    "description": "Entreprises et contacts : maîtres d'ouvrage, architectes, entrepreneurs, fournisseurs.",
+    "description": "Entreprises et personnes de contact : maîtres d'ouvrage, architectes, entrepreneurs, fournisseurs.",
     "emptyTitle": "Aucune adresse",
-    "comingSoon": "La gestion des adresses suivra en phase 1."
+    "emptyText": "Créez la première adresse ou importez vos adresses existantes depuis un fichier CSV.",
+    "noResults": "Aucune adresse trouvée.",
+    "newCompany": "Nouvelle adresse",
+    "import": "Import CSV",
+    "searchPlaceholder": "Nom, lieu, personne de contact …",
+    "allCategories": "Toutes les catégories",
+    "allTrades": "Tous les corps de métier",
+    "showArchived": "Afficher les archivées",
+    "archived": "Archivée",
+    "columns": {
+      "name": "Nom",
+      "city": "Lieu",
+      "categories": "Catégories",
+      "phone": "Téléphone",
+      "contacts": "Contacts"
+    },
+    "company": {
+      "newTitle": "Nouvelle adresse",
+      "privateHint": "Saisissez les particuliers (p. ex. maîtres d'ouvrage privés) avec leur nom comme nom d'entreprise.",
+      "sections": {
+        "address": "Adresse",
+        "communication": "Communication",
+        "classification": "Classement",
+        "notes": "Remarques"
+      },
+      "fields": {
+        "name": "Nom de l'entreprise",
+        "name2": "Complément",
+        "street": "Rue",
+        "po_box": "Case postale",
+        "zip": "NPA",
+        "city": "Lieu",
+        "country": "Pays",
+        "phone": "Téléphone",
+        "email": "E-mail",
+        "website": "Site web",
+        "uid_number": "Numéro IDE",
+        "language": "Langue de correspondance",
+        "categories": "Catégories",
+        "trades": "Corps de métier",
+        "notes": "Remarques",
+        "archived": "Archivée (masquer dans les listes)"
+      },
+      "readOnly": "Vous avez uniquement un accès en lecture.",
+      "create": "Créer l'adresse",
+      "delete": "Supprimer l'adresse",
+      "deleteConfirm": "L'adresse « {name} » et toutes ses personnes de contact seront supprimées. Cette action est irréversible."
+    },
+    "contacts": {
+      "title": "Personnes de contact",
+      "empty": "Aucune personne de contact.",
+      "add": "Ajouter un contact",
+      "newTitle": "Nouvelle personne de contact",
+      "editTitle": "Modifier la personne de contact",
+      "languageDefault": "Comme l'entreprise",
+      "fields": {
+        "salutation": "Civilité",
+        "first_name": "Prénom",
+        "last_name": "Nom",
+        "function": "Fonction",
+        "phone": "Téléphone",
+        "mobile": "Mobile",
+        "email": "E-mail",
+        "language": "Langue",
+        "notes": "Remarques"
+      },
+      "deleteConfirm": "Supprimer la personne de contact « {name} » ?"
+    },
+    "projectsTitle": "Projets",
+    "projectsEmpty": "Cette adresse ne participe à aucun projet.",
+    "importPage": {
+      "title": "Importer des adresses",
+      "description": "Reprendre des adresses existantes depuis Excel ou un autre programme.",
+      "step1": "1. Choisir le fichier CSV",
+      "fileHint": "Dans Excel : « Enregistrer sous » → « CSV (séparateur : point-virgule) ». La première ligne doit contenir les en-têtes de colonnes.",
+      "encoding": "Encodage",
+      "encodingHint": "Si les accents s'affichent mal (p. ex. « GenÃ¨ve »), choisissez l'autre encodage.",
+      "invalidFile": "Le fichier n'a pas pu être lu ou ne contient aucune donnée.",
+      "step2": "2. Associer les colonnes",
+      "mappingHint": "Associez chaque colonne à un champ. Les lignes avec le même nom d'entreprise et le même NPA sont regroupées en une adresse avec plusieurs personnes de contact ; les adresses existantes sont complétées, pas dupliquées.",
+      "column": "Colonne du fichier",
+      "example": "Exemple",
+      "target": "Champ",
+      "ignore": "– ne pas importer –",
+      "groupCompany": "Adresse",
+      "groupContact": "Personne de contact",
+      "assignCategories": "Attribuer ces catégories à toutes les adresses importées",
+      "assignTrades": "Attribuer ces corps de métier à toutes les adresses importées",
+      "nameRequired": "Associez au moins la colonne « Nom de l'entreprise ».",
+      "step3": "3. Aperçu",
+      "previewHint": "{rows} lignes dans le fichier. Aperçu des 10 premières :",
+      "start": "Lancer l'importation",
+      "done": "Importation terminée : {companies} nouvelles adresses, {contacts} nouvelles personnes de contact, {skipped} lignes sans nom d'entreprise ignorées.",
+      "toList": "Vers la liste d'adresses"
+    }
   },
   "catalogs": {
     "title": "Catalogues",
@@ -126,5 +284,54 @@
     "profile": {
       "title": "Données personnelles"
     }
+  },
+  "options": {
+    "categories": {
+      "client": "Maître d'ouvrage",
+      "architect": "Architecte",
+      "engineer": "Planificateur spécialisé",
+      "contractor": "Entrepreneur",
+      "supplier": "Fournisseur",
+      "authority": "Autorité",
+      "other": "Autres"
+    },
+    "trades": {
+      "sanitary": "Sanitaire",
+      "heating": "Chauffage",
+      "ventilation": "Ventilation",
+      "air_conditioning": "Climatisation",
+      "refrigeration": "Froid",
+      "sheet_metal": "Ferblanterie",
+      "electrical": "Électricité",
+      "building_automation": "Automatisation du bâtiment",
+      "insulation": "Isolation",
+      "general": "Général"
+    },
+    "participantRoles": {
+      "client": "Maître d'ouvrage",
+      "client_representative": "Représentant du maître d'ouvrage",
+      "architect": "Architecte",
+      "general_contractor": "Entreprise totale/générale",
+      "engineer": "Planificateur spécialisé",
+      "contractor": "Entrepreneur",
+      "supplier": "Fournisseur",
+      "authority": "Autorité",
+      "other": "Autres"
+    },
+    "projectStatus": {
+      "acquisition": "Acquisition",
+      "active": "En cours",
+      "on_hold": "Suspendu",
+      "completed": "Terminé",
+      "archived": "Archivé"
+    },
+    "salutations": {
+      "mr": "Monsieur",
+      "ms": "Madame"
+    }
+  },
+  "companyPicker": {
+    "placeholder": "Rechercher une entreprise …",
+    "noMatches": "Aucun résultat"
   }
 }

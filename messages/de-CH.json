@@ -1,7 +1,18 @@
 {
   "common": {
     "language": "Sprache",
-    "save": "Speichern"
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "reset": "Zurücksetzen",
+    "back": "Zurück",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "pageOf": "Seite {page} von {pages}",
+    "count": "{count, plural, =0 {Keine Einträge} one {# Eintrag} other {# Einträge}}"
   },
   "languages": {
     "de": "Deutsch",
@@ -55,19 +66,166 @@
     "inviteFailed": "Die Einladung konnte nicht gesendet werden.",
     "inviteSent": "Einladung wurde gesendet.",
     "cannotDemoteSelf": "Sie können sich nicht selbst die Administratorrechte entziehen oder sich deaktivieren.",
-    "notLoggedIn": "Sie sind nicht angemeldet."
+    "notLoggedIn": "Sie sind nicht angemeldet.",
+    "deleteFailed": "Löschen fehlgeschlagen.",
+    "companyInUse": "Die Adresse ist an Projekten beteiligt und kann nicht gelöscht werden. Archivieren Sie sie stattdessen.",
+    "projectNumberExists": "Diese Projektnummer ist bereits vergeben.",
+    "participantExists": "Diese Firma ist in dieser Rolle bereits beteiligt.",
+    "importFailed": "Der Import ist fehlgeschlagen. Es wurde nichts gespeichert."
   },
   "projects": {
     "title": "Projekte",
     "description": "Bauprojekte mit Beteiligten, Kostenplan, Leistungsverzeichnissen und Offerten.",
     "emptyTitle": "Noch keine Projekte",
-    "comingSoon": "Die Projektverwaltung folgt in Phase 1."
+    "emptyText": "Legen Sie das erste Projekt an.",
+    "noResults": "Keine Projekte gefunden.",
+    "newProject": "Neues Projekt",
+    "searchPlaceholder": "Nummer, Name, Ort, Beteiligte …",
+    "allStatuses": "Alle Status",
+    "columns": {
+      "number": "Nr.",
+      "name": "Projekt",
+      "city": "Ort",
+      "client": "Bauherr",
+      "status": "Status"
+    },
+    "form": {
+      "newTitle": "Neues Projekt",
+      "sections": {
+        "general": "Projekt",
+        "location": "Standort",
+        "dates": "Termine"
+      },
+      "fields": {
+        "number": "Projektnummer",
+        "name": "Projektname",
+        "street": "Strasse",
+        "zip": "PLZ",
+        "city": "Ort",
+        "status": "Status",
+        "language": "Dokumentsprache",
+        "start_date": "Beginn",
+        "end_date": "Ende",
+        "description": "Beschreibung"
+      },
+      "languageHint": "Sprache der Leistungsverzeichnisse und Briefe dieses Projekts.",
+      "readOnly": "Sie haben nur Leserechte.",
+      "create": "Projekt anlegen",
+      "delete": "Projekt löschen",
+      "deleteConfirm": "Das Projekt «{name}» wird mit allen Beteiligten gelöscht. Das kann nicht rückgängig gemacht werden."
+    },
+    "participants": {
+      "title": "Beteiligte",
+      "empty": "Noch keine Beteiligten.",
+      "add": "Beteiligte hinzufügen",
+      "role": "Rolle",
+      "company": "Firma",
+      "contact": "Kontaktperson",
+      "noContact": "– keine –",
+      "note": "Bemerkung",
+      "remove": "Entfernen",
+      "removeConfirm": "«{name}» als Beteiligte entfernen?"
+    }
   },
   "addresses": {
     "title": "Adressen",
     "description": "Firmen und Kontaktpersonen: Bauherren, Architekten, Unternehmer, Lieferanten.",
     "emptyTitle": "Noch keine Adressen",
-    "comingSoon": "Die Adressverwaltung folgt in Phase 1."
+    "emptyText": "Legen Sie die erste Adresse an oder importieren Sie Ihre bestehenden Adressen aus einer CSV-Datei.",
+    "noResults": "Keine Adressen gefunden.",
+    "newCompany": "Neue Adresse",
+    "import": "CSV-Import",
+    "searchPlaceholder": "Name, Ort, Kontaktperson …",
+    "allCategories": "Alle Kategorien",
+    "allTrades": "Alle Gewerke",
+    "showArchived": "Archivierte anzeigen",
+    "archived": "Archiviert",
+    "columns": {
+      "name": "Name",
+      "city": "Ort",
+      "categories": "Kategorien",
+      "phone": "Telefon",
+      "contacts": "Kontakte"
+    },
+    "company": {
+      "newTitle": "Neue Adresse",
+      "privateHint": "Privatpersonen (z. B. private Bauherren) erfassen Sie mit ihrem Namen als Firmenname.",
+      "sections": {
+        "address": "Adresse",
+        "communication": "Kommunikation",
+        "classification": "Einteilung",
+        "notes": "Bemerkungen"
+      },
+      "fields": {
+        "name": "Firmenname",
+        "name2": "Zusatz",
+        "street": "Strasse",
+        "po_box": "Postfach",
+        "zip": "PLZ",
+        "city": "Ort",
+        "country": "Land",
+        "phone": "Telefon",
+        "email": "E-Mail",
+        "website": "Website",
+        "uid_number": "UID-Nummer",
+        "language": "Korrespondenzsprache",
+        "categories": "Kategorien",
+        "trades": "Gewerke",
+        "notes": "Bemerkungen",
+        "archived": "Archiviert (in Listen ausblenden)"
+      },
+      "readOnly": "Sie haben nur Leserechte.",
+      "create": "Adresse anlegen",
+      "delete": "Adresse löschen",
+      "deleteConfirm": "Die Adresse «{name}» und alle ihre Kontaktpersonen werden gelöscht. Das kann nicht rückgängig gemacht werden."
+    },
+    "contacts": {
+      "title": "Kontaktpersonen",
+      "empty": "Noch keine Kontaktpersonen.",
+      "add": "Kontakt hinzufügen",
+      "newTitle": "Neue Kontaktperson",
+      "editTitle": "Kontaktperson bearbeiten",
+      "languageDefault": "Wie Firma",
+      "fields": {
+        "salutation": "Anrede",
+        "first_name": "Vorname",
+        "last_name": "Nachname",
+        "function": "Funktion",
+        "phone": "Telefon",
+        "mobile": "Mobile",
+        "email": "E-Mail",
+        "language": "Sprache",
+        "notes": "Bemerkungen"
+      },
+      "deleteConfirm": "Kontaktperson «{name}» löschen?"
+    },
+    "projectsTitle": "Projekte",
+    "projectsEmpty": "Diese Adresse ist an keinem Projekt beteiligt.",
+    "importPage": {
+      "title": "Adressen importieren",
+      "description": "Bestehende Adressen aus Excel oder einem anderen Programm übernehmen.",
+      "step1": "1. CSV-Datei wählen",
+      "fileHint": "In Excel: «Speichern unter» → «CSV (Trennzeichen-getrennt)». Die erste Zeile muss die Spaltenüberschriften enthalten.",
+      "encoding": "Zeichensatz",
+      "encodingHint": "Falls Umlaute falsch angezeigt werden (z. B. «ZÃ¼rich»), den anderen Zeichensatz wählen.",
+      "invalidFile": "Die Datei konnte nicht gelesen werden oder enthält keine Daten.",
+      "step2": "2. Spalten zuordnen",
+      "mappingHint": "Ordnen Sie jede Spalte einem Feld zu. Zeilen mit gleichem Firmennamen und gleicher PLZ werden zu einer Adresse mit mehreren Kontaktpersonen zusammengefasst; bereits vorhandene Adressen werden ergänzt, nicht doppelt angelegt.",
+      "column": "Spalte in der Datei",
+      "example": "Beispiel",
+      "target": "Feld",
+      "ignore": "– nicht importieren –",
+      "groupCompany": "Adresse",
+      "groupContact": "Kontaktperson",
+      "assignCategories": "Diese Kategorien allen importierten Adressen zuweisen",
+      "assignTrades": "Diese Gewerke allen importierten Adressen zuweisen",
+      "nameRequired": "Ordnen Sie mindestens die Spalte «Firmenname» zu.",
+      "step3": "3. Vorschau",
+      "previewHint": "{rows} Zeilen in der Datei. Vorschau der ersten 10:",
+      "start": "Import starten",
+      "done": "Import abgeschlossen: {companies} neue Adressen, {contacts} neue Kontaktpersonen, {skipped} Zeilen ohne Firmenname übersprungen.",
+      "toList": "Zur Adressliste"
+    }
   },
   "catalogs": {
     "title": "Kataloge",
@@ -126,5 +284,54 @@
     "profile": {
       "title": "Persönliche Angaben"
     }
+  },
+  "options": {
+    "categories": {
+      "client": "Bauherr",
+      "architect": "Architekt",
+      "engineer": "Fachplaner",
+      "contractor": "Unternehmer",
+      "supplier": "Lieferant",
+      "authority": "Behörde",
+      "other": "Sonstige"
+    },
+    "trades": {
+      "sanitary": "Sanitär",
+      "heating": "Heizung",
+      "ventilation": "Lüftung",
+      "air_conditioning": "Klima",
+      "refrigeration": "Kälte",
+      "sheet_metal": "Spengler",
+      "electrical": "Elektro",
+      "building_automation": "Gebäudeautomation",
+      "insulation": "Isolation",
+      "general": "Allgemein"
+    },
+    "participantRoles": {
+      "client": "Bauherr",
+      "client_representative": "Bauherrenvertretung",
+      "architect": "Architekt",
+      "general_contractor": "Total-/Generalunternehmer",
+      "engineer": "Fachplaner",
+      "contractor": "Unternehmer",
+      "supplier": "Lieferant",
+      "authority": "Behörde",
+      "other": "Sonstige"
+    },
+    "projectStatus": {
+      "acquisition": "Akquisition",
+      "active": "In Bearbeitung",
+      "on_hold": "Sistiert",
+      "completed": "Abgeschlossen",
+      "archived": "Archiviert"
+    },
+    "salutations": {
+      "mr": "Herr",
+      "ms": "Frau"
+    }
+  },
+  "companyPicker": {
+    "placeholder": "Firma suchen …",
+    "noMatches": "Keine Treffer"
   }
 }

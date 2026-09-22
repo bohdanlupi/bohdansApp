@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 import type messages from "../../messages/de-CH.json";
 
-type FormMessageKey = keyof (typeof messages)["forms"];
+export type FormMessageKey = keyof (typeof messages)["forms"];
 
 export function SubmitButton({ children, ...props }: ComponentProps<typeof Button>) {
   const { pending } = useFormStatus();

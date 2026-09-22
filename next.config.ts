@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/pdf/**": ["./public/brand/**"],
   },
+  experimental: {
+    serverActions: {
+      // The address import sends up to 10'000 CSV rows in one action (Vercel caps bodies at 4.5 MB).
+      bodySizeLimit: "4mb",
+    },
+  },
 };
 
 export default withNextIntl(nextConfig);
