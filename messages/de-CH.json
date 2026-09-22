@@ -71,7 +71,9 @@
     "companyInUse": "Die Adresse ist an Projekten beteiligt und kann nicht gelöscht werden. Archivieren Sie sie stattdessen.",
     "projectNumberExists": "Diese Projektnummer ist bereits vergeben.",
     "participantExists": "Diese Firma ist in dieser Rolle bereits beteiligt.",
-    "importFailed": "Der Import ist fehlgeschlagen. Es wurde nichts gespeichert."
+    "importFailed": "Der Import ist fehlgeschlagen. Es wurde nichts gespeichert.",
+    "invalidMove": "Dieser Eintrag kann nicht dorthin verschoben werden.",
+    "lvNumberExists": "Diese LV-Nummer gibt es in diesem Projekt bereits."
   },
   "projects": {
     "title": "Projekte",
@@ -125,6 +127,11 @@
       "note": "Bemerkung",
       "remove": "Entfernen",
       "removeConfirm": "«{name}» als Beteiligte entfernen?"
+    },
+    "tabs": {
+      "overview": "Übersicht",
+      "lvs": "Leistungsverzeichnisse",
+      "costPlan": "Kostenplan"
     }
   },
   "addresses": {
@@ -231,7 +238,20 @@
     "title": "Kataloge",
     "description": "Eigener Textkatalog mit NPK-ähnlicher Gliederung und eigenen Preisen.",
     "emptyTitle": "Noch keine Kataloge",
-    "comingSoon": "Der Katalog-Editor folgt in Phase 2."
+    "emptyText": "Legen Sie einen Katalog an und erfassen Sie Ihre Standardpositionen. Diese können Sie dann in jedes LV übernehmen.",
+    "new": "Neuer Katalog",
+    "create": "Katalog anlegen",
+    "settings": "Einstellungen",
+    "delete": "Katalog löschen",
+    "deleteConfirm": "Der Katalog «{name}» wird mit allen Positionen gelöscht. Bereits in LVs übernommene Positionen bleiben erhalten.",
+    "entries": "Einträge",
+    "inactive": "Inaktiv",
+    "fields": {
+      "name": "Name",
+      "trade": "Gewerk",
+      "description": "Beschreibung",
+      "active": "Aktiv (beim Einfügen in LVs anbieten)"
+    }
   },
   "settings": {
     "title": "Einstellungen",
@@ -328,10 +348,116 @@
     "salutations": {
       "mr": "Herr",
       "ms": "Frau"
+    },
+    "lvStatus": {
+      "draft": "Entwurf",
+      "tendered": "Ausgeschrieben",
+      "awarded": "Vergeben"
     }
   },
   "companyPicker": {
     "placeholder": "Firma suchen …",
     "noMatches": "Keine Treffer"
+  },
+  "lvs": {
+    "title": "Leistungsverzeichnisse",
+    "lv": "LV",
+    "description": "Leistungsverzeichnisse dieses Projekts mit Kostenschätzung.",
+    "emptyTitle": "Noch keine Leistungsverzeichnisse",
+    "emptyText": "Legen Sie das erste LV an, z. B. «Heizungsanlage» oder «Sanitäranlagen».",
+    "new": "Neues LV",
+    "create": "LV anlegen",
+    "settings": "Einstellungen",
+    "delete": "LV löschen",
+    "deleteConfirm": "Das LV «{name}» wird mit allen Positionen und Offerten gelöscht. Das kann nicht rückgängig gemacht werden.",
+    "positions": "Positionen",
+    "estimate": "Kostenschätzung",
+    "totalEstimate": "Total Kostenschätzung (exkl. MwSt.)",
+    "pdfTender": "PDF Ausschreibung",
+    "pdfEstimate": "PDF mit Schätzpreisen",
+    "tabs": {
+      "positions": "Positionen",
+      "offers": "Offerten",
+      "comparison": "Angebotsvergleich"
+    },
+    "fields": {
+      "number": "Nr.",
+      "title": "Titel",
+      "trade": "Gewerk",
+      "language": "Dokumentsprache",
+      "status": "Status",
+      "submissionDeadline": "Eingabetermin",
+      "description": "Bemerkungen"
+    }
+  },
+  "tree": {
+    "addGroup": "Gruppe",
+    "addSubgroup": "Untergruppe",
+    "addPosition": "Position",
+    "addRPosition": "R-Position",
+    "addText": "Text",
+    "fromCatalog": "Aus Katalog",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "delete": "Löschen",
+    "deleteConfirm": "«{name}» löschen? Untergeordnete Einträge werden ebenfalls gelöscht.",
+    "expand": "Aufklappen",
+    "collapse": "Zuklappen",
+    "empty": "Noch keine Einträge. Beginnen Sie mit einer Gruppe, z. B. «Wärmeerzeugung».",
+    "emptyReadOnly": "Noch keine Einträge.",
+    "selectHint": "Wählen Sie links einen Eintrag aus, um ihn zu bearbeiten. Einträge lassen sich per Drag & Drop verschieben.",
+    "missingTranslation": "Übersetzung fehlt",
+    "textLanguage": "Textsprache",
+    "documentLanguage": "Dokument",
+    "saving": "Speichert …",
+    "saved": "Gespeichert",
+    "saveError": "Nicht gespeichert",
+    "totalExclOptional": "Total exkl. MwSt. (ohne Eventualpositionen)",
+    "optionalBadge": "E",
+    "lumpSumUnit": "psch",
+    "untitled": {
+      "group": "Neue Gruppe",
+      "position": "Neue Position",
+      "r_position": "Neue R-Position",
+      "text": "Neuer Text"
+    },
+    "kinds": {
+      "group": "Gruppe",
+      "position": "Position",
+      "r_position": "R-Position (freier Text)",
+      "text": "Text"
+    },
+    "fields": {
+      "title": "Titel",
+      "shortText": "Kurztext",
+      "longText": "Langtext",
+      "unit": "Einheit",
+      "quantity": "Menge",
+      "unitPrice": "Einheitspreis",
+      "estimatePrice": "Schätzpreis (EP)",
+      "total": "Betrag",
+      "priceDate": "Preisstand",
+      "optional": "Eventualposition",
+      "lumpSum": "Pauschal"
+    },
+    "measurements": {
+      "title": "Vorausmass",
+      "description": "Beschreibung",
+      "count": "Anzahl",
+      "result": "Resultat",
+      "total": "Menge",
+      "add": "Zeile",
+      "delete": "Zeile löschen",
+      "hint": "Menge direkt eingeben oder mit «Zeile» ein Vorausmass erfassen (Anzahl × a × b × c)."
+    },
+    "catalogPicker": {
+      "title": "Aus Katalog einfügen",
+      "hint": "Positionen oder ganze Gruppen auswählen. Sie werden bei der Auswahl links eingefügt.",
+      "catalog": "Katalog",
+      "search": "Suchen …",
+      "insert": "{count, plural, one {# Position einfügen} other {# Positionen einfügen}}",
+      "noCatalogs": "Es gibt noch keine aktiven Kataloge.",
+      "cancel": "Abbrechen"
+    }
   }
 }

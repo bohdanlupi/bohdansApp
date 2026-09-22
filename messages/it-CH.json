@@ -71,7 +71,9 @@
     "companyInUse": "L'indirizzo partecipa a dei progetti e non può essere eliminato. Archiviarlo invece.",
     "projectNumberExists": "Questo numero di progetto è già assegnato.",
     "participantExists": "Questa ditta partecipa già con questo ruolo.",
-    "importFailed": "L'importazione non è riuscita. Non è stato salvato nulla."
+    "importFailed": "L'importazione non è riuscita. Non è stato salvato nulla.",
+    "invalidMove": "Questo elemento non può essere spostato in quella posizione.",
+    "lvNumberExists": "Questo numero di capitolato esiste già in questo progetto."
   },
   "projects": {
     "title": "Progetti",
@@ -125,6 +127,11 @@
       "note": "Osservazione",
       "remove": "Rimuovi",
       "removeConfirm": "Rimuovere «{name}» dai partecipanti?"
+    },
+    "tabs": {
+      "overview": "Panoramica",
+      "lvs": "Capitolati",
+      "costPlan": "Piano dei costi"
     }
   },
   "addresses": {
@@ -229,9 +236,22 @@
   },
   "catalogs": {
     "title": "Cataloghi",
-    "description": "Catalogo testi proprio con struttura simile al CPN e prezzi propri.",
-    "emptyTitle": "Ancora nessun catalogo",
-    "comingSoon": "L'editor dei cataloghi seguirà nella fase 2."
+    "description": "Catalogo di testi proprio con struttura tipo CPN e prezzi propri.",
+    "emptyTitle": "Nessun catalogo",
+    "emptyText": "Crei un catalogo e registri le sue posizioni standard. Potrà poi riprenderle in ogni capitolato.",
+    "new": "Nuovo catalogo",
+    "create": "Crea catalogo",
+    "settings": "Impostazioni",
+    "delete": "Elimina catalogo",
+    "deleteConfirm": "Il catalogo «{name}» sarà eliminato con tutte le posizioni. Le posizioni già riprese nei capitolati restano invariate.",
+    "entries": "Elementi",
+    "inactive": "Inattivo",
+    "fields": {
+      "name": "Nome",
+      "trade": "Settore",
+      "description": "Descrizione",
+      "active": "Attivo (proporre durante l'inserimento nei capitolati)"
+    }
   },
   "settings": {
     "title": "Impostazioni",
@@ -328,10 +348,116 @@
     "salutations": {
       "mr": "Signor",
       "ms": "Signora"
+    },
+    "lvStatus": {
+      "draft": "Bozza",
+      "tendered": "In appalto",
+      "awarded": "Aggiudicato"
     }
   },
   "companyPicker": {
     "placeholder": "Cerca ditta …",
     "noMatches": "Nessun risultato"
+  },
+  "lvs": {
+    "title": "Capitolati",
+    "lv": "Capitolato",
+    "description": "Capitolati di questo progetto con stima dei costi.",
+    "emptyTitle": "Nessun capitolato",
+    "emptyText": "Crei il primo capitolato, p. es. «Impianto di riscaldamento» o «Impianti sanitari».",
+    "new": "Nuovo capitolato",
+    "create": "Crea capitolato",
+    "settings": "Impostazioni",
+    "delete": "Elimina capitolato",
+    "deleteConfirm": "Il capitolato «{name}» sarà eliminato con tutte le posizioni e offerte. L'operazione è irreversibile.",
+    "positions": "Posizioni",
+    "estimate": "Stima dei costi",
+    "totalEstimate": "Totale stima dei costi (IVA esclusa)",
+    "pdfTender": "PDF appalto",
+    "pdfEstimate": "PDF con prezzi stimati",
+    "tabs": {
+      "positions": "Posizioni",
+      "offers": "Offerte",
+      "comparison": "Confronto offerte"
+    },
+    "fields": {
+      "number": "N.",
+      "title": "Titolo",
+      "trade": "Settore",
+      "language": "Lingua dei documenti",
+      "status": "Stato",
+      "submissionDeadline": "Termine di consegna",
+      "description": "Osservazioni"
+    }
+  },
+  "tree": {
+    "addGroup": "Gruppo",
+    "addSubgroup": "Sottogruppo",
+    "addPosition": "Posizione",
+    "addRPosition": "Posizione R",
+    "addText": "Testo",
+    "fromCatalog": "Dal catalogo",
+    "moveUp": "Sposta su",
+    "moveDown": "Sposta giù",
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare «{name}»? Anche gli elementi subordinati saranno eliminati.",
+    "expand": "Espandi",
+    "collapse": "Comprimi",
+    "empty": "Nessun elemento. Inizi con un gruppo, p. es. «Produzione di calore».",
+    "emptyReadOnly": "Nessun elemento.",
+    "selectHint": "Selezioni un elemento a sinistra per modificarlo. Gli elementi si possono spostare con il trascinamento.",
+    "missingTranslation": "Traduzione mancante",
+    "textLanguage": "Lingua del testo",
+    "documentLanguage": "documento",
+    "saving": "Salvataggio …",
+    "saved": "Salvato",
+    "saveError": "Non salvato",
+    "totalExclOptional": "Totale IVA esclusa (senza posizioni eventuali)",
+    "optionalBadge": "E",
+    "lumpSumUnit": "a corpo",
+    "untitled": {
+      "group": "Nuovo gruppo",
+      "position": "Nuova posizione",
+      "r_position": "Nuova posizione R",
+      "text": "Nuovo testo"
+    },
+    "kinds": {
+      "group": "Gruppo",
+      "position": "Posizione",
+      "r_position": "Posizione R (testo libero)",
+      "text": "Testo"
+    },
+    "fields": {
+      "title": "Titolo",
+      "shortText": "Testo breve",
+      "longText": "Testo lungo",
+      "unit": "Unità",
+      "quantity": "Quantità",
+      "unitPrice": "Prezzo unitario",
+      "estimatePrice": "Prezzo stimato (PU)",
+      "total": "Importo",
+      "priceDate": "Stato dei prezzi",
+      "optional": "Posizione eventuale",
+      "lumpSum": "A corpo"
+    },
+    "measurements": {
+      "title": "Computo metrico",
+      "description": "Descrizione",
+      "count": "Numero",
+      "result": "Risultato",
+      "total": "Quantità",
+      "add": "Riga",
+      "delete": "Elimina riga",
+      "hint": "Inserire la quantità direttamente o redigere un computo con «Riga» (numero × a × b × c)."
+    },
+    "catalogPicker": {
+      "title": "Inserisci dal catalogo",
+      "hint": "Selezioni posizioni o interi gruppi. Saranno inseriti nel punto selezionato a sinistra.",
+      "catalog": "Catalogo",
+      "search": "Cerca …",
+      "insert": "{count, plural, one {Inserisci # posizione} other {Inserisci # posizioni}}",
+      "noCatalogs": "Non ci sono ancora cataloghi attivi.",
+      "cancel": "Annulla"
+    }
   }
 }

@@ -71,7 +71,9 @@
     "companyInUse": "Cette adresse participe à des projets et ne peut pas être supprimée. Archivez-la plutôt.",
     "projectNumberExists": "Ce numéro de projet est déjà attribué.",
     "participantExists": "Cette entreprise participe déjà avec ce rôle.",
-    "importFailed": "L'importation a échoué. Rien n'a été enregistré."
+    "importFailed": "L'importation a échoué. Rien n'a été enregistré.",
+    "invalidMove": "Cet élément ne peut pas être déplacé à cet endroit.",
+    "lvNumberExists": "Ce numéro de descriptif existe déjà dans ce projet."
   },
   "projects": {
     "title": "Projets",
@@ -125,6 +127,11 @@
       "note": "Remarque",
       "remove": "Retirer",
       "removeConfirm": "Retirer « {name} » des intervenants ?"
+    },
+    "tabs": {
+      "overview": "Aperçu",
+      "lvs": "Descriptifs",
+      "costPlan": "Plan des coûts"
     }
   },
   "addresses": {
@@ -231,7 +238,20 @@
     "title": "Catalogues",
     "description": "Catalogue de textes propre avec structure de type CAN et prix propres.",
     "emptyTitle": "Aucun catalogue",
-    "comingSoon": "L'éditeur de catalogues suivra en phase 2."
+    "emptyText": "Créez un catalogue et saisissez vos positions standard. Vous pourrez ensuite les reprendre dans chaque descriptif.",
+    "new": "Nouveau catalogue",
+    "create": "Créer le catalogue",
+    "settings": "Paramètres",
+    "delete": "Supprimer le catalogue",
+    "deleteConfirm": "Le catalogue « {name} » sera supprimé avec toutes ses positions. Les positions déjà reprises dans des descriptifs sont conservées.",
+    "entries": "Éléments",
+    "inactive": "Inactif",
+    "fields": {
+      "name": "Nom",
+      "trade": "Corps de métier",
+      "description": "Description",
+      "active": "Actif (proposer lors de l'insertion dans les descriptifs)"
+    }
   },
   "settings": {
     "title": "Paramètres",
@@ -328,10 +348,116 @@
     "salutations": {
       "mr": "Monsieur",
       "ms": "Madame"
+    },
+    "lvStatus": {
+      "draft": "Brouillon",
+      "tendered": "En soumission",
+      "awarded": "Adjugé"
     }
   },
   "companyPicker": {
     "placeholder": "Rechercher une entreprise …",
     "noMatches": "Aucun résultat"
+  },
+  "lvs": {
+    "title": "Descriptifs",
+    "lv": "Descriptif",
+    "description": "Descriptifs de ce projet avec estimation des coûts.",
+    "emptyTitle": "Aucun descriptif",
+    "emptyText": "Créez le premier descriptif, p. ex. « Installation de chauffage » ou « Installations sanitaires ».",
+    "new": "Nouveau descriptif",
+    "create": "Créer le descriptif",
+    "settings": "Paramètres",
+    "delete": "Supprimer le descriptif",
+    "deleteConfirm": "Le descriptif « {name} » sera supprimé avec toutes ses positions et offres. Cette action est irréversible.",
+    "positions": "Positions",
+    "estimate": "Estimation des coûts",
+    "totalEstimate": "Total estimation des coûts (hors TVA)",
+    "pdfTender": "PDF soumission",
+    "pdfEstimate": "PDF avec prix estimés",
+    "tabs": {
+      "positions": "Positions",
+      "offers": "Offres",
+      "comparison": "Comparaison des offres"
+    },
+    "fields": {
+      "number": "N°",
+      "title": "Titre",
+      "trade": "Corps de métier",
+      "language": "Langue des documents",
+      "status": "Statut",
+      "submissionDeadline": "Délai de remise",
+      "description": "Remarques"
+    }
+  },
+  "tree": {
+    "addGroup": "Groupe",
+    "addSubgroup": "Sous-groupe",
+    "addPosition": "Position",
+    "addRPosition": "Position R",
+    "addText": "Texte",
+    "fromCatalog": "Depuis le catalogue",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer « {name} » ? Les éléments subordonnés seront également supprimés.",
+    "expand": "Déplier",
+    "collapse": "Replier",
+    "empty": "Aucun élément. Commencez par un groupe, p. ex. « Production de chaleur ».",
+    "emptyReadOnly": "Aucun élément.",
+    "selectHint": "Sélectionnez un élément à gauche pour le modifier. Les éléments peuvent être déplacés par glisser-déposer.",
+    "missingTranslation": "Traduction manquante",
+    "textLanguage": "Langue du texte",
+    "documentLanguage": "document",
+    "saving": "Enregistrement …",
+    "saved": "Enregistré",
+    "saveError": "Non enregistré",
+    "totalExclOptional": "Total hors TVA (sans positions éventuelles)",
+    "optionalBadge": "E",
+    "lumpSumUnit": "forfait",
+    "untitled": {
+      "group": "Nouveau groupe",
+      "position": "Nouvelle position",
+      "r_position": "Nouvelle position R",
+      "text": "Nouveau texte"
+    },
+    "kinds": {
+      "group": "Groupe",
+      "position": "Position",
+      "r_position": "Position R (texte libre)",
+      "text": "Texte"
+    },
+    "fields": {
+      "title": "Titre",
+      "shortText": "Texte court",
+      "longText": "Texte long",
+      "unit": "Unité",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire",
+      "estimatePrice": "Prix estimé (PU)",
+      "total": "Montant",
+      "priceDate": "État des prix",
+      "optional": "Position éventuelle",
+      "lumpSum": "Forfait"
+    },
+    "measurements": {
+      "title": "Avant-métré",
+      "description": "Description",
+      "count": "Nombre",
+      "result": "Résultat",
+      "total": "Quantité",
+      "add": "Ligne",
+      "delete": "Supprimer la ligne",
+      "hint": "Saisir la quantité directement ou établir un avant-métré avec « Ligne » (nombre × a × b × c)."
+    },
+    "catalogPicker": {
+      "title": "Insérer depuis le catalogue",
+      "hint": "Sélectionnez des positions ou des groupes entiers. Ils seront insérés à l'endroit sélectionné à gauche.",
+      "catalog": "Catalogue",
+      "search": "Rechercher …",
+      "insert": "{count, plural, one {Insérer # position} other {Insérer # positions}}",
+      "noCatalogs": "Il n'y a encore aucun catalogue actif.",
+      "cancel": "Annuler"
+    }
   }
 }

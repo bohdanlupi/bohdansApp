@@ -14,6 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
+      catalog_nodes: {
+        Row: {
+          catalog_id: string
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["node_kind"]
+          long_text: Json
+          number: string | null
+          parent_id: string | null
+          price_date: string | null
+          short_text: Json
+          sort: number
+          unit: string | null
+          unit_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          catalog_id: string
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["node_kind"]
+          long_text?: Json
+          number?: string | null
+          parent_id?: string | null
+          price_date?: string | null
+          short_text?: Json
+          sort?: number
+          unit?: string | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          catalog_id?: string
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["node_kind"]
+          long_text?: Json
+          number?: string | null
+          parent_id?: string | null
+          price_date?: string | null
+          short_text?: Json
+          sort?: number
+          unit?: string | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_nodes_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "catalogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_nodes_parent_id_catalog_id_fkey"
+            columns: ["parent_id", "catalog_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_nodes"
+            referencedColumns: ["id", "catalog_id"]
+          },
+        ]
+      }
+      catalogs: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          trade: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          trade?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          trade?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalogs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           archived: boolean
@@ -237,6 +341,206 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lv_measurements: {
+        Row: {
+          count: number
+          created_at: string
+          description: string | null
+          factor_a: number | null
+          factor_b: number | null
+          factor_c: number | null
+          id: string
+          lv_node_id: string
+          result: number | null
+          sort: number
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          description?: string | null
+          factor_a?: number | null
+          factor_b?: number | null
+          factor_c?: number | null
+          id?: string
+          lv_node_id: string
+          result?: number | null
+          sort?: number
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          description?: string | null
+          factor_a?: number | null
+          factor_b?: number | null
+          factor_c?: number | null
+          id?: string
+          lv_node_id?: string
+          result?: number | null
+          sort?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lv_measurements_lv_node_id_fkey"
+            columns: ["lv_node_id"]
+            isOneToOne: false
+            referencedRelation: "lv_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lv_nodes: {
+        Row: {
+          created_at: string
+          id: string
+          is_lump_sum: boolean
+          is_optional: boolean
+          kind: Database["public"]["Enums"]["node_kind"]
+          long_text: Json
+          lv_id: string
+          number: string | null
+          parent_id: string | null
+          quantity: number | null
+          short_text: Json
+          sort: number
+          source_catalog_node_id: string | null
+          unit: string | null
+          unit_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_lump_sum?: boolean
+          is_optional?: boolean
+          kind: Database["public"]["Enums"]["node_kind"]
+          long_text?: Json
+          lv_id: string
+          number?: string | null
+          parent_id?: string | null
+          quantity?: number | null
+          short_text?: Json
+          sort?: number
+          source_catalog_node_id?: string | null
+          unit?: string | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_lump_sum?: boolean
+          is_optional?: boolean
+          kind?: Database["public"]["Enums"]["node_kind"]
+          long_text?: Json
+          lv_id?: string
+          number?: string | null
+          parent_id?: string | null
+          quantity?: number | null
+          short_text?: Json
+          sort?: number
+          source_catalog_node_id?: string | null
+          unit?: string | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lv_nodes_lv_id_fkey"
+            columns: ["lv_id"]
+            isOneToOne: false
+            referencedRelation: "lv_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lv_nodes_lv_id_fkey"
+            columns: ["lv_id"]
+            isOneToOne: false
+            referencedRelation: "lvs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lv_nodes_parent_id_lv_id_fkey"
+            columns: ["parent_id", "lv_id"]
+            isOneToOne: false
+            referencedRelation: "lv_nodes"
+            referencedColumns: ["id", "lv_id"]
+          },
+          {
+            foreignKeyName: "lv_nodes_source_catalog_node_id_fkey"
+            columns: ["source_catalog_node_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lvs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          language: Database["public"]["Enums"]["app_language"]
+          number: string
+          project_id: string
+          status: Database["public"]["Enums"]["lv_status"]
+          submission_deadline: string | null
+          title: string
+          trade: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["app_language"]
+          number: string
+          project_id: string
+          status?: Database["public"]["Enums"]["lv_status"]
+          submission_deadline?: string | null
+          title: string
+          trade?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["app_language"]
+          number?: string
+          project_id?: string
+          status?: Database["public"]["Enums"]["lv_status"]
+          submission_deadline?: string | null
+          title?: string
+          trade?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lvs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lvs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lvs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -494,6 +798,79 @@ export type Database = {
           },
         ]
       }
+      lv_list: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          estimate_total: number | null
+          id: string | null
+          language: Database["public"]["Enums"]["app_language"] | null
+          number: string | null
+          position_count: number | null
+          project_id: string | null
+          status: Database["public"]["Enums"]["lv_status"] | null
+          submission_deadline: string | null
+          title: string | null
+          trade: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimate_total?: never
+          id?: string | null
+          language?: Database["public"]["Enums"]["app_language"] | null
+          number?: string | null
+          position_count?: never
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["lv_status"] | null
+          submission_deadline?: string | null
+          title?: string | null
+          trade?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimate_total?: never
+          id?: string | null
+          language?: Database["public"]["Enums"]["app_language"] | null
+          number?: string | null
+          position_count?: never
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["lv_status"] | null
+          submission_deadline?: string | null
+          title?: string | null
+          trade?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lvs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lvs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lvs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_list: {
         Row: {
           city: string | null
@@ -580,6 +957,8 @@ export type Database = {
     Enums: {
       app_language: "de" | "fr" | "it"
       app_role: "admin" | "planer" | "viewer"
+      lv_status: "draft" | "tendered" | "awarded"
+      node_kind: "group" | "position" | "r_position" | "text"
       project_status:
         | "acquisition"
         | "active"
@@ -715,6 +1094,8 @@ export const Constants = {
     Enums: {
       app_language: ["de", "fr", "it"],
       app_role: ["admin", "planer", "viewer"],
+      lv_status: ["draft", "tendered", "awarded"],
+      node_kind: ["group", "position", "r_position", "text"],
       project_status: [
         "acquisition",
         "active",
