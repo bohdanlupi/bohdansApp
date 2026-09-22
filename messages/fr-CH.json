@@ -1,0 +1,130 @@
+{
+  "common": {
+    "language": "Langue",
+    "save": "Enregistrer"
+  },
+  "languages": {
+    "de": "Allemand",
+    "fr": "Français",
+    "it": "Italien"
+  },
+  "roles": {
+    "admin": "Administrateur",
+    "planer": "Planificateur",
+    "viewer": "Lecture seule"
+  },
+  "nav": {
+    "projects": "Projets",
+    "addresses": "Adresses",
+    "catalogs": "Catalogues",
+    "settings": "Paramètres",
+    "profile": "Mon profil"
+  },
+  "auth": {
+    "loginTitle": "Connexion",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "login": "Se connecter",
+    "logout": "Se déconnecter",
+    "forgotPassword": "Mot de passe oublié ?",
+    "linkInvalid": "Le lien est invalide ou a expiré. Veuillez en demander un nouveau.",
+    "forgotTitle": "Réinitialiser le mot de passe",
+    "forgotDescription": "Nous vous envoyons un lien pour définir un nouveau mot de passe.",
+    "sendResetLink": "Envoyer le lien",
+    "backToLogin": "Retour à la connexion",
+    "setPasswordTitle": "Définir le mot de passe",
+    "setPasswordDescription": "Au moins 10 caractères.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "savePassword": "Enregistrer le mot de passe",
+    "changePassword": "Modifier le mot de passe"
+  },
+  "forms": {
+    "invalidCredentials": "E-mail ou mot de passe incorrect.",
+    "accountInactive": "Votre compte est désactivé. Veuillez contacter un administrateur.",
+    "invalidEmail": "Veuillez saisir une adresse e-mail valide.",
+    "resetEmailSent": "Si un compte existe avec cette adresse, un lien a été envoyé.",
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "passwordTooShort": "Le mot de passe doit comporter au moins 10 caractères.",
+    "passwordUpdateFailed": "Le mot de passe n'a pas pu être enregistré.",
+    "passwordChanged": "Le mot de passe a été modifié.",
+    "invalidInput": "Veuillez vérifier vos saisies.",
+    "saveFailed": "L'enregistrement a échoué.",
+    "saved": "Enregistré.",
+    "userExists": "Un utilisateur existe déjà pour cette adresse e-mail.",
+    "inviteFailed": "L'invitation n'a pas pu être envoyée.",
+    "inviteSent": "L'invitation a été envoyée.",
+    "cannotDemoteSelf": "Vous ne pouvez pas retirer vos propres droits d'administrateur ni vous désactiver.",
+    "notLoggedIn": "Vous n'êtes pas connecté."
+  },
+  "projects": {
+    "title": "Projets",
+    "description": "Projets de construction avec intervenants, plan des coûts, descriptifs et offres.",
+    "emptyTitle": "Aucun projet",
+    "comingSoon": "La gestion des projets suivra en phase 1."
+  },
+  "addresses": {
+    "title": "Adresses",
+    "description": "Entreprises et contacts : maîtres d'ouvrage, architectes, entrepreneurs, fournisseurs.",
+    "emptyTitle": "Aucune adresse",
+    "comingSoon": "La gestion des adresses suivra en phase 1."
+  },
+  "catalogs": {
+    "title": "Catalogues",
+    "description": "Catalogue de textes propre avec structure de type CAN et prix propres.",
+    "emptyTitle": "Aucun catalogue",
+    "comingSoon": "L'éditeur de catalogues suivra en phase 2."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "tabs": {
+      "firm": "Entreprise",
+      "users": "Utilisateurs",
+      "profile": "Mon profil"
+    },
+    "firm": {
+      "readOnly": "Seuls les administrateurs peuvent modifier les données de l'entreprise.",
+      "sections": {
+        "address": "Adresse et contact",
+        "banking": "IDE et coordonnées bancaires",
+        "defaults": "Valeurs par défaut",
+        "letterhead": "En-tête"
+      },
+      "fields": {
+        "name": "Raison sociale",
+        "street": "Rue",
+        "zip": "NPA",
+        "city": "Localité",
+        "phone": "Téléphone",
+        "email": "E-mail",
+        "website": "Site web",
+        "managing_director": "Directeur",
+        "uid_number": "Numéro IDE",
+        "bank_name": "Banque",
+        "iban": "IBAN",
+        "bic": "BIC",
+        "vat_rate": "Taux de TVA (%)",
+        "offer_validity_days": "Validité des offres (jours)",
+        "payment_terms_days": "Délai de paiement (jours)"
+      },
+      "letterheadHint": "Ainsi apparaissent le logo, l'adresse et le pied de page sur tous les documents (contenu d'exemple).",
+      "letterheadPreview": "Ouvrir l'aperçu PDF",
+      "save": "Enregistrer les données de l'entreprise"
+    },
+    "users": {
+      "inviteTitle": "Inviter un utilisateur",
+      "listTitle": "Utilisateurs",
+      "fullName": "Nom",
+      "role": "Rôle",
+      "status": "Statut",
+      "active": "Actif",
+      "inactive": "Désactivé",
+      "you": "Vous",
+      "roleHelp": "Administrateur : tout, y c. utilisateurs et données de l'entreprise · Planificateur : modifier les projets · Lecture seule : tout voir, rien modifier.",
+      "sendInvite": "Envoyer l'invitation"
+    },
+    "profile": {
+      "title": "Données personnelles"
+    }
+  }
+}

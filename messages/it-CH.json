@@ -1,0 +1,130 @@
+{
+  "common": {
+    "language": "Lingua",
+    "save": "Salva"
+  },
+  "languages": {
+    "de": "Tedesco",
+    "fr": "Francese",
+    "it": "Italiano"
+  },
+  "roles": {
+    "admin": "Amministratore",
+    "planer": "Progettista",
+    "viewer": "Sola lettura"
+  },
+  "nav": {
+    "projects": "Progetti",
+    "addresses": "Indirizzi",
+    "catalogs": "Cataloghi",
+    "settings": "Impostazioni",
+    "profile": "Il mio profilo"
+  },
+  "auth": {
+    "loginTitle": "Accesso",
+    "email": "E-mail",
+    "password": "Password",
+    "login": "Accedi",
+    "logout": "Esci",
+    "forgotPassword": "Password dimenticata?",
+    "linkInvalid": "Il link non è valido o è scaduto. Richiedetene uno nuovo.",
+    "forgotTitle": "Reimposta la password",
+    "forgotDescription": "Vi inviamo un link per impostare una nuova password.",
+    "sendResetLink": "Invia link",
+    "backToLogin": "Torna all'accesso",
+    "setPasswordTitle": "Imposta la password",
+    "setPasswordDescription": "Almeno 10 caratteri.",
+    "newPassword": "Nuova password",
+    "confirmPassword": "Conferma password",
+    "savePassword": "Salva password",
+    "changePassword": "Cambia password"
+  },
+  "forms": {
+    "invalidCredentials": "E-mail o password errata.",
+    "accountInactive": "Il vostro account è disattivato. Rivolgetevi a un amministratore.",
+    "invalidEmail": "Inserite un indirizzo e-mail valido.",
+    "resetEmailSent": "Se esiste un account con questo indirizzo, è stato inviato un link.",
+    "passwordMismatch": "Le password non corrispondono.",
+    "passwordTooShort": "La password deve contenere almeno 10 caratteri.",
+    "passwordUpdateFailed": "Non è stato possibile salvare la password.",
+    "passwordChanged": "La password è stata modificata.",
+    "invalidInput": "Verificate i dati inseriti.",
+    "saveFailed": "Salvataggio non riuscito.",
+    "saved": "Salvato.",
+    "userExists": "Esiste già un utente con questo indirizzo e-mail.",
+    "inviteFailed": "Non è stato possibile inviare l'invito.",
+    "inviteSent": "L'invito è stato inviato.",
+    "cannotDemoteSelf": "Non potete revocare i vostri diritti di amministratore né disattivarvi.",
+    "notLoggedIn": "Non avete effettuato l'accesso."
+  },
+  "projects": {
+    "title": "Progetti",
+    "description": "Progetti edilizi con partecipanti, piano dei costi, capitolati e offerte.",
+    "emptyTitle": "Ancora nessun progetto",
+    "comingSoon": "La gestione dei progetti seguirà nella fase 1."
+  },
+  "addresses": {
+    "title": "Indirizzi",
+    "description": "Aziende e persone di contatto: committenti, architetti, imprenditori, fornitori.",
+    "emptyTitle": "Ancora nessun indirizzo",
+    "comingSoon": "La gestione degli indirizzi seguirà nella fase 1."
+  },
+  "catalogs": {
+    "title": "Cataloghi",
+    "description": "Catalogo testi proprio con struttura simile al CPN e prezzi propri.",
+    "emptyTitle": "Ancora nessun catalogo",
+    "comingSoon": "L'editor dei cataloghi seguirà nella fase 2."
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "tabs": {
+      "firm": "Azienda",
+      "users": "Utenti",
+      "profile": "Il mio profilo"
+    },
+    "firm": {
+      "readOnly": "Solo gli amministratori possono modificare i dati aziendali.",
+      "sections": {
+        "address": "Indirizzo e contatto",
+        "banking": "IDI e coordinate bancarie",
+        "defaults": "Valori predefiniti",
+        "letterhead": "Carta intestata"
+      },
+      "fields": {
+        "name": "Ragione sociale",
+        "street": "Via",
+        "zip": "NPA",
+        "city": "Località",
+        "phone": "Telefono",
+        "email": "E-mail",
+        "website": "Sito web",
+        "managing_director": "Amministratore",
+        "uid_number": "Numero IDI",
+        "bank_name": "Banca",
+        "iban": "IBAN",
+        "bic": "BIC",
+        "vat_rate": "Aliquota IVA (%)",
+        "offer_validity_days": "Validità offerte (giorni)",
+        "payment_terms_days": "Termine di pagamento (giorni)"
+      },
+      "letterheadHint": "Così appaiono logo, indirizzo e piè di pagina su tutti i documenti (contenuto di esempio).",
+      "letterheadPreview": "Apri anteprima PDF",
+      "save": "Salva dati aziendali"
+    },
+    "users": {
+      "inviteTitle": "Invita utente",
+      "listTitle": "Utenti",
+      "fullName": "Nome",
+      "role": "Ruolo",
+      "status": "Stato",
+      "active": "Attivo",
+      "inactive": "Disattivato",
+      "you": "Voi",
+      "roleHelp": "Amministratore: tutto, incl. utenti e dati aziendali · Progettista: modificare i progetti · Sola lettura: vedere tutto, non modificare nulla.",
+      "sendInvite": "Invia invito"
+    },
+    "profile": {
+      "title": "Dati personali"
+    }
+  }
+}

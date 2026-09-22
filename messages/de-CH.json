@@ -1,0 +1,130 @@
+{
+  "common": {
+    "language": "Sprache",
+    "save": "Speichern"
+  },
+  "languages": {
+    "de": "Deutsch",
+    "fr": "Französisch",
+    "it": "Italienisch"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "planer": "Planer",
+    "viewer": "Nur lesen"
+  },
+  "nav": {
+    "projects": "Projekte",
+    "addresses": "Adressen",
+    "catalogs": "Kataloge",
+    "settings": "Einstellungen",
+    "profile": "Mein Profil"
+  },
+  "auth": {
+    "loginTitle": "Anmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "forgotPassword": "Passwort vergessen?",
+    "linkInvalid": "Der Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
+    "forgotTitle": "Passwort zurücksetzen",
+    "forgotDescription": "Wir senden Ihnen einen Link, mit dem Sie ein neues Passwort festlegen können.",
+    "sendResetLink": "Link senden",
+    "backToLogin": "Zurück zur Anmeldung",
+    "setPasswordTitle": "Passwort festlegen",
+    "setPasswordDescription": "Mindestens 10 Zeichen.",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "savePassword": "Passwort speichern",
+    "changePassword": "Passwort ändern"
+  },
+  "forms": {
+    "invalidCredentials": "E-Mail oder Passwort ist falsch.",
+    "accountInactive": "Ihr Konto ist deaktiviert. Bitte wenden Sie sich an einen Administrator.",
+    "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "resetEmailSent": "Falls ein Konto mit dieser Adresse existiert, wurde ein Link gesendet.",
+    "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+    "passwordTooShort": "Das Passwort muss mindestens 10 Zeichen lang sein.",
+    "passwordUpdateFailed": "Das Passwort konnte nicht gespeichert werden.",
+    "passwordChanged": "Passwort wurde geändert.",
+    "invalidInput": "Bitte prüfen Sie Ihre Eingaben.",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "saved": "Gespeichert.",
+    "userExists": "Für diese E-Mail-Adresse existiert bereits ein Benutzer.",
+    "inviteFailed": "Die Einladung konnte nicht gesendet werden.",
+    "inviteSent": "Einladung wurde gesendet.",
+    "cannotDemoteSelf": "Sie können sich nicht selbst die Administratorrechte entziehen oder sich deaktivieren.",
+    "notLoggedIn": "Sie sind nicht angemeldet."
+  },
+  "projects": {
+    "title": "Projekte",
+    "description": "Bauprojekte mit Beteiligten, Kostenplan, Leistungsverzeichnissen und Offerten.",
+    "emptyTitle": "Noch keine Projekte",
+    "comingSoon": "Die Projektverwaltung folgt in Phase 1."
+  },
+  "addresses": {
+    "title": "Adressen",
+    "description": "Firmen und Kontaktpersonen: Bauherren, Architekten, Unternehmer, Lieferanten.",
+    "emptyTitle": "Noch keine Adressen",
+    "comingSoon": "Die Adressverwaltung folgt in Phase 1."
+  },
+  "catalogs": {
+    "title": "Kataloge",
+    "description": "Eigener Textkatalog mit NPK-ähnlicher Gliederung und eigenen Preisen.",
+    "emptyTitle": "Noch keine Kataloge",
+    "comingSoon": "Der Katalog-Editor folgt in Phase 2."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "tabs": {
+      "firm": "Firma",
+      "users": "Benutzer",
+      "profile": "Mein Profil"
+    },
+    "firm": {
+      "readOnly": "Nur Administratoren können die Firmendaten ändern.",
+      "sections": {
+        "address": "Adresse und Kontakt",
+        "banking": "UID und Bankverbindung",
+        "defaults": "Standardwerte",
+        "letterhead": "Briefkopf"
+      },
+      "fields": {
+        "name": "Firmenname",
+        "street": "Strasse",
+        "zip": "PLZ",
+        "city": "Ort",
+        "phone": "Telefon",
+        "email": "E-Mail",
+        "website": "Website",
+        "managing_director": "Geschäftsführer",
+        "uid_number": "UID-Nummer",
+        "bank_name": "Bank",
+        "iban": "IBAN",
+        "bic": "BIC",
+        "vat_rate": "MwSt.-Satz (%)",
+        "offer_validity_days": "Gültigkeit Offerten (Tage)",
+        "payment_terms_days": "Zahlungsfrist (Tage)"
+      },
+      "letterheadHint": "So erscheinen Logo, Adresse und Fusszeile auf allen Dokumenten (Beispielinhalt).",
+      "letterheadPreview": "PDF-Vorschau öffnen",
+      "save": "Firmendaten speichern"
+    },
+    "users": {
+      "inviteTitle": "Benutzer einladen",
+      "listTitle": "Benutzer",
+      "fullName": "Name",
+      "role": "Rolle",
+      "status": "Status",
+      "active": "Aktiv",
+      "inactive": "Deaktiviert",
+      "you": "Sie",
+      "roleHelp": "Administrator: alles inkl. Benutzer und Firmendaten · Planer: Projekte bearbeiten · Nur lesen: alles ansehen, nichts ändern.",
+      "sendInvite": "Einladung senden"
+    },
+    "profile": {
+      "title": "Persönliche Angaben"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+<div style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #272727; max-width: 560px">
+  <p><strong>LUPI Technik &amp; Planung GmbH</strong></p>
+
+  <p>Sie haben ein neues Passwort angefordert. Klicken Sie auf den Link, um es festzulegen.</p>
+  <p lang="fr">Vous avez demandé un nouveau mot de passe. Cliquez sur le lien pour le définir.</p>
+  <p lang="it">Ha richiesto una nuova password. Clicchi sul link per impostarla.</p>
+
+  <p>
+    <a
+      href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/passwort-setzen"
+      style="display: inline-block; padding: 10px 16px; background: #1F497D; color: #ffffff; text-decoration: none; border-radius: 4px"
+      >Neues Passwort festlegen / Nouveau mot de passe / Nuova password</a
+    >
+  </p>
+
+  <p style="color: #595959; font-size: 12px">
+    Falls Sie dies nicht angefordert haben, ignorieren Sie diese E-Mail. / Si vous n'êtes pas à l'origine de
+    cette demande, ignorez cet e-mail. / Se non ha richiesto questa operazione, ignori questa e-mail.
+  </p>
+</div>
