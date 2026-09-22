@@ -268,6 +268,69 @@ export type Database = {
           },
         ]
       }
+      cost_plan_items: {
+        Row: {
+          code: string
+          id: string
+          name: Json
+          parent_id: string | null
+          sort: number
+          template_id: string
+        }
+        Insert: {
+          code: string
+          id?: string
+          name?: Json
+          parent_id?: string | null
+          sort?: number
+          template_id: string
+        }
+        Update: {
+          code?: string
+          id?: string
+          name?: Json
+          parent_id?: string | null
+          sort?: number
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_plan_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cost_plan_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_plan_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "cost_plan_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cost_plan_templates: {
+        Row: {
+          created_at: string
+          id: string
+          key: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
       firm_settings: {
         Row: {
           bank_name: string | null
@@ -394,6 +457,7 @@ export type Database = {
       }
       lv_nodes: {
         Row: {
+          cost_plan_item_id: string | null
           created_at: string
           id: string
           is_lump_sum: boolean
@@ -412,6 +476,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cost_plan_item_id?: string | null
           created_at?: string
           id?: string
           is_lump_sum?: boolean
@@ -430,6 +495,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cost_plan_item_id?: string | null
           created_at?: string
           id?: string
           is_lump_sum?: boolean
@@ -448,6 +514,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "lv_nodes_cost_plan_item_id_fkey"
+            columns: ["cost_plan_item_id"]
+            isOneToOne: false
+            referencedRelation: "cost_plan_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lv_nodes_lv_id_fkey"
             columns: ["lv_id"]
@@ -480,6 +553,7 @@ export type Database = {
       }
       lvs: {
         Row: {
+          cost_plan_item_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -494,6 +568,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cost_plan_item_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -508,6 +583,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cost_plan_item_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -522,6 +598,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "lvs_cost_plan_item_id_fkey"
+            columns: ["cost_plan_item_id"]
+            isOneToOne: false
+            referencedRelation: "cost_plan_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lvs_created_by_fkey"
             columns: ["created_by"]
@@ -577,6 +660,58 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      project_cost_items: {
+        Row: {
+          budget: number | null
+          cost_plan_item_id: string
+          id: string
+          manual_amount: number | null
+          note: string | null
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          cost_plan_item_id: string
+          id?: string
+          manual_amount?: number | null
+          note?: string | null
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          cost_plan_item_id?: string
+          id?: string
+          manual_amount?: number | null
+          note?: string | null
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_cost_items_cost_plan_item_id_fkey"
+            columns: ["cost_plan_item_id"]
+            isOneToOne: false
+            referencedRelation: "cost_plan_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_cost_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_cost_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_participants: {
         Row: {
@@ -657,6 +792,7 @@ export type Database = {
       projects: {
         Row: {
           city: string | null
+          cost_plan_template_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -673,6 +809,7 @@ export type Database = {
         }
         Insert: {
           city?: string | null
+          cost_plan_template_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -689,6 +826,7 @@ export type Database = {
         }
         Update: {
           city?: string | null
+          cost_plan_template_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -704,6 +842,13 @@ export type Database = {
           zip?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_cost_plan_template_id_fkey"
+            columns: ["cost_plan_template_id"]
+            isOneToOne: false
+            referencedRelation: "cost_plan_templates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_created_by_fkey"
             columns: ["created_by"]
@@ -800,6 +945,7 @@ export type Database = {
       }
       lv_list: {
         Row: {
+          cost_plan_item_id: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -816,6 +962,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          cost_plan_item_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -832,6 +979,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          cost_plan_item_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -848,6 +996,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lvs_cost_plan_item_id_fkey"
+            columns: ["cost_plan_item_id"]
+            isOneToOne: false
+            referencedRelation: "cost_plan_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lvs_created_by_fkey"
             columns: ["created_by"]
@@ -871,10 +1026,34 @@ export type Database = {
           },
         ]
       }
+      project_cost_lv_amounts: {
+        Row: {
+          amount: number | null
+          cost_plan_item_id: string | null
+          project_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lvs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lvs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_list: {
         Row: {
           city: string | null
           client_names: string | null
+          cost_plan_template_id: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -893,6 +1072,7 @@ export type Database = {
         Insert: {
           city?: string | null
           client_names?: never
+          cost_plan_template_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -911,6 +1091,7 @@ export type Database = {
         Update: {
           city?: string | null
           client_names?: never
+          cost_plan_template_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -927,6 +1108,13 @@ export type Database = {
           zip?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_cost_plan_template_id_fkey"
+            columns: ["cost_plan_template_id"]
+            isOneToOne: false
+            referencedRelation: "cost_plan_templates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_created_by_fkey"
             columns: ["created_by"]

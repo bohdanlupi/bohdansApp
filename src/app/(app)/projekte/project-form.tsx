@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { projectStatuses } from "@/lib/address-options";
 import { initialFormState } from "@/lib/form-state";
-import type { Project } from "@/lib/supabase/types";
+import type { CostPlanTemplate, Project } from "@/lib/supabase/types";
 
 import { createProject, updateProject } from "./actions";
 
@@ -18,10 +18,12 @@ import { createProject, updateProject } from "./actions";
 export function ProjectForm({
   project,
   suggestedNumber,
+  templates,
   editable,
 }: {
   project?: Project;
   suggestedNumber?: string;
+  templates: CostPlanTemplate[];
   editable: boolean;
 }) {
   const t = useTranslations();
@@ -75,6 +77,20 @@ export function ProjectForm({
                 ))}
               </NativeSelect>
               <p className="text-xs text-muted-foreground">{tf("languageHint")}</p>
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="cost_plan_template_id">{tf("fields.cost_plan_template_id")}</Label>
+              <NativeSelect
+                id="cost_plan_template_id"
+                name="cost_plan_template_id"
+                defaultValue={project?.cost_plan_template_id ?? templates.find((tpl) => tpl.key === "bkp")?.id ?? ""}
+              >
+                {templates.map((tpl) => (
+                  <option key={tpl.id} value={tpl.id}>
+                    {tpl.name}
+                  </option>
+                ))}
+              </NativeSelect>
             </div>
             <div className="space-y-2 sm:col-span-4">
               <Label htmlFor="description">{tf("fields.description")}</Label>

@@ -10,7 +10,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
     <>
       <PageHeader title={t("title")} />
       <SettingsNav />
-      <div className="mt-6 max-w-3xl">{children}</div>
+      <div className="mt-6 max-w-5xl">{children}</div>
     </>
   );
 }

@@ -21,6 +21,7 @@ const projectSchema = z.object({
   start_date: optionalDate,
   end_date: optionalDate,
   description: optionalText,
+  cost_plan_template_id: z.union([z.uuid(), z.literal("")]).transform((v) => v || null),
 });
 
 export async function createProject(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -29,7 +30,16 @@ export async function createProject(_prev: FormState, formData: FormData): Promi
   if (!parsed.success) return { error: "invalidInput" };
 
   const supabase = await createClient();
-  const { data, error } = await supabase.from("projects").insert(parsed.data).select("id").single();
+  let costPlanTemplateId = parsed.data.cost_plan_template_id;
+  if (!costPlanTemplateId) {
+    const { data: bkp } = await supabase.from("cost_plan_templates").select("id").eq("key", "bkp").maybeSingle();
+    costPlanTemplateId = bkp?.id ?? null;
+  }
+  const { data, error } = await supabase
+    .from("projects")
+    .insert({ ...parsed.data, cost_plan_template_id: costPlanTemplateId })
+    .select("id")
+    .single();
   if (error || !data) return { error: error?.code === PG_UNIQUE_VIOLATION ? "projectNumberExists" : "saveFailed" };
 
   revalidatePath("/projekte");

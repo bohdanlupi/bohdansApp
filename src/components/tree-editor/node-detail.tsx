@@ -4,9 +4,11 @@ import { Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
+import { CostItemSelect } from "@/components/cost-item-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { CostItemOption } from "@/lib/cost-plan";
 import { contentLanguages, type I18nText } from "@/lib/i18n-text";
 import { formatMoney, formatNumber, parseNumber } from "@/lib/number-input";
 import type { AppLanguage } from "@/lib/supabase/types";
@@ -29,6 +31,7 @@ type Draft = {
   is_optional: boolean;
   is_lump_sum: boolean;
   price_date: string;
+  cost_plan_item_id: string;
 };
 
 const toDraft = (node: EditorNode): Draft => ({
@@ -40,6 +43,7 @@ const toDraft = (node: EditorNode): Draft => ({
   is_optional: node.is_optional ?? false,
   is_lump_sum: node.is_lump_sum ?? false,
   price_date: node.price_date ?? "",
+  cost_plan_item_id: node.cost_plan_item_id ?? "",
 });
 
 /** Detail panel of the selected node; every change is saved when a field loses focus. */
@@ -49,12 +53,14 @@ export function NodeDetail({
   language,
   editable,
   measurements,
+  costOptions,
 }: {
   scope: TreeScope;
   node: EditorNode;
   language: AppLanguage;
   editable: boolean;
   measurements: Measurement[];
+  costOptions: CostItemOption[];
 }) {
   const t = useTranslations("tree");
   const isLv = scope.type === "lv";
@@ -78,6 +84,7 @@ export function NodeDetail({
       is_optional: next.is_optional,
       is_lump_sum: next.is_lump_sum,
       price_date: next.price_date || null,
+      cost_plan_item_id: isLv ? next.cost_plan_item_id || null : undefined,
     });
     if (result.error) {
       setStatus("error");
@@ -258,6 +265,18 @@ export function NodeDetail({
                 </label>
               </div>
             )}
+          </div>
+        )}
+        {isLv && node.kind !== "text" && costOptions.length > 0 && (
+          <div className="space-y-2">
+            <Label htmlFor="cost_plan_item_id">{t("fields.costItem")}</Label>
+            <CostItemSelect
+              id="cost_plan_item_id"
+              options={costOptions}
+              emptyLabel={t("fields.costItemInherited")}
+              value={draft.cost_plan_item_id}
+              onChange={(e) => update({ cost_plan_item_id: e.target.value }, true)}
+            />
           </div>
         )}
       </fieldset>

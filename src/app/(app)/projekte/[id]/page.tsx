@@ -27,7 +27,7 @@ export default async function ProjectPage({ params }: PageProps<"/projekte/[id]"
   const canWrite = profile.role !== "viewer";
 
   const supabase = await createClient();
-  const [{ data: rows }, { data: companies }] = await Promise.all([
+  const [{ data: rows }, { data: companies }, { data: templates }] = await Promise.all([
     supabase
       .from("project_participants")
       .select(
@@ -37,6 +37,7 @@ export default async function ProjectPage({ params }: PageProps<"/projekte/[id]"
     canWrite
       ? supabase.from("companies").select("id, name, city").eq("archived", false).order("name")
       : Promise.resolve({ data: [] }),
+    supabase.from("cost_plan_templates").select("*").order("name"),
   ]);
 
   // Sorted by role order (Bauherr first), then company name.
@@ -51,7 +52,7 @@ export default async function ProjectPage({ params }: PageProps<"/projekte/[id]"
   return (
     <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,48rem)_minmax(0,1fr)]">
       <div className="space-y-6">
-        <ProjectForm key={project.updated_at} project={project} editable={canWrite} />
+        <ProjectForm key={project.updated_at} project={project} templates={templates ?? []} editable={canWrite} />
         {canWrite && (
           <div className="flex justify-end border-t pt-4">
             <ConfirmButton

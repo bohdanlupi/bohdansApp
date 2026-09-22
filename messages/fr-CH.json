@@ -73,7 +73,9 @@
     "participantExists": "Cette entreprise participe déjà avec ce rôle.",
     "importFailed": "L'importation a échoué. Rien n'a été enregistré.",
     "invalidMove": "Cet élément ne peut pas être déplacé à cet endroit.",
-    "lvNumberExists": "Ce numéro de descriptif existe déjà dans ce projet."
+    "lvNumberExists": "Ce numéro de descriptif existe déjà dans ce projet.",
+    "costCodeExists": "Ce code existe déjà dans cette liste.",
+    "templateInUse": "Cette liste est utilisée par des projets et ne peut pas être supprimée."
   },
   "projects": {
     "title": "Projets",
@@ -108,7 +110,8 @@
         "language": "Langue des documents",
         "start_date": "Début",
         "end_date": "Fin",
-        "description": "Description"
+        "description": "Description",
+        "cost_plan_template_id": "Plan des coûts"
       },
       "languageHint": "Langue des descriptifs et des lettres de ce projet.",
       "readOnly": "Vous avez uniquement un accès en lecture.",
@@ -258,7 +261,8 @@
     "tabs": {
       "firm": "Entreprise",
       "users": "Utilisateurs",
-      "profile": "Mon profil"
+      "profile": "Mon profil",
+      "costPlans": "Plans des coûts"
     },
     "firm": {
       "readOnly": "Seuls les administrateurs peuvent modifier les données de l'entreprise.",
@@ -303,6 +307,18 @@
     },
     "profile": {
       "title": "Données personnelles"
+    },
+    "costPlans": {
+      "description": "Listes de codes pour les plans des coûts. Le CFC et l'eCCC-Bât sont préremplis avec les groupes principaux et les détails CVSE – veuillez vérifier et compléter selon les besoins.",
+      "code": "Code",
+      "codeHint": "La hiérarchie découle du code : 242 appartient à 24, D05 à D.",
+      "newTemplate": "Nouvelle liste",
+      "templateName": "Nom",
+      "copyFrom": "Reprendre les codes de",
+      "empty": "– commencer vide –",
+      "deleteTemplate": "Supprimer la liste",
+      "deleteTemplateConfirm": "Supprimer la liste « {name} » avec tous ses codes ?",
+      "deleteItemConfirm": "Supprimer le code {code} ? Les budgets et attributions de ce code seront perdus."
     }
   },
   "options": {
@@ -387,8 +403,10 @@
       "language": "Langue des documents",
       "status": "Statut",
       "submissionDeadline": "Délai de remise",
-      "description": "Remarques"
-    }
+      "description": "Remarques",
+      "costItem": "Code du plan des coûts (CFC / eCCC-Bât)"
+    },
+    "noCostItem": "– aucun code –"
   },
   "tree": {
     "addGroup": "Groupe",
@@ -438,7 +456,9 @@
       "total": "Montant",
       "priceDate": "État des prix",
       "optional": "Position éventuelle",
-      "lumpSum": "Forfait"
+      "lumpSum": "Forfait",
+      "costItem": "Code du plan des coûts",
+      "costItemInherited": "comme le groupe ou le descriptif"
     },
     "measurements": {
       "title": "Avant-métré",
@@ -458,6 +478,30 @@
       "insert": "{count, plural, one {Insérer # position} other {Insérer # positions}}",
       "noCatalogs": "Il n'y a encore aucun catalogue actif.",
       "cancel": "Annuler"
+    }
+  },
+  "costPlan": {
+    "title": "Plan des coûts",
+    "description": "{template} · Budget et devis estimatif (hors TVA). Le devis se compose des prix estimés des descriptifs et de montants supplémentaires.",
+    "noTemplate": "Aucun plan des coûts n'est attribué à ce projet. Choisissez un plan des coûts (CFC ou eCCC-Bât) dans l'aperçu.",
+    "showAll": "Afficher tous les codes",
+    "showUsed": "Seulement les codes utilisés",
+    "pdf": "PDF devis estimatif",
+    "empty": "Aucun montant. Choisissez « Afficher tous les codes » pour saisir des budgets ou attribuez un code aux descriptifs.",
+    "unassignedTitle": "Descriptifs sans code du plan des coûts",
+    "unassignedHint": "Ces descriptifs manquent dans le devis (sauf les positions avec leur propre code). Attribuez-leur un code dans les paramètres du descriptif.",
+    "totalExclVat": "Total hors TVA",
+    "vat": "TVA {rate} %",
+    "totalInclVat": "Total TVA incl.",
+    "columns": {
+      "code": "Code",
+      "name": "Désignation",
+      "budget": "Budget",
+      "lv": "Devis descriptifs",
+      "manual": "Devis supplémentaire",
+      "kv": "Devis total",
+      "difference": "Différence",
+      "percent": "%"
     }
   }
 }

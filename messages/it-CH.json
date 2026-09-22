@@ -73,7 +73,9 @@
     "participantExists": "Questa ditta partecipa già con questo ruolo.",
     "importFailed": "L'importazione non è riuscita. Non è stato salvato nulla.",
     "invalidMove": "Questo elemento non può essere spostato in quella posizione.",
-    "lvNumberExists": "Questo numero di capitolato esiste già in questo progetto."
+    "lvNumberExists": "Questo numero di capitolato esiste già in questo progetto.",
+    "costCodeExists": "Questo codice esiste già in questa lista.",
+    "templateInUse": "Questa lista è utilizzata da progetti e non può essere eliminata."
   },
   "projects": {
     "title": "Progetti",
@@ -108,7 +110,8 @@
         "language": "Lingua dei documenti",
         "start_date": "Inizio",
         "end_date": "Fine",
-        "description": "Descrizione"
+        "description": "Descrizione",
+        "cost_plan_template_id": "Piano dei costi"
       },
       "languageHint": "Lingua dei capitolati e delle lettere di questo progetto.",
       "readOnly": "Ha solo diritti di lettura.",
@@ -258,7 +261,8 @@
     "tabs": {
       "firm": "Azienda",
       "users": "Utenti",
-      "profile": "Il mio profilo"
+      "profile": "Il mio profilo",
+      "costPlans": "Piani dei costi"
     },
     "firm": {
       "readOnly": "Solo gli amministratori possono modificare i dati aziendali.",
@@ -303,6 +307,18 @@
     },
     "profile": {
       "title": "Dati personali"
+    },
+    "costPlans": {
+      "description": "Liste di codici per i piani dei costi. CCC ed eCCC-E sono precompilati con i gruppi principali e i dettagli RVCSE – verificare e completare secondo necessità.",
+      "code": "Codice",
+      "codeHint": "La gerarchia risulta dal codice: 242 appartiene a 24, D05 a D.",
+      "newTemplate": "Nuova lista",
+      "templateName": "Nome",
+      "copyFrom": "Riprendere i codici da",
+      "empty": "– iniziare vuota –",
+      "deleteTemplate": "Elimina lista",
+      "deleteTemplateConfirm": "Eliminare la lista «{name}» con tutti i codici?",
+      "deleteItemConfirm": "Eliminare il codice {code}? I budget e le assegnazioni di questo codice andranno persi."
     }
   },
   "options": {
@@ -387,8 +403,10 @@
       "language": "Lingua dei documenti",
       "status": "Stato",
       "submissionDeadline": "Termine di consegna",
-      "description": "Osservazioni"
-    }
+      "description": "Osservazioni",
+      "costItem": "Codice del piano dei costi (CCC / eCCC-E)"
+    },
+    "noCostItem": "– nessun codice –"
   },
   "tree": {
     "addGroup": "Gruppo",
@@ -438,7 +456,9 @@
       "total": "Importo",
       "priceDate": "Stato dei prezzi",
       "optional": "Posizione eventuale",
-      "lumpSum": "A corpo"
+      "lumpSum": "A corpo",
+      "costItem": "Codice del piano dei costi",
+      "costItemInherited": "come il gruppo o il capitolato"
     },
     "measurements": {
       "title": "Computo metrico",
@@ -458,6 +478,30 @@
       "insert": "{count, plural, one {Inserisci # posizione} other {Inserisci # posizioni}}",
       "noCatalogs": "Non ci sono ancora cataloghi attivi.",
       "cancel": "Annulla"
+    }
+  },
+  "costPlan": {
+    "title": "Piano dei costi",
+    "description": "{template} · Budget e preventivo (IVA esclusa). Il preventivo si compone dei prezzi stimati dei capitolati e di importi supplementari.",
+    "noTemplate": "A questo progetto non è assegnato alcun piano dei costi. Scelga un piano dei costi (CCC o eCCC-E) nella panoramica.",
+    "showAll": "Mostra tutti i codici",
+    "showUsed": "Solo codici utilizzati",
+    "pdf": "PDF preventivo",
+    "empty": "Nessun importo. Scelga «Mostra tutti i codici» per inserire budget o assegni un codice ai capitolati.",
+    "unassignedTitle": "Capitolati senza codice del piano dei costi",
+    "unassignedHint": "Questi capitolati mancano nel preventivo (tranne le posizioni con un proprio codice). Assegni loro un codice nelle impostazioni del capitolato.",
+    "totalExclVat": "Totale IVA esclusa",
+    "vat": "IVA {rate} %",
+    "totalInclVat": "Totale IVA inclusa",
+    "columns": {
+      "code": "Codice",
+      "name": "Designazione",
+      "budget": "Budget",
+      "lv": "Preventivo capitolati",
+      "manual": "Preventivo supplementare",
+      "kv": "Preventivo totale",
+      "difference": "Differenza",
+      "percent": "%"
     }
   }
 }

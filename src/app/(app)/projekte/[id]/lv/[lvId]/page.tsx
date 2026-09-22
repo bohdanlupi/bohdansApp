@@ -5,6 +5,8 @@ import { TreeEditor, type EditorNode } from "@/components/tree-editor/tree-edito
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
+import { loadCostOptions } from "../../cost-options";
+import { loadProject } from "../../load-project";
 import { loadLv } from "./load-lv";
 
 export async function generateMetadata({ params }: PageProps<"/projekte/[id]/lv/[lvId]">): Promise<Metadata> {
@@ -19,6 +21,8 @@ export default async function LvEditorPage({ params }: PageProps<"/projekte/[id]
   const lv = await loadLv(id, lvId);
   if (!lv) notFound();
 
+  const project = await loadProject(id);
+  const costOptions = await loadCostOptions(project?.cost_plan_template_id ?? null, lv.language ?? "de");
   const supabase = await createClient();
   const [{ data: nodes }, { data: measurements }, { data: catalogs }] = await Promise.all([
     supabase.from("lv_nodes").select("*").eq("lv_id", lvId),
@@ -35,6 +39,7 @@ export default async function LvEditorPage({ params }: PageProps<"/projekte/[id]
       language={lv.language ?? "de"}
       editable={profile.role !== "viewer"}
       catalogs={catalogs ?? []}
+      costOptions={costOptions}
     />
   );
 }

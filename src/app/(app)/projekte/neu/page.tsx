@@ -29,11 +29,13 @@ export default async function NewProjectPage() {
   const profile = await requireProfile();
   if (profile.role === "viewer") redirect("/projekte");
   const t = await getTranslations("projects.form");
+  const supabase = await createClient();
+  const { data: templates } = await supabase.from("cost_plan_templates").select("*").order("name");
 
   return (
     <div className="max-w-3xl">
       <PageHeader title={t("newTitle")} />
-      <ProjectForm editable suggestedNumber={await suggestNumber()} />
+      <ProjectForm editable suggestedNumber={await suggestNumber()} templates={templates ?? []} />
     </div>
   );
 }

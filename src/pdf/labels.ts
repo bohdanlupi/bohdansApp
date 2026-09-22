@@ -3,6 +3,12 @@ import type { AppLanguage } from "@/lib/supabase/types";
 // Printed documents use the document's language, which can differ from the UI language.
 const labels = {
   de: {
+    kv: "Kostenvoranschlag",
+    costPlan: "Kostenplan",
+    code: "Code",
+    budget: "Budget",
+    kvAmount: "KV",
+    difference: "Differenz",
     lv: "Leistungsverzeichnis",
     lvNo: "LV Nr.",
     submissionDeadline: "Eingabetermin",
@@ -47,6 +53,12 @@ const labels = {
     managingDirector: "Geschäftsführer",
   },
   fr: {
+    kv: "Devis estimatif",
+    costPlan: "Plan des coûts",
+    code: "Code",
+    budget: "Budget",
+    kvAmount: "Devis",
+    difference: "Différence",
     lv: "Descriptif",
     lvNo: "Descriptif n°",
     submissionDeadline: "Délai de remise",
@@ -91,6 +103,12 @@ const labels = {
     managingDirector: "Directeur",
   },
   it: {
+    kv: "Preventivo",
+    costPlan: "Piano dei costi",
+    code: "Codice",
+    budget: "Budget",
+    kvAmount: "Preventivo",
+    difference: "Differenza",
     lv: "Capitolato",
     lvNo: "Capitolato n.",
     submissionDeadline: "Termine di consegna",

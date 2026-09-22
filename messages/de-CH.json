@@ -73,7 +73,9 @@
     "participantExists": "Diese Firma ist in dieser Rolle bereits beteiligt.",
     "importFailed": "Der Import ist fehlgeschlagen. Es wurde nichts gespeichert.",
     "invalidMove": "Dieser Eintrag kann nicht dorthin verschoben werden.",
-    "lvNumberExists": "Diese LV-Nummer gibt es in diesem Projekt bereits."
+    "lvNumberExists": "Diese LV-Nummer gibt es in diesem Projekt bereits.",
+    "costCodeExists": "Diesen Code gibt es in dieser Liste bereits.",
+    "templateInUse": "Diese Liste wird von Projekten verwendet und kann nicht gelöscht werden."
   },
   "projects": {
     "title": "Projekte",
@@ -108,7 +110,8 @@
         "language": "Dokumentsprache",
         "start_date": "Beginn",
         "end_date": "Ende",
-        "description": "Beschreibung"
+        "description": "Beschreibung",
+        "cost_plan_template_id": "Kostenplan"
       },
       "languageHint": "Sprache der Leistungsverzeichnisse und Briefe dieses Projekts.",
       "readOnly": "Sie haben nur Leserechte.",
@@ -258,7 +261,8 @@
     "tabs": {
       "firm": "Firma",
       "users": "Benutzer",
-      "profile": "Mein Profil"
+      "profile": "Mein Profil",
+      "costPlans": "Kostenpläne"
     },
     "firm": {
       "readOnly": "Nur Administratoren können die Firmendaten ändern.",
@@ -303,6 +307,18 @@
     },
     "profile": {
       "title": "Persönliche Angaben"
+    },
+    "costPlans": {
+      "description": "Code-Listen für Kostenpläne. BKP und eBKP-H sind mit den Hauptgruppen und den Details für HLKSE vorbelegt – bitte prüfen und nach Bedarf ergänzen.",
+      "code": "Code",
+      "codeHint": "Die Hierarchie ergibt sich aus dem Code: 242 gehört zu 24, D05 zu D.",
+      "newTemplate": "Neue Liste",
+      "templateName": "Name",
+      "copyFrom": "Codes übernehmen von",
+      "empty": "– leer beginnen –",
+      "deleteTemplate": "Liste löschen",
+      "deleteTemplateConfirm": "Die Liste «{name}» mit allen Codes löschen?",
+      "deleteItemConfirm": "Code {code} löschen? Budgets und Zuordnungen zu diesem Code gehen verloren."
     }
   },
   "options": {
@@ -387,8 +403,10 @@
       "language": "Dokumentsprache",
       "status": "Status",
       "submissionDeadline": "Eingabetermin",
-      "description": "Bemerkungen"
-    }
+      "description": "Bemerkungen",
+      "costItem": "Kostenplan-Code (BKP / eBKP-H)"
+    },
+    "noCostItem": "– keinem Code zugeordnet –"
   },
   "tree": {
     "addGroup": "Gruppe",
@@ -438,7 +456,9 @@
       "total": "Betrag",
       "priceDate": "Preisstand",
       "optional": "Eventualposition",
-      "lumpSum": "Pauschal"
+      "lumpSum": "Pauschal",
+      "costItem": "Kostenplan-Code",
+      "costItemInherited": "wie Gruppe bzw. LV"
     },
     "measurements": {
       "title": "Vorausmass",
@@ -458,6 +478,30 @@
       "insert": "{count, plural, one {# Position einfügen} other {# Positionen einfügen}}",
       "noCatalogs": "Es gibt noch keine aktiven Kataloge.",
       "cancel": "Abbrechen"
+    }
+  },
+  "costPlan": {
+    "title": "Kostenplan",
+    "description": "{template} · Budget und Kostenvoranschlag (exkl. MwSt.). Der KV setzt sich aus den Schätzpreisen der LVs und zusätzlichen Beträgen zusammen.",
+    "noTemplate": "Diesem Projekt ist kein Kostenplan zugeordnet. Wählen Sie in der Übersicht einen Kostenplan (BKP oder eBKP-H).",
+    "showAll": "Alle Codes anzeigen",
+    "showUsed": "Nur verwendete Codes",
+    "pdf": "PDF Kostenvoranschlag",
+    "empty": "Noch keine Beträge. Wählen Sie «Alle Codes anzeigen», um Budgets zu erfassen, oder ordnen Sie LVs einem Code zu.",
+    "unassignedTitle": "LVs ohne Kostenplan-Code",
+    "unassignedHint": "Diese LVs fehlen im KV (ausser Positionen mit eigenem Code). Ordnen Sie sie in den LV-Einstellungen einem Code zu.",
+    "totalExclVat": "Total exkl. MwSt.",
+    "vat": "MwSt. {rate} %",
+    "totalInclVat": "Total inkl. MwSt.",
+    "columns": {
+      "code": "Code",
+      "name": "Bezeichnung",
+      "budget": "Budget",
+      "lv": "KV aus LV",
+      "manual": "KV zusätzlich",
+      "kv": "KV total",
+      "difference": "Differenz",
+      "percent": "%"
     }
   }
 }

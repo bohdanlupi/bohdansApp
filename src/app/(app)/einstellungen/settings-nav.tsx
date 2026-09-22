@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 const tabs = [
   { href: "/einstellungen", key: "firm" },
   { href: "/einstellungen/benutzer", key: "users" },
+  { href: "/einstellungen/kostenplaene", key: "costPlans" },
   { href: "/einstellungen/profil", key: "profile" },
 ] as const;
 

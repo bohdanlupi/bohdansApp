@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
 import type { FormMessageKey } from "@/components/form";
 import { Button } from "@/components/ui/button";
+import type { CostItemOption } from "@/lib/cost-plan";
 import { pickText, type I18nText } from "@/lib/i18n-text";
 import { formatMoney, formatQty } from "@/lib/number-input";
 import type { AppLanguage } from "@/lib/supabase/types";
@@ -47,6 +48,7 @@ export type EditorNode = TreeNode & {
   is_optional?: boolean;
   is_lump_sum?: boolean;
   price_date?: string | null;
+  cost_plan_item_id?: string | null;
 };
 
 export type Measurement = {
@@ -70,6 +72,7 @@ export function TreeEditor({
   language,
   editable,
   catalogs = [],
+  costOptions = [],
 }: {
   scope: TreeScope;
   nodes: EditorNode[];
@@ -79,6 +82,8 @@ export function TreeEditor({
   editable: boolean;
   /** LV only: catalogues for "insert from catalogue". */
   catalogs?: { id: string; name: string }[];
+  /** LV only: cost codes for assigning positions or groups to another code than the LV. */
+  costOptions?: CostItemOption[];
 }) {
   const t = useTranslations("tree");
   const tForms = useTranslations("forms");
@@ -330,6 +335,7 @@ export function TreeEditor({
             language={language}
             editable={editable}
             measurements={measurements.filter((m) => m.lv_node_id === selected.id)}
+            costOptions={costOptions}
           />
         ) : (
           <p className="rounded-xl border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">

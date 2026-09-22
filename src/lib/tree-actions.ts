@@ -88,6 +88,7 @@ const updateSchema = z.object({
   is_optional: z.boolean().optional(),
   is_lump_sum: z.boolean().optional(),
   price_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  cost_plan_item_id: z.uuid().nullable().optional(),
 });
 export type NodeUpdate = z.input<typeof updateSchema>;
 
@@ -100,7 +101,7 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
   const parsed = updateSchema.safeParse(input);
   if (!s.success || !parsed.success || !z.uuid().safeParse(nodeId).success) return { error: "invalidInput" };
 
-  const { short_text, long_text, unit, quantity, unit_price, is_optional, is_lump_sum, price_date } = parsed.data;
+  const { short_text, long_text, unit, quantity, unit_price, is_optional, is_lump_sum, price_date, cost_plan_item_id } = parsed.data;
   const values =
     scope.type === "lv"
       ? {
@@ -111,6 +112,7 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
           unit_price,
           is_optional: is_optional ?? false,
           is_lump_sum: is_lump_sum ?? false,
+          ...(cost_plan_item_id !== undefined && { cost_plan_item_id }),
         }
       : { short_text: cleanText(short_text), long_text: cleanText(long_text), unit: unit || null, unit_price, price_date: price_date ?? null };
 

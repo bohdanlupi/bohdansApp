@@ -10,6 +10,7 @@ import { requireProfile } from "@/lib/auth";
 import { formatMoney } from "@/lib/number-input";
 import { createClient } from "@/lib/supabase/server";
 
+import { loadCostOptions } from "../cost-options";
 import { loadProject } from "../load-project";
 import { LvFormDialog } from "./lv-form";
 import { LvStatusBadge } from "./lv-status-badge";
@@ -32,12 +33,13 @@ export default async function LvListPage({ params }: PageProps<"/projekte/[id]/l
   const list = lvs ?? [];
   const total = list.reduce((sum, lv) => sum + (lv.estimate_total ?? 0), 0);
   const nextNumber = String(list.length + 1).padStart(2, "0");
+  const costOptions = canWrite ? await loadCostOptions(project.cost_plan_template_id, project.language) : [];
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">{t("lvs.description")}</p>
-        {canWrite && <LvFormDialog projectId={id} defaults={{ number: nextNumber, language: project.language }} />}
+        {canWrite && <LvFormDialog projectId={id} defaults={{ number: nextNumber, language: project.language }} costOptions={costOptions} />}
       </div>
 
       {list.length === 0 ? (

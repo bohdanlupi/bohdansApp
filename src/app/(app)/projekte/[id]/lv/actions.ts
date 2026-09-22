@@ -19,6 +19,10 @@ const lvSchema = z.object({
   status: z.enum(["draft", "tendered", "awarded"]).optional(),
   description: optionalText.optional(),
   submission_deadline: optionalDate.optional(),
+  cost_plan_item_id: z
+    .union([z.uuid(), z.literal("")])
+    .optional()
+    .transform((v) => v || null),
 });
 
 export async function createLv(_prev: FormState, formData: FormData): Promise<FormState> {

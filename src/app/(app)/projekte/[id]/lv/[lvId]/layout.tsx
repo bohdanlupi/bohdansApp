@@ -9,6 +9,8 @@ import { requireProfile } from "@/lib/auth";
 import { formatMoney } from "@/lib/number-input";
 import type { Lv } from "@/lib/supabase/types";
 
+import { loadCostOptions } from "../../cost-options";
+import { loadProject } from "../../load-project";
 import { deleteLv } from "../actions";
 import { LvFormDialog } from "../lv-form";
 import { LvStatusBadge } from "../lv-status-badge";
@@ -24,6 +26,8 @@ export default async function LvLayout({ children, params }: LayoutProps<"/proje
   const t = await getTranslations();
   const canWrite = profile.role !== "viewer";
   const pdf = `/api/pdf/lv/${lv.id}`;
+  const project = await loadProject(id);
+  const costOptions = canWrite ? await loadCostOptions(project?.cost_plan_template_id ?? null, lv.language ?? "de") : [];
 
   return (
     <div className="space-y-4">
@@ -54,7 +58,7 @@ export default async function LvLayout({ children, params }: LayoutProps<"/proje
           </a>
           {canWrite && (
             <>
-              <LvFormDialog projectId={id} lv={lv as Lv} />
+              <LvFormDialog projectId={id} lv={lv as Lv} costOptions={costOptions} />
               <ConfirmButton
                 label={t("lvs.delete")}
                 title={t("lvs.delete")}

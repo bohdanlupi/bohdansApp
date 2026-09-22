@@ -16,3 +16,5 @@ export type ProjectParticipant = Tables<"project_participants">;
 export type Lv = Tables<"lvs">;
 export type LvStatus = Enums<"lv_status">;
 export type Catalog = Tables<"catalogs">;
+export type CostPlanTemplate = Tables<"cost_plan_templates">;
+export type CostPlanItem = Tables<"cost_plan_items">;

@@ -4,6 +4,7 @@ import { Plus, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useState } from "react";
 
+import { CostItemSelect } from "@/components/cost-item-select";
 import { FormMessage, NativeSelect, SubmitButton } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -11,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { trades } from "@/lib/address-options";
+import type { CostItemOption } from "@/lib/cost-plan";
 import { initialFormState } from "@/lib/form-state";
 import type { AppLanguage, Tables } from "@/lib/supabase/types";
 
@@ -23,10 +25,12 @@ export function LvFormDialog({
   projectId,
   lv,
   defaults,
+  costOptions,
 }: {
   projectId: string;
   lv?: Lv;
   defaults?: { number: string; language: AppLanguage };
+  costOptions: CostItemOption[];
 }) {
   const tl = useTranslations("lvs");
   const [open, setOpen] = useState(false);
@@ -38,7 +42,7 @@ export function LvFormDialog({
         {lv ? tl("settings") : tl("new")}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
-        {open && <LvForm projectId={projectId} lv={lv} defaults={defaults} onSaved={() => setOpen(false)} />}
+        {open && <LvForm projectId={projectId} lv={lv} defaults={defaults} costOptions={costOptions} onSaved={() => setOpen(false)} />}
       </DialogContent>
     </Dialog>
   );
@@ -48,11 +52,13 @@ function LvForm({
   projectId,
   lv,
   defaults,
+  costOptions,
   onSaved,
 }: {
   projectId: string;
   lv?: Lv;
   defaults?: { number: string; language: AppLanguage };
+  costOptions: CostItemOption[];
   onSaved: () => void;
 }) {
   const t = useTranslations();
@@ -101,6 +107,16 @@ function LvForm({
               </option>
             ))}
           </NativeSelect>
+        </div>
+        <div className="space-y-2 sm:col-span-4">
+          <Label htmlFor="lv-cost-item">{tl("fields.costItem")}</Label>
+          <CostItemSelect
+            id="lv-cost-item"
+            name="cost_plan_item_id"
+            options={costOptions}
+            emptyLabel={tl("noCostItem")}
+            defaultValue={lv?.cost_plan_item_id ?? ""}
+          />
         </div>
         {lv && (
           <>
