@@ -152,11 +152,12 @@ Done:
   sign-up off, password ≥ 10, Site URL + redirect URLs (prod + localhost).
 - First admin created in Supabase; login on the live site works.
 
-Waiting on the user:
-1. **SMTP** (own mailbox info@lupi-gmbh.ch or Resend/Brevo) – required to invite colleagues and to use the
-   custom templates (free plan blocks templates without SMTP). Then re-run the script with `--templates`.
-   Until then, colleagues can be added in Supabase → Authentication → Users (they start as viewer).
-2. **Delete the old London project** `upcwquytpfihfpbvulbp`.
+Decisions 2026-09-22:
+- **No SMTP.** Users are created on the website (Supabase → Authentication → Users → Add user, with password,
+  auto-confirm); new users start as viewer and get their role in the app. The in-app e-mail invite and
+  "Passwort vergessen" therefore do not send mails.
+- London project deleted; only the Zurich project `nrtmpqhfdwnfavvrqghj` remains.
+- Address CSV sample from the user will follow.
 
 Phase 1 done (2026-09-22): migrations `20260922180000_addresses_projects.sql` and
 `20260922190000_import_addresses.sql` applied to Zurich; 23 DB/RLS checks and page smoke tests passed.
