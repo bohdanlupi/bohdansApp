@@ -23,8 +23,19 @@ export type PdfNode = {
   is_lump_sum: boolean;
 };
 
-const col = { pos: 62, qty: 46, unit: 44, price: 58, amount: 70 };
+// The tender version has wider price columns and taller rows so bidders can write their prices in by hand.
+const priceColumns = { pos: 62, qty: 46, unit: 44, price: 58, amount: 70 };
+const tenderColumns = { pos: 58, qty: 40, unit: 40, price: 80, amount: 88 };
 const blank = "..............";
+
+/** Empty field with a line to write on, at the bottom of its row. */
+function WriteIn({ width, height = 18 }: { width: number; height?: number }) {
+  return (
+    <View style={{ width, paddingLeft: 8, alignSelf: "flex-end" }}>
+      <View style={{ height, borderBottomWidth: 0.75, borderBottomColor: colors.text }} />
+    </View>
+  );
+}
 
 /**
  * Leistungsverzeichnis. `withPrices`: estimate version with unit prices and totals;
@@ -48,10 +59,10 @@ export function LvDocument({
   withPrices: boolean;
 }) {
   const l = pdfLabels(language);
+  const col = withPrices ? priceColumns : tenderColumns;
   const children = childrenMap(nodes);
   const totals = groupTotals(nodes);
   const text = (t: I18nText) => pickText(t, language).value;
-  const money = (value: number) => (withPrices ? formatAmount(value) : blank);
   const hasOptional = nodes.some((n) => n.is_optional && isPosition(n.kind));
 
   const total = totals.get("") ?? 0;
@@ -76,11 +87,19 @@ export function LvDocument({
           {long && <Text style={{ marginLeft: col.pos, marginTop: 2, fontSize: 9 }}>{long}</Text>}
         </View>,
         ...items,
-        <View key={`${node.id}-total`} wrap={false} style={{ flexDirection: "row", paddingVertical: 3, paddingHorizontal: 4, ...styles.bold }}>
-          <Text style={{ flex: 1, textAlign: "right" }}>
+        <View
+          key={`${node.id}-total`}
+          wrap={false}
+          style={{ flexDirection: "row", paddingVertical: 3, paddingHorizontal: 4, ...styles.bold, ...(withPrices ? {} : { minHeight: 26 }) }}
+        >
+          <Text style={{ flex: 1, textAlign: "right", alignSelf: withPrices ? "auto" : "flex-end" }}>
             {l.totalOf} {node.number} {text(node.short_text)}
           </Text>
-          <Text style={{ width: col.amount, textAlign: "right" }}>{money(totals.get(node.id) ?? 0)}</Text>
+          {withPrices ? (
+            <Text style={{ width: col.amount, textAlign: "right" }}>{formatAmount(totals.get(node.id) ?? 0)}</Text>
+          ) : (
+            <WriteIn width={col.amount} />
+          )}
         </View>,
       ];
     }
@@ -100,7 +119,14 @@ export function LvDocument({
       <View
         key={node.id}
         wrap={false}
-        style={{ flexDirection: "row", paddingVertical: 4, paddingHorizontal: 4, borderBottomWidth: 0.5, borderBottomColor: colors.line }}
+        style={{
+          flexDirection: "row",
+          paddingVertical: 4,
+          paddingHorizontal: 4,
+          borderBottomWidth: 0.5,
+          borderBottomColor: colors.line,
+          ...(withPrices ? {} : { minHeight: 34, paddingBottom: 6 }),
+        }}
       >
         <Text style={{ width: col.pos }}>
           {node.kind === "r_position" ? "R " : ""}
@@ -113,12 +139,19 @@ export function LvDocument({
         </View>
         <Text style={{ width: col.qty, textAlign: "right" }}>{node.quantity !== null ? formatQuantity(node.quantity) : ""}</Text>
         <Text style={{ width: col.unit, paddingLeft: 4 }}>{unit}</Text>
-        <Text style={{ width: col.price, textAlign: "right" }}>
-          {withPrices ? (node.unit_price !== null ? formatAmount(node.unit_price) : "") : blank}
-        </Text>
-        <Text style={{ width: col.amount, textAlign: "right" }}>
-          {withPrices ? (node.is_optional ? `(${formatAmount(amount)})` : formatAmount(amount)) : blank}
-        </Text>
+        {withPrices ? (
+          <>
+            <Text style={{ width: col.price, textAlign: "right" }}>{node.unit_price !== null ? formatAmount(node.unit_price) : ""}</Text>
+            <Text style={{ width: col.amount, textAlign: "right" }}>
+              {node.is_optional ? `(${formatAmount(amount)})` : formatAmount(amount)}
+            </Text>
+          </>
+        ) : (
+          <>
+            <WriteIn width={col.price} />
+            <WriteIn width={col.amount} />
+          </>
+        )}
       </View>,
     ];
   };
@@ -129,6 +162,20 @@ export function LvDocument({
     <View style={{ flexDirection: "row", paddingVertical: 3, paddingHorizontal: 4, ...(bold ? styles.bold : {}) }}>
       <Text style={{ flex: 1 }}>{label}</Text>
       <Text style={{ width: 110, textAlign: "right" }}>{value}</Text>
+    </View>
+  );
+
+  /** Tender version: label (optionally with a % field) and a line for the amount. */
+  const writeInRow = (label: string, bold = false, percent = false) => (
+    <View style={{ flexDirection: "row", paddingVertical: 3, paddingHorizontal: 4, minHeight: 26, ...(bold ? styles.bold : {}) }}>
+      <Text style={{ flex: 1, alignSelf: "flex-end" }}>{label}</Text>
+      {percent && (
+        <>
+          <WriteIn width={48} />
+          <Text style={{ width: 20, paddingLeft: 3, alignSelf: "flex-end" }}>%</Text>
+        </>
+      )}
+      <WriteIn width={140} />
     </View>
   );
 
@@ -169,22 +216,41 @@ export function LvDocument({
         <View wrap={false} style={{ marginTop: 20 }}>
           <Text style={{ ...styles.bold, fontSize: 11, marginBottom: 6 }}>{l.summary}</Text>
           {topGroups.map((g) => (
-            <View key={g.id} style={{ flexDirection: "row", paddingVertical: 3, paddingHorizontal: 4, borderBottomWidth: 0.5, borderBottomColor: colors.line }}>
-              <Text style={{ width: col.pos }}>{g.number}</Text>
-              <Text style={{ flex: 1 }}>{text(g.short_text)}</Text>
-              <Text style={{ width: 110, textAlign: "right" }}>{money(totals.get(g.id) ?? 0)}</Text>
+            <View
+              key={g.id}
+              style={{
+                flexDirection: "row",
+                paddingVertical: 3,
+                paddingHorizontal: 4,
+                borderBottomWidth: withPrices ? 0.5 : 0,
+                borderBottomColor: colors.line,
+                ...(withPrices ? {} : { minHeight: 26 }),
+              }}
+            >
+              <Text style={{ width: col.pos, alignSelf: withPrices ? "auto" : "flex-end" }}>{g.number}</Text>
+              <Text style={{ flex: 1, alignSelf: withPrices ? "auto" : "flex-end" }}>{text(g.short_text)}</Text>
+              {withPrices ? (
+                <Text style={{ width: 110, textAlign: "right" }}>{formatAmount(totals.get(g.id) ?? 0)}</Text>
+              ) : (
+                <WriteIn width={140} />
+              )}
             </View>
           ))}
           <View style={{ marginTop: 6 }}>
-            {summaryRow(l.totalExclVat, withPrices ? formatAmount(total) : blank, true)}
-            {!withPrices && (
+            {withPrices ? (
               <>
-                {summaryRow(`${l.discount} ....... %`, blank)}
-                {summaryRow(`${l.skonto} ....... %`, blank)}
-                {summaryRow(l.net, blank, true)}
+                {summaryRow(l.totalExclVat, formatAmount(total), true)}
+                {summaryRow(`${l.vat} ${formatQuantity(firm.vat_rate)}%`, formatAmount(vat))}
+              </>
+            ) : (
+              <>
+                {writeInRow(l.totalExclVat, true)}
+                {writeInRow(l.discount, false, true)}
+                {writeInRow(l.skonto, false, true)}
+                {writeInRow(l.net, true)}
+                {writeInRow(`${l.vat} ${formatQuantity(firm.vat_rate)}%`)}
               </>
             )}
-            {summaryRow(`${l.vat} ${formatQuantity(firm.vat_rate)}%`, withPrices ? formatAmount(vat) : blank)}
           </View>
           <View
             style={{
@@ -198,8 +264,16 @@ export function LvDocument({
               fontSize: 11,
             }}
           >
-            <Text style={{ flex: 1 }}>{l.totalInclVat}</Text>
-            <Text style={{ width: 130, textAlign: "right" }}>{withPrices ? formatChf(round2(total + vat)) : `CHF ${blank}`}</Text>
+            <Text style={{ flex: 1, alignSelf: "center" }}>{l.totalInclVat}</Text>
+            {withPrices ? (
+              <Text style={{ width: 130, textAlign: "right" }}>{formatChf(round2(total + vat))}</Text>
+            ) : (
+              // White field inside the bar: handwriting on dark blue would not be readable.
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text style={{ paddingRight: 6 }}>CHF</Text>
+                <View style={{ width: 140, height: 22, backgroundColor: colors.brandText }} />
+              </View>
+            )}
           </View>
           {hasOptional && <Text style={{ marginTop: 6, fontSize: 8.5, color: colors.muted }}>{l.optionalNote}</Text>}
         </View>
