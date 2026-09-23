@@ -78,7 +78,9 @@
     "bidderExists": "Questa impresa è già stata invitata.",
     "bidderAwarded": "Il capitolato è stato aggiudicato a questa impresa. Annulli prima l'aggiudicazione.",
     "userCreated": "L'utente è stato creato. Comunichi la password iniziale personalmente.",
-    "createUserFailed": "Non è stato possibile creare l'utente."
+    "createUserFailed": "Non è stato possibile creare l'utente.",
+    "catalogReadOnly": "I cataloghi dei fornitori non possono essere modificati. Vengono aggiornati con una nuova importazione.",
+    "tooManyEntries": "La selezione è troppo grande (al massimo 5000 voci). Selezioni gruppi più piccoli."
   },
   "projects": {
     "title": "Progetti",
@@ -242,7 +244,7 @@
   },
   "catalogs": {
     "title": "Cataloghi",
-    "description": "Catalogo di testi proprio con struttura tipo CPN e prezzi propri.",
+    "description": "Cataloghi di testi propri e cataloghi fornitori IGH importati.",
     "emptyTitle": "Nessun catalogo",
     "emptyText": "Crei un catalogo e registri le sue posizioni standard. Potrà poi riprenderle in ogni capitolato.",
     "new": "Nuovo catalogo",
@@ -257,7 +259,22 @@
       "trade": "Settore",
       "description": "Descrizione",
       "active": "Attivo (proporre durante l'inserimento nei capitolati)"
-    }
+    },
+    "supplierInfo": "Catalogo fornitore IGH, versione {version} – solo lettura, aggiornato tramite importazione",
+    "validFrom": "Prezzi validi dal {date}"
+  },
+  "catalogBrowser": {
+    "search": "Cerca (testo o numero d’articolo) …",
+    "expand": "Espandi",
+    "collapse": "Comprimi",
+    "loading": "Caricamento …",
+    "showMore": "Mostra altro …",
+    "noResults": "Nessun risultato.",
+    "tooManyHits": "Sono mostrati i primi {count} risultati. Affini la ricerca.",
+    "empty": "Ancora nessuna voce.",
+    "selectHint": "Selezioni una voce a sinistra per vederne i dettagli.",
+    "articleNumber": "N. art.",
+    "grossPrice": "Prezzo lordo"
   },
   "settings": {
     "title": "Impostazioni",
@@ -482,7 +499,7 @@
       "hint": "Selezioni posizioni o interi gruppi. Saranno inseriti nel punto selezionato a sinistra.",
       "catalog": "Catalogo",
       "search": "Cerca …",
-      "insert": "{count, plural, one {Inserisci # posizione} other {Inserisci # posizioni}}",
+      "insert": "{count, plural, one {Inserisci # voce} other {Inserisci # voci}}",
       "noCatalogs": "Non ci sono ancora cataloghi attivi.",
       "cancel": "Annulla"
     }

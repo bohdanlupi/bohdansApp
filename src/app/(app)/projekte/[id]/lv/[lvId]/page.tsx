@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { TreeEditor, type EditorNode } from "@/components/tree-editor/tree-editor";
 import { requireProfile } from "@/lib/auth";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 
 import { loadCostOptions } from "../../cost-options";
@@ -25,9 +26,9 @@ export default async function LvEditorPage({ params }: PageProps<"/projekte/[id]
   const costOptions = await loadCostOptions(project?.cost_plan_template_id ?? null, lv.language ?? "de");
   const supabase = await createClient();
   const [{ data: nodes }, { data: measurements }, { data: catalogs }] = await Promise.all([
-    supabase.from("lv_nodes").select("*").eq("lv_id", lvId),
-    supabase.from("lv_measurements").select("*, lv_nodes!inner(lv_id)").eq("lv_nodes.lv_id", lvId),
-    supabase.from("catalogs").select("id, name").eq("active", true).order("name"),
+    fetchAll((from, to) => supabase.from("lv_nodes").select("*").eq("lv_id", lvId).order("id").range(from, to)).then((data) => ({ data })),
+    fetchAll((from, to) => supabase.from("lv_measurements").select("*, lv_nodes!inner(lv_id)").eq("lv_nodes.lv_id", lvId).order("id").range(from, to)).then((data) => ({ data })),
+    supabase.from("catalogs").select("id, name").eq("active", true).order("source", { ascending: false }).order("name"),
   ]);
 
   return (

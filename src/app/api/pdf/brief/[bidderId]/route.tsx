@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { getCurrentProfile } from "@/lib/auth";
 import { offerGross, offerTotals } from "@/lib/offer-math";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import { formatAmount, formatDate } from "@/pdf/format";
 import { loadLogo } from "@/pdf/logo";
@@ -37,8 +38,8 @@ export async function GET(request: NextRequest, { params }: RouteContext<"/api/p
   let total = "";
   if (type === "award") {
     const [{ data: nodes }, { data: prices }] = await Promise.all([
-      supabase.from("lv_nodes").select("id, parent_id, kind, sort, number, quantity, is_optional").eq("lv_id", bidder.lv_id),
-      supabase.from("offer_prices").select("lv_node_id, unit_price").eq("lv_bidder_id", bidderId),
+      fetchAll((from, to) => supabase.from("lv_nodes").select("id, parent_id, kind, sort, number, quantity, is_optional").eq("lv_id", bidder.lv_id).order("id").range(from, to)).then((data) => ({ data })),
+      fetchAll((from, to) => supabase.from("offer_prices").select("lv_node_id, unit_price").eq("lv_bidder_id", bidderId).order("lv_node_id").range(from, to)).then((data) => ({ data })),
     ]);
     const gross = offerGross(nodes ?? [], new Map((prices ?? []).map((p) => [p.lv_node_id, p.unit_price])));
     total = formatAmount(offerTotals(gross, bidder).total);

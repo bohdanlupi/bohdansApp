@@ -9,10 +9,12 @@ import { PageHeader } from "@/components/page-header";
 import { TreeEditor, type EditorNode } from "@/components/tree-editor/tree-editor";
 import { localeToLanguage, type Locale } from "@/i18n/config";
 import { requireProfile } from "@/lib/auth";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 
 import { deleteCatalog } from "../actions";
 import { CatalogFormDialog } from "../catalog-form";
+import { CatalogViewer } from "./catalog-viewer";
 
 async function loadCatalog(id: string) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
@@ -34,8 +36,13 @@ export default async function CatalogPage({ params }: PageProps<"/kataloge/[id]"
 
   const t = await getTranslations();
   const canWrite = profile.role !== "viewer";
+  const isSupplier = catalog.source !== "own";
+  const language = localeToLanguage((await getLocale()) as Locale);
   const supabase = await createClient();
-  const { data: nodes } = await supabase.from("catalog_nodes").select("*").eq("catalog_id", id);
+  // Supplier catalogues are loaded group by group in the browser.
+  const nodes = isSupplier
+    ? []
+    : await fetchAll((from, to) => supabase.from("catalog_nodes").select("*").eq("catalog_id", id).order("id").range(from, to));
 
   return (
     <>
@@ -45,7 +52,16 @@ export default async function CatalogPage({ params }: PageProps<"/kataloge/[id]"
       </Link>
       <PageHeader
         title={catalog.name}
-        description={catalog.description ?? undefined}
+        description={
+          isSupplier
+            ? [
+                t("catalogs.supplierInfo", { version: catalog.version ?? "–" }),
+                catalog.valid_from && t("catalogs.validFrom", { date: new Date(catalog.valid_from).toLocaleDateString("de-CH") }),
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            : (catalog.description ?? undefined)
+        }
         actions={
           canWrite && (
             <>
@@ -62,13 +78,17 @@ export default async function CatalogPage({ params }: PageProps<"/kataloge/[id]"
           )
         }
       />
-      <TreeEditor
-        key={catalog.id}
-        scope={{ type: "catalog", id: catalog.id }}
-        nodes={(nodes ?? []) as EditorNode[]}
-        language={localeToLanguage((await getLocale()) as Locale)}
-        editable={canWrite}
-      />
+      {isSupplier ? (
+        <CatalogViewer catalogId={catalog.id} language={language} />
+      ) : (
+        <TreeEditor
+          key={catalog.id}
+          scope={{ type: "catalog", id: catalog.id }}
+          nodes={nodes as EditorNode[]}
+          language={language}
+          editable={canWrite}
+        />
+      )}
     </>
   );
 }

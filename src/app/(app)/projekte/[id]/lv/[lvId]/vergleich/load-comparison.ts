@@ -3,6 +3,7 @@ import "server-only";
 import type { I18nText } from "@/lib/i18n-text";
 import { offerGross, offerTotals, type OfferTotals } from "@/lib/offer-math";
 import type { AppLanguage } from "@/lib/supabase/types";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import { flatten, groupTotals, type NodeKind } from "@/lib/tree";
 
@@ -41,7 +42,7 @@ export async function loadComparison(lvId: string) {
   const supabase = await createClient();
   const [{ data: lv }, { data: nodes }, { data: bidders }, { data: prices }, { data: firm }] = await Promise.all([
     supabase.from("lvs").select("*, project:projects(id, number, name, city, street, zip)").eq("id", lvId).maybeSingle(),
-    supabase.from("lv_nodes").select("id, parent_id, kind, sort, number, short_text, unit, quantity, unit_price, is_optional, is_lump_sum").eq("lv_id", lvId),
+    fetchAll((from, to) => supabase.from("lv_nodes").select("id, parent_id, kind, sort, number, short_text, unit, quantity, unit_price, is_optional, is_lump_sum").eq("lv_id", lvId).order("id").range(from, to)).then((data) => ({ data })),
     supabase
       .from("lv_bidders")
       .select(
@@ -49,7 +50,7 @@ export async function loadComparison(lvId: string) {
       )
       .eq("lv_id", lvId)
       .eq("status", "offered"),
-    supabase.from("offer_prices").select("lv_bidder_id, lv_node_id, unit_price").eq("lv_id", lvId),
+    fetchAll((from, to) => supabase.from("offer_prices").select("lv_bidder_id, lv_node_id, unit_price").eq("lv_id", lvId).order("lv_bidder_id").order("lv_node_id").range(from, to)).then((data) => ({ data })),
     supabase.from("firm_settings").select("*").eq("id", true).single(),
   ]);
   if (!lv || !lv.project || !firm) return null;

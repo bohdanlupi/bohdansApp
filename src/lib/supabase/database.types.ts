@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       catalog_nodes: {
         Row: {
+          article_number: string | null
           catalog_id: string
           created_at: string
           id: string
@@ -24,6 +25,7 @@ export type Database = {
           number: string | null
           parent_id: string | null
           price_date: string | null
+          search_text: string | null
           short_text: Json
           sort: number
           unit: string | null
@@ -31,6 +33,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          article_number?: string | null
           catalog_id: string
           created_at?: string
           id?: string
@@ -39,6 +42,7 @@ export type Database = {
           number?: string | null
           parent_id?: string | null
           price_date?: string | null
+          search_text?: string | null
           short_text?: Json
           sort?: number
           unit?: string | null
@@ -46,6 +50,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          article_number?: string | null
           catalog_id?: string
           created_at?: string
           id?: string
@@ -54,6 +59,7 @@ export type Database = {
           number?: string | null
           parent_id?: string | null
           price_date?: string | null
+          search_text?: string | null
           short_text?: Json
           sort?: number
           unit?: string | null
@@ -83,30 +89,54 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          entry_count: number
+          external_key: string | null
           id: string
+          imported_at: string | null
           name: string
+          source: string
+          supplier: string | null
           trade: string | null
           updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+          version: string | null
         }
         Insert: {
           active?: boolean
           created_at?: string
           created_by?: string | null
           description?: string | null
+          entry_count?: number
+          external_key?: string | null
           id?: string
+          imported_at?: string | null
           name: string
+          source?: string
+          supplier?: string | null
           trade?: string | null
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+          version?: string | null
         }
         Update: {
           active?: boolean
           created_at?: string
           created_by?: string | null
           description?: string | null
+          entry_count?: number
+          external_key?: string | null
           id?: string
+          imported_at?: string | null
           name?: string
+          source?: string
+          supplier?: string | null
           trade?: string | null
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+          version?: string | null
         }
         Relationships: [
           {
@@ -1346,6 +1376,52 @@ export type Database = {
     }
     Functions: {
       can_write: { Args: never; Returns: boolean }
+      catalog_children: {
+        Args: {
+          p_catalog_id: string
+          p_limit?: number
+          p_offset?: number
+          p_parent_id: string
+        }
+        Returns: {
+          article_number: string
+          child_count: number
+          id: string
+          kind: Database["public"]["Enums"]["node_kind"]
+          number: string
+          parent_id: string
+          short_text: Json
+          sort: number
+          unit: string
+          unit_price: number
+        }[]
+      }
+      catalog_subtrees: {
+        Args: { p_ids: string[] }
+        Returns: {
+          article_number: string | null
+          catalog_id: string
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["node_kind"]
+          long_text: Json
+          number: string | null
+          parent_id: string | null
+          price_date: string | null
+          search_text: string | null
+          short_text: Json
+          sort: number
+          unit: string | null
+          unit_price: number | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "catalog_nodes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       current_app_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -1360,6 +1436,21 @@ export type Database = {
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
+      search_catalog_nodes: {
+        Args: { p_catalog_id: string; p_limit?: number; p_query: string }
+        Returns: {
+          article_number: string
+          id: string
+          kind: Database["public"]["Enums"]["node_kind"]
+          number: string
+          parent_id: string
+          path: string
+          short_text: Json
+          sort: number
+          unit: string
+          unit_price: number
+        }[]
+      }
     }
     Enums: {
       app_language: "de" | "fr" | "it"

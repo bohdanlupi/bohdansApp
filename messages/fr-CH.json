@@ -78,7 +78,9 @@
     "bidderExists": "Cet entrepreneur est déjà invité.",
     "bidderAwarded": "Le descriptif a été adjugé à cet entrepreneur. Annulez d'abord l'adjudication.",
     "userCreated": "L'utilisateur a été créé. Communiquez le mot de passe initial personnellement.",
-    "createUserFailed": "L'utilisateur n'a pas pu être créé."
+    "createUserFailed": "L'utilisateur n'a pas pu être créé.",
+    "catalogReadOnly": "Les catalogues fournisseurs ne peuvent pas être modifiés. Ils sont mis à jour par une nouvelle importation.",
+    "tooManyEntries": "La sélection est trop grande (5000 entrées au maximum). Veuillez choisir des groupes plus petits."
   },
   "projects": {
     "title": "Projets",
@@ -242,7 +244,7 @@
   },
   "catalogs": {
     "title": "Catalogues",
-    "description": "Catalogue de textes propre avec structure de type CAN et prix propres.",
+    "description": "Catalogues de textes propres et catalogues fournisseurs IGH importés.",
     "emptyTitle": "Aucun catalogue",
     "emptyText": "Créez un catalogue et saisissez vos positions standard. Vous pourrez ensuite les reprendre dans chaque descriptif.",
     "new": "Nouveau catalogue",
@@ -257,7 +259,22 @@
       "trade": "Corps de métier",
       "description": "Description",
       "active": "Actif (proposer lors de l'insertion dans les descriptifs)"
-    }
+    },
+    "supplierInfo": "Catalogue fournisseur IGH, version {version} – lecture seule, mis à jour par importation",
+    "validFrom": "Prix valables dès le {date}"
+  },
+  "catalogBrowser": {
+    "search": "Rechercher (texte ou numéro d’article) …",
+    "expand": "Déplier",
+    "collapse": "Replier",
+    "loading": "Chargement …",
+    "showMore": "Afficher plus …",
+    "noResults": "Aucun résultat.",
+    "tooManyHits": "Les {count} premiers résultats sont affichés. Veuillez affiner la recherche.",
+    "empty": "Aucune entrée pour l’instant.",
+    "selectHint": "Sélectionnez une entrée à gauche pour voir les détails.",
+    "articleNumber": "N° d’art.",
+    "grossPrice": "Prix brut"
   },
   "settings": {
     "title": "Paramètres",
@@ -482,7 +499,7 @@
       "hint": "Sélectionnez des positions ou des groupes entiers. Ils seront insérés à l'endroit sélectionné à gauche.",
       "catalog": "Catalogue",
       "search": "Rechercher …",
-      "insert": "{count, plural, one {Insérer # position} other {Insérer # positions}}",
+      "insert": "{count, plural, one {Insérer # entrée} other {Insérer # entrées}}",
       "noCatalogs": "Il n'y a encore aucun catalogue actif.",
       "cancel": "Annuler"
     }

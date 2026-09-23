@@ -48,3 +48,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IGH supplier catalogues (licensed price lists, imported with scripts/import-igh.mjs)
+/IGH/

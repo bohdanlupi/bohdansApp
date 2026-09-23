@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import type { I18nText } from "@/lib/i18n-text";
 import { requireProfile } from "@/lib/auth";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import { flatten } from "@/lib/tree";
 import { param } from "@/lib/validation";
@@ -58,8 +59,8 @@ export default async function OffersPage({ params, searchParams }: PageProps<"/p
   let rows: OfferRow[] = [];
   if (selected) {
     const [{ data: nodes }, { data: prices }] = await Promise.all([
-      supabase.from("lv_nodes").select("id, parent_id, kind, sort, number, short_text, unit, quantity, unit_price, is_optional, is_lump_sum").eq("lv_id", lvId),
-      supabase.from("offer_prices").select("lv_node_id, unit_price").eq("lv_bidder_id", selected.id),
+      fetchAll((from, to) => supabase.from("lv_nodes").select("id, parent_id, kind, sort, number, short_text, unit, quantity, unit_price, is_optional, is_lump_sum").eq("lv_id", lvId).order("id").range(from, to)).then((data) => ({ data })),
+      fetchAll((from, to) => supabase.from("offer_prices").select("lv_node_id, unit_price").eq("lv_bidder_id", selected.id).order("lv_node_id").range(from, to)).then((data) => ({ data })),
     ]);
     const priceById = new Map((prices ?? []).map((p) => [p.lv_node_id, p.unit_price]));
     rows = flatten(nodes ?? []).map(({ node, depth }) => ({

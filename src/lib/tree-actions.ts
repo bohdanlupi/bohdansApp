@@ -4,15 +4,26 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { assertRole } from "@/lib/auth";
-import type { Json } from "@/lib/supabase/database.types";
+import type { Database, Json, Tables } from "@/lib/supabase/database.types";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
-import { descendants, flatten, moveNode, renumber, type NodeKind, type TreeNode } from "@/lib/tree";
+import type { AppLanguage } from "@/lib/supabase/types";
+import { CATALOG_PAGE_SIZE, descendants, moveNode, renumber, type NodeKind, type TreeNode } from "@/lib/tree";
 
 // Catalogue and LV nodes share their columns; only the table and the owner column differ.
 // The casts below pick the LV types for both, which is safe for the shared columns used here.
 export type TreeScope = { type: "catalog" | "lv"; id: string };
 
 type Result = { error?: string; id?: string };
+
+/** The most entries copied into an LV at once. */
+const MAX_INSERT = 5000;
+
+const articleLabels: Record<AppLanguage, { make: string; number: string }> = {
+  de: { make: "Fabrikat", number: "Art.-Nr." },
+  fr: { make: "Fabricant", number: "N° d’art." },
+  it: { make: "Fabbricante", number: "N. art." },
+};
 
 const scopeSchema = z.object({ type: z.enum(["catalog", "lv"]), id: z.uuid() });
 
@@ -31,9 +42,17 @@ function revalidate(scope: TreeScope) {
 async function loadNodes(scope: TreeScope): Promise<TreeNode[]> {
   const supabase = await createClient();
   const { table, owner } = tableOf(scope);
-  const { data, error } = await supabase.from(table).select("id, parent_id, kind, sort, number").eq(owner, scope.id);
-  if (error) throw error;
-  return data;
+  return fetchAll((from, to) =>
+    supabase.from(table).select("id, parent_id, kind, sort, number").eq(owner, scope.id).order("id").range(from, to),
+  );
+}
+
+/** Supplier (IGH) catalogues are read-only; they are replaced by re-importing them. */
+async function isReadOnly(scope: TreeScope) {
+  if (scope.type !== "catalog") return false;
+  const supabase = await createClient();
+  const { data } = await supabase.from("catalogs").select("source").eq("id", scope.id).maybeSingle();
+  return data?.source !== "own";
 }
 
 /** Writes changed parent/sort/number values back (one upsert). */
@@ -60,6 +79,7 @@ export async function addTreeNode(scope: TreeScope, input: z.input<typeof addSch
   const parsed = addSchema.safeParse(input);
   if (!s.success || !parsed.success) return { error: "invalidInput" };
   if (scope.type === "catalog" && parsed.data.kind === "r_position") return { error: "invalidInput" };
+  if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
 
   const supabase = await createClient();
   const { table, owner } = tableOf(scope);
@@ -100,6 +120,7 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
   const s = scopeSchema.safeParse(scope);
   const parsed = updateSchema.safeParse(input);
   if (!s.success || !parsed.success || !z.uuid().safeParse(nodeId).success) return { error: "invalidInput" };
+  if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
 
   const { short_text, long_text, unit, quantity, unit_price, is_optional, is_lump_sum, price_date, cost_plan_item_id } = parsed.data;
   const values =
@@ -128,6 +149,7 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
 export async function deleteTreeNode(scope: TreeScope, nodeId: string): Promise<Result> {
   await assertRole("admin", "planer");
   if (!scopeSchema.safeParse(scope).success || !z.uuid().safeParse(nodeId).success) return { error: "invalidInput" };
+  if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
 
   const supabase = await createClient();
   const { table, owner } = tableOf(scope);
@@ -147,6 +169,7 @@ export async function moveTreeNode(
 ): Promise<Result> {
   await assertRole("admin", "planer");
   if (!scopeSchema.safeParse(scope).success) return { error: "invalidInput" };
+  if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
 
   const moved = moveNode(await loadNodes(scope), nodeId, parentId, beforeId);
   if (!moved) return { error: "invalidMove" };
@@ -168,11 +191,33 @@ export async function insertFromCatalog(
   }
 
   const supabase = await createClient();
-  const { data: picked } = await supabase.from("catalog_nodes").select("catalog_id").in("id", catalogNodeIds);
-  const catalogIds = [...new Set((picked ?? []).map((n) => n.catalog_id))];
-  if (!catalogIds.length) return { error: "invalidInput" };
-  const { data: source } = await supabase.from("catalog_nodes").select("*").in("catalog_id", catalogIds);
-  if (!source) return { error: "saveFailed" };
+  let source: Tables<"catalog_nodes">[];
+  try {
+    source = await fetchAll((from, to) => supabase.rpc("catalog_subtrees", { p_ids: catalogNodeIds }).range(from, to));
+  } catch {
+    return { error: "saveFailed" };
+  }
+  if (!source.length) return { error: "invalidInput" };
+  if (source.length > MAX_INSERT) return { error: "tooManyEntries" };
+
+  // Supplier articles keep their make and article number in the LV text.
+  const { data: suppliers } = await supabase
+    .from("catalogs")
+    .select("id, supplier")
+    .in("id", [...new Set(source.map((n) => n.catalog_id))])
+    .eq("source", "igh");
+  const supplierOf = new Map((suppliers ?? []).map((c) => [c.id, c.supplier]));
+  const longText = (node: Tables<"catalog_nodes">): Json => {
+    const supplier = supplierOf.get(node.catalog_id);
+    if (!supplier || !node.article_number) return node.long_text;
+    const text = { ...(node.long_text as Record<string, string>) };
+    const languages = Object.keys(node.short_text as object) as AppLanguage[];
+    for (const l of languages.length ? languages : (["de"] as const)) {
+      const line = `${articleLabels[l].make}: ${supplier}, ${articleLabels[l].number} ${node.article_number}`;
+      text[l] = [text[l], line].filter(Boolean).join("\n");
+    }
+    return text;
+  };
 
   // Selected nodes whose ancestor is also selected are copied as part of that ancestor.
   const selected = new Set(catalogNodeIds);
@@ -181,7 +226,8 @@ export async function insertFromCatalog(
     for (let p = byId.get(id)?.parent_id; p; p = byId.get(p)?.parent_id) if (selected.has(p)) return true;
     return false;
   };
-  const order = flatten(source).map(({ node }) => node);
+  // sort is the document order within a catalogue.
+  const order = [...source].sort((a, b) => a.sort - b.sort);
   const roots = order.filter((n) => selected.has(n.id) && !hasSelectedAncestor(n.id));
 
   const newId = new Map<string, string>();
@@ -209,7 +255,7 @@ export async function insertFromCatalog(
         parent_id: node.id === root.id ? parentId : newId.get(node.parent_id!)!,
         kind: node.kind,
         short_text: node.short_text,
-        long_text: node.long_text,
+        long_text: longText(node),
         unit: node.unit,
         quantity: null,
         unit_price: node.unit_price,
@@ -272,14 +318,42 @@ export async function deleteMeasurement(measurementId: string): Promise<Result> 
   return {};
 }
 
-/** Nodes of a catalogue, for the "insert from catalogue" dialog. */
-export async function getCatalogNodes(catalogId: string) {
-  await assertRole("admin", "planer");
-  if (!z.uuid().safeParse(catalogId).success) return [];
+// ---------------------------------------------------------------------------
+// Browsing catalogues (supplier catalogues are too large to load at once)
+// ---------------------------------------------------------------------------
+
+export type CatalogBrowseNode = Database["public"]["Functions"]["catalog_children"]["Returns"][number];
+export type CatalogSearchHit = Database["public"]["Functions"]["search_catalog_nodes"]["Returns"][number];
+
+/** Children of a node (null = top level), one page at a time. */
+export async function getCatalogChildren(catalogId: string, parentId: string | null, offset = 0): Promise<CatalogBrowseNode[]> {
+  await assertRole("admin", "planer", "viewer");
+  if (!z.uuid().safeParse(catalogId).success || !z.uuid().nullable().safeParse(parentId).success) return [];
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("catalog_nodes")
-    .select("id, parent_id, kind, sort, number, short_text, unit, unit_price")
-    .eq("catalog_id", catalogId);
+  const { data } = await supabase.rpc("catalog_children", {
+    p_catalog_id: catalogId,
+    // The SQL function treats null as "top level"; the generated type does not know nullable arguments.
+    p_parent_id: parentId as string,
+    p_offset: Math.max(0, Math.trunc(offset)),
+    p_limit: CATALOG_PAGE_SIZE,
+  });
   return data ?? [];
+}
+
+/** Positions and groups matching all words of the query (number, article number, short text). */
+export async function searchCatalog(catalogId: string, query: string): Promise<CatalogSearchHit[]> {
+  await assertRole("admin", "planer", "viewer");
+  if (!z.uuid().safeParse(catalogId).success || !query.trim()) return [];
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("search_catalog_nodes", { p_catalog_id: catalogId, p_query: query.slice(0, 200), p_limit: 200 });
+  return data ?? [];
+}
+
+/** One catalogue entry with all texts, for the read-only detail panel. */
+export async function getCatalogNode(nodeId: string) {
+  await assertRole("admin", "planer", "viewer");
+  if (!z.uuid().safeParse(nodeId).success) return null;
+  const supabase = await createClient();
+  const { data } = await supabase.from("catalog_nodes").select("*").eq("id", nodeId).maybeSingle();
+  return data;
 }

@@ -133,7 +133,7 @@ Vergabeantrag PDF, Auftragsbestätigung / Absageschreiben letters.
 
 **Later (post-MVP)**
 - SIA 451 / IfA18 (`.crbx`) import/export – requires the CRB specification and certification
-- NPK import (with CRB licence), suissetec and IGH catalogues
+- NPK import (with CRB licence), suissetec catalogues (IGH done 2026-09-23)
 - Bauleitung: protocols, Mängel- und Pendenzenverwaltung
 - Werkvertrag, document management with free folder structure
 - Images and signatures in documents, article search across catalogues
@@ -169,6 +169,14 @@ Tested with temporary users against the live DB: tree numbering/moves, catalogue
 estimate totals, cost codes (LV / group / position), budget/KV roll-ups, offer prices, Rabatt/Skonto/MwSt,
 ranking, all PDFs (LV tender/estimate, KV, letters DE/FR/IT, Vergabeantrag, Angebotsvergleich), all pages
 in DE/FR/IT as planer and viewer. Not yet clicked through in a real browser by the user.
+
+IGH catalogues (2026-09-23): migrations `20260924000000`–`20260924030000` applied to Zurich (supplier catalogue
+columns, browse/search/subtree RPCs, RLS initplan, entry_count triggers, trigram search index).
+`scripts/import-igh.mjs` imported 14 catalogues (~215k entries, DB ~220 MB of 500 MB): Biral, CTA, Danfoss,
+Grundfos, Heim, Helios, IMI, Meier Tobler, Nussbaum, Oventrop, Sanitas, Siemens, Techem, Zehnder Lüftung.
+Left out on purpose (free-plan size): Zehnder HK, Debrunner Acifer BW/TB/WG. Catalogue page and LV
+"Aus Katalog" dialog load lazily with server search; LV/offer queries now page past the 1000-row API limit.
+Tested end to end with a temporary planer (browse, search, insert into LV, read-only guard, PDF).
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

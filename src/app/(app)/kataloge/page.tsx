@@ -23,7 +23,10 @@ export default async function CatalogsPage() {
   const canWrite = profile.role !== "viewer";
 
   const supabase = await createClient();
-  const { data: catalogs } = await supabase.from("catalogs").select("*, catalog_nodes(count)").order("name");
+  const { data: catalogs } = await supabase.from("catalogs").select("*")
+    // Own catalogues first, then the supplier catalogues.
+    .order("source", { ascending: false })
+    .order("name");
 
   return (
     <>
@@ -53,10 +56,15 @@ export default async function CatalogsPage() {
                     <Link href={`/kataloge/${c.id}`} className="font-medium after:absolute after:inset-0">
                       {c.name}
                     </Link>
+                    {c.source === "igh" && (
+                      <Badge variant="secondary" className="ml-2" title={t("catalogs.supplierInfo", { version: c.version ?? "–" })}>
+                        IGH
+                      </Badge>
+                    )}
                     {c.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{c.description}</div>}
                   </TableCell>
                   <TableCell>{onlyKnown([c.trade ?? ""], trades).map((tr) => t(`options.trades.${tr}`))}</TableCell>
-                  <TableCell className="text-right tabular-nums">{c.catalog_nodes[0]?.count ?? 0}</TableCell>
+                  <TableCell className="text-right tabular-nums">{c.entry_count}</TableCell>
                   <TableCell className="pr-4 text-right">
                     {!c.active && <Badge variant="outline">{t("catalogs.inactive")}</Badge>}
                   </TableCell>

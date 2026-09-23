@@ -2,6 +2,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import type { NextRequest } from "next/server";
 
 import { getCurrentProfile } from "@/lib/auth";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import { loadLogo } from "@/pdf/logo";
 import { LvDocument, type PdfNode } from "@/pdf/lv-document";
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest, { params }: RouteContext<"/api/p
   const supabase = await createClient();
   const [{ data: lv }, { data: nodes }, { data: firm }] = await Promise.all([
     supabase.from("lvs").select("*, project:projects(number, name, city)").eq("id", lvId).maybeSingle(),
-    supabase.from("lv_nodes").select("*").eq("lv_id", lvId),
+    fetchAll((from, to) => supabase.from("lv_nodes").select("*").eq("lv_id", lvId).order("id").range(from, to)).then((data) => ({ data })),
     supabase.from("firm_settings").select("*").eq("id", true).single(),
   ]);
   if (!lv || !lv.project) return new Response("Not found", { status: 404 });

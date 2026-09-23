@@ -18,6 +18,9 @@ export type TreeNode = {
   number: string | null;
 };
 
+/** Entries of a group loaded at once when browsing a catalogue ("show more" loads the next page). */
+export const CATALOG_PAGE_SIZE = 500;
+
 export const isPosition = (kind: NodeKind) => kind === "position" || kind === "r_position";
 
 /** Children per parent id ("" = root), each list ordered by sort. */

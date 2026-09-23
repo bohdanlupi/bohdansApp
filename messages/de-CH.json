@@ -78,7 +78,9 @@
     "bidderExists": "Dieser Unternehmer ist bereits eingeladen.",
     "bidderAwarded": "Diesem Unternehmer wurde das LV vergeben. Heben Sie zuerst die Vergabe auf.",
     "userCreated": "Benutzer wurde angelegt. Teilen Sie das Startpasswort persönlich mit.",
-    "createUserFailed": "Der Benutzer konnte nicht angelegt werden."
+    "createUserFailed": "Der Benutzer konnte nicht angelegt werden.",
+    "catalogReadOnly": "Lieferantenkataloge können nicht bearbeitet werden. Sie werden durch einen neuen Import aktualisiert.",
+    "tooManyEntries": "Die Auswahl ist zu gross (höchstens 5000 Einträge). Bitte kleinere Gruppen wählen."
   },
   "projects": {
     "title": "Projekte",
@@ -242,7 +244,7 @@
   },
   "catalogs": {
     "title": "Kataloge",
-    "description": "Eigener Textkatalog mit NPK-ähnlicher Gliederung und eigenen Preisen.",
+    "description": "Eigene Textkataloge und importierte IGH-Lieferantenkataloge.",
     "emptyTitle": "Noch keine Kataloge",
     "emptyText": "Legen Sie einen Katalog an und erfassen Sie Ihre Standardpositionen. Diese können Sie dann in jedes LV übernehmen.",
     "new": "Neuer Katalog",
@@ -257,7 +259,22 @@
       "trade": "Gewerk",
       "description": "Beschreibung",
       "active": "Aktiv (beim Einfügen in LVs anbieten)"
-    }
+    },
+    "supplierInfo": "IGH-Lieferantenkatalog, Version {version} – nur lesbar, wird per Import aktualisiert",
+    "validFrom": "Preise gültig ab {date}"
+  },
+  "catalogBrowser": {
+    "search": "Suchen (Text oder Artikelnummer) …",
+    "expand": "Aufklappen",
+    "collapse": "Zuklappen",
+    "loading": "Lädt …",
+    "showMore": "Weitere anzeigen …",
+    "noResults": "Keine Treffer.",
+    "tooManyHits": "Es werden die ersten {count} Treffer angezeigt. Bitte die Suche verfeinern.",
+    "empty": "Noch keine Einträge.",
+    "selectHint": "Wählen Sie links einen Eintrag aus, um die Details zu sehen.",
+    "articleNumber": "Art.-Nr.",
+    "grossPrice": "Bruttopreis"
   },
   "settings": {
     "title": "Einstellungen",
@@ -482,7 +499,7 @@
       "hint": "Positionen oder ganze Gruppen auswählen. Sie werden bei der Auswahl links eingefügt.",
       "catalog": "Katalog",
       "search": "Suchen …",
-      "insert": "{count, plural, one {# Position einfügen} other {# Positionen einfügen}}",
+      "insert": "{count, plural, one {# Eintrag einfügen} other {# Einträge einfügen}}",
       "noCatalogs": "Es gibt noch keine aktiven Kataloge.",
       "cancel": "Abbrechen"
     }
