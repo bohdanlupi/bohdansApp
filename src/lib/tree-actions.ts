@@ -42,6 +42,12 @@ function revalidate(scope: TreeScope) {
 async function loadNodes(scope: TreeScope): Promise<TreeNode[]> {
   const supabase = await createClient();
   const { table, owner } = tableOf(scope);
+  // Only LV groups can have a number set by hand.
+  if (scope.type === "lv") {
+    return fetchAll((from, to) =>
+      supabase.from(table).select("id, parent_id, kind, sort, number, custom_number").eq(owner, scope.id).order("id").range(from, to),
+    );
+  }
   return fetchAll((from, to) =>
     supabase.from(table).select("id, parent_id, kind, sort, number").eq(owner, scope.id).order("id").range(from, to),
   );
@@ -109,6 +115,13 @@ const updateSchema = z.object({
   is_lump_sum: z.boolean().optional(),
   price_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
   cost_plan_item_id: z.uuid().nullable().optional(),
+  custom_number: z
+    .string()
+    .trim()
+    .regex(/^[0-9A-Za-z.-]{0,20}$/)
+    .transform((v) => v || null)
+    .nullable()
+    .optional(),
 });
 export type NodeUpdate = z.input<typeof updateSchema>;
 
@@ -122,7 +135,8 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
   if (!s.success || !parsed.success || !z.uuid().safeParse(nodeId).success) return { error: "invalidInput" };
   if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
 
-  const { short_text, long_text, unit, quantity, unit_price, is_optional, is_lump_sum, price_date, cost_plan_item_id } = parsed.data;
+  const { short_text, long_text, unit, quantity, unit_price, is_optional, is_lump_sum, price_date, cost_plan_item_id, custom_number } =
+    parsed.data;
   const values =
     scope.type === "lv"
       ? {
@@ -134,6 +148,7 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
           is_optional: is_optional ?? false,
           is_lump_sum: is_lump_sum ?? false,
           ...(cost_plan_item_id !== undefined && { cost_plan_item_id }),
+          ...(custom_number !== undefined && { custom_number }),
         }
       : { short_text: cleanText(short_text), long_text: cleanText(long_text), unit: unit || null, unit_price, price_date: price_date ?? null };
 
@@ -141,6 +156,8 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
   const { table, owner } = tableOf(scope);
   const { error } = await supabase.from(table).update(values as never).eq("id", nodeId).eq(owner, scope.id);
   if (error) return { error: "saveFailed" };
+  // A group number set by hand also changes the numbers after and below it.
+  if (scope.type === "lv" && custom_number !== undefined) await saveLayout(scope, await loadNodes(scope));
 
   revalidate(scope);
   return {};

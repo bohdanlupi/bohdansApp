@@ -589,6 +589,7 @@ export type Database = {
         Row: {
           cost_plan_item_id: string | null
           created_at: string
+          custom_number: string | null
           id: string
           is_lump_sum: boolean
           is_optional: boolean
@@ -608,6 +609,7 @@ export type Database = {
         Insert: {
           cost_plan_item_id?: string | null
           created_at?: string
+          custom_number?: string | null
           id?: string
           is_lump_sum?: boolean
           is_optional?: boolean
@@ -627,6 +629,7 @@ export type Database = {
         Update: {
           cost_plan_item_id?: string | null
           created_at?: string
+          custom_number?: string | null
           id?: string
           is_lump_sum?: boolean
           is_optional?: boolean

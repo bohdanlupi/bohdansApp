@@ -5,6 +5,10 @@
 //   groups inside a group   110, 120, …   (third level: 111, 112, …)
 //   positions in a group    110.101, 110.102, …  (top level: 101, 102, …)
 //   texts                   no number
+//
+// LV groups can have a number set by hand (custom_number, e.g. BKP codes 24 › 242 › 242.0). Groups after it
+// continue from it (242 → 243, 242.0 → 242.1), the first subgroup of such a group gets 241 (below a one- or
+// two-digit number) or 242.0, and positions keep .101, .102, … (242.1.101).
 
 import type { Enums } from "@/lib/supabase/database.types";
 
@@ -16,6 +20,8 @@ export type TreeNode = {
   kind: NodeKind;
   sort: number;
   number: string | null;
+  /** LV groups only: number set by hand (null = automatic). */
+  custom_number?: string | null;
 };
 
 /** Entries of a group loaded at once when browsing a catalogue ("show more" loads the next page). */
@@ -72,28 +78,51 @@ export function renumber<T extends TreeNode>(nodes: T[]): (T & { sort: number; n
   const changed: (T & { sort: number; number: string | null })[] = [];
   let sort = 0;
 
-  const walk = (parentId: string, parentNumber: number | null, depth: number) => {
+  // `custom`: the number was set by hand or continues from such a number (then the NPK steps do not apply).
+  type Numbered = { number: string; custom: boolean };
+  const walk = (parentId: string, parent: Numbered | null, depth: number) => {
     let groupIndex = 0;
     let positionIndex = 0;
+    let previous: Numbered | null = null;
     for (const node of children.get(parentId) ?? []) {
       let number: string | null = null;
-      let groupNumber: number | null = null;
+      let group: Numbered | null = null;
       if (node.kind === "group") {
         groupIndex++;
-        const step = depth === 0 ? 100 : depth === 1 ? 10 : 1;
-        groupNumber = (parentNumber ?? 0) + groupIndex * step;
-        number = String(groupNumber);
+        const custom = node.custom_number?.trim();
+        if (custom) group = { number: custom, custom: true };
+        else if (previous?.custom) group = { number: nextNumber(previous.number), custom: true };
+        else if (parent?.custom) group = { number: firstChildNumber(parent.number), custom: true };
+        else {
+          const step = depth === 0 ? 100 : depth === 1 ? 10 : 1;
+          group = { number: String(Number(parent?.number ?? 0) + groupIndex * step), custom: false };
+        }
+        number = group.number;
+        previous = group;
       } else if (isPosition(node.kind)) {
         positionIndex++;
-        number = parentNumber === null ? String(100 + positionIndex) : `${parentNumber}.${100 + positionIndex}`;
+        number = parent === null ? String(100 + positionIndex) : `${parent.number}.${100 + positionIndex}`;
       }
       sort++;
       if (node.sort !== sort || node.number !== number) changed.push({ ...node, sort, number });
-      walk(node.id, groupNumber ?? parentNumber, depth + 1);
+      walk(node.id, group ?? parent, depth + 1);
     }
   };
   walk("", null, 0);
   return changed;
+}
+
+/** Next sibling number: the last run of digits + 1, keeping leading zeros (242 → 243, 242.0 → 242.1, 09 → 10). */
+export function nextNumber(number: string): string {
+  const match = number.match(/^(.*?)(\d+)(\D*)$/);
+  if (!match) return `${number}.1`;
+  const [, head, digits, tail] = match;
+  return `${head}${String(Number(digits) + 1).padStart(digits.length, "0")}${tail}`;
+}
+
+/** Number of the first subgroup: 24 → 241, 242 → 242.0, 242.0 → 242.0.0. */
+export function firstChildNumber(number: string): string {
+  return /^\d{1,2}$/.test(number) ? `${number}1` : `${number}.0`;
 }
 
 /**

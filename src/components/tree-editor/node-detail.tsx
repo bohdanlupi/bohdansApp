@@ -32,6 +32,7 @@ type Draft = {
   is_lump_sum: boolean;
   price_date: string;
   cost_plan_item_id: string;
+  custom_number: string;
 };
 
 const toDraft = (node: EditorNode): Draft => ({
@@ -44,6 +45,7 @@ const toDraft = (node: EditorNode): Draft => ({
   is_lump_sum: node.is_lump_sum ?? false,
   price_date: node.price_date ?? "",
   cost_plan_item_id: node.cost_plan_item_id ?? "",
+  custom_number: node.custom_number ?? "",
 });
 
 /** Detail panel of the selected node; every change is saved when a field loses focus. */
@@ -69,6 +71,8 @@ export function NodeDetail({
   const [textLanguage, setTextLanguage] = useState<AppLanguage>(language);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const saved = useRef(JSON.stringify(toDraft(node)));
+  const savedNumber = useRef(node.custom_number ?? "");
+  const numbered = isLv && node.kind === "group";
 
   const save = async (next: Draft = draft) => {
     const serialized = JSON.stringify(next);
@@ -85,11 +89,14 @@ export function NodeDetail({
       is_lump_sum: next.is_lump_sum,
       price_date: next.price_date || null,
       cost_plan_item_id: isLv ? next.cost_plan_item_id || null : undefined,
+      // Sent only when changed: a new group number renumbers the LV.
+      custom_number: numbered && next.custom_number.trim() !== savedNumber.current ? next.custom_number : undefined,
     });
     if (result.error) {
       setStatus("error");
     } else {
       saved.current = serialized;
+      savedNumber.current = next.custom_number.trim();
       setStatus("saved");
     }
   };
@@ -136,6 +143,22 @@ export function NodeDetail({
       </div>
 
       <fieldset disabled={!editable} className="space-y-4">
+        {numbered && (
+          <div className="space-y-2">
+            <Label htmlFor="custom_number">{t("fields.number")}</Label>
+            <Input
+              id="custom_number"
+              className="w-40 font-mono"
+              maxLength={20}
+              value={draft.custom_number}
+              placeholder={node.number ?? ""}
+              onChange={(e) => update({ custom_number: e.target.value.replace(/[^0-9A-Za-z.-]/g, "") })}
+              onBlur={() => save()}
+            />
+            <p className="text-xs text-muted-foreground">{t("fields.numberHint")}</p>
+          </div>
+        )}
+
         <div className="flex gap-1 border-b" role="tablist" aria-label={t("textLanguage")}>
           {contentLanguages.map((l) => (
             <button

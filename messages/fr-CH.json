@@ -471,6 +471,8 @@
     },
     "fields": {
       "title": "Titre",
+      "number": "Numéro",
+      "numberHint": "Laisser vide pour la numérotation automatique. Les groupes suivants continuent à partir d’ici (242 → 243), les sous-groupes reçoivent .0, .1, … (242.0), les positions .101, .102, …",
       "shortText": "Texte court",
       "longText": "Texte long",
       "unit": "Unité",
