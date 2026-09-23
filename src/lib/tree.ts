@@ -70,6 +70,22 @@ export function descendants<T extends TreeNode>(nodes: T[], id: string): T[] {
 }
 
 /**
+ * The selected nodes that have no selected ancestor, in document order. A selected group stands for its
+ * whole subtree, so its selected descendants are not handled separately (delete, copy, move).
+ */
+export function topmostSelected<T extends TreeNode>(nodes: T[], ids: Iterable<string>): T[] {
+  const selected = new Set(ids);
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const hasSelectedAncestor = (node: T) => {
+    for (let p = node.parent_id; p; p = byId.get(p)?.parent_id ?? null) if (selected.has(p)) return true;
+    return false;
+  };
+  return flatten(nodes)
+    .map(({ node }) => node)
+    .filter((n) => selected.has(n.id) && !hasSelectedAncestor(n));
+}
+
+/**
  * Assigns sort (document order) and numbers. Returns only the nodes whose parent, sort or
  * number changed, ready to be written back.
  */

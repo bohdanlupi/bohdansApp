@@ -8,7 +8,7 @@ import type { Database, Json, Tables } from "@/lib/supabase/database.types";
 import { fetchAll } from "@/lib/supabase/fetch-all";
 import { createClient } from "@/lib/supabase/server";
 import type { AppLanguage } from "@/lib/supabase/types";
-import { CATALOG_PAGE_SIZE, descendants, moveNode, renumber, type NodeKind, type TreeNode } from "@/lib/tree";
+import { CATALOG_PAGE_SIZE, childrenMap, descendants, moveNode, renumber, topmostSelected, type NodeKind, type TreeNode } from "@/lib/tree";
 
 // Catalogue and LV nodes share their columns; only the table and the owner column differ.
 // The casts below pick the LV types for both, which is safe for the shared columns used here.
@@ -163,15 +163,22 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
   return {};
 }
 
-export async function deleteTreeNode(scope: TreeScope, nodeId: string): Promise<Result> {
+const idsSchema = z.array(z.uuid()).min(1).max(MAX_INSERT);
+
+/** Deletes the given nodes (a group with everything below it). */
+export async function deleteTreeNodes(scope: TreeScope, nodeIds: string[]): Promise<Result> {
   await assertRole("admin", "planer");
-  if (!scopeSchema.safeParse(scope).success || !z.uuid().safeParse(nodeId).success) return { error: "invalidInput" };
+  if (!scopeSchema.safeParse(scope).success || !idsSchema.safeParse(nodeIds).success) return { error: "invalidInput" };
   if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
 
   const supabase = await createClient();
   const { table, owner } = tableOf(scope);
-  const { error } = await supabase.from(table).delete().eq("id", nodeId).eq(owner, scope.id);
-  if (error) return { error: "deleteFailed" };
+  // Children go with their group (on delete cascade), so only the topmost selected nodes are deleted.
+  const roots = topmostSelected(await loadNodes(scope), nodeIds).map((n) => n.id);
+  for (let i = 0; i < roots.length; i += 200) {
+    const { error } = await supabase.from(table).delete().in("id", roots.slice(i, i + 200)).eq(owner, scope.id);
+    if (error) return { error: "deleteFailed" };
+  }
 
   await saveLayout(scope, await loadNodes(scope));
   revalidate(scope);
@@ -184,15 +191,114 @@ export async function moveTreeNode(
   parentId: string | null,
   beforeId: string | null,
 ): Promise<Result> {
+  return moveTreeNodes(scope, [nodeId], parentId, beforeId);
+}
+
+/** Moves the given nodes (in document order) into `parentId`, before `beforeId` (null = at the end). */
+export async function moveTreeNodes(
+  scope: TreeScope,
+  nodeIds: string[],
+  parentId: string | null,
+  beforeId: string | null,
+): Promise<Result> {
   await assertRole("admin", "planer");
-  if (!scopeSchema.safeParse(scope).success) return { error: "invalidInput" };
+  if (!scopeSchema.safeParse(scope).success || !idsSchema.safeParse(nodeIds).success) return { error: "invalidInput" };
   if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
 
-  const moved = moveNode(await loadNodes(scope), nodeId, parentId, beforeId);
-  if (!moved) return { error: "invalidMove" };
-  await saveLayout(scope, moved);
+  let nodes = await loadNodes(scope);
+  const roots = topmostSelected(nodes, nodeIds);
+  if (!roots.length) return { error: "invalidInput" };
+  // "Before" a node that moves itself means before the next sibling that stays.
+  const moving = new Set(roots.map((n) => n.id));
+  if (beforeId && moving.has(beforeId)) {
+    const siblings = childrenMap(nodes).get(parentId ?? "") ?? [];
+    beforeId = siblings.slice(siblings.findIndex((n) => n.id === beforeId)).find((n) => !moving.has(n.id))?.id ?? null;
+  }
+  for (const root of roots) {
+    const moved = moveNode(nodes, root.id, parentId, beforeId);
+    if (!moved) return { error: "invalidMove" };
+    nodes = moved;
+  }
+  await saveLayout(scope, nodes);
   revalidate(scope);
   return {};
+}
+
+/**
+ * Copies the given nodes (groups with everything below them, LV positions with their Vorausmass) into
+ * `parentId`, before `beforeId` (null = at the end). Numbers set by hand are not copied.
+ */
+export async function copyTreeNodes(
+  scope: TreeScope,
+  nodeIds: string[],
+  parentId: string | null,
+  beforeId: string | null,
+): Promise<Result> {
+  await assertRole("admin", "planer");
+  if (!scopeSchema.safeParse(scope).success || !idsSchema.safeParse(nodeIds).success || !z.uuid().nullable().safeParse(parentId).success) {
+    return { error: "invalidInput" };
+  }
+  if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
+
+  const supabase = await createClient();
+  const { table, owner } = tableOf(scope);
+  const all = (await fetchAll((from, to) => supabase.from(table).select("*").eq(owner, scope.id).order("id").range(from, to))) as (TreeNode &
+    Record<string, unknown>)[];
+  if (parentId && all.find((n) => n.id === parentId)?.kind !== "group") return { error: "invalidMove" };
+  const roots = topmostSelected(all, nodeIds);
+  if (!roots.length) return { error: "invalidInput" };
+
+  const newId = new Map<string, string>();
+  const rows: Record<string, unknown>[] = [];
+  let sort = 1_000_000;
+  for (const root of roots) {
+    for (const node of [root, ...descendants(all, root.id)]) {
+      // Generated and derived columns are set by the database or by renumbering.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, created_at, updated_at, number, search_text, ...rest } = node;
+      const copyId = crypto.randomUUID();
+      newId.set(id, copyId);
+      rows.push({
+        ...rest,
+        id: copyId,
+        parent_id: node === root ? parentId : newId.get(node.parent_id!)!,
+        sort: sort++,
+        ...(scope.type === "lv" && { custom_number: null }),
+      });
+    }
+  }
+  if (rows.length > MAX_INSERT) return { error: "tooManyEntries" };
+
+  // Parents come before their children, so every batch only refers to rows that already exist.
+  for (let i = 0; i < rows.length; i += 1000) {
+    const { error } = await supabase.from(table).insert(rows.slice(i, i + 1000) as never[]);
+    if (error) return { error: "saveFailed" };
+  }
+
+  if (scope.type === "lv") {
+    const sourceIds = [...newId.keys()];
+    for (let i = 0; i < sourceIds.length; i += 200) {
+      const { data: measurements } = await supabase.from("lv_measurements").select("*").in("lv_node_id", sourceIds.slice(i, i + 200));
+      if (!measurements?.length) continue;
+      const copies = measurements.map(({ lv_node_id, description, count, factor_a, factor_b, factor_c, sort }) => ({
+        lv_node_id: newId.get(lv_node_id)!,
+        description,
+        count,
+        factor_a,
+        factor_b,
+        factor_c,
+        sort,
+      }));
+      const { error } = await supabase.from("lv_measurements").insert(copies);
+      if (error) return { error: "saveFailed" };
+    }
+  }
+
+  let nodes = await loadNodes(scope);
+  for (const root of roots) nodes = moveNode(nodes, newId.get(root.id)!, parentId, beforeId) ?? nodes;
+  await saveLayout(scope, nodes);
+  revalidate(scope);
+  return { id: newId.get(roots[0].id) };
 }
 
 /** Copies catalogue nodes (groups with their whole subtree) into an LV. */

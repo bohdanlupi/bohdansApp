@@ -6,10 +6,13 @@ import {
   BookOpen,
   ChevronDown,
   ChevronRight,
+  ClipboardPaste,
+  Copy,
   FilePlus2,
   FolderPlus,
   ListPlus,
   Pilcrow,
+  Scissors,
   Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -35,7 +38,7 @@ import {
 } from "@/lib/tree";
 import { cn } from "@/lib/utils";
 
-import { addTreeNode, deleteTreeNode, moveTreeNode, type TreeScope } from "@/lib/tree-actions";
+import { addTreeNode, copyTreeNodes, deleteTreeNodes, moveTreeNode, moveTreeNodes, type TreeScope } from "@/lib/tree-actions";
 import { CatalogPicker } from "./catalog-picker";
 import { NodeDetail } from "./node-detail";
 
@@ -88,7 +91,11 @@ export function TreeEditor({
   const t = useTranslations("tree");
   const tForms = useTranslations("forms");
   const isLv = scope.type === "lv";
+  // selectedId: the entry shown in the detail panel; selection: all selected entries (Ctrl/Shift + click).
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selection, setSelection] = useState<Set<string>>(new Set());
+  const [anchorId, setAnchorId] = useState<string | null>(null);
+  const [clipboard, setClipboard] = useState<{ ids: string[]; cut: boolean } | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
@@ -100,6 +107,9 @@ export function TreeEditor({
   const totals = useMemo(() => groupTotals(nodes), [nodes]);
   const measuredIds = useMemo(() => new Set(measurements.map((m) => m.lv_node_id)), [measurements]);
   const selected = nodes.find((n) => n.id === selectedId) ?? null;
+  // In document order; entries deleted in the meantime drop out.
+  const selectedIds = useMemo(() => rows.filter(({ node }) => selection.has(node.id)).map(({ node }) => node.id), [rows, selection]);
+  const clipboardIds = useMemo(() => new Set(clipboard?.ids.filter((id) => nodes.some((n) => n.id === id))), [clipboard, nodes]);
 
   const visible = useMemo(() => {
     const hidden = new Set<string>();
@@ -112,12 +122,66 @@ export function TreeEditor({
     });
   }, [rows, collapsed]);
 
+  const selectOnly = (id: string | null) => {
+    setSelectedId(id);
+    setSelection(new Set(id ? [id] : []));
+    setAnchorId(id);
+  };
+
+  /** Click: select one entry; Ctrl/⌘ + click: add or remove it; Shift + click: select the range from the last click. */
+  const clickRow = (e: React.MouseEvent, id: string) => {
+    const toggle = e.ctrlKey || e.metaKey;
+    if (e.shiftKey && anchorId) {
+      const ids = visible.map(({ node }) => node.id);
+      const [from, to] = [ids.indexOf(anchorId), ids.indexOf(id)].sort((a, b) => a - b);
+      if (from !== -1) {
+        const range = ids.slice(from, to + 1);
+        setSelection(new Set(toggle ? [...selection, ...range] : range));
+        setSelectedId(id);
+        return;
+      }
+    }
+    if (toggle) {
+      const next = new Set(selection);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      setSelection(next);
+      setSelectedId(next.has(id) ? id : null);
+      setAnchorId(id);
+      return;
+    }
+    selectOnly(id);
+  };
+
   const run = (action: () => Promise<{ error?: string; id?: string }>, select?: boolean) =>
     startTransition(async () => {
       const result = await action();
       if (result.error) toast.error(tForms(result.error as FormMessageKey));
-      else if (select && result.id) setSelectedId(result.id);
+      else if (select && result.id) selectOnly(result.id);
     });
+
+  const copy = (cut: boolean) => {
+    if (!selectedIds.length) return;
+    setClipboard({ ids: selectedIds, cut });
+    toast.success(t(cut ? "cutDone" : "copied", { count: selectedIds.length }));
+  };
+
+  /** Pastes into the selected group (at the end) or after the selected entry. */
+  const paste = () => {
+    if (!clipboard || !clipboardIds.size) return;
+    const ids = [...clipboardIds];
+    const { parentId, beforeId } = insertionPoint(nodes, selectedId, "position");
+    if (parentId) setCollapsed((c) => new Set([...c].filter((id) => id !== parentId)));
+    if (clipboard.cut) {
+      run(async () => {
+        const result = await moveTreeNodes(scope, ids, parentId, beforeId);
+        if (!result.error) setClipboard(null);
+        return result;
+      });
+    } else {
+      run(() => copyTreeNodes(scope, ids, parentId, beforeId), true);
+    }
+  };
 
   const add = (kind: NodeKind, asChild = false) => {
     const { parentId, beforeId } = insertionPoint(nodes, selectedId, kind, asChild);
@@ -143,15 +207,17 @@ export function TreeEditor({
     const target = nodes.find((n) => n.id === drop.id);
     setDrop(null);
     setDragId(null);
-    if (!target || target.id === dragId) return;
+    // Dragging a selected entry moves the whole selection.
+    const ids = selection.has(dragId) ? selectedIds : [dragId];
+    if (!target || ids.includes(target.id)) return;
     if (drop.where === "inside") {
-      run(() => moveTreeNode(scope, dragId, target.id, null));
+      run(() => moveTreeNodes(scope, ids, target.id, null));
       return;
     }
-    const siblings = siblingsOf(target).filter((n) => n.id !== dragId);
+    const siblings = siblingsOf(target).filter((n) => !ids.includes(n.id));
     const index = siblings.findIndex((n) => n.id === target.id);
     const beforeId = drop.where === "before" ? target.id : (siblings[index + 1]?.id ?? null);
-    run(() => moveTreeNode(scope, dragId, target.parent_id, beforeId));
+    run(() => moveTreeNodes(scope, ids, target.parent_id, beforeId));
   };
 
   const label = (node: EditorNode) => {
@@ -166,6 +232,7 @@ export function TreeEditor({
     </Button>
   );
 
+  const multiple = selectedIds.length > 1;
   const siblings = selected ? siblingsOf(selected) : [];
   const selectedIndex = selected ? siblings.findIndex((n) => n.id === selected.id) : -1;
 
@@ -179,21 +246,38 @@ export function TreeEditor({
             {toolbarButton(<FilePlus2 />, isLv ? t("addRPosition") : t("addPosition"), () => add(isLv ? "r_position" : "position"))}
             {toolbarButton(<Pilcrow />, t("addText"), () => add("text"))}
             {isLv && toolbarButton(<BookOpen />, t("fromCatalog"), () => setPickerOpen(true))}
-            <div className="ml-auto flex gap-1.5">
-              {toolbarButton(<ArrowUp />, t("moveUp"), () => moveBy(-1), selectedIndex <= 0)}
-              {toolbarButton(<ArrowDown />, t("moveDown"), () => moveBy(1), selectedIndex === -1 || selectedIndex >= siblings.length - 1)}
-              {selected && (
+            <div className="ml-auto flex flex-wrap gap-1.5">
+              {toolbarButton(<Copy />, t("copy"), () => copy(false), !selectedIds.length)}
+              {toolbarButton(<Scissors />, t("cut"), () => copy(true), !selectedIds.length)}
+              {toolbarButton(
+                <ClipboardPaste />,
+                clipboardIds.size ? `${t("paste")} (${clipboardIds.size})` : t("paste"),
+                paste,
+                !clipboardIds.size,
+              )}
+              {toolbarButton(<ArrowUp />, t("moveUp"), () => moveBy(-1), multiple || selectedIndex <= 0)}
+              {toolbarButton(
+                <ArrowDown />,
+                t("moveDown"),
+                () => moveBy(1),
+                multiple || selectedIndex === -1 || selectedIndex >= siblings.length - 1,
+              )}
+              {selectedIds.length > 0 && (
                 <ConfirmButton
                   variant="outline"
                   size="sm"
                   label={t("delete")}
                   trigger={<Trash2 />}
                   title={t("delete")}
-                  text={t("deleteConfirm", { name: `${selected.number ?? ""} ${label(selected).text}`.trim() })}
+                  text={
+                    selected && !multiple
+                      ? t("deleteConfirm", { name: `${selected.number ?? ""} ${label(selected).text}`.trim() })
+                      : t("deleteManyConfirm", { count: selectedIds.length })
+                  }
                   confirmLabel={t("delete")}
                   onConfirm={async () => {
-                    const result = await deleteTreeNode(scope, selected.id);
-                    if (!result.error) setSelectedId(null);
+                    const result = await deleteTreeNodes(scope, selectedIds);
+                    if (!result.error) selectOnly(null);
                     return result;
                   }}
                 />
@@ -210,11 +294,18 @@ export function TreeEditor({
             tabIndex={0}
             className="max-h-[calc(100vh-15rem)] overflow-auto py-1 text-sm outline-none"
             onKeyDown={(e) => {
+              const shortcut = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey ? e.key.toLowerCase() : null;
+              if (editable && shortcut && ["c", "x", "v"].includes(shortcut)) {
+                e.preventDefault();
+                if (shortcut === "v") paste();
+                else copy(shortcut === "x");
+                return;
+              }
               if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
               e.preventDefault();
               const index = visible.findIndex(({ node }) => node.id === selectedId);
               const next = visible[Math.min(visible.length - 1, Math.max(0, index + (e.key === "ArrowDown" ? 1 : -1)))];
-              if (next) setSelectedId(next.node.id);
+              if (next) selectOnly(next.node.id);
             }}
           >
             {visible.map(({ node, depth }) => {
@@ -227,7 +318,7 @@ export function TreeEditor({
                 <div
                   key={node.id}
                   role="treeitem"
-                  aria-selected={node.id === selectedId}
+                  aria-selected={selection.has(node.id)}
                   aria-expanded={isGroup && hasChildren ? !isCollapsed : undefined}
                   draggable={editable}
                   onDragStart={(e) => {
@@ -250,13 +341,15 @@ export function TreeEditor({
                     e.preventDefault();
                     onDrop();
                   }}
-                  onClick={() => setSelectedId(node.id)}
+                  onClick={(e) => clickRow(e, node.id)}
                   className={cn(
                     "relative flex cursor-pointer items-center gap-2 py-1.5 pr-3 select-none hover:bg-muted/60",
-                    node.id === selectedId && "bg-brand/10 hover:bg-brand/15",
+                    selection.has(node.id) && "bg-brand/10 hover:bg-brand/15",
+                    node.id === selectedId && multiple && "bg-brand/20 hover:bg-brand/25",
+                    clipboard?.cut && clipboardIds.has(node.id) && "opacity-50",
                     isGroup && "font-semibold",
                     node.is_optional && "text-muted-foreground italic",
-                    dragId === node.id && "opacity-40",
+                    dragId && (dragId === node.id || (selection.has(dragId) && selection.has(node.id))) && "opacity-40",
                     dropHere === "inside" && "ring-2 ring-brand ring-inset",
                   )}
                   style={{ paddingLeft: `${0.5 + depth * 1.25}rem` }}
@@ -327,7 +420,12 @@ export function TreeEditor({
       </div>
 
       <div className="lg:sticky lg:top-4">
-        {selected ? (
+        {multiple ? (
+          <div className="space-y-2 rounded-xl border p-4 text-sm">
+            <p className="font-semibold">{t("multiSelected", { count: selectedIds.length })}</p>
+            <p className="text-muted-foreground">{t("multiHint")}</p>
+          </div>
+        ) : selected ? (
           <NodeDetail
             key={selected.id}
             scope={scope}
@@ -352,7 +450,7 @@ export function TreeEditor({
           language={language}
           lvId={scope.id}
           target={insertionPoint(nodes, selectedId, "position")}
-          onInserted={(id) => setSelectedId(id ?? null)}
+          onInserted={(id) => selectOnly(id ?? null)}
         />
       )}
     </div>
