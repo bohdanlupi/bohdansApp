@@ -506,7 +506,13 @@
       "hint": "Positiv = Rabatt, negativ = Zuschlag. Nur im Editor sichtbar; gedruckt und in allen Totalen wird der Preis nach Rabatten verwendet.",
       "groupHint": "Gilt für alle Positionen dieser Gruppe und ihrer Untergruppen. Positiv = Rabatt, negativ = Zuschlag. Nur im Editor sichtbar.",
       "inherited": "Rabatte der übergeordneten Gruppen: {pct} %.",
-      "own": "Rabatte hier zusammen: {pct} %."
+      "own": "Rabatte hier zusammen: {pct} %.",
+      "apply": "Für {count, plural, one {# Position} other {# Positionen}} übernehmen",
+      "applied": "Rabatte für {count, plural, one {# Position} other {# Positionen}} übernommen.",
+      "bulkHint": "Ersetzt die Rabatte aller ausgewählten Positionen (ohne Einträge = Rabatte entfernen). Rabatte der Gruppen gelten weiterhin zusätzlich.",
+      "bulkMixed": "Die ausgewählten Positionen haben zurzeit unterschiedliche Rabatte.",
+      "bulkGroupsSkipped": "{count, plural, one {# ausgewählte Gruppe wird} other {# ausgewählte Gruppen werden}} nicht geändert.",
+      "noPositions": "Unter den ausgewählten Einträgen sind keine Positionen."
     },
     "measurements": {
       "title": "Vorausmass",

@@ -1,11 +1,10 @@
 "use client";
 
-import { Check, Loader2, Plus, X } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
 import { CostItemSelect } from "@/components/cost-item-select";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,10 +12,11 @@ import type { CostItemOption } from "@/lib/cost-plan";
 import { contentLanguages, type I18nText } from "@/lib/i18n-text";
 import { formatMoney, formatNumber, parseNumber } from "@/lib/number-input";
 import type { AppLanguage } from "@/lib/supabase/types";
-import { discountFactor, isPosition, positionTotal, round2, type Discount } from "@/lib/tree";
+import { discountFactor, isPosition, positionTotal, round2 } from "@/lib/tree";
 import { updateTreeNode, type TreeScope } from "@/lib/tree-actions";
 import { cn } from "@/lib/utils";
 
+import { DiscountRows, parseDiscounts, toDiscountDrafts, type DiscountDraft } from "./discount-rows";
 import { MeasurementTable } from "./measurements";
 import type { EditorNode, Measurement } from "./tree-editor";
 
@@ -34,17 +34,8 @@ type Draft = {
   price_date: string;
   cost_plan_item_id: string;
   custom_number: string;
-  discounts: { name: string; pct: string }[];
+  discounts: DiscountDraft[];
 };
-
-const MAX_DISCOUNTS = 4;
-
-/** Discount rows with a percentage; rows without one are not saved. */
-const parseDiscounts = (rows: Draft["discounts"]): Discount[] =>
-  rows.flatMap(({ name, pct }) => {
-    const value = parseNumber(pct);
-    return value === null ? [] : [{ name: name.trim(), pct: value }];
-  });
 
 const toDraft = (node: EditorNode): Draft => ({
   short_text: { ...node.short_text },
@@ -58,7 +49,7 @@ const toDraft = (node: EditorNode): Draft => ({
   price_date: node.price_date ?? "",
   cost_plan_item_id: node.cost_plan_item_id ?? "",
   custom_number: node.custom_number ?? "",
-  discounts: (node.discounts ?? []).map((d) => ({ name: d.name, pct: formatNumber(d.pct, 2, false) })),
+  discounts: toDiscountDrafts(node.discounts),
 });
 
 /** Detail panel of the selected node; every change is saved when a field loses focus. */
@@ -140,8 +131,6 @@ export function NodeDetail({
   const discounted = factor !== 1;
   const percent = (f: number) => formatNumber(round2((1 - f) * 100), 2, false);
 
-  const setDiscount = (index: number, patch: Partial<Draft["discounts"][number]>) =>
-    update({ discounts: draft.discounts.map((d, i) => (i === index ? { ...d, ...patch } : d)) });
 
   return (
     <div className="space-y-4 rounded-xl border p-4">
@@ -329,59 +318,11 @@ export function NodeDetail({
           </div>
         )}
         {discountable && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <Label>{t("discounts.title")}</Label>
-              {editable && draft.discounts.length < MAX_DISCOUNTS && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => update({ discounts: [...draft.discounts, { name: "", pct: "" }] })}
-                >
-                  <Plus />
-                  {t("discounts.add")}
-                </Button>
-              )}
-            </div>
-            {draft.discounts.map((d, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input
-                  aria-label={t("discounts.name")}
-                  placeholder={t("discounts.namePlaceholder", { n: i + 1 })}
-                  maxLength={60}
-                  value={d.name}
-                  onChange={(e) => setDiscount(i, { name: e.target.value })}
-                  onBlur={() => save()}
-                />
-                <Input
-                  aria-label={t("discounts.pct")}
-                  inputMode="decimal"
-                  placeholder="0"
-                  className="w-24 shrink-0 text-right tabular-nums"
-                  value={d.pct}
-                  onChange={(e) => setDiscount(i, { pct: e.target.value })}
-                  onBlur={() => save()}
-                />
-                <span className="text-sm text-muted-foreground">%</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={t("discounts.remove")}
-                  title={t("discounts.remove")}
-                  onClick={() => update({ discounts: draft.discounts.filter((_, j) => j !== i) }, true)}
-                >
-                  <X />
-                </Button>
-              </div>
-            ))}
-            <p className="text-xs text-muted-foreground">
-              {node.kind === "group" ? t("discounts.groupHint") : t("discounts.hint")}
-              {inheritedFactor !== 1 && <> {t("discounts.inherited", { pct: percent(inheritedFactor) })}</>}
-              {draft.discounts.length > 0 && ownFactor !== 1 && <> {t("discounts.own", { pct: percent(ownFactor) })}</>}
-            </p>
-          </div>
+          <DiscountRows rows={draft.discounts} editable={editable} onChange={(discounts, now) => update({ discounts }, now)} onBlur={() => save()}>
+            {node.kind === "group" ? t("discounts.groupHint") : t("discounts.hint")}
+            {inheritedFactor !== 1 && <> {t("discounts.inherited", { pct: percent(inheritedFactor) })}</>}
+            {draft.discounts.length > 0 && ownFactor !== 1 && <> {t("discounts.own", { pct: percent(ownFactor) })}</>}
+          </DiscountRows>
         )}
         {isLv && node.kind !== "text" && costOptions.length > 0 && (
           <div className="space-y-2">

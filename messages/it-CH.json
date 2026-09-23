@@ -506,7 +506,13 @@
       "hint": "Positivo = sconto, negativo = supplemento. Visibile solo nell’editor; nella stampa e in tutti i totali si usa il prezzo dopo gli sconti.",
       "groupHint": "Vale per tutte le posizioni di questo gruppo e dei suoi sottogruppi. Positivo = sconto, negativo = supplemento. Visibile solo nell’editor.",
       "inherited": "Sconti dei gruppi superiori: {pct} %.",
-      "own": "Sconti qui in totale: {pct} %."
+      "own": "Sconti qui in totale: {pct} %.",
+      "apply": "Applica a {count, plural, one {# posizione} other {# posizioni}}",
+      "applied": "Sconti applicati a {count, plural, one {# posizione} other {# posizioni}}.",
+      "bulkHint": "Sostituisce gli sconti di tutte le posizioni selezionate (senza righe = rimuovere gli sconti). Gli sconti dei gruppi continuano ad applicarsi in aggiunta.",
+      "bulkMixed": "Le posizioni selezionate hanno attualmente sconti diversi.",
+      "bulkGroupsSkipped": "{count, plural, one {# gruppo selezionato non viene modificato} other {# gruppi selezionati non vengono modificati}}.",
+      "noPositions": "Tra gli elementi selezionati non ci sono posizioni."
     },
     "measurements": {
       "title": "Computo metrico",

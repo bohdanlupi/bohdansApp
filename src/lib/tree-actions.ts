@@ -105,6 +105,11 @@ export async function addTreeNode(scope: TreeScope, input: z.input<typeof addSch
 const textSchema = z.object({ de: z.string(), fr: z.string(), it: z.string() }).partial();
 const num = z.number().finite().nullable();
 
+/** LV: up to 4 named discounts (pct > 0) or surcharges (pct < 0). */
+const discountsSchema = z
+  .array(z.object({ name: z.string().trim().max(60), pct: z.number().finite().min(-1000).max(100) }))
+  .max(4);
+
 const updateSchema = z.object({
   short_text: textSchema,
   long_text: textSchema,
@@ -123,10 +128,7 @@ const updateSchema = z.object({
     .nullable()
     .optional(),
   /** LV only: up to 4 named discounts (pct > 0) or surcharges (pct < 0). */
-  discounts: z
-    .array(z.object({ name: z.string().trim().max(60), pct: z.number().finite().min(-1000).max(100) }))
-    .max(4)
-    .optional(),
+  discounts: discountsSchema.optional(),
 });
 export type NodeUpdate = z.input<typeof updateSchema>;
 
@@ -189,6 +191,29 @@ export async function deleteTreeNodes(scope: TreeScope, nodeIds: string[]): Prom
 
   await saveLayout(scope, await loadNodes(scope));
   revalidate(scope);
+  return {};
+}
+
+/**
+ * Gives all selected LV positions the same discounts (replacing their own; an empty list removes them).
+ * Groups are left alone: their discounts would apply to the positions a second time.
+ */
+export async function setPositionDiscounts(lvId: string, nodeIds: string[], discounts: z.input<typeof discountsSchema>): Promise<Result> {
+  await assertRole("admin", "planer");
+  const parsed = discountsSchema.safeParse(discounts);
+  if (!z.uuid().safeParse(lvId).success || !idsSchema.safeParse(nodeIds).success || !parsed.success) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  for (let i = 0; i < nodeIds.length; i += 200) {
+    const { error } = await supabase
+      .from("lv_nodes")
+      .update({ discounts: parsed.data })
+      .in("id", nodeIds.slice(i, i + 200))
+      .eq("lv_id", lvId)
+      .in("kind", ["position", "r_position"]);
+    if (error) return { error: "saveFailed" };
+  }
+  revalidate({ type: "lv", id: lvId });
   return {};
 }
 

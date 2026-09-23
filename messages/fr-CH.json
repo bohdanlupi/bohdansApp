@@ -506,7 +506,13 @@
       "hint": "Positif = rabais, négatif = supplément. Visible uniquement dans l’éditeur ; à l’impression et dans tous les totaux, le prix après rabais est utilisé.",
       "groupHint": "S’applique à toutes les positions de ce groupe et de ses sous-groupes. Positif = rabais, négatif = supplément. Visible uniquement dans l’éditeur.",
       "inherited": "Rabais des groupes supérieurs : {pct} %.",
-      "own": "Rabais ici au total : {pct} %."
+      "own": "Rabais ici au total : {pct} %.",
+      "apply": "Appliquer à {count, plural, one {# position} other {# positions}}",
+      "applied": "Rabais appliqués à {count, plural, one {# position} other {# positions}}.",
+      "bulkHint": "Remplace les rabais de toutes les positions sélectionnées (sans ligne = supprimer les rabais). Les rabais des groupes s’appliquent toujours en plus.",
+      "bulkMixed": "Les positions sélectionnées ont actuellement des rabais différents.",
+      "bulkGroupsSkipped": "{count, plural, one {# groupe sélectionné n’est pas modifié} other {# groupes sélectionnés ne sont pas modifiés}}.",
+      "noPositions": "Aucune position parmi les éléments sélectionnés."
     },
     "measurements": {
       "title": "Avant-métré",

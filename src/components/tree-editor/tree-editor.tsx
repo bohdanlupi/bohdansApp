@@ -41,6 +41,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { addTreeNode, copyTreeNodes, deleteTreeNodes, moveTreeNode, moveTreeNodes, type TreeScope } from "@/lib/tree-actions";
+import { BulkDiscounts } from "./bulk-discounts";
 import { CatalogPicker } from "./catalog-picker";
 import { NodeDetail } from "./node-detail";
 
@@ -434,9 +435,19 @@ export function TreeEditor({
 
       <div className="lg:sticky lg:top-4">
         {multiple ? (
-          <div className="space-y-2 rounded-xl border p-4 text-sm">
-            <p className="font-semibold">{t("multiSelected", { count: selectedIds.length })}</p>
-            <p className="text-muted-foreground">{t("multiHint")}</p>
+          <div className="space-y-3 rounded-xl border p-4 text-sm">
+            <div className="space-y-2">
+              <p className="font-semibold">{t("multiSelected", { count: selectedIds.length })}</p>
+              <p className="text-muted-foreground">{t("multiHint")}</p>
+            </div>
+            {isLv && editable && (
+              <BulkDiscounts
+                key={selectedIds.join()}
+                lvId={scope.id}
+                positions={nodes.filter((n) => selection.has(n.id) && isPosition(n.kind))}
+                skippedGroups={nodes.filter((n) => selection.has(n.id) && n.kind === "group").length}
+              />
+            )}
           </div>
         ) : selected ? (
           <NodeDetail
