@@ -35,7 +35,8 @@ export default async function LvEditorPage({ params }: PageProps<"/projekte/[id]
     <TreeEditor
       key={lvId}
       scope={{ type: "lv", id: lvId }}
-      nodes={(nodes ?? []) as EditorNode[]}
+      // jsonb columns (texts, discounts) come back as Json.
+      nodes={(nodes ?? []) as unknown as EditorNode[]}
       measurements={measurements ?? []}
       language={lv.language ?? "de"}
       editable={profile.role !== "viewer"}

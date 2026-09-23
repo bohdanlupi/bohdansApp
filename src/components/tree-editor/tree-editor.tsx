@@ -30,9 +30,11 @@ import {
   childrenMap,
   flatten,
   groupTotals,
+  inheritedDiscountFactor,
   insertionPoint,
   isPosition,
   positionTotal,
+  type Discount,
   type NodeKind,
   type TreeNode,
 } from "@/lib/tree";
@@ -52,6 +54,9 @@ export type EditorNode = TreeNode & {
   is_lump_sum?: boolean;
   price_date?: string | null;
   cost_plan_item_id?: string | null;
+  /** LV only: price entered in the editor; unit_price is the net price after discounts. */
+  gross_unit_price?: number | null;
+  discounts?: Discount[];
 };
 
 export type Measurement = {
@@ -384,6 +389,14 @@ export function TreeEditor({
                     )}
                   </span>
                   {node.is_optional && <span className="shrink-0 rounded border px-1 text-[10px] not-italic">{t("optionalBadge")}</span>}
+                  {isLv && (node.discounts?.length ?? 0) > 0 && (
+                    <span
+                      className="shrink-0 rounded border border-brand/40 px-1 text-[10px] font-normal text-brand not-italic"
+                      title={node.discounts!.map((d, i) => `${d.name || t("discounts.namePlaceholder", { n: i + 1 })}: ${d.pct} %`).join("\n")}
+                    >
+                      %
+                    </span>
+                  )}
                   {isPosition(node.kind) && (
                     <span className="hidden shrink-0 text-right text-xs text-muted-foreground tabular-nums sm:block">
                       {isLv ? (
@@ -434,6 +447,7 @@ export function TreeEditor({
             editable={editable}
             measurements={measurements.filter((m) => m.lv_node_id === selected.id)}
             costOptions={costOptions}
+            inheritedFactor={isLv ? inheritedDiscountFactor(nodes, selected) : 1}
           />
         ) : (
           <p className="rounded-xl border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">

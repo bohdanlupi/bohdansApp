@@ -487,12 +487,26 @@
       "quantity": "Quantità",
       "unitPrice": "Prezzo unitario",
       "estimatePrice": "Prezzo stimato (PU)",
+      "grossPrice": "Prezzo stimato lordo (PU)",
+      "netPrice": "PU netto (dopo sconti)",
       "total": "Importo",
       "priceDate": "Stato dei prezzi",
       "optional": "Posizione eventuale",
       "lumpSum": "A corpo",
       "costItem": "Codice del piano dei costi",
       "costItemInherited": "come il gruppo o il capitolato"
+    },
+    "discounts": {
+      "title": "Sconti / supplementi",
+      "add": "Sconto",
+      "name": "Descrizione",
+      "namePlaceholder": "Sconto {n}",
+      "pct": "Percentuale",
+      "remove": "Rimuovi sconto",
+      "hint": "Positivo = sconto, negativo = supplemento. Visibile solo nell’editor; nella stampa e in tutti i totali si usa il prezzo dopo gli sconti.",
+      "groupHint": "Vale per tutte le posizioni di questo gruppo e dei suoi sottogruppi. Positivo = sconto, negativo = supplemento. Visibile solo nell’editor.",
+      "inherited": "Sconti dei gruppi superiori: {pct} %.",
+      "own": "Sconti qui in totale: {pct} %."
     },
     "measurements": {
       "title": "Computo metrico",

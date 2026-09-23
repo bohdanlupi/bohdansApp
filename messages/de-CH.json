@@ -487,12 +487,26 @@
       "quantity": "Menge",
       "unitPrice": "Einheitspreis",
       "estimatePrice": "Schätzpreis (EP)",
+      "grossPrice": "Schätzpreis brutto (EP)",
+      "netPrice": "Netto-EP (nach Rabatten)",
       "total": "Betrag",
       "priceDate": "Preisstand",
       "optional": "Eventualposition",
       "lumpSum": "Pauschal",
       "costItem": "Kostenplan-Code",
       "costItemInherited": "wie Gruppe bzw. LV"
+    },
+    "discounts": {
+      "title": "Rabatte / Zuschläge",
+      "add": "Rabatt",
+      "name": "Bezeichnung",
+      "namePlaceholder": "Rabatt {n}",
+      "pct": "Prozent",
+      "remove": "Rabatt entfernen",
+      "hint": "Positiv = Rabatt, negativ = Zuschlag. Nur im Editor sichtbar; gedruckt und in allen Totalen wird der Preis nach Rabatten verwendet.",
+      "groupHint": "Gilt für alle Positionen dieser Gruppe und ihrer Untergruppen. Positiv = Rabatt, negativ = Zuschlag. Nur im Editor sichtbar.",
+      "inherited": "Rabatte der übergeordneten Gruppen: {pct} %.",
+      "own": "Rabatte hier zusammen: {pct} %."
     },
     "measurements": {
       "title": "Vorausmass",

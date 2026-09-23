@@ -590,6 +590,8 @@ export type Database = {
           cost_plan_item_id: string | null
           created_at: string
           custom_number: string | null
+          discounts: Json
+          gross_unit_price: number | null
           id: string
           is_lump_sum: boolean
           is_optional: boolean
@@ -610,6 +612,8 @@ export type Database = {
           cost_plan_item_id?: string | null
           created_at?: string
           custom_number?: string | null
+          discounts?: Json
+          gross_unit_price?: number | null
           id?: string
           is_lump_sum?: boolean
           is_optional?: boolean
@@ -630,6 +634,8 @@ export type Database = {
           cost_plan_item_id?: string | null
           created_at?: string
           custom_number?: string | null
+          discounts?: Json
+          gross_unit_price?: number | null
           id?: string
           is_lump_sum?: boolean
           is_optional?: boolean
@@ -1439,6 +1445,8 @@ export type Database = {
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
+      lv_discount_factor: { Args: { p_discounts: Json }; Returns: number }
+      lv_refresh_prices: { Args: { p_lv_ids: string[] }; Returns: undefined }
       search_catalog_nodes: {
         Args: { p_catalog_id: string; p_limit?: number; p_query: string }
         Returns: {

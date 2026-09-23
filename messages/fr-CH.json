@@ -487,12 +487,26 @@
       "quantity": "Quantité",
       "unitPrice": "Prix unitaire",
       "estimatePrice": "Prix estimé (PU)",
+      "grossPrice": "Prix estimé brut (PU)",
+      "netPrice": "PU net (après rabais)",
       "total": "Montant",
       "priceDate": "État des prix",
       "optional": "Position éventuelle",
       "lumpSum": "Forfait",
       "costItem": "Code du plan des coûts",
       "costItemInherited": "comme le groupe ou le descriptif"
+    },
+    "discounts": {
+      "title": "Rabais / suppléments",
+      "add": "Rabais",
+      "name": "Désignation",
+      "namePlaceholder": "Rabais {n}",
+      "pct": "Pourcent",
+      "remove": "Supprimer le rabais",
+      "hint": "Positif = rabais, négatif = supplément. Visible uniquement dans l’éditeur ; à l’impression et dans tous les totaux, le prix après rabais est utilisé.",
+      "groupHint": "S’applique à toutes les positions de ce groupe et de ses sous-groupes. Positif = rabais, négatif = supplément. Visible uniquement dans l’éditeur.",
+      "inherited": "Rabais des groupes supérieurs : {pct} %.",
+      "own": "Rabais ici au total : {pct} %."
     },
     "measurements": {
       "title": "Avant-métré",

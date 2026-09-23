@@ -122,6 +122,11 @@ const updateSchema = z.object({
     .transform((v) => v || null)
     .nullable()
     .optional(),
+  /** LV only: up to 4 named discounts (pct > 0) or surcharges (pct < 0). */
+  discounts: z
+    .array(z.object({ name: z.string().trim().max(60), pct: z.number().finite().min(-1000).max(100) }))
+    .max(4)
+    .optional(),
 });
 export type NodeUpdate = z.input<typeof updateSchema>;
 
@@ -135,7 +140,7 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
   if (!s.success || !parsed.success || !z.uuid().safeParse(nodeId).success) return { error: "invalidInput" };
   if (await isReadOnly(scope)) return { error: "catalogReadOnly" };
 
-  const { short_text, long_text, unit, quantity, unit_price, is_optional, is_lump_sum, price_date, cost_plan_item_id, custom_number } =
+  const { short_text, long_text, unit, quantity, unit_price, is_optional, is_lump_sum, price_date, cost_plan_item_id, custom_number, discounts } =
     parsed.data;
   const values =
     scope.type === "lv"
@@ -144,7 +149,9 @@ export async function updateTreeNode(scope: TreeScope, nodeId: string, input: No
           long_text: cleanText(long_text),
           unit: is_lump_sum ? null : unit || null,
           ...(is_lump_sum ? { quantity: 1 } : quantity !== undefined && { quantity }),
-          unit_price,
+          // The net unit_price (after discounts of the position and its groups) is set by the database.
+          gross_unit_price: unit_price,
+          ...(discounts !== undefined && { discounts }),
           is_optional: is_optional ?? false,
           is_lump_sum: is_lump_sum ?? false,
           ...(cost_plan_item_id !== undefined && { cost_plan_item_id }),
@@ -363,7 +370,7 @@ export async function insertFromCatalog(
     long_text: Json;
     unit: string | null;
     quantity: number | null;
-    unit_price: number | null;
+    gross_unit_price: number | null;
     source_catalog_node_id: string;
     sort: number;
   }[] = [];
@@ -381,7 +388,7 @@ export async function insertFromCatalog(
         long_text: longText(node),
         unit: node.unit,
         quantity: null,
-        unit_price: node.unit_price,
+        gross_unit_price: node.unit_price,
         source_catalog_node_id: node.id,
         sort: sort++,
       });

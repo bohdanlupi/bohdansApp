@@ -193,6 +193,23 @@ export function insertionPoint<T extends TreeNode>(
   return { parentId: selected.parent_id, beforeId: next?.id ?? null };
 }
 
+/** LV discount (pct > 0) or surcharge (pct < 0) on a position or group; shown in the editor only. */
+export type Discount = { name: string; pct: number };
+
+/** Price factor of discounts applied one after another: 10 % and 5 % → 0.9 × 0.95. */
+export const discountFactor = (discounts: readonly Discount[] | null | undefined) =>
+  (discounts ?? []).reduce((factor, d) => factor * (1 - d.pct / 100), 1);
+
+/** Factor of the discounts of all groups above a node (the database applies the same to unit_price). */
+export function inheritedDiscountFactor<T extends TreeNode & { discounts?: unknown }>(nodes: T[], node: T): number {
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  let factor = 1;
+  for (let p = node.parent_id ? byId.get(node.parent_id) : undefined; p; p = p.parent_id ? byId.get(p.parent_id) : undefined) {
+    factor *= discountFactor(p.discounts as Discount[] | undefined);
+  }
+  return factor;
+}
+
 /** Rounds to Rappen (toPrecision removes float noise, so 4.995 rounds to 5.00 like in Postgres). */
 export const round2 = (value: number) => (Math.sign(value) * Math.round(Number(Math.abs(value * 100).toPrecision(12)))) / 100;
 

@@ -1,10 +1,11 @@
 "use client";
 
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
 import { CostItemSelect } from "@/components/cost-item-select";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +13,7 @@ import type { CostItemOption } from "@/lib/cost-plan";
 import { contentLanguages, type I18nText } from "@/lib/i18n-text";
 import { formatMoney, formatNumber, parseNumber } from "@/lib/number-input";
 import type { AppLanguage } from "@/lib/supabase/types";
-import { isPosition, positionTotal } from "@/lib/tree";
+import { discountFactor, isPosition, positionTotal, round2, type Discount } from "@/lib/tree";
 import { updateTreeNode, type TreeScope } from "@/lib/tree-actions";
 import { cn } from "@/lib/utils";
 
@@ -33,19 +34,31 @@ type Draft = {
   price_date: string;
   cost_plan_item_id: string;
   custom_number: string;
+  discounts: { name: string; pct: string }[];
 };
+
+const MAX_DISCOUNTS = 4;
+
+/** Discount rows with a percentage; rows without one are not saved. */
+const parseDiscounts = (rows: Draft["discounts"]): Discount[] =>
+  rows.flatMap(({ name, pct }) => {
+    const value = parseNumber(pct);
+    return value === null ? [] : [{ name: name.trim(), pct: value }];
+  });
 
 const toDraft = (node: EditorNode): Draft => ({
   short_text: { ...node.short_text },
   long_text: { ...node.long_text },
   unit: node.unit ?? "",
   quantity: formatNumber(node.quantity, 3, false),
-  unit_price: formatNumber(node.unit_price, 2),
+  // LV: the gross price is edited; unit_price is the net price after discounts.
+  unit_price: formatNumber(node.gross_unit_price !== undefined ? node.gross_unit_price : node.unit_price, 2),
   is_optional: node.is_optional ?? false,
   is_lump_sum: node.is_lump_sum ?? false,
   price_date: node.price_date ?? "",
   cost_plan_item_id: node.cost_plan_item_id ?? "",
   custom_number: node.custom_number ?? "",
+  discounts: (node.discounts ?? []).map((d) => ({ name: d.name, pct: formatNumber(d.pct, 2, false) })),
 });
 
 /** Detail panel of the selected node; every change is saved when a field loses focus. */
@@ -56,6 +69,7 @@ export function NodeDetail({
   editable,
   measurements,
   costOptions,
+  inheritedFactor = 1,
 }: {
   scope: TreeScope;
   node: EditorNode;
@@ -63,6 +77,8 @@ export function NodeDetail({
   editable: boolean;
   measurements: Measurement[];
   costOptions: CostItemOption[];
+  /** LV: price factor of the discounts of the groups above this node. */
+  inheritedFactor?: number;
 }) {
   const t = useTranslations("tree");
   const isLv = scope.type === "lv";
@@ -73,6 +89,7 @@ export function NodeDetail({
   const saved = useRef(JSON.stringify(toDraft(node)));
   const savedNumber = useRef(node.custom_number ?? "");
   const numbered = isLv && node.kind === "group";
+  const discountable = isLv && node.kind !== "text";
 
   const save = async (next: Draft = draft) => {
     const serialized = JSON.stringify(next);
@@ -91,6 +108,7 @@ export function NodeDetail({
       cost_plan_item_id: isLv ? next.cost_plan_item_id || null : undefined,
       // Sent only when changed: a new group number renumbers the LV.
       custom_number: numbered && next.custom_number.trim() !== savedNumber.current ? next.custom_number : undefined,
+      discounts: discountable ? parseDiscounts(next.discounts) : undefined,
     });
     if (result.error) {
       setStatus("error");
@@ -113,7 +131,17 @@ export function NodeDetail({
   const hasMeasurements = measurements.length > 0;
   const quantityText = hasMeasurements ? formatNumber(node.quantity, 3, false) : draft.quantity;
   const quantity = draft.is_lump_sum ? 1 : (parseNumber(quantityText) ?? 0);
-  const total = positionTotal({ ...node, quantity, unit_price: parseNumber(draft.unit_price) });
+  // Same calculation as the database: gross × discounts of the node and its groups, rounded to Rappen.
+  const ownFactor = discountFactor(parseDiscounts(draft.discounts));
+  const factor = isLv ? ownFactor * inheritedFactor : 1;
+  const gross = parseNumber(draft.unit_price);
+  const net = gross === null ? null : round2(gross * factor);
+  const total = positionTotal({ ...node, quantity, unit_price: net });
+  const discounted = factor !== 1;
+  const percent = (f: number) => formatNumber(round2((1 - f) * 100), 2, false);
+
+  const setDiscount = (index: number, patch: Partial<Draft["discounts"][number]>) =>
+    update({ discounts: draft.discounts.map((d, i) => (i === index ? { ...d, ...patch } : d)) });
 
   return (
     <div className="space-y-4 rounded-xl border p-4">
@@ -236,7 +264,9 @@ export function NodeDetail({
               </datalist>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="unit_price">{isLv ? t("fields.estimatePrice") : t("fields.unitPrice")}</Label>
+              <Label htmlFor="unit_price">
+                {isLv ? (discounted ? t("fields.grossPrice") : t("fields.estimatePrice")) : t("fields.unitPrice")}
+              </Label>
               <Input
                 id="unit_price"
                 inputMode="decimal"
@@ -249,6 +279,14 @@ export function NodeDetail({
                 }}
               />
             </div>
+            {isLv && discounted && (
+              <div className="space-y-2">
+                <Label>{t("fields.netPrice")}</Label>
+                <div className="flex h-8 items-center justify-end rounded-lg bg-muted/50 px-2.5 text-sm tabular-nums">
+                  {formatMoney(net)}
+                </div>
+              </div>
+            )}
             {isLv ? (
               <div className="space-y-2">
                 <Label>{t("fields.total")}</Label>
@@ -288,6 +326,61 @@ export function NodeDetail({
                 </label>
               </div>
             )}
+          </div>
+        )}
+        {discountable && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <Label>{t("discounts.title")}</Label>
+              {editable && draft.discounts.length < MAX_DISCOUNTS && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => update({ discounts: [...draft.discounts, { name: "", pct: "" }] })}
+                >
+                  <Plus />
+                  {t("discounts.add")}
+                </Button>
+              )}
+            </div>
+            {draft.discounts.map((d, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Input
+                  aria-label={t("discounts.name")}
+                  placeholder={t("discounts.namePlaceholder", { n: i + 1 })}
+                  maxLength={60}
+                  value={d.name}
+                  onChange={(e) => setDiscount(i, { name: e.target.value })}
+                  onBlur={() => save()}
+                />
+                <Input
+                  aria-label={t("discounts.pct")}
+                  inputMode="decimal"
+                  placeholder="0"
+                  className="w-24 shrink-0 text-right tabular-nums"
+                  value={d.pct}
+                  onChange={(e) => setDiscount(i, { pct: e.target.value })}
+                  onBlur={() => save()}
+                />
+                <span className="text-sm text-muted-foreground">%</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t("discounts.remove")}
+                  title={t("discounts.remove")}
+                  onClick={() => update({ discounts: draft.discounts.filter((_, j) => j !== i) }, true)}
+                >
+                  <X />
+                </Button>
+              </div>
+            ))}
+            <p className="text-xs text-muted-foreground">
+              {node.kind === "group" ? t("discounts.groupHint") : t("discounts.hint")}
+              {inheritedFactor !== 1 && <> {t("discounts.inherited", { pct: percent(inheritedFactor) })}</>}
+              {draft.discounts.length > 0 && ownFactor !== 1 && <> {t("discounts.own", { pct: percent(ownFactor) })}</>}
+            </p>
           </div>
         )}
         {isLv && node.kind !== "text" && costOptions.length > 0 && (
