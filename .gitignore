@@ -51,3 +51,8 @@ next-env.d.ts
 
 # IGH supplier catalogues (licensed price lists, imported with scripts/import-igh.mjs)
 /IGH/
+
+# Licensed standards and guides (SIA 108, SIA 382/5, suissetec NPK) and working files with customer data
+/Berechnungsvorlagen/
+/NPK/
+*.pdf
