@@ -87,6 +87,12 @@ Offer math (src/lib/offer-math.ts): Brutto − Rabatt − Abzüge = Netto − Sk
 
 -- Dokumente
 documents           id, project_id?, company_id?, storage_path, name, type, uploaded_by
+
+-- KWL-Auslegung (kontrollierte Wohnungslüftung)
+ventilation_calcs   id, project_id, name (Wohnung / Einheit), sort, data jsonb (rooms, height, filter, device, notes)
+                    → schema src/lib/kwl/schema.ts, all results computed in src/lib/kwl/calc.ts + sia3825.ts
+ventilation_plans   project_id (PK), data jsonb (design criteria, checklist states, phase inputs,
+                    commissioning measurements, notes per phase) → src/lib/kwl/plan-schema.ts
 ```
 
 All tables get `created_at/updated_at/created_by`. RLS policies: authenticated users of the firm
@@ -99,6 +105,9 @@ can read everything; write access by role.
 /projekte                      list + create
 /projekte/[id]                 overview, Beteiligte, documents
 /projekte/[id]/kostenplan      BKP / KV
+/projekte/[id]/lueftung        KWL-Planung: design criteria + phase progress, PDF /api/pdf/kwl-plan/[id]
+/projekte/[id]/lueftung/[31…61] SIA 108 phase: checklists (SIA 382/5 refs) + calculations + diagrams
+/projekte/[id]/lueftung/wohnungen[/calcId]  dwelling calculations, PDF /api/pdf/kwl/[calcId]
 /projekte/[id]/lv/[lvId]       LV editor (tree + detail panel, Vorausmass tab)
 /projekte/[id]/lv/[lvId]/offerten        bidders, price entry per offer
 /projekte/[id]/lv/[lvId]/vergleich       Angebotsvergleich + Vergabeantrag
@@ -177,6 +186,23 @@ Grundfos, Heim, Helios, IMI, Meier Tobler, Nussbaum, Oventrop, Sanitas, Siemens,
 Left out on purpose (free-plan size): Zehnder HK, Debrunner Acifer BW/TB/WG. Catalogue page and LV
 "Aus Katalog" dialog load lazily with server search; LV/offer queries now page past the 1000-row API limit.
 Tested end to end with a temporary planer (browse, search, insert into LV, read-only guard, PDF).
+
+KWL-Auslegung (2026-09-25): calculations of `Berechnungsvorlagen/2026-XXX_L_DimTool-Lupi.xlsm` ported to
+`src/lib/kwl/` (air flows per room SIA 382/5 with LUPI defaults, min/party distribution, fan curves of 16 devices
+→ operating points per stage, nominal stage, party flow, SPI check SIA 382/1, ODA/IDA → ISO 16890 filters, duct
+sizing, door overflow, AUL/FOL distance, duct insulation). Results match the workbook example (Q350 ST: stages 5/4,
+SPI 0.20, party 235.9 m³/h). Migration `20260925200000_ventilation_calcs.sql` applied to Zurich.
+To check: the stage power table in the workbook is identical for all Zehnder units and missing for Hoval/Helios
+(SPI then needs the power entered by hand); the AUL/FOL distance and insulation charts were digitised from images.
+
+KWL-Planung (2026-09-25): the Lüftung tab is a planning dossier by SIA 108 phases 31, 32, 33, 41, 51, 52, 53, 61
+(src/lib/kwl/phases.ts: goals + checklists DE/FR/IT with SIA 382/5 / SIA 108 references, conditional on the design
+criteria). Calculations/diagrams from SIA 382/5 (src/lib/kwl/sia3825.ts): four-step design flows (5.4.3, Annex F
+example verified), base ventilation 0.1 h⁻¹ / 0.3 h⁻¹, CO₂, simple extract system f-factor, Table 4/7 limits,
+door gaps (Figure 3 reproduced with Cd 0.7), AUL/FOL distance (Figure 17), acoustics L_H / L_Aeq (Table 1, Annex C),
+frost variants (Table 8), commissioning protocol (≤ 10 % balance, measured SPI). Migration
+`20260925210000_ventilation_plans.sql` applied. Norm PDFs in `Berechnungsvorlagen/` are licensed SIA documents –
+never commit them (repo is public).
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

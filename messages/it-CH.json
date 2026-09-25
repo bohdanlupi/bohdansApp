@@ -139,7 +139,8 @@
     "tabs": {
       "overview": "Panoramica",
       "lvs": "Capitolati",
-      "costPlan": "Piano dei costi"
+      "costPlan": "Piano dei costi",
+      "ventilation": "Ventilazione"
     }
   },
   "addresses": {
@@ -645,5 +646,727 @@
       "awardLetter": "Aggiudicazione (PDF)",
       "rejectionLetter": "Rifiuto (PDF)"
     }
+  },
+  "kwl": {
+    "title": "Dimensionamento VMC",
+    "description": "Dimensionamento della ventilazione controllata degli appartamenti, per appartamento o unità d’uso.",
+    "new": "Nuovo dimensionamento VMC",
+    "create": "Crea",
+    "defaultName": "Appartamento {n}",
+    "emptyTitle": "Ancora nessun dimensionamento VMC",
+    "emptyText": "Create un dimensionamento per appartamento: portate d’aria per locale, livelli di filtrazione, apparecchio di ventilazione con curve caratteristiche e verifica SPI.",
+    "pdf": "PDF",
+    "duplicate": "Copia",
+    "delete": "Elimina",
+    "deleteTitle": "Eliminare il dimensionamento VMC?",
+    "deleteText": "«{name}» sarà eliminato definitivamente con tutti i locali.",
+    "save": "Salva",
+    "saved": "Salvato",
+    "saveFirst": "Salvare prima.",
+    "supply": "Aria immessa",
+    "extract": "Aria ripresa",
+    "supplyShort": "AIM",
+    "extractShort": "ARI",
+    "yes": "Sì",
+    "no": "No",
+    "fields": {
+      "name": "Appartamento / unità",
+      "nameHint": "p. es. «Casa A – PT app. A1». Per appartamenti uguali copiare poi il dimensionamento."
+    },
+    "list": {
+      "rooms": "Locali",
+      "area": "Superficie m²",
+      "supply": "AIM m³/h",
+      "extract": "ARI m³/h",
+      "device": "Apparecchio",
+      "total": "Totale"
+    },
+    "tabs": {
+      "rooms": "Portate d’aria",
+      "device": "Apparecchio di ventilazione",
+      "filter": "Filtrazione",
+      "tools": "Calcoli ausiliari",
+      "notes": "Indicazioni"
+    },
+    "roomTypes": {
+      "room": "Camera (anche camera per 2 pers.)",
+      "passage": "Locale di transito",
+      "kitchenOpen": "Cucina nella zona di transito",
+      "kitchenClosed": "Cucina fuori dalla zona di transito",
+      "bath": "Bagno o doccia, con o senza WC",
+      "wc": "WC separato",
+      "shortUse": "Locale a uso di breve durata (ca. 2 h/giorno)",
+      "dwelling": "Intera unità abitativa"
+    },
+    "rooms": {
+      "number": "N.",
+      "name": "Designazione",
+      "type": "Tipo (SIA 382/5)",
+      "area": "Superficie m²",
+      "recommended": "racc.",
+      "minimum": "min.",
+      "used": "adottata",
+      "party": "Party",
+      "empty": "Ancora nessun locale. Aggiungete locali o iniziate con locali tipici.",
+      "total": "Totale",
+      "add": "Aggiungi locale",
+      "addTypical": "Inserisci locali tipici",
+      "up": "Sposta su",
+      "down": "Sposta giù",
+      "remove": "Rimuovi locale",
+      "distributionLarge": "> 60 m³/h: dimensionare le condotte (calcoli ausiliari)",
+      "lupiHint": "Valori raccomandati secondo SIA 382/5, tabelle 2 + 3. Scegliendo il tipo vengono proposti i valori di progettazione LUPI (più elevati per comfort, p. es. cucina 40 m³/h) – la portata d’aria immessa risulta quindi più elevata. Le portate minime e party sono ripartite in proporzione alle portate adottate.",
+      "typical": {
+        "living": "Soggiorno / pranzo",
+        "kitchen": "Cucina",
+        "room1": "Camera 1",
+        "room2": "Camera 2",
+        "room3": "Camera 3",
+        "bath": "Bagno / WC",
+        "shower": "Doccia / WC",
+        "storage": "Ripostiglio"
+      }
+    },
+    "summary": {
+      "minimum": "Portata minima (liv. I)",
+      "minimumHint": "0.25 m³/h per m², almeno 50 m³/h",
+      "nominal": "Portata nominale AIM / ARI",
+      "nominalHint": "Norma: {supply} / {extract} m³/h",
+      "party": "Portata party (liv. III)",
+      "partyHint": "Livello massimo dell’apparecchio (scegliere l’apparecchio)",
+      "area": "Superficie",
+      "imbalance": "Aria immessa e aria ripresa non sono bilanciate: aumentare {side} di {difference} m³/h a {target} m³/h (il valore maggiore determina la portata totale dell’appartamento).",
+      "belowNorm": "Le portate adottate sono inferiori ai valori della norma SIA 382/5.",
+      "minimumPdf": "Portata minima (livello I): {flow} m³/h (0.25 m³/h per m², almeno 50 m³/h)"
+    },
+    "device": {
+      "title": "Apparecchio di ventilazione",
+      "description": "Scelta dell’apparecchio e perdita di carico alla portata nominale. Determinante è la portata desiderata al livello III.",
+      "device": "Apparecchio (fornitore / tipo)",
+      "none": "– scegliere l’apparecchio –",
+      "power": "Potenza assorbita in esercizio nominale [W]",
+      "powerPlaceholder": "dai dati",
+      "powerHint": "Necessaria solo se i dati dell’apparecchio non contengono la potenza per livello o se sono disponibili valori del fabbricante.",
+      "supplyDrop": "Perdita di carico AES → AIM alla portata nominale [Pa]",
+      "extractDrop": "Perdita di carico ARI → AES/scarico alla portata nominale [Pa]",
+      "presets": "Valori indicativi:",
+      "preset": {
+        "small": "Impianto piccolo {total} Pa",
+        "medium": "Impianto medio {total} Pa",
+        "multiStorey": "Più piani {total} Pa"
+      },
+      "dropHint": "Secondo il calcolo nel tool VMC (Enerweb) o il progetto. Valori indicativi = somma AES → AIM + ARI → scarico, ripartiti 3/5 lato immissione e 2/5 lato ripresa. SIA 382/5 tabella 7 limita la somma a 150 Pa (obiettivo 100 Pa).",
+      "choose": "Scegliete un apparecchio per calcolare punti di funzionamento, portata party e SPI.",
+      "nominalStage": "Livello in esercizio nominale AIM / ARI",
+      "nominalStageHint": "Livello più basso che raggiunge la portata nominale",
+      "partyHint": "Punto di funzionamento del livello massimo (valore minore AIM/ARI)",
+      "spi": "SPI progettato",
+      "spiUnit": "W per m³/h",
+      "spiUnknown": "Nessun dato di potenza – inserire la potenza",
+      "spiLimits": "Valore limite ≤ {limit}, valore obiettivo ≤ {target}",
+      "spiCheck": "Valore limite / obiettivo rispettato",
+      "spiCheckHint": "SIA 382/1 capoverso 5.7.5.1",
+      "spiFromInput": "SPI calcolato dalla potenza inserita e dalla portata nominale maggiore.",
+      "tooSmall": "L’apparecchio non raggiunge la portata nominale nemmeno al livello massimo. Scegliere un apparecchio più grande o ridurre la perdita di carico.",
+      "minimumNotReached": "Il livello più basso fornisce {lowest} m³/h – più della portata minima di {minimum} m³/h.",
+      "noFlows": "Inserite prima le portate d’aria immessa e ripresa.",
+      "stage": "Livello",
+      "stagePower": "Potenza W",
+      "stageN": "Livello {stage}",
+      "spiLimitPdf": "Valore limite SPI ≤ {limit} rispettato",
+      "spiTargetPdf": "Valore obiettivo SPI ≤ {target} rispettato",
+      "chart": {
+        "supply": "Lato immissione – {flow} m³/h a {drop} Pa",
+        "extract": "Lato ripresa – {flow} m³/h a {drop} Pa",
+        "flow": "Portata [m³/h]",
+        "pressure": "Pressione [Pa]",
+        "system": "Curva dell’impianto passante per il punto nominale",
+        "hint": "Curve del ventilatore per livello (livello in esercizio nominale evidenziato). I punti di funzionamento si trovano sulla curva dell’impianto Δp = k · V².",
+        "supplyPdf": "Lato immissione",
+        "extractPdf": "Lato ripresa",
+        "pdfLegend": "Curve del ventilatore per livello, curva dell’impianto (tratteggio rosso) e punti di funzionamento. Blu: livello in esercizio nominale."
+      },
+      "pressure": {
+        "target": "Perdita di carico esterna {total} Pa: valore obiettivo ({target} Pa) secondo SIA 382/5 tabella 7 rispettato.",
+        "limit": "Perdita di carico esterna {total} Pa: valore limite ({limit} Pa) rispettato, obiettivo ({target} Pa) superato.",
+        "exceeded": "La perdita di carico esterna di {total} Pa supera il valore limite di {limit} Pa secondo SIA 382/5 tabella 7. Ottimizzare la rete."
+      }
+    },
+    "filter": {
+      "traffic": {
+        "title": "Inquinamento dovuto al traffico",
+        "airport": "Aeroporto",
+        "airportHint": "commerciale come Zurigo-Kloten, non aerodromo privato",
+        "motorway": "Strada ad alto scorrimento",
+        "motorwayHint": "> 30'000 veicoli/giorno, p. es. autostrada",
+        "mainRoad": "Asse principale",
+        "mainRoadHint": "< 30'000, p. es. strada principale",
+        "moderate": "Traffico moderato",
+        "moderateHint": "< 10'000, p. es. in località",
+        "none": "Nessun traffico",
+        "noneHint": "p. es. stand di tiro, capanna nel bosco"
+      },
+      "settlement": {
+        "title": "Inquinamento dovuto all’agglomerato",
+        "city": "Grande città",
+        "cityHint": "> 150'000 abitanti",
+        "town": "Piccola città",
+        "townHint": "< 150'000 abitanti",
+        "village": "Villaggio",
+        "villageHint": "< 20'000 abitanti",
+        "hamlet": "Frazione",
+        "hamletHint": "< 1'000 abitanti",
+        "rural": "Fuori dall’abitato",
+        "ruralHint": "p. es. fattoria"
+      },
+      "oda": {
+        "title": "1. Classificazione dell’aria esterna",
+        "description": "Secondo SIA 382/1:2014, tabella 4. Punti: meno di 3 = ODA 1, meno di 5 = ODA 2, altrimenti ODA 3.",
+        "override": "Condizioni particolari",
+        "fromCriteria": "dai criteri",
+        "reason": "Motivazione",
+        "class1": "Aria esterna che può essere solo temporaneamente carica di polvere (p. es. pollini)",
+        "class2": "Aria esterna con elevata concentrazione di polvere o polveri fini e/o di inquinanti gassosi",
+        "class3": "Aria esterna con concentrazione molto elevata di polvere o polveri fini e/o di inquinanti gassosi"
+      },
+      "ida": {
+        "title": "2. Classificazione dell’aria interna",
+        "description": "Secondo SIA 382/1:2014, tabella 8.",
+        "class1": "Locali con esigenze particolari riguardo al contenuto di sostanze estranee e odori",
+        "class2": "Locali di soggiorno con esigenze elevate; CO₂ < 1000 ppm, portata > 30 m³/h per persona",
+        "class3": "Locali di soggiorno; CO₂ < 1400 ppm, portata 18–30 m³/h per persona",
+        "class4": "Locali raramente o mai occupati, nonché locali fumatori",
+        "example1": "Laboratori e locali di produzione per lavori o beni sensibili",
+        "example2": "Locali con esigenze particolari riguardo agli odori, soprattutto per chi entra",
+        "example3": "Tipici edifici abitativi e amministrativi",
+        "example4": "Magazzini, corridoi; tutti i locali in cui si fuma"
+      },
+      "result": {
+        "oda": "Classe dell’aria esterna",
+        "manual": "impostata manualmente",
+        "ida": "Classe dell’aria interna",
+        "supply": "Filtro aria esterna → aria immessa",
+        "supplyHint": "per {ida}, ISO 16890",
+        "extract": "Filtro aria ripresa → aria di scarico (raccomandazione)",
+        "extractHint": "Almeno {minimum} (G4) secondo SIA 382/5 cifra 5.3.6.5.2; filtro fine raccomandato per proteggere lo scambiatore di calore.",
+        "extractPdf": "ISO ePM10 50 % raccomandato (almeno ISO coarse 80 % / G4 secondo SIA 382/5)"
+      },
+      "matrix": {
+        "title": "3. Filtrazione aria esterna – aria immessa",
+        "description": "La EN 779 è stata sostituita nel 2018; le designazioni G1–F9 non vanno più utilizzate.",
+        "corner": "Aria esterna \\ aria interna",
+        "former": "Designazioni precedenti (approssimative)"
+      }
+    },
+    "tools": {
+      "notSaved": "I dati dei calcoli ausiliari non vengono salvati (tranne lo standard costruttivo).",
+      "duct": {
+        "title": "Dimensionamento delle condotte",
+        "description": "Diametro interno necessario e portata massima per condotta alla velocità dell’aria ammessa.",
+        "flow": "Portata [m³/h]",
+        "standard": "Standard costruttivo",
+        "standardBuilding": "Costruzione standard",
+        "velocity": "Velocità dell’aria [m/s]",
+        "velocityHint": "Vuoto = valore massimo ammesso {limit} m/s",
+        "required": "Diametro necessario",
+        "mmInner": "mm interno",
+        "inner": "interno",
+        "maxFlow": "m³/h a {v} m/s"
+      },
+      "door": {
+        "title": "Transito d’aria attraverso le porte",
+        "description": "Altezza della fessura secondo SIA 382/5 figura 3 (pavimento liscio) a {dp} Pa; oltre 10 mm scegliere un’altra bocchetta di transito. Sezione e larghezza della griglia di transito (p. es. Trox Hesco DG13, 55 % di sezione libera, almeno 200 mm) a 2 m/s.",
+        "custom": "Valore proprio",
+        "customFlow": "Altra portata [m³/h]",
+        "empty": "Nessun locale con portata.",
+        "room": "Locale",
+        "area": "Sezione",
+        "gap": "Altezza fessura per larghezza porta",
+        "grille": "Larghezza griglia di transito",
+        "hint": "Determinante è la portata maggiore (immissione o ripresa) del locale."
+      },
+      "exhaust": {
+        "title": "Distanza presa d’aria esterna – scarico",
+        "description": "Distanza orizzontale minima tra le bocchette AES e di scarico secondo il diagramma (impianti per uno o più appartamenti fino a 1'800 m³/h).",
+        "flow": "Portata d’aria di scarico [m³/h]",
+        "position": "Posizione della bocchetta di scarico",
+        "above": "sopra la presa d’aria esterna",
+        "below": "sotto la presa d’aria esterna",
+        "vertical": "Distanza verticale [m]",
+        "tooLarge": "Oltre {max} m³/h: vedi SIA 382/1 fig. 9.",
+        "horizontal": "Distanza orizzontale minima",
+        "base": "Distanza alla stessa altezza",
+        "verticalOnly": "Distanza verticale senza scostamento orizzontale",
+        "hint": "Approssimazione dal diagramma (d ≈ 0.081 · √V). Scarico sopra: 1 m di altezza sostituisce 1 m di distanza; sotto: 2 m di altezza sostituiscono 1 m di distanza."
+      },
+      "insulation": {
+        "title": "Isolamento delle condotte d’aria",
+        "description": "Spessore dell’isolamento secondo la lunghezza della condotta e la differenza di temperatura tra aria e ambiente.",
+        "delta": "Differenza di temperatura",
+        "length": "Lunghezza condotta [m]",
+        "thickness": "Spessore isolamento",
+        "hint": "5 K: 30 mm; 10 K: 30 mm fino a 3 m, poi lineare fino a 60 mm da 6 m; 15 K: 30 mm fino a 2.5 m, poi lineare fino a 100 mm da 6 m."
+      }
+    },
+    "notes": {
+      "own": "Osservazioni",
+      "planning": "Indicazioni di progettazione",
+      "hints": {
+        "stages": "Gli impianti funzionano di norma a tre livelli: 1. notte = esercizio minimo, 2. giorno = esercizio normale, 3. party = ventilazione intensiva.",
+        "intensive": "L’esercizio intensivo corrisponde alla potenza massima dell’apparecchio (dimensionamento per appartamento). Attenzione: la ventilazione intensiva può generare rumore (valori acustici non rispettati).",
+        "minimum": "La portata minima (livello I) è di almeno 50 m³/h o 0.25 m³/h per m².",
+        "maximum": "La portata massima (livello III) è determinata con le curve dell’impianto e del ventilatore.",
+        "simultaneity": "Con un apparecchio centrale si può applicare un fattore di contemporaneità; per 8 appartamenti calcoliamo ca. 80 %.",
+        "heatRecovery": "Gli impianti con aria esterna e aria di scarico devono disporre di un recupero di calore: costruzione standard almeno {standard} %, Minergie {minergie} %.",
+        "efficiency": "Attenzione: il rendimento degli scambiatori di calore è spesso indicato troppo alto dai fabbricanti.",
+        "enerweb": "Il dimensionamento, incl. perdite di carico e acustica, avviene nel tool VMC; tutti i valori tranne il volume d’aria vanno rispettati:"
+      },
+      "velocities": "Velocità dell’aria",
+      "velocitiesHint": "Negli apparecchi, riferita alla superficie netta, al massimo 2 m/s; nel tratto determinante delle condotte al massimo:",
+      "airFlow": "Portata",
+      "standardBuilding": "Costruzione standard",
+      "upTo": "fino a {flow} m³/h",
+      "above": "oltre {flow} m³/h",
+      "overflow": "Perdita di carico max. delle bocchette di transito",
+      "overflowLimits": {
+        "balanced": "Impianto di ventilazione semplice (immissione e ripresa)",
+        "extractOnly": "Impianto di estrazione o impianti con un solo ventilatore di ripresa",
+        "singleRoomClassified": "Apparecchi di ventilazione singoli in cascata o in rete, sensibilità alle variazioni di pressione S1–S3",
+        "singleRoomUnclassified": "Apparecchi di ventilazione singoli, sensibilità alle variazioni di pressione non classificata"
+      },
+      "fire": "Protezione antincendio",
+      "fireText": "Un apparecchio VMC serve di regola una sola unità abitativa e quindi un solo compartimento tagliafuoco; normalmente non sono necessarie misure antincendio. Negli edifici plurifamiliari va rispettato il piano dei compartimenti tagliafuoco.",
+      "literature": "Letteratura"
+    },
+    "norm": {
+      "title": "Verifica secondo SIA 382/5",
+      "description": "Dimensionamento in quattro fasi (cifra 5.4.3) e ventilazione di base (cifra 5.2.3).",
+      "height": "Altezza del locale",
+      "step1": "Fase 1: immissione min.",
+      "step1Hint": "30 m³/h per camera ({rooms} camere, tabella 2)",
+      "step2": "Fase 2: ripresa min.",
+      "step2Hint": "Tabella 3, funzionamento continuo",
+      "step2Demand": "Tabella 3, comandato secondo il fabbisogno",
+      "step3": "Fase 3: determinante",
+      "step4": "Fase 4: {flow} m³/h per camera se l’occupazione non è data",
+      "base": "Ventilazione di base 0.1 h⁻¹",
+      "baseHint": "Portata minima dell’appartamento: {minimum} m³/h",
+      "flowsLow": "Immissione o ripresa inferiore al valore determinante di {flow} m³/h. Portare entrambe a questo valore.",
+      "baseLow": "In questi locali la portata minima non basta per 0.1 h⁻¹: {rooms}."
+    }
+  },
+  "kwlPlan": {
+    "title": "Progettazione VMC",
+    "description": "Progettazione della ventilazione controllata secondo le fasi della SIA 108 – con le esigenze, i calcoli e i diagrammi della SIA 382/5 – fino all’appalto e oltre.",
+    "navLabel": "Progettazione VMC",
+    "overview": "Panoramica e criteri di dimensionamento",
+    "phases": "Fasi SIA 108",
+    "calculations": "Calcoli",
+    "dwellings": {
+      "title": "Dimensionamento degli appartamenti",
+      "description": "Tutti i calcoli degli appartamenti con le verifiche della SIA 382/5.",
+      "open": "Modificare gli appartamenti",
+      "empty": "Ancora nessun calcolo. Create un calcolo per tipo sotto «Appartamenti».",
+      "name": "Appartamento",
+      "step3": "Fase 3",
+      "used": "AIM / ARI",
+      "flows": "Portate",
+      "base": "Ventilazione di base",
+      "pressure": "Pressione est.",
+      "device": "Apparecchio",
+      "unbalanced": "non bilanciato",
+      "hint": "Fase 3 = valore maggiore tra 30 m³/h per camera e ripresa secondo tabella 3. Ventilazione di base = 0.1 h⁻¹ del volume, confrontata con la portata minima. Pressione esterna secondo tabella 7."
+    },
+    "phaseList": "Fasi",
+    "normsHint": "Le liste di controllo riprendono il senso delle esigenze e rimandano alle cifre della SIA 382/5:2021 o SIA 108:2014. Fa stato il testo della norma.",
+    "phaseLabel": "Fase {code}",
+    "phaseNotes": "Osservazioni sulla fase",
+    "save": {
+      "saved": "Salvato",
+      "pending": "Modifiche …",
+      "saving": "Salvataggio …",
+      "error": "Non salvato"
+    },
+    "checklist": {
+      "done": "Fatto",
+      "na": "Non pertinente",
+      "note": "Nota",
+      "ref": "Riferimento:"
+    },
+    "criteria": {
+      "title": "Criteri di dimensionamento",
+      "description": "Basi per la scelta del sistema e il dimensionamento (SIA 382/5 capitolo 3). Determinano i punti di controllo e i valori limite delle fasi e vanno fissati per iscritto con il committente."
+    },
+    "params": {
+      "buildingType": "Edificio",
+      "construction": "Progetto",
+      "system": "Sistema di ventilazione",
+      "systemHint": "Tipo d’impianto secondo SIA 382/1 tabella 1",
+      "unit": "Concetto d’impianto",
+      "unitHint": "Impianto per singolo appartamento o plurifamiliare (cifra 4.2)",
+      "operation": "Funzionamento",
+      "standard": "Standard costruttivo",
+      "dwellings": "Numero di appartamenti",
+      "simultaneity": "Contemporaneità",
+      "simultaneityHint": "0.70 … 1.00 per l’apparecchio, da convenire per iscritto (cifra 5.4.1.5)",
+      "altitude": "Altitudine [m]",
+      "altitudeHint": "per il limite inferiore di umidità (cifra 2.2.6.1)",
+      "storeys": "Piani dell’appartamento",
+      "fireplace": "Focolare nell’appartamento",
+      "kitchen": "Ventilazione della cucina",
+      "airtightness": "Ermeticità dell’involucro",
+      "noise": "Protezione dal rumore",
+      "noiseHint": "Nuovi impianti: esigenze elevate (cifra 2.2.7.3)",
+      "radon": "Zona radon (probabilità > 10 %)",
+      "strongWind": "Zona di vento forte / grattacielo",
+      "fog": "Zona con nebbia frequente",
+      "publicIntake": "Presa d’aria su terreno accessibile al pubblico"
+    },
+    "options": {
+      "buildingType": {
+        "efh": "Casa unifamiliare",
+        "mfh": "Casa plurifamiliare"
+      },
+      "construction": {
+        "new": "Nuova costruzione",
+        "renovation": "Trasformazione / rinnovo"
+      },
+      "system": {
+        "balanced": "Impianto semplice (immissione/estrazione con recupero)",
+        "extract": "Semplice estrazione con prese d’aria",
+        "singleRoom": "Apparecchi di ventilazione singoli",
+        "compound": "Ventilazione in rete (transito attivo)",
+        "reversing": "Apparecchi reversibili"
+      },
+      "unit": {
+        "single": "Impianto per singolo appartamento",
+        "multi": "Impianto plurifamiliare"
+      },
+      "operation": {
+        "continuous": "Funzionamento continuo",
+        "demand": "Comandato secondo il fabbisogno"
+      },
+      "standard": {
+        "standard": "Costruzione standard",
+        "minergie": "Minergie"
+      },
+      "storeys": {
+        "one": "Un piano",
+        "two": "Due piani"
+      },
+      "fireplace": {
+        "none": "Nessuno",
+        "roomAirDependent": "Dipendente dall’aria ambiente",
+        "roomAirIndependent": "Indipendente dall’aria ambiente"
+      },
+      "kitchen": {
+        "window": "Aerazione dalle finestre (senza cappa)",
+        "recirculationHood": "Cappa a ricircolo",
+        "exhaustHood": "Cappa a espulsione",
+        "connectedHood": "Cappa collegata all’impianto"
+      },
+      "airtightness": {
+        "newTarget": "Obiettivo nuovo (q_a50 0.6)",
+        "renovationTarget": "Obiettivo rinnovo (q_a50 1.2)",
+        "limit": "Valore limite (q_a50 1.6)",
+        "unknown": "Sconosciuta"
+      },
+      "noise": {
+        "minimum": "Esigenze minime",
+        "increased": "Esigenze elevate"
+      }
+    },
+    "derived": {
+      "title": "Esigenze derivate",
+      "description": "Valori limite risultanti dai criteri di dimensionamento.",
+      "energyClass": "Classe energetica apparecchio (tabella 7)",
+      "externalPressure": "Perdita di carico esterna (tabella 7)",
+      "pressureValue": "≤ {limit} Pa (obiettivo {target} Pa)",
+      "none": "nessuna esigenza",
+      "transfer": "Perdita di carico bocchetta di transito (tabella 4)",
+      "infiltration": "Fattore d’infiltrazione f (tabella 5)",
+      "ald": "Perdita di carico prese d’aria (cifra 5.4.2.2.1)",
+      "aldOne": "4 Pa",
+      "aldTwo": "3 Pa sopra / 6 Pa sotto",
+      "underPressure": "Depressione max. nell’appartamento",
+      "humidity": "Limite inferiore di umidità",
+      "noiseLiving": "L_H soggiorno e camere",
+      "noiseWet": "L_H bagno/WC ≥ 25 m³, cucina",
+      "intake": "Presa d’aria altezza / velocità",
+      "filters": "Filtri almeno",
+      "co2": "CO₂ con occupazione normale"
+    },
+    "concept": {
+      "title": "Concetto di ventilazione",
+      "description": "Sistema scelto secondo i criteri di dimensionamento e le indicazioni della norma.",
+      "change": "Modificare i criteri",
+      "system": {
+        "balanced": [
+          "Immissione nelle camere, ripresa da cucina, bagno e WC; soggiorno e corridoio in zona di transito (cifra 4.4.1).",
+          "Pressioni bilanciate: al massimo ±3 Pa rispetto all’esterno (figura 1).",
+          "Apparecchio con recupero, classe A, perdita di carico esterna al massimo 150 Pa (tabella 7)."
+        ],
+        "extract": [
+          "Estrazione da locali umidi e cucina, compensazione tramite prese d’aria nelle camere (allegato A.1.1).",
+          "Involucro ermetico necessario (obiettivo SIA 180); ripresa = f × somma prese d’aria (cifra 5.4.2.1).",
+          "Depressione max. 4 / 5 / 6 Pa (figura 1); nessuna compensazione dalla cantina (radon)."
+        ],
+        "singleRoom": [
+          "Portate come per l’impianto semplice; nessuna cascata senza collegamento a un locale vicino (cifra 5.4.4.1).",
+          "Sensibilità alle variazioni di pressione S1 / S2 / S3 secondo altezza e facciate (cifra 5.4.4.4).",
+          "Risolvere scarico della condensa e protezione antigelo (cifra 5.4.4.3)."
+        ],
+        "compound": [
+          "Camere senza condotta d’immissione alimentate con transito attivo (cifra 4.4.2).",
+          "Portate secondo tabella 6 (numero di locali e persone).",
+          "Stesse esigenze acustiche e di comfort della ventilazione a cascata."
+        ],
+        "reversing": [
+          "Solo tra locali con la stessa qualità dell’aria (cifra 4.4.3).",
+          "Apparecchi sempre a coppie; con numero dispari prevedere prese d’aria (cifra 5.4.7.2).",
+          "Filtri su entrambi i lati almeno ISO ePM10 50 %, immissione ISO ePM1 50 % (cifra 5.3.6.4)."
+        ]
+      },
+      "advantages": {
+        "multi": "Vantaggi dell’impianto plurifamiliare",
+        "single": "Vantaggi dell’impianto per singolo appartamento"
+      },
+      "pros": {
+        "multi": [
+          "Manutenzione centralizzata (cambio filtri)",
+          "Spesso investimenti minori e meno spazio nei cavedi",
+          "Scambiatore geotermico più semplice",
+          "Apparecchi fuori dall’appartamento (acustica)"
+        ],
+        "single": [
+          "Comando individuale, migliore adattamento a carico e umidità",
+          "Meno problemi acustici tra appartamenti",
+          "Nessuna fuga d’aria tra appartamenti nell’apparecchio",
+          "Ma: condotte lunghe d’aria esterna/espulsa riducono l’utilità del recupero (cifra 4.2.5)"
+        ]
+      }
+    },
+    "rough": {
+      "title": "Predimensionamento per tipo di appartamento",
+      "description": "Immissione 30 m³/h per camera, ripresa secondo tabella 3 (bagno 30, WC 15, cucina chiusa 20, uso breve 10 m³/h); determinante il valore maggiore (cifra 5.4.3).",
+      "name": "Tipo di appartamento",
+      "count": "Numero",
+      "rooms": "Camere",
+      "baths": "Bagno/doccia",
+      "wcs": "WC sep.",
+      "shortUse": "Ripostiglio ecc.",
+      "closedKitchen": "Cucina chiusa",
+      "supply": "AIM",
+      "extract": "ARI",
+      "governing": "determinante",
+      "remove": "Rimuovere",
+      "defaultName": "Tipo {n}",
+      "add": "Aggiungere tipo",
+      "empty": "Ancora nessun tipo di appartamento.",
+      "dwellings": "Appartamenti",
+      "total": "Portata totale",
+      "totalHint": "tutti gli appartamenti, contemporaneità 1.0",
+      "device": "Dimensionamento apparecchio centrale",
+      "deviceHint": "con contemporaneità {factor}",
+      "largest": "Appartamento più grande",
+      "largestHint": "determinante per la grandezza dell’apparecchio per appartamento"
+    },
+    "cascade": {
+      "title": "Principio della ventilazione a cascata e pressioni",
+      "description": "L’aria fluisce dai locali poco carichi a quelli molto carichi (figura 2). Impianto semplice: al massimo 3 Pa di sovrapressione o depressione rispetto all’esterno (figura 1).",
+      "descriptionExtract": "Semplice estrazione con prese d’aria: depressione a gradini al massimo 4 / 5 / 6 Pa (figura 1).",
+      "supplyZone": "Zona d’immissione",
+      "passageZone": "Zona di transito",
+      "extractZone": "Zona di ripresa",
+      "supplyRooms": "Camere",
+      "passageRooms": "Corridoio, soggiorno, cucina aperta",
+      "extractRooms": "Bagno, WC, cucina",
+      "max": "{pa} Pa max.",
+      "overpressure": "Sovrapressione",
+      "underpressure": "Depressione",
+      "hint": "Andamento qualitativo delle pressioni con finestre e porte chiuse. Al massimo due bocchette di transito (ÜSLD) in serie (cifra 4.4.1.3)."
+    },
+    "targets": {
+      "title": "Valori nominali per taratura e collaudo",
+      "description": "Portate definitive per locale dai calcoli degli appartamenti – base per la taratura e il verbale di collaudo.",
+      "empty": "Ancora nessun calcolo.",
+      "supplyMin": "AIM min.",
+      "supply": "AIM nominale",
+      "extractMin": "ARI min.",
+      "extract": "ARI nominale",
+      "device": "Livello dell’apparecchio in esercizio nominale: immissione {supply}, ripresa {extract}"
+    },
+    "co2": {
+      "title": "Controllo CO₂",
+      "description": "Contenuto stazionario di CO₂ con aria esterna a 400 ppm e 20 l/h (giorno) o 13.6 l/h (notte) per persona (cifra 5.2.4.5).",
+      "flow": "Immissione locale [m³/h]",
+      "dayPersons": "Persone di giorno",
+      "nightPersons": "Persone di notte",
+      "day": "CO₂ di giorno",
+      "night": "CO₂ di notte",
+      "hint": "Obiettivo: 1’000 … 1’400 ppm con occupazione normale (cifra 2.2.5.6). La norma indica per 30 m³/h circa 1’100 ppm (1 persona, giorno) e 1’350 ppm (2 persone, notte)."
+    },
+    "extract": {
+      "title": "Dimensionamento semplice estrazione",
+      "description": "Ripresa determinante = max(f × immissione fase 1; ripresa fase 2), somma tramite prese d’aria = ripresa / f (cifra 5.4.2.3.2).",
+      "supply": "Immissione fase 1 [m³/h]",
+      "extract": "Ripresa fase 2 [m³/h]",
+      "fromCalc": "Proposta da «{name}»",
+      "factor": "Fattore f",
+      "factorHint": {
+        "newTarget": "Tabella 5, obiettivo nuovo",
+        "renovationTarget": "Tabella 5, obiettivo rinnovo",
+        "limit": "Tabella 5, valore limite",
+        "unknown": "Ermeticità sconosciuta (cifra 5.4.2.1.4/5)"
+      },
+      "extractResult": "Portata di ripresa",
+      "ald": "Aria esterna tramite prese d’aria",
+      "aldHint": "Le prese d’aria sono dimensionate sull’immissione dei locali (infiltrazione non considerata)."
+    },
+    "frost": {
+      "title": "Protezione antigelo del recupero",
+      "description": "Varianti secondo l’allegato D, tabella 8. Sono possibili combinazioni.",
+      "code": "Codice",
+      "variant": "Variante",
+      "status": "Valutazione",
+      "variants": {
+        "S": "Nessun rischio di gelo (p. es. scambiatore entalpico)",
+        "E1": "Preriscaldamento elettrico, 1 livello",
+        "E3": "Preriscaldamento elettrico, modulante secondo il fabbisogno",
+        "E4": "Preriscaldamento elettrico modulante, con sorveglianza temperatura/pressione/umidità",
+        "L1a": "Ventilatore d’immissione spento, compensazione tramite presa d’aria a chiusura automatica",
+        "L1b": "Ventilatore d’immissione spento, senza compensazione",
+        "L2a": "Aria esterna ridotta in modo continuo, con compensazione tramite presa d’aria",
+        "L2b": "Aria esterna ridotta in modo continuo, senza compensazione",
+        "B2": "Bypass, modulante secondo il fabbisogno",
+        "XW2": "Preriscaldamento con il riscaldamento, modulante",
+        "XB1": "Preriscaldamento con scambiatore terreno-glicole",
+        "XG": "Scambiatore terreno-aria (registro geotermico)",
+        "M": "Ricircolo dell’aria ripresa (miscela con aria esterna)"
+      },
+      "statuses": {
+        "suitable": "Adatto",
+        "possible": "Possibile (con cautela)",
+        "notAllowed": "Non ammesso"
+      },
+      "notAllowed": "Questa variante non è ammessa secondo SIA 382/5.",
+      "hint": "La protezione antigelo non deve causare una depressione superiore a {pa} Pa; senza dati sull’involucro, riduzione dell’immissione al massimo del {reduction} %. Nessun ricircolo da bagno, WC o cucina (cifra 4.3.4)."
+    },
+    "doorGap": {
+      "title": "Transito tramite fessure delle porte",
+      "description": "Altezza della fessura necessaria secondo figura 3 (pavimento liscio). Perdita di carico max. della bocchetta di transito per questo sistema: {limit} Pa.",
+      "flow": "Portata [m³/h]",
+      "width": "Larghezza porta [cm]",
+      "dp": "Differenza di pressione [Pa]",
+      "dpHint": "Tabella 4: al massimo {limit} Pa",
+      "gap": "Altezza fessura necessaria",
+      "velocity": "Velocità nella fessura",
+      "velocityHint": "al massimo 1.5 m/s (cifra 5.3.5.2.3)",
+      "dpCheck": "Perdita di carico",
+      "ok": "ammessa",
+      "tooHigh": "troppo alta",
+      "tooLarge": "Fessura oltre 10 mm: scegliere un’altra bocchetta di transito (isolamento acustico, passaggio di luce) (cifra 5.3.5.2.4).",
+      "tooFast": "Velocità oltre 1.5 m/s: ridurre la differenza di pressione o scegliere un’altra bocchetta di transito.",
+      "axisGap": "Altezza fessura necessaria [mm]",
+      "axisFlow": "Portata d’aria [m³/h]",
+      "legendWidth": "Porta da {w} cm",
+      "perRoom": "Per locale",
+      "room": "Locale",
+      "hint": "Riprodotto con un coefficiente di efflusso di 0.7 (corrisponde alla figura 3). Le superfici della fessura e del pavimento (p. es. tappeto) influenzano fortemente la portata; guarnizioni a ghigliottina solo con bocchetta di transito separata."
+    },
+    "acoustics": {
+      "title": "Protezione dal rumore per locale",
+      "description": "Esigenza L_H secondo tabella 1 ({level}) e valore di progetto del livello medio L_Aeq ≤ L_H − K1 − K2 − K3 − K_P (allegato C).",
+      "levels": {
+        "minimum": "esigenze minime",
+        "increased": "esigenze elevate"
+      },
+      "k1Hint": "Assorbimento: −2 scarso, −4 senza arredo",
+      "k2Hint": "Tonalità, tipicamente 2",
+      "k3Hint": "Impulsività, tipicamente 0",
+      "kpHint": "Supplemento di progetto, tipicamente 2",
+      "empty": "Ancora nessun calcolo.",
+      "dwelling": "Appartamento",
+      "room": "Locale",
+      "type": "Tipo",
+      "volume": "Volume",
+      "design": "Valore di progetto",
+      "hint": "Bagno/doccia/WC sotto 25 m³: 38 dB (continuo) o 43 dB (secondo il fabbisogno). Le esigenze valgono in ventilazione normale (cifra 2.2.7.5)."
+    },
+    "intake": {
+      "title": "Presa d’aria esterna ed espulsione",
+      "description": "Distanza minima secondo l’allegato E, figura 17 (aria espulsa ≤ 1’800 m³/h, AES 1/2), altezza e velocità della presa d’aria.",
+      "flow": "Portata espulsa [m³/h]",
+      "position": "Bocchetta di espulsione",
+      "above": "sopra la presa",
+      "below": "sotto la presa",
+      "vertical": "Distanza verticale [m]",
+      "horizontal": "Distanza orizzontale [m]",
+      "height": "Altezza della presa [m]",
+      "area": "Sezione netta della presa [m²]",
+      "tooLarge": "Oltre {max} m³/h o aria della cucina (classe 3): distanza secondo SIA 382/1 figura 9.",
+      "required": "Distanza orizzontale minima",
+      "heightCheck": "Altezza minima della presa",
+      "heightNone": "nessuna altezza minima (impianto singolo, privato)",
+      "velocity": "Velocità alla presa",
+      "velocityHint": "al massimo {max} m/s, griglia 5–10 mm",
+      "axisHorizontal": "Distanza orizzontale minima tra le bocchette [m]",
+      "axisVertical": "Distanza verticale h [m]",
+      "hint": "Linee per portata espulsa (50 … 1’800 m³/h), in blu la portata attuale, punto rosso la posizione prevista. Interassi; approssimazione dal diagramma."
+    },
+    "energy": {
+      "title": "Fabbisogno energetico per il trasporto dell’aria",
+      "description": "Stima approssimativa dell’elettricità dei ventilatori (metodo semplificato, cfr. SIA 382/1 allegato D).",
+      "flow": "Portata [m³/h]",
+      "flowHint": "Predimensionamento: {flow} m³/h",
+      "spi": "SPI [W per m³/h]",
+      "spiHint": "Obiettivo 0.28, limite 0.35",
+      "hours": "Ore di esercizio all’anno",
+      "price": "Prezzo dell’elettricità [CHF/kWh]",
+      "energy": "Fabbisogno di elettricità",
+      "cost": "Costi dell’elettricità",
+      "heatRecovery": "Recupero di calore",
+      "heatRecoveryHint": "Rendimento di temperatura; valori più alti secondo SIA 382/1 cifra 5.10 o regolamento (UE) 1253/2014"
+    },
+    "operation": {
+      "title": "Esercizio e manutenzione",
+      "description": "Cambio filtri d’immissione: 1° stadio al più tardi dopo {first} anno, 2° stadio dopo {second} anni. Nuove costruzioni: almeno 0.3 h⁻¹ nei primi tre mesi.",
+      "empty": "Ancora nessun calcolo.",
+      "dwelling": "Appartamento",
+      "nominal": "Portata nominale",
+      "firstMonths": "0.3 h⁻¹ (primi 3 mesi)",
+      "energy": "Elettricità ventilatori",
+      "cost": "Costi",
+      "hint": "In rosso: 0.3 h⁻¹ non è raggiunto nemmeno al livello massimo. Energia dallo SPI progettato in continuo (8’760 h)."
+    },
+    "lv": {
+      "title": "Elenchi delle prestazioni",
+      "description": "L’appalto si svolge nel modulo degli elenchi prestazioni del progetto (posizioni dai cataloghi, offerte, confronto, proposta di aggiudicazione).",
+      "open": "Agli elenchi",
+      "empty": "Ancora nessun elenco delle prestazioni in questo progetto.",
+      "positions": "{count, plural, one {# posizione} other {# posizioni}}"
+    },
+    "commissioning": {
+      "title": "Verbale di collaudo – misure",
+      "description": "Confronto nominale/misurato per locale (cifre 6.2.3–6.2.8). Nominale = portate adottate nel calcolo dell’appartamento.",
+      "empty": "Ancora nessun calcolo.",
+      "dwelling": "Appartamento",
+      "room": "Locale",
+      "supplySoll": "AIM nominale",
+      "supplyIst": "AIM misurata",
+      "extractSoll": "ARI nominale",
+      "extractIst": "ARI misurata",
+      "noiseTotal": "L_H,tot / L_H",
+      "totals": "Totale misurato AIM / ARI",
+      "totalsHint": "Nominale: {supply} / {extract} m³/h",
+      "balance": "Differenza immissione/ripresa",
+      "balanceHint": "al massimo 10 % (cifra 6.3.2)",
+      "power": "Potenza misurata [W]",
+      "spi": "SPI misurato",
+      "hint": "L_H,tot = L_Aeq + K1 + K2 + K3 (allegato C, metodo semplice) con le correzioni della fase 32. Le portate minime secondo le tabelle 2 e 3 devono essere rispettate."
+    },
+    "dwellingsNav": "Appartamenti (portate, apparecchio)",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Lista di controllo (PDF)"
   }
 }

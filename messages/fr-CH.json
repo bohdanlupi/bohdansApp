@@ -139,7 +139,8 @@
     "tabs": {
       "overview": "Aperçu",
       "lvs": "Descriptifs",
-      "costPlan": "Plan des coûts"
+      "costPlan": "Plan des coûts",
+      "ventilation": "Ventilation"
     }
   },
   "addresses": {
@@ -645,5 +646,727 @@
       "awardLetter": "Adjudication (PDF)",
       "rejectionLetter": "Refus (PDF)"
     }
+  },
+  "kwl": {
+    "title": "Dimensionnement VMC",
+    "description": "Dimensionnement de la ventilation contrôlée des logements, par logement ou unité d’utilisation.",
+    "new": "Nouveau dimensionnement VMC",
+    "create": "Créer",
+    "defaultName": "Logement {n}",
+    "emptyTitle": "Aucun dimensionnement VMC",
+    "emptyText": "Créez un dimensionnement par logement : débits d’air par pièce, niveaux de filtration, appareil de ventilation avec courbes caractéristiques et justificatif SPI.",
+    "pdf": "PDF",
+    "duplicate": "Copier",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer le dimensionnement VMC ?",
+    "deleteText": "«{name}» sera définitivement supprimé avec toutes ses pièces.",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "saveFirst": "Veuillez d’abord enregistrer.",
+    "supply": "Air neuf",
+    "extract": "Air repris",
+    "supplyShort": "AIN",
+    "extractShort": "ARE",
+    "yes": "Oui",
+    "no": "Non",
+    "fields": {
+      "name": "Logement / unité",
+      "nameHint": "p. ex. «Maison A – rez app. A1». Pour des logements identiques, copier ensuite le dimensionnement."
+    },
+    "list": {
+      "rooms": "Pièces",
+      "area": "Surface m²",
+      "supply": "AIN m³/h",
+      "extract": "ARE m³/h",
+      "device": "Appareil",
+      "total": "Total"
+    },
+    "tabs": {
+      "rooms": "Débits d’air",
+      "device": "Appareil de ventilation",
+      "filter": "Filtration",
+      "tools": "Calculs auxiliaires",
+      "notes": "Remarques"
+    },
+    "roomTypes": {
+      "room": "Chambre (aussi chambre pour 2 pers.)",
+      "passage": "Pièce de transfert",
+      "kitchenOpen": "Cuisine dans la zone de transfert",
+      "kitchenClosed": "Cuisine hors de la zone de transfert",
+      "bath": "Bain ou douche, avec ou sans WC",
+      "wc": "WC séparé",
+      "shortUse": "Local à utilisation de courte durée (env. 2 h/jour)",
+      "dwelling": "Unité d’habitation entière"
+    },
+    "rooms": {
+      "number": "N°",
+      "name": "Désignation",
+      "type": "Type (SIA 382/5)",
+      "area": "Surface m²",
+      "recommended": "recom.",
+      "minimum": "min.",
+      "used": "retenu",
+      "party": "Party",
+      "empty": "Aucune pièce. Ajoutez des pièces ou commencez avec des pièces types.",
+      "total": "Total",
+      "add": "Ajouter une pièce",
+      "addTypical": "Insérer des pièces types",
+      "up": "Monter",
+      "down": "Descendre",
+      "remove": "Supprimer la pièce",
+      "distributionLarge": "> 60 m³/h : dimensionner les conduits (calculs auxiliaires)",
+      "lupiHint": "Valeurs recommandées selon SIA 382/5, tableaux 2 + 3. Lors du choix du type, les valeurs de planification LUPI sont proposées (plus élevées pour le confort, p. ex. cuisine 40 m³/h) – le débit d’air neuf est donc plus élevé. Les débits minimaux et party sont répartis proportionnellement aux débits retenus.",
+      "typical": {
+        "living": "Séjour / repas",
+        "kitchen": "Cuisine",
+        "room1": "Chambre 1",
+        "room2": "Chambre 2",
+        "room3": "Chambre 3",
+        "bath": "Bain / WC",
+        "shower": "Douche / WC",
+        "storage": "Réduit"
+      }
+    },
+    "summary": {
+      "minimum": "Débit minimal (niv. I)",
+      "minimumHint": "0.25 m³/h par m², au moins 50 m³/h",
+      "nominal": "Débit nominal AIN / ARE",
+      "nominalHint": "Norme : {supply} / {extract} m³/h",
+      "party": "Débit party (niv. III)",
+      "partyHint": "Niveau maximal de l’appareil (choisir l’appareil)",
+      "area": "Surface",
+      "imbalance": "Air neuf et air repris ne sont pas équilibrés : augmenter {side} de {difference} m³/h à {target} m³/h (la valeur la plus grande donne le débit total du logement).",
+      "belowNorm": "Les débits retenus sont inférieurs aux valeurs de la norme SIA 382/5.",
+      "minimumPdf": "Débit minimal (niveau I) : {flow} m³/h (0.25 m³/h par m², au moins 50 m³/h)"
+    },
+    "device": {
+      "title": "Appareil de ventilation",
+      "description": "Choix de l’appareil et perte de charge au débit nominal. Le débit souhaité au niveau III est déterminant.",
+      "device": "Appareil (fournisseur / type)",
+      "none": "– choisir un appareil –",
+      "power": "Puissance absorbée en service nominal [W]",
+      "powerPlaceholder": "selon données",
+      "powerHint": "Nécessaire seulement si les données de l’appareil ne contiennent pas de puissance par niveau ou si des valeurs du fabricant sont disponibles.",
+      "supplyDrop": "Perte de charge AEX → AIN au débit nominal [Pa]",
+      "extractDrop": "Perte de charge ARE → AEJ au débit nominal [Pa]",
+      "presets": "Valeurs indicatives :",
+      "preset": {
+        "small": "Petite installation {total} Pa",
+        "medium": "Installation moyenne {total} Pa",
+        "multiStorey": "Plusieurs étages {total} Pa"
+      },
+      "dropHint": "Selon le calcul dans l’outil VMC (Enerweb) ou le projet. Valeurs indicatives = somme AEX → AIN + ARE → AEJ, réparties 3/5 côté air neuf et 2/5 côté air repris. SIA 382/5 tableau 7 limite la somme à 150 Pa (cible 100 Pa).",
+      "choose": "Choisissez un appareil pour calculer les points de fonctionnement, le débit party et le SPI.",
+      "nominalStage": "Niveau en service nominal AIN / ARE",
+      "nominalStageHint": "Niveau le plus bas atteignant le débit nominal",
+      "partyHint": "Point de fonctionnement du niveau maximal (plus petite valeur AIN/ARE)",
+      "spi": "SPI projeté",
+      "spiUnit": "W par m³/h",
+      "spiUnknown": "Pas de données de puissance – saisir la puissance",
+      "spiLimits": "Valeur limite ≤ {limit}, valeur cible ≤ {target}",
+      "spiCheck": "Valeur limite / cible respectée",
+      "spiCheckHint": "SIA 382/1 alinéa 5.7.5.1",
+      "spiFromInput": "SPI calculé à partir de la puissance saisie et du plus grand débit nominal.",
+      "tooSmall": "L’appareil n’atteint pas le débit nominal, même au niveau maximal. Choisir un appareil plus grand ou réduire la perte de charge.",
+      "minimumNotReached": "Le niveau le plus bas fournit {lowest} m³/h – plus que le débit minimal de {minimum} m³/h.",
+      "noFlows": "Saisissez d’abord les débits d’air neuf et d’air repris.",
+      "stage": "Niveau",
+      "stagePower": "Puissance W",
+      "stageN": "Niveau {stage}",
+      "spiLimitPdf": "Valeur limite SPI ≤ {limit} respectée",
+      "spiTargetPdf": "Valeur cible SPI ≤ {target} respectée",
+      "chart": {
+        "supply": "Côté air neuf – {flow} m³/h à {drop} Pa",
+        "extract": "Côté air repris – {flow} m³/h à {drop} Pa",
+        "flow": "Débit [m³/h]",
+        "pressure": "Pression [Pa]",
+        "system": "Courbe du réseau passant par le point nominal",
+        "hint": "Courbes du ventilateur par niveau (niveau en service nominal mis en évidence). Les points de fonctionnement se trouvent sur la courbe du réseau Δp = k · V².",
+        "supplyPdf": "Côté air neuf",
+        "extractPdf": "Côté air repris",
+        "pdfLegend": "Courbes du ventilateur par niveau, courbe du réseau (tirets rouges) et points de fonctionnement. Bleu : niveau en service nominal."
+      },
+      "pressure": {
+        "target": "Perte de charge externe {total} Pa : valeur cible ({target} Pa) selon SIA 382/5 tableau 7 respectée.",
+        "limit": "Perte de charge externe {total} Pa : valeur limite ({limit} Pa) respectée, valeur cible ({target} Pa) dépassée.",
+        "exceeded": "La perte de charge externe de {total} Pa dépasse la valeur limite de {limit} Pa selon SIA 382/5 tableau 7. Optimiser le réseau."
+      }
+    },
+    "filter": {
+      "traffic": {
+        "title": "Pollution due au trafic",
+        "airport": "Aéroport",
+        "airportHint": "commercial comme Zurich-Kloten, pas un aérodrome privé",
+        "motorway": "Route à grand débit",
+        "motorwayHint": "> 30'000 véhicules/jour, p. ex. autoroute",
+        "mainRoad": "Axe principal",
+        "mainRoadHint": "< 30'000, p. ex. route principale",
+        "moderate": "Trafic modéré",
+        "moderateHint": "< 10'000, p. ex. en localité",
+        "none": "Pas de trafic",
+        "noneHint": "p. ex. stand de tir, cabane forestière"
+      },
+      "settlement": {
+        "title": "Pollution due à l’agglomération",
+        "city": "Grande ville",
+        "cityHint": "> 150'000 habitants",
+        "town": "Petite ville",
+        "townHint": "< 150'000 habitants",
+        "village": "Village",
+        "villageHint": "< 20'000 habitants",
+        "hamlet": "Hameau",
+        "hamletHint": "< 1'000 habitants",
+        "rural": "Hors zone habitée",
+        "ruralHint": "p. ex. ferme"
+      },
+      "oda": {
+        "title": "1. Classification de l’air extérieur",
+        "description": "Selon SIA 382/1:2014, tableau 4. Points : moins de 3 = ODA 1, moins de 5 = ODA 2, sinon ODA 3.",
+        "override": "Conditions particulières",
+        "fromCriteria": "selon critères",
+        "reason": "Justification",
+        "class1": "Air extérieur qui ne peut être que temporairement chargé de poussière (p. ex. pollen)",
+        "class2": "Air extérieur à forte concentration de poussières ou de particules fines et/ou de polluants gazeux",
+        "class3": "Air extérieur à très forte concentration de poussières ou de particules fines et/ou de polluants gazeux"
+      },
+      "ida": {
+        "title": "2. Classification de l’air intérieur",
+        "description": "Selon SIA 382/1:2014, tableau 8.",
+        "class1": "Locaux avec exigences particulières quant à la teneur en substances étrangères et odeurs",
+        "class2": "Locaux de séjour avec exigences élevées ; CO₂ < 1000 ppm, débit > 30 m³/h par personne",
+        "class3": "Locaux de séjour ; CO₂ < 1400 ppm, débit 18–30 m³/h par personne",
+        "class4": "Locaux rarement ou jamais occupés, ainsi que locaux fumeurs",
+        "example1": "Laboratoires et locaux de production pour travaux ou biens sensibles",
+        "example2": "Locaux avec exigences particulières quant aux odeurs, notamment pour les personnes qui entrent",
+        "example3": "Logements et bureaux typiques",
+        "example4": "Dépôts, couloirs ; tous les locaux où l’on fume"
+      },
+      "result": {
+        "oda": "Classe d’air extérieur",
+        "manual": "fixée manuellement",
+        "ida": "Classe d’air intérieur",
+        "supply": "Filtre air extérieur → air neuf",
+        "supplyHint": "pour {ida}, ISO 16890",
+        "extract": "Filtre air repris → air rejeté (recommandation)",
+        "extractHint": "Au moins {minimum} (G4) selon SIA 382/5 ch. 5.3.6.5.2 ; filtre fin recommandé pour protéger l’échangeur de chaleur.",
+        "extractPdf": "ISO ePM10 50 % recommandé (au moins ISO coarse 80 % / G4 selon SIA 382/5)"
+      },
+      "matrix": {
+        "title": "3. Filtration air extérieur – air neuf",
+        "description": "L’EN 779 a été remplacée en 2018 ; les désignations G1–F9 ne doivent plus être utilisées.",
+        "corner": "Air extérieur \\ air intérieur",
+        "former": "Anciennes désignations (approximatif)"
+      }
+    },
+    "tools": {
+      "notSaved": "Les saisies des calculs auxiliaires ne sont pas enregistrées (sauf le standard de construction).",
+      "duct": {
+        "title": "Dimensionnement des conduits",
+        "description": "Diamètre intérieur nécessaire et débit maximal par conduit à la vitesse d’air admissible.",
+        "flow": "Débit [m³/h]",
+        "standard": "Standard de construction",
+        "standardBuilding": "Construction standard",
+        "velocity": "Vitesse de l’air [m/s]",
+        "velocityHint": "Vide = valeur maximale admissible {limit} m/s",
+        "required": "Diamètre nécessaire",
+        "mmInner": "mm intérieur",
+        "inner": "intérieur",
+        "maxFlow": "m³/h à {v} m/s"
+      },
+      "door": {
+        "title": "Transfert d’air par les portes",
+        "description": "Hauteur de fente selon SIA 382/5 figure 3 (sol lisse) à {dp} Pa ; au-delà de 10 mm, choisir une autre bouche de transfert. Section et largeur de la grille de transfert (p. ex. Trox Hesco DG13, 55 % de section libre, au moins 200 mm) à 2 m/s.",
+        "custom": "Valeur propre",
+        "customFlow": "Autre débit [m³/h]",
+        "empty": "Aucune pièce avec débit.",
+        "room": "Pièce",
+        "area": "Section",
+        "gap": "Hauteur de fente pour largeur de porte",
+        "grille": "Largeur grille de transfert",
+        "hint": "Le plus grand débit (air neuf ou repris) de la pièce est déterminant."
+      },
+      "exhaust": {
+        "title": "Distance prise d’air extérieur – rejet d’air",
+        "description": "Distance horizontale minimale entre les bouches AEX et AEJ selon le diagramme (installations individuelles et collectives jusqu’à 1'800 m³/h).",
+        "flow": "Débit d’air rejeté [m³/h]",
+        "position": "Position de la bouche de rejet",
+        "above": "au-dessus de la prise d’air",
+        "below": "en dessous de la prise d’air",
+        "vertical": "Distance verticale [m]",
+        "tooLarge": "Au-delà de {max} m³/h : voir SIA 382/1 fig. 9.",
+        "horizontal": "Distance horizontale minimale",
+        "base": "Distance à même hauteur",
+        "verticalOnly": "Distance verticale sans écart horizontal",
+        "hint": "Approximation du diagramme (d ≈ 0.081 · √V). Rejet au-dessus : 1 m de hauteur remplace 1 m d’écart ; en dessous : 2 m de hauteur remplacent 1 m d’écart."
+      },
+      "insulation": {
+        "title": "Isolation des conduits d’air",
+        "description": "Épaisseur d’isolation selon la longueur du conduit et la différence de température entre l’air et l’environnement.",
+        "delta": "Différence de température",
+        "length": "Longueur du conduit [m]",
+        "thickness": "Épaisseur d’isolation",
+        "hint": "5 K : 30 mm ; 10 K : 30 mm jusqu’à 3 m, puis linéaire jusqu’à 60 mm dès 6 m ; 15 K : 30 mm jusqu’à 2.5 m, puis linéaire jusqu’à 100 mm dès 6 m."
+      }
+    },
+    "notes": {
+      "own": "Remarques",
+      "planning": "Indications de planification",
+      "hints": {
+        "stages": "Les installations fonctionnent normalement à trois niveaux : 1. nuit = service minimal, 2. jour = service normal, 3. party = ventilation intensive.",
+        "intensive": "Le service intensif correspond à la puissance maximale de l’appareil (dimensionnement par logement). Attention : la ventilation intensive peut générer du bruit (valeurs acoustiques non respectées).",
+        "minimum": "Le débit minimal (niveau I) est d’au moins 50 m³/h ou 0.25 m³/h par m².",
+        "maximum": "Le débit maximal (niveau III) est déterminé à l’aide des courbes du réseau et du ventilateur.",
+        "simultaneity": "Pour un appareil central, un facteur de simultanéité peut être appliqué ; pour 8 logements, nous comptons env. 80 %.",
+        "heatRecovery": "Les installations avec air extérieur et air rejeté doivent être équipées d’une récupération de chaleur : construction standard au moins {standard} %, Minergie {minergie} %.",
+        "efficiency": "Attention : le rendement des échangeurs de chaleur est souvent surestimé par les fabricants.",
+        "enerweb": "Le dimensionnement, y c. pertes de charge et acoustique, se fait dans l’outil VMC ; toutes les valeurs sauf le volume d’air doivent être respectées :"
+      },
+      "velocities": "Vitesses de l’air",
+      "velocitiesHint": "Dans les appareils, rapportée à la surface nette, au plus 2 m/s ; dans le tronçon déterminant des conduits, au plus :",
+      "airFlow": "Débit",
+      "standardBuilding": "Construction standard",
+      "upTo": "jusqu’à {flow} m³/h",
+      "above": "plus de {flow} m³/h",
+      "overflow": "Perte de charge max. des bouches de transfert",
+      "overflowLimits": {
+        "balanced": "Installation de ventilation simple (air neuf et repris)",
+        "extractOnly": "Installation d’extraction ou installations avec un seul ventilateur d’extraction",
+        "singleRoomClassified": "Appareils de ventilation individuels en cascade ou en réseau, sensibilité aux variations de pression S1–S3",
+        "singleRoomUnclassified": "Appareils de ventilation individuels, sensibilité aux variations de pression non classée"
+      },
+      "fire": "Protection incendie",
+      "fireText": "Un appareil VMC dessert en règle générale une seule unité d’habitation et donc un seul compartiment coupe-feu ; normalement, aucune mesure de protection incendie n’est nécessaire. Dans les immeubles collectifs, respecter le plan des compartiments coupe-feu.",
+      "literature": "Littérature"
+    },
+    "norm": {
+      "title": "Justification selon SIA 382/5",
+      "description": "Dimensionnement en quatre étapes (ch. 5.4.3) et ventilation de base (ch. 5.2.3).",
+      "height": "Hauteur de pièce",
+      "step1": "Étape 1 : air neuf min.",
+      "step1Hint": "30 m³/h par chambre ({rooms} chambres, tableau 2)",
+      "step2": "Étape 2 : air repris min.",
+      "step2Hint": "Tableau 3, fonctionnement continu",
+      "step2Demand": "Tableau 3, commandé selon les besoins",
+      "step3": "Étape 3 : déterminant",
+      "step4": "Étape 4 : {flow} m³/h par chambre si l’occupation n’est pas donnée",
+      "base": "Ventilation de base 0.1 h⁻¹",
+      "baseHint": "Débit minimal du logement : {minimum} m³/h",
+      "flowsLow": "L’air neuf ou repris est inférieur à la valeur déterminante de {flow} m³/h. Régler les deux sur cette valeur.",
+      "baseLow": "Dans ces pièces, le débit minimal ne suffit pas pour 0.1 h⁻¹ : {rooms}."
+    }
+  },
+  "kwlPlan": {
+    "title": "Planification VMC",
+    "description": "Planification de la ventilation contrôlée selon les phases de la SIA 108 – avec les exigences, calculs et diagrammes de la SIA 382/5 – jusqu’à l’appel d’offres et au-delà.",
+    "navLabel": "Planification VMC",
+    "overview": "Aperçu et critères de dimensionnement",
+    "phases": "Phases SIA 108",
+    "calculations": "Calculs",
+    "dwellings": {
+      "title": "Dimensionnement des logements",
+      "description": "Tous les calculs de logements avec les justifications de la SIA 382/5.",
+      "open": "Modifier les logements",
+      "empty": "Aucun calcul de logement. Créez un calcul par type sous « Logements ».",
+      "name": "Logement",
+      "step3": "Étape 3",
+      "used": "AIN / ARE",
+      "flows": "Débits",
+      "base": "Ventilation de base",
+      "pressure": "Pression ext.",
+      "device": "Appareil",
+      "unbalanced": "non équilibré",
+      "hint": "Étape 3 = plus grande valeur entre 30 m³/h par chambre et l’air repris selon tableau 3. Ventilation de base = 0.1 h⁻¹ du volume, comparée au débit minimal. Pression externe selon tableau 7."
+    },
+    "phaseList": "Phases",
+    "normsHint": "Les listes de contrôle reprennent le sens des exigences et renvoient aux chiffres de la SIA 382/5:2021 ou SIA 108:2014. Le texte de la norme fait foi.",
+    "phaseLabel": "Phase {code}",
+    "phaseNotes": "Remarques sur la phase",
+    "save": {
+      "saved": "Enregistré",
+      "pending": "Modifications …",
+      "saving": "Enregistrement …",
+      "error": "Non enregistré"
+    },
+    "checklist": {
+      "done": "Fait",
+      "na": "Non applicable",
+      "note": "Note",
+      "ref": "Référence :"
+    },
+    "criteria": {
+      "title": "Critères de dimensionnement",
+      "description": "Bases pour le choix du système et le dimensionnement (SIA 382/5 chapitre 3). Ils déterminent les points de contrôle et valeurs limites des phases et doivent être consignés par écrit avec le maître d’ouvrage."
+    },
+    "params": {
+      "buildingType": "Bâtiment",
+      "construction": "Projet",
+      "system": "Système de ventilation",
+      "systemHint": "Type d’installation selon SIA 382/1 tableau 1",
+      "unit": "Concept d’installation",
+      "unitHint": "Installation individuelle ou collective (ch. 4.2)",
+      "operation": "Fonctionnement",
+      "standard": "Standard de construction",
+      "dwellings": "Nombre de logements",
+      "simultaneity": "Simultanéité",
+      "simultaneityHint": "0.70 … 1.00 pour l’appareil, à convenir par écrit (ch. 5.4.1.5)",
+      "altitude": "Altitude [m]",
+      "altitudeHint": "pour la limite inférieure d’humidité (ch. 2.2.6.1)",
+      "storeys": "Niveaux du logement",
+      "fireplace": "Foyer dans le logement",
+      "kitchen": "Ventilation de la cuisson",
+      "airtightness": "Étanchéité de l’enveloppe",
+      "noise": "Protection contre le bruit",
+      "noiseHint": "Nouvelles installations : exigences accrues (ch. 2.2.7.3)",
+      "radon": "Zone radon (probabilité > 10 %)",
+      "strongWind": "Zone de vents forts / immeuble tour",
+      "fog": "Zone de brouillard fréquent",
+      "publicIntake": "Prise d’air sur terrain accessible au public"
+    },
+    "options": {
+      "buildingType": {
+        "efh": "Maison individuelle",
+        "mfh": "Immeuble collectif"
+      },
+      "construction": {
+        "new": "Construction neuve",
+        "renovation": "Transformation / rénovation"
+      },
+      "system": {
+        "balanced": "Installation simple (double flux avec récupération)",
+        "extract": "Extraction simple avec entrées d’air",
+        "singleRoom": "Appareils de ventilation individuels",
+        "compound": "Ventilation en réseau (transfert actif)",
+        "reversing": "Appareils réversibles"
+      },
+      "unit": {
+        "single": "Installation individuelle",
+        "multi": "Installation collective"
+      },
+      "operation": {
+        "continuous": "Fonctionnement continu",
+        "demand": "Commandé selon les besoins"
+      },
+      "standard": {
+        "standard": "Construction standard",
+        "minergie": "Minergie"
+      },
+      "storeys": {
+        "one": "Un niveau",
+        "two": "Deux niveaux"
+      },
+      "fireplace": {
+        "none": "Aucun",
+        "roomAirDependent": "Dépendant de l’air ambiant",
+        "roomAirIndependent": "Indépendant de l’air ambiant"
+      },
+      "kitchen": {
+        "window": "Aération par fenêtre (sans hotte)",
+        "recirculationHood": "Hotte à recyclage",
+        "exhaustHood": "Hotte à évacuation",
+        "connectedHood": "Hotte raccordée à l’installation"
+      },
+      "airtightness": {
+        "newTarget": "Valeur cible neuf (q_a50 0.6)",
+        "renovationTarget": "Valeur cible rénovation (q_a50 1.2)",
+        "limit": "Valeur limite (q_a50 1.6)",
+        "unknown": "Inconnue"
+      },
+      "noise": {
+        "minimum": "Exigences minimales",
+        "increased": "Exigences accrues"
+      }
+    },
+    "derived": {
+      "title": "Exigences dérivées",
+      "description": "Valeurs limites découlant des critères de dimensionnement.",
+      "energyClass": "Classe énergétique appareil (tableau 7)",
+      "externalPressure": "Perte de charge externe (tableau 7)",
+      "pressureValue": "≤ {limit} Pa (cible {target} Pa)",
+      "none": "aucune exigence",
+      "transfer": "Perte de charge bouche de transfert (tableau 4)",
+      "infiltration": "Facteur d’infiltration f (tableau 5)",
+      "ald": "Perte de charge entrées d’air (ch. 5.4.2.2.1)",
+      "aldOne": "4 Pa",
+      "aldTwo": "3 Pa en haut / 6 Pa en bas",
+      "underPressure": "Dépression max. dans le logement",
+      "humidity": "Limite inférieure d’humidité",
+      "noiseLiving": "L_H séjour et chambres",
+      "noiseWet": "L_H bain/WC ≥ 25 m³, cuisine",
+      "intake": "Prise d’air hauteur / vitesse",
+      "filters": "Filtres au moins",
+      "co2": "CO₂ en occupation normale"
+    },
+    "concept": {
+      "title": "Concept de ventilation",
+      "description": "Système choisi selon les critères de dimensionnement et les indications de la norme.",
+      "change": "Modifier les critères",
+      "system": {
+        "balanced": [
+          "Air neuf dans les chambres, air repris de la cuisine, du bain et du WC ; séjour et couloir en zone de transfert (ch. 4.4.1).",
+          "Pressions équilibrées : au plus ±3 Pa par rapport à l’extérieur (figure 1).",
+          "Appareil avec récupération, classe A, perte de charge externe au plus 150 Pa (tableau 7)."
+        ],
+        "extract": [
+          "Extraction des locaux humides et de la cuisine, compensation par entrées d’air dans les chambres (annexe A.1.1).",
+          "Enveloppe étanche nécessaire (valeur cible SIA 180) ; air repris = f × somme des entrées d’air (ch. 5.4.2.1).",
+          "Dépression max. 4 / 5 / 6 Pa (figure 1) ; pas de compensation depuis la cave (radon)."
+        ],
+        "singleRoom": [
+          "Débits d’air comme pour l’installation simple ; pas de cascade sans raccordement à une pièce voisine (ch. 5.4.4.1).",
+          "Sensibilité aux variations de pression S1 / S2 / S3 selon la hauteur et les façades (ch. 5.4.4.4).",
+          "Résoudre l’évacuation des condensats et la protection antigel (ch. 5.4.4.3)."
+        ],
+        "compound": [
+          "Chambres sans conduit d’air neuf alimentées par des transferts actifs (ch. 4.4.2).",
+          "Débits selon tableau 6 (nombre de pièces et de personnes).",
+          "Mêmes exigences acoustiques et de confort que pour la ventilation en cascade."
+        ],
+        "reversing": [
+          "Seulement entre pièces de même qualité d’air (ch. 4.4.3).",
+          "Appareils toujours par paires ; entrées d’air en cas de nombre impair (ch. 5.4.7.2).",
+          "Filtres des deux côtés au moins ISO ePM10 50 %, air fourni ISO ePM1 50 % (ch. 5.3.6.4)."
+        ]
+      },
+      "advantages": {
+        "multi": "Avantages de l’installation collective",
+        "single": "Avantages de l’installation individuelle"
+      },
+      "pros": {
+        "multi": [
+          "Entretien centralisé (changement des filtres)",
+          "Souvent moins d’investissement et de place dans les gaines",
+          "Échangeur géothermique plus simple",
+          "Appareils hors du logement (acoustique)"
+        ],
+        "single": [
+          "Commande individuelle, meilleure adaptation à la charge et à l’humidité",
+          "Moins de problèmes acoustiques entre logements",
+          "Pas de fuite d’air d’un logement à l’autre dans l’appareil",
+          "Mais : de longs conduits d’air extérieur/rejeté réduisent l’utilité de la récupération (ch. 4.2.5)"
+        ]
+      }
+    },
+    "rough": {
+      "title": "Prédimensionnement par type de logement",
+      "description": "Air neuf 30 m³/h par chambre, air repris selon tableau 3 (bain 30, WC 15, cuisine fermée 20, usage bref 10 m³/h) ; la plus grande valeur est déterminante (ch. 5.4.3).",
+      "name": "Type de logement",
+      "count": "Nombre",
+      "rooms": "Chambres",
+      "baths": "Bain/douche",
+      "wcs": "WC sép.",
+      "shortUse": "Réduit etc.",
+      "closedKitchen": "Cuisine fermée",
+      "supply": "AIN",
+      "extract": "ARE",
+      "governing": "déterminant",
+      "remove": "Supprimer",
+      "defaultName": "Type {n}",
+      "add": "Ajouter un type",
+      "empty": "Aucun type de logement.",
+      "dwellings": "Logements",
+      "total": "Débit total",
+      "totalHint": "tous les logements, simultanéité 1.0",
+      "device": "Dimensionnement appareil central",
+      "deviceHint": "avec simultanéité {factor}",
+      "largest": "Plus grand logement",
+      "largestHint": "déterminant pour la taille de l’appareil par logement"
+    },
+    "cascade": {
+      "title": "Principe de la ventilation en cascade et pressions",
+      "description": "L’air circule des pièces peu chargées vers les pièces très chargées (figure 2). Installation simple : au plus 3 Pa de surpression ou de dépression par rapport à l’extérieur (figure 1).",
+      "descriptionExtract": "Extraction simple avec entrées d’air : dépression par paliers au plus 4 / 5 / 6 Pa (figure 1).",
+      "supplyZone": "Zone d’air neuf",
+      "passageZone": "Zone de transfert",
+      "extractZone": "Zone d’air repris",
+      "supplyRooms": "Chambres",
+      "passageRooms": "Couloir, séjour, cuisine ouverte",
+      "extractRooms": "Bain, WC, cuisine",
+      "max": "{pa} Pa max.",
+      "overpressure": "Surpression",
+      "underpressure": "Dépression",
+      "hint": "Allure qualitative des pressions, fenêtres et portes fermées. Au plus deux bouches de transfert (ÜSLD) en série (ch. 4.4.1.3)."
+    },
+    "targets": {
+      "title": "Valeurs de consigne pour le réglage et la réception",
+      "description": "Débits définitifs par pièce issus des calculs – base pour le réglage et le procès-verbal de réception.",
+      "empty": "Aucun calcul de logement.",
+      "supplyMin": "AIN min.",
+      "supply": "AIN consigne",
+      "extractMin": "ARE min.",
+      "extract": "ARE consigne",
+      "device": "Niveau de l’appareil en service nominal : air neuf {supply}, air repris {extract}"
+    },
+    "co2": {
+      "title": "Contrôle du CO₂",
+      "description": "Teneur stationnaire en CO₂ avec air extérieur à 400 ppm et 20 l/h (jour) ou 13.6 l/h (nuit) par personne (ch. 5.2.4.5).",
+      "flow": "Air neuf pièce [m³/h]",
+      "dayPersons": "Personnes le jour",
+      "nightPersons": "Personnes la nuit",
+      "day": "CO₂ le jour",
+      "night": "CO₂ la nuit",
+      "hint": "Objectif : 1’000 … 1’400 ppm en occupation normale (ch. 2.2.5.6). La norme indique pour 30 m³/h environ 1’100 ppm (1 personne, jour) et 1’350 ppm (2 personnes, nuit)."
+    },
+    "extract": {
+      "title": "Dimensionnement de l’extraction simple",
+      "description": "Air repris déterminant = max(f × air neuf étape 1 ; air repris étape 2), somme par les entrées d’air = air repris / f (ch. 5.4.2.3.2).",
+      "supply": "Air neuf étape 1 [m³/h]",
+      "extract": "Air repris étape 2 [m³/h]",
+      "fromCalc": "Proposition de « {name} »",
+      "factor": "Facteur f",
+      "factorHint": {
+        "newTarget": "Tableau 5, valeur cible neuf",
+        "renovationTarget": "Tableau 5, valeur cible rénovation",
+        "limit": "Tableau 5, valeur limite",
+        "unknown": "Étanchéité inconnue (ch. 5.4.2.1.4/5)"
+      },
+      "extractResult": "Débit d’air repris",
+      "ald": "Air extérieur par les entrées d’air",
+      "aldHint": "Les entrées d’air sont dimensionnées sur l’air neuf des pièces (infiltration non prise en compte)."
+    },
+    "frost": {
+      "title": "Protection antigel de la récupération",
+      "description": "Variantes selon l’annexe D, tableau 8. Des combinaisons sont possibles.",
+      "code": "Code",
+      "variant": "Variante",
+      "status": "Évaluation",
+      "variants": {
+        "S": "Pas de risque de gel (p. ex. échangeur enthalpique)",
+        "E1": "Préchauffage électrique, 1 niveau",
+        "E3": "Préchauffage électrique, modulant selon les besoins",
+        "E4": "Préchauffage électrique modulant, avec surveillance température/pression/humidité",
+        "L1a": "Ventilateur d’air neuf arrêté, compensation par entrée d’air à fermeture automatique",
+        "L1b": "Ventilateur d’air neuf arrêté, sans compensation",
+        "L2a": "Air extérieur réduit en continu, avec compensation par entrée d’air",
+        "L2b": "Air extérieur réduit en continu, sans compensation",
+        "B2": "Bypass, modulant selon les besoins",
+        "XW2": "Préchauffage par le chauffage, modulant",
+        "XB1": "Préchauffage par échangeur sol-eau glycolée",
+        "XG": "Échangeur sol-air (registre géothermique)",
+        "M": "Recyclage d’air repris (mélange avec l’air extérieur)"
+      },
+      "statuses": {
+        "suitable": "Approprié",
+        "possible": "Possible (avec prudence)",
+        "notAllowed": "Non admis"
+      },
+      "notAllowed": "Cette variante n’est pas admise selon SIA 382/5.",
+      "hint": "La protection antigel ne doit pas créer une dépression de plus de {pa} Pa ; sans données sur l’enveloppe, réduction de l’air neuf d’au plus {reduction} %. Pas de recyclage d’air du bain, du WC ou de la cuisine (ch. 4.3.4)."
+    },
+    "doorGap": {
+      "title": "Transfert par fentes de porte",
+      "description": "Hauteur de fente nécessaire selon figure 3 (sol lisse). Perte de charge max. de la bouche de transfert pour ce système : {limit} Pa.",
+      "flow": "Débit [m³/h]",
+      "width": "Largeur de porte [cm]",
+      "dp": "Différence de pression [Pa]",
+      "dpHint": "Tableau 4 : au plus {limit} Pa",
+      "gap": "Hauteur de fente nécessaire",
+      "velocity": "Vitesse dans la fente",
+      "velocityHint": "au plus 1.5 m/s (ch. 5.3.5.2.3)",
+      "dpCheck": "Perte de charge",
+      "ok": "admise",
+      "tooHigh": "trop élevée",
+      "tooLarge": "Fente de plus de 10 mm : choisir une autre bouche de transfert (isolation acoustique, passage de lumière) (ch. 5.3.5.2.4).",
+      "tooFast": "Vitesse supérieure à 1.5 m/s : réduire la différence de pression ou choisir une autre bouche de transfert.",
+      "axisGap": "Hauteur de fente nécessaire [mm]",
+      "axisFlow": "Débit d’air [m³/h]",
+      "legendWidth": "Porte de {w} cm",
+      "perRoom": "Par pièce",
+      "room": "Pièce",
+      "hint": "Reproduit avec un coefficient de débit de 0.7 (correspond à la figure 3). Les surfaces de la fente et du sol (p. ex. tapis) influencent fortement le débit ; joints abaissables seulement avec une bouche de transfert séparée."
+    },
+    "acoustics": {
+      "title": "Protection contre le bruit par pièce",
+      "description": "Exigence L_H selon tableau 1 ({level}) et valeur de projet du niveau moyen L_Aeq ≤ L_H − K1 − K2 − K3 − K_P (annexe C).",
+      "levels": {
+        "minimum": "exigences minimales",
+        "increased": "exigences accrues"
+      },
+      "k1Hint": "Absorption : −2 faible, −4 sans ameublement",
+      "k2Hint": "Tonalité, typiquement 2",
+      "k3Hint": "Impulsivité, typiquement 0",
+      "kpHint": "Majoration de projet, typiquement 2",
+      "empty": "Aucun calcul de logement.",
+      "dwelling": "Logement",
+      "room": "Pièce",
+      "type": "Type",
+      "volume": "Volume",
+      "design": "Valeur de projet",
+      "hint": "Bain/douche/WC de moins de 25 m³ : 38 dB (continu) ou 43 dB (selon les besoins). Les exigences s’appliquent en ventilation normale (ch. 2.2.7.5)."
+    },
+    "intake": {
+      "title": "Prise d’air extérieur et rejet",
+      "description": "Distance minimale selon l’annexe E, figure 17 (air rejeté ≤ 1’800 m³/h, AEJ 1/2), hauteur et vitesse de la prise d’air.",
+      "flow": "Débit rejeté [m³/h]",
+      "position": "Bouche de rejet",
+      "above": "au-dessus de la prise",
+      "below": "en dessous de la prise",
+      "vertical": "Distance verticale [m]",
+      "horizontal": "Distance horizontale [m]",
+      "height": "Hauteur de la prise [m]",
+      "area": "Section nette de la prise [m²]",
+      "tooLarge": "Au-delà de {max} m³/h ou air de cuisine (AEJ 3) : distance selon SIA 382/1 figure 9.",
+      "required": "Distance horizontale minimale",
+      "heightCheck": "Hauteur minimale de la prise",
+      "heightNone": "pas de hauteur minimale (installation individuelle, privé)",
+      "velocity": "Vitesse à la prise",
+      "velocityHint": "au plus {max} m/s, grille 5–10 mm",
+      "axisHorizontal": "Distance horizontale minimale entre les bouches [m]",
+      "axisVertical": "Distance verticale h [m]",
+      "hint": "Lignes par débit rejeté (50 … 1’800 m³/h), en bleu le débit actuel, point rouge la position prévue. Entraxes ; approximation du diagramme."
+    },
+    "energy": {
+      "title": "Besoins d’énergie pour le transport de l’air",
+      "description": "Estimation grossière de l’électricité des ventilateurs (méthode simplifiée, cf. SIA 382/1 annexe D).",
+      "flow": "Débit [m³/h]",
+      "flowHint": "Prédimensionnement : {flow} m³/h",
+      "spi": "SPI [W par m³/h]",
+      "spiHint": "Valeur cible 0.28, limite 0.35",
+      "hours": "Heures de fonctionnement par an",
+      "price": "Prix de l’électricité [CHF/kWh]",
+      "energy": "Besoins d’électricité",
+      "cost": "Coûts d’électricité",
+      "heatRecovery": "Récupération de chaleur",
+      "heatRecoveryHint": "Rendement de température ; valeurs plus élevées selon SIA 382/1 ch. 5.10 ou règlement (UE) 1253/2014"
+    },
+    "operation": {
+      "title": "Exploitation et entretien",
+      "description": "Changement des filtres d’air neuf : 1er étage au plus tard après {first} an, 2e étage après {second} ans. Constructions neuves : au moins 0.3 h⁻¹ pendant les trois premiers mois.",
+      "empty": "Aucun calcul de logement.",
+      "dwelling": "Logement",
+      "nominal": "Débit nominal",
+      "firstMonths": "0.3 h⁻¹ (3 premiers mois)",
+      "energy": "Électricité ventilateurs",
+      "cost": "Coûts",
+      "hint": "En rouge : 0.3 h⁻¹ n’est pas atteint même au niveau maximal. Énergie selon le SPI projeté en continu (8’760 h)."
+    },
+    "lv": {
+      "title": "Descriptifs",
+      "description": "L’appel d’offres se fait dans le module des descriptifs du projet (positions des catalogues, offres, comparaison, proposition d’adjudication).",
+      "open": "Vers les descriptifs",
+      "empty": "Aucun descriptif dans ce projet.",
+      "positions": "{count, plural, one {# position} other {# positions}}"
+    },
+    "commissioning": {
+      "title": "Procès-verbal de réception – mesures",
+      "description": "Comparaison consigne/mesure par pièce (ch. 6.2.3–6.2.8). Consigne = débits retenus du calcul de logement.",
+      "empty": "Aucun calcul de logement.",
+      "dwelling": "Logement",
+      "room": "Pièce",
+      "supplySoll": "AIN consigne",
+      "supplyIst": "AIN mesuré",
+      "extractSoll": "ARE consigne",
+      "extractIst": "ARE mesuré",
+      "noiseTotal": "L_H,tot / L_H",
+      "totals": "Total mesuré AIN / ARE",
+      "totalsHint": "Consigne : {supply} / {extract} m³/h",
+      "balance": "Écart air neuf/repris",
+      "balanceHint": "au plus 10 % (ch. 6.3.2)",
+      "power": "Puissance mesurée [W]",
+      "spi": "SPI mesuré",
+      "hint": "L_H,tot = L_Aeq + K1 + K2 + K3 (annexe C, méthode simple) avec les corrections de la phase 32. Les débits minimaux selon tableaux 2 et 3 doivent être respectés."
+    },
+    "dwellingsNav": "Logements (débits, appareil)",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Liste de contrôle (PDF)"
   }
 }

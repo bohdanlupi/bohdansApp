@@ -139,7 +139,8 @@
     "tabs": {
       "overview": "Übersicht",
       "lvs": "Leistungsverzeichnisse",
-      "costPlan": "Kostenplan"
+      "costPlan": "Kostenplan",
+      "ventilation": "Lüftung"
     }
   },
   "addresses": {
@@ -645,5 +646,727 @@
       "awardLetter": "Zusage (PDF)",
       "rejectionLetter": "Absage (PDF)"
     }
+  },
+  "kwl": {
+    "title": "KWL-Auslegung",
+    "description": "Dimensionierung der kontrollierten Wohnungslüftung, je Wohnung bzw. Nutzungseinheit.",
+    "new": "Neue KWL-Auslegung",
+    "create": "Anlegen",
+    "defaultName": "Wohnung {n}",
+    "emptyTitle": "Noch keine KWL-Auslegung",
+    "emptyText": "Legen Sie pro Wohnung eine Auslegung an: Luftmengen je Raum, Filterstufen, Lüftungsgerät mit Kennlinien und SPI-Nachweis.",
+    "pdf": "PDF",
+    "duplicate": "Kopieren",
+    "delete": "Löschen",
+    "deleteTitle": "KWL-Auslegung löschen?",
+    "deleteText": "«{name}» wird mit allen Räumen endgültig gelöscht.",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "saveFirst": "Bitte zuerst speichern.",
+    "supply": "Zuluft",
+    "extract": "Abluft",
+    "supplyShort": "ZUL",
+    "extractShort": "ABL",
+    "yes": "Ja",
+    "no": "Nein",
+    "fields": {
+      "name": "Wohnung / Einheit",
+      "nameHint": "z. B. «Haus A – EG Whg. A1». Für gleiche Wohnungen die Auslegung später kopieren."
+    },
+    "list": {
+      "rooms": "Räume",
+      "area": "Fläche m²",
+      "supply": "ZUL m³/h",
+      "extract": "ABL m³/h",
+      "device": "Gerät",
+      "total": "Total"
+    },
+    "tabs": {
+      "rooms": "Luftmengen",
+      "device": "Lüftungsgerät",
+      "filter": "Filterstufen",
+      "tools": "Hilfsrechner",
+      "notes": "Hinweise"
+    },
+    "roomTypes": {
+      "room": "Zimmer (auch Schlafzimmer für 2 Pers.)",
+      "passage": "Raum im Durchströmbereich",
+      "kitchenOpen": "Küche im Durchströmbereich",
+      "kitchenClosed": "Küche nicht im Durchströmbereich",
+      "bath": "Bad oder Dusche, mit oder ohne WC",
+      "wc": "separates WC",
+      "shortUse": "Raum mit kurzzeitiger Nutzung (ca. 2 h/Tag)",
+      "dwelling": "gesamte Wohneinheit"
+    },
+    "rooms": {
+      "number": "Nr.",
+      "name": "Bezeichnung",
+      "type": "Typ (SIA 382/5)",
+      "area": "Fläche m²",
+      "recommended": "empf.",
+      "minimum": "min.",
+      "used": "eingesetzt",
+      "party": "Party",
+      "empty": "Noch keine Räume. Fügen Sie Räume hinzu oder starten Sie mit typischen Räumen.",
+      "total": "Total",
+      "add": "Raum hinzufügen",
+      "addTypical": "Typische Räume einfügen",
+      "up": "Nach oben",
+      "down": "Nach unten",
+      "remove": "Raum entfernen",
+      "distributionLarge": "> 60 m³/h: Leitungen dimensionieren (Hilfsrechner)",
+      "lupiHint": "Empfohlene Werte gemäss SIA 382/5 Tabellen 2 + 3. Beim Wählen des Typs werden die LUPI-Planungswerte vorgeschlagen (aus Komfortgründen höher, z. B. Küche 40 m³/h) – die Zuluftmenge fällt dadurch erhöht aus. Die Mindest- und Partyluftmengen werden im Verhältnis der eingesetzten Luftmengen verteilt.",
+      "typical": {
+        "living": "Wohnen / Essen",
+        "kitchen": "Küche",
+        "room1": "Zimmer 1",
+        "room2": "Zimmer 2",
+        "room3": "Zimmer 3",
+        "bath": "Bad / WC",
+        "shower": "Dusche / WC",
+        "storage": "Reduit"
+      }
+    },
+    "summary": {
+      "minimum": "Mindestluftmenge (St. I)",
+      "minimumHint": "0.25 m³/h je m², mindestens 50 m³/h",
+      "nominal": "Nennluftmenge ZUL / ABL",
+      "nominalHint": "Norm: {supply} / {extract} m³/h",
+      "party": "Partyluftmenge (St. III)",
+      "partyHint": "Höchste Gerätestufe (Lüftungsgerät wählen)",
+      "area": "Fläche",
+      "imbalance": "Zu- und Abluft sind nicht ausgeglichen: {side} um {difference} m³/h auf {target} m³/h anheben (der grössere Wert ergibt die Gesamtluftmenge der Wohnung).",
+      "belowNorm": "Die eingesetzten Luftmengen liegen unter den Normwerten nach SIA 382/5.",
+      "minimumPdf": "Mindestluftmenge (Stufe I): {flow} m³/h (0.25 m³/h je m², mindestens 50 m³/h)"
+    },
+    "device": {
+      "title": "Lüftungsgerät",
+      "description": "Gerätewahl und Druckverlust bei Nennvolumenstrom. Massgebend ist die gewünschte Luftmenge auf Stufe III.",
+      "device": "Gerät (Lieferant / Typ)",
+      "none": "– Gerät wählen –",
+      "power": "Leistungsaufnahme bei Nennbetrieb [W]",
+      "powerPlaceholder": "aus Gerätedaten",
+      "powerHint": "Nur nötig, wenn die Gerätedaten keine Leistung je Stufe enthalten oder Herstellerwerte vorliegen.",
+      "supplyDrop": "Druckverlust AUL → ZUL bei Nennvolumenstrom [Pa]",
+      "extractDrop": "Druckverlust ABL → FOL bei Nennvolumenstrom [Pa]",
+      "presets": "Richtwerte:",
+      "preset": {
+        "small": "Kleine Anlage {total} Pa",
+        "medium": "Mittlere Anlage {total} Pa",
+        "multiStorey": "Mehrgeschossig {total} Pa"
+      },
+      "dropHint": "Gemäss Berechnung im KWL-Tool (Enerweb) oder Bauprojekt. Richtwerte = Summe AUL → ZUL + ABL → FOL, aufgeteilt 3/5 Zuluft- und 2/5 Abluftseite. SIA 382/5 Tabelle 7 begrenzt die Summe auf 150 Pa (Zielwert 100 Pa).",
+      "choose": "Wählen Sie ein Lüftungsgerät, um Betriebspunkte, Partyluftmenge und SPI zu berechnen.",
+      "nominalStage": "Stufe bei Nennbetrieb ZUL / ABL",
+      "nominalStageHint": "Tiefste Stufe, welche die Nennluftmenge erreicht",
+      "partyHint": "Betriebspunkt der höchsten Stufe (kleinerer Wert von ZUL/ABL)",
+      "spi": "SPI projektiert",
+      "spiUnit": "W pro m³/h",
+      "spiUnknown": "Keine Leistungsdaten – Leistung eingeben",
+      "spiLimits": "Grenzwert ≤ {limit}, Zielwert ≤ {target}",
+      "spiCheck": "Grenzwert / Zielwert erfüllt",
+      "spiCheckHint": "SIA 382/1 Absatz 5.7.5.1",
+      "spiFromInput": "SPI aus der eingegebenen Leistung und der grösseren Nennluftmenge.",
+      "tooSmall": "Das Gerät erreicht die Nennluftmenge auch auf der höchsten Stufe nicht. Grösseres Gerät wählen oder Druckverlust reduzieren.",
+      "minimumNotReached": "Die tiefste Gerätestufe liefert {lowest} m³/h – mehr als die Mindestluftmenge von {minimum} m³/h.",
+      "noFlows": "Tragen Sie zuerst Zu- und Abluftmengen ein.",
+      "stage": "Stufe",
+      "stagePower": "Leistung W",
+      "stageN": "Stufe {stage}",
+      "spiLimitPdf": "Grenzwert SPI ≤ {limit} erfüllt",
+      "spiTargetPdf": "Zielwert SPI ≤ {target} erfüllt",
+      "chart": {
+        "supply": "Zuluftseite – {flow} m³/h bei {drop} Pa",
+        "extract": "Abluftseite – {flow} m³/h bei {drop} Pa",
+        "flow": "Volumenstrom [m³/h]",
+        "pressure": "Druck [Pa]",
+        "system": "Anlagenkennlinie durch den Nennpunkt",
+        "hint": "Ventilatorkennlinien je Stufe (Stufe bei Nennbetrieb hervorgehoben). Die Betriebspunkte liegen auf der Anlagenkennlinie Δp = k · V².",
+        "supplyPdf": "Zuluftseite",
+        "extractPdf": "Abluftseite",
+        "pdfLegend": "Ventilatorkennlinien je Stufe, Anlagenkennlinie (rot gestrichelt) und Betriebspunkte. Blau: Stufe bei Nennbetrieb."
+      },
+      "pressure": {
+        "target": "Externer Druckverlust {total} Pa: Zielwert ({target} Pa) nach SIA 382/5 Tabelle 7 eingehalten.",
+        "limit": "Externer Druckverlust {total} Pa: Grenzwert ({limit} Pa) eingehalten, Zielwert ({target} Pa) überschritten.",
+        "exceeded": "Externer Druckverlust {total} Pa überschreitet den Grenzwert von {limit} Pa nach SIA 382/5 Tabelle 7. Netz optimieren."
+      }
+    },
+    "filter": {
+      "traffic": {
+        "title": "Belastung durch Verkehr",
+        "airport": "Flughafen",
+        "airportHint": "kommerziell wie Flughafen Kloten, nicht Privatflugplatz",
+        "motorway": "Hochleistungsstrasse",
+        "motorwayHint": "> 30'000 Fahrzeuge/Tag, z. B. Autobahn",
+        "mainRoad": "Hauptverkehrsachse",
+        "mainRoadHint": "< 30'000, z. B. Hauptstrasse",
+        "moderate": "mässiger Verkehr",
+        "moderateHint": "< 10'000, z. B. innerorts",
+        "none": "kein Verkehr",
+        "noneHint": "z. B. Schützenhaus, Waldhütte"
+      },
+      "settlement": {
+        "title": "Belastung durch Agglomeration",
+        "city": "Grossstadt",
+        "cityHint": "> 150'000 Einwohner",
+        "town": "Kleinstadt",
+        "townHint": "< 150'000 Einwohner",
+        "village": "Dorf",
+        "villageHint": "< 20'000 Einwohner",
+        "hamlet": "Weiler",
+        "hamletHint": "< 1'000 Einwohner",
+        "rural": "ohne Siedlung",
+        "ruralHint": "z. B. Bauernhof"
+      },
+      "oda": {
+        "title": "1. Klassierung der Aussenluft",
+        "description": "Nach SIA 382/1:2014, Tabelle 4. Punkte: unter 3 = ODA 1, unter 5 = ODA 2, sonst ODA 3.",
+        "override": "Besondere Bedingungen",
+        "fromCriteria": "aus Kriterien",
+        "reason": "Begründung",
+        "class1": "Aussenluft, die nur zeitweise staubbelastet sein darf (z. B. Pollen)",
+        "class2": "Aussenluft mit hoher Konzentration an Staub oder Feinstaub und/oder an gasförmigen Verunreinigungen",
+        "class3": "Aussenluft mit sehr hoher Konzentration an Staub oder Feinstaub und/oder an gasförmigen Verunreinigungen"
+      },
+      "ida": {
+        "title": "2. Klassierung der Raumluft",
+        "description": "Nach SIA 382/1:2014, Tabelle 8.",
+        "class1": "Räume mit besonderen Anforderungen an den Gehalt von Fremd- und Geruchsstoffen",
+        "class2": "Aufenthaltsräume mit erhöhten Ansprüchen; CO₂ < 1000 ppm, Luftrate > 30 m³/h pro Person",
+        "class3": "Aufenthaltsräume; CO₂ < 1400 ppm, Luftrate 18–30 m³/h pro Person",
+        "class4": "Räume, in denen sich selten oder keine Personen aufhalten, sowie Raucherräume",
+        "example1": "Labor- und Produktionsräume für empfindliche Arbeiten bzw. Güter",
+        "example2": "Räume mit speziellen Ansprüchen an Gerüche, insbesondere für neu eintretende Personen",
+        "example3": "Typische Wohn- und Bürobauten",
+        "example4": "Lagerräume, Korridore; alle Räume, in denen geraucht wird"
+      },
+      "result": {
+        "oda": "Klasse der Aussenluft",
+        "manual": "von Hand gesetzt",
+        "ida": "Klasse der Raumluft",
+        "supply": "Filter Aussenluft → Zuluft",
+        "supplyHint": "für {ida}, ISO 16890",
+        "extract": "Filter Abluft → Fortluft (Empfehlung)",
+        "extractHint": "Mindestens {minimum} (G4) gemäss SIA 382/5 Ziff. 5.3.6.5.2; Feinfilter zum Schutz des Wärmeübertragers empfohlen.",
+        "extractPdf": "ISO ePM10 50 % empfohlen (mindestens ISO coarse 80 % / G4 gemäss SIA 382/5)"
+      },
+      "matrix": {
+        "title": "3. Filterstufen Aussenluft – Zuluft",
+        "description": "Die EN 779 wurde 2018 abgelöst; die Bezeichnungen G1–F9 dürfen nicht mehr verwendet werden.",
+        "corner": "Aussenluft \\ Raumluft",
+        "former": "Ehemalige Bezeichnungen (approximativ)"
+      }
+    },
+    "tools": {
+      "notSaved": "Eingaben in den Hilfsrechnern werden nicht gespeichert (ausser dem Baustandard).",
+      "duct": {
+        "title": "Leitungsdimensionierung",
+        "description": "Notwendiger Innendurchmesser und maximale Luftmenge je Rohr bei der zulässigen Luftgeschwindigkeit.",
+        "flow": "Luftmenge [m³/h]",
+        "standard": "Baustandard",
+        "standardBuilding": "Standardbau",
+        "velocity": "Luftgeschwindigkeit [m/s]",
+        "velocityHint": "Leer = zulässiger Höchstwert {limit} m/s",
+        "required": "Notwendiger Durchmesser",
+        "mmInner": "mm innen",
+        "inner": "innen",
+        "maxFlow": "m³/h bei {v} m/s"
+      },
+      "door": {
+        "title": "Überströmung über Türen",
+        "description": "Türspalthöhe nach SIA 382/5 Figur 3 (glatter Bodenbelag) bei {dp} Pa; über 10 mm einen anderen Überström-Luftdurchlass wählen. Querschnitt und Breite Überströmgitter (z. B. Trox Hesco DG13, 55 % freier Querschnitt, mindestens 200 mm) bei 2 m/s.",
+        "custom": "Eigener Wert",
+        "customFlow": "Weitere Luftmenge [m³/h]",
+        "empty": "Keine Räume mit Luftmengen.",
+        "room": "Raum",
+        "area": "Querschnitt",
+        "gap": "Türspalthöhe bei Türbreite",
+        "grille": "Breite Überströmgitter",
+        "hint": "Massgebend ist die grössere Luftmenge (Zu- oder Abluft) des Raumes."
+      },
+      "exhaust": {
+        "title": "Distanz Aussenluft- zu Fortluftdurchlass",
+        "description": "Minimale horizontale Distanz zwischen AUL- und FOL-Durchlass nach Diagramm (Einzel- und Mehrwohnungsanlagen bis 1'800 m³/h).",
+        "flow": "Fortluftmenge [m³/h]",
+        "position": "Lage Fortluftdurchlass",
+        "above": "oberhalb Aussenluftdurchlass",
+        "below": "unterhalb Aussenluftdurchlass",
+        "vertical": "Vertikale Distanz [m]",
+        "tooLarge": "Über {max} m³/h: siehe SIA 382/1 Fig. 9.",
+        "horizontal": "Minimale horizontale Distanz",
+        "base": "Distanz bei gleicher Höhe",
+        "verticalOnly": "Vertikale Distanz ohne horizontalen Abstand",
+        "hint": "Näherung aus dem Diagramm (d ≈ 0.081 · √V). Fortluft oberhalb: 1 m Höhe ersetzt 1 m Abstand; unterhalb: 2 m Höhe ersetzen 1 m Abstand."
+      },
+      "insulation": {
+        "title": "Dämmung von Luftleitungen",
+        "description": "Dämmstärke nach Leitungslänge und Temperaturdifferenz zwischen Luft und Umgebung.",
+        "delta": "Temperaturdifferenz",
+        "length": "Leitungslänge [m]",
+        "thickness": "Dämmstärke",
+        "hint": "5 K: 30 mm; 10 K: 30 mm bis 3 m, dann linear bis 60 mm ab 6 m; 15 K: 30 mm bis 2.5 m, dann linear bis 100 mm ab 6 m."
+      }
+    },
+    "notes": {
+      "own": "Bemerkungen",
+      "planning": "Planungshinweise",
+      "hints": {
+        "stages": "Die Anlagen werden im Normalfall dreistufig betrieben: 1. Nacht = Minimalbetrieb, 2. Tag = Normalbetrieb, 3. Party = Intensivlüftung.",
+        "intensive": "Der Intensivbetrieb entspricht der maximalen Geräteleistung (Auslegung pro Wohnung). Achtung: Intensivlüftung kann zu Geräuschen führen (Schallwerte nicht eingehalten).",
+        "minimum": "Die minimale Luftmenge (Stufe I) beträgt mindestens 50 m³/h oder 0.25 m³/h je m².",
+        "maximum": "Die maximale Luftmenge (Stufe III) wird anhand der Anlagen- und der Ventilatorkennlinie bestimmt.",
+        "simultaneity": "Bei einem zentralen Gerät kann ein Gleichzeitigkeitsfaktor eingesetzt werden; für 8 Wohnungen rechnen wir mit ca. 80 %.",
+        "heatRecovery": "Lüftungsanlagen mit Aussen- und Fortluft sind mit einer Wärmerückgewinnung auszurüsten: Standardbau mindestens {standard} %, Minergie {minergie} %.",
+        "efficiency": "Vorsicht: Der Wirkungsgrad von Wärmetauschern wird von Herstellern häufig zu hoch angegeben.",
+        "enerweb": "Die Dimensionierung inkl. Druckverlust und Schall erfolgt im KWL-Tool; alle Werte ausser dem Luftvolumen sind einzuhalten:"
+      },
+      "velocities": "Luftgeschwindigkeiten",
+      "velocitiesHint": "In Apparaten, bezogen auf die Nettofläche, höchstens 2 m/s; im massgebenden Strang der Kanäle höchstens:",
+      "airFlow": "Luftmenge",
+      "standardBuilding": "Standardbau",
+      "upTo": "bis {flow} m³/h",
+      "above": "über {flow} m³/h",
+      "overflow": "Max. Druckabfall von Überström-Luftdurchlässen",
+      "overflowLimits": {
+        "balanced": "Einfache Lüftungsanlage (Zu- und Abluft)",
+        "extractOnly": "Abluftanlage bzw. Anlagen mit nur einem Abluftventilator",
+        "singleRoomClassified": "Einzelraum-Lüftungsgeräte in Kaskaden- oder Verbundlüftung, Druckschwankungsempfindlichkeit S1–S3",
+        "singleRoomUnclassified": "Einzelraum-Lüftungsgeräte, Druckschwankungsempfindlichkeit nicht klassiert"
+      },
+      "fire": "Brandschutz",
+      "fireText": "Ein KWL-Gerät versorgt in der Regel nur eine Wohneinheit und somit nur einen Brandabschnitt; im Normalfall sind keine Brandschutzmassnahmen notwendig. Bei Mehrfamilienhäusern ist der Brandabschnittsplan zu beachten.",
+      "literature": "Literatur"
+    },
+    "norm": {
+      "title": "Nachweis nach SIA 382/5",
+      "description": "Bemessung in vier Schritten (Ziffer 5.4.3) und Grundlüftung (Ziffer 5.2.3).",
+      "height": "Raumhöhe",
+      "step1": "Schritt 1: Zuluft min.",
+      "step1Hint": "30 m³/h je Zimmer ({rooms} Zimmer, Tabelle 2)",
+      "step2": "Schritt 2: Abluft min.",
+      "step2Hint": "Tabelle 3, Dauerbetrieb",
+      "step2Demand": "Tabelle 3, bedarfsgesteuert ein/aus",
+      "step3": "Schritt 3: massgebend",
+      "step4": "Schritt 4: {flow} m³/h je Zimmer, wenn die Belegung nicht vorgegeben ist",
+      "base": "Grundlüftung 0.1 h⁻¹",
+      "baseHint": "Mindestluftmenge der Wohnung: {minimum} m³/h",
+      "flowsLow": "Zu- oder Abluft liegt unter dem massgebenden Wert von {flow} m³/h. Beide Luftarten auf diesen Wert setzen.",
+      "baseLow": "In diesen Räumen reicht die Mindestluftmenge nicht für 0.1 h⁻¹: {rooms}."
+    }
+  },
+  "kwlPlan": {
+    "title": "KWL-Planung",
+    "description": "Planung der kontrollierten Wohnungslüftung nach den Phasen der SIA 108 – mit den Anforderungen, Berechnungen und Diagrammen der SIA 382/5 – bis zur Ausschreibung und darüber hinaus.",
+    "navLabel": "KWL-Planung",
+    "overview": "Übersicht und Auslegungskriterien",
+    "phases": "Phasen SIA 108",
+    "calculations": "Berechnungen",
+    "dwellings": {
+      "title": "Bemessung der Wohnungen",
+      "description": "Alle Wohnungsberechnungen mit den Nachweisen der SIA 382/5.",
+      "open": "Wohnungen bearbeiten",
+      "empty": "Noch keine Wohnungsberechnung. Legen Sie unter «Wohnungen» je Wohnungstyp eine Berechnung an.",
+      "name": "Wohnung",
+      "step3": "Schritt 3",
+      "used": "ZUL / ABL",
+      "flows": "Volumenströme",
+      "base": "Grundlüftung",
+      "pressure": "Ext. Druck",
+      "device": "Gerät",
+      "unbalanced": "nicht ausgeglichen",
+      "hint": "Schritt 3 = grösserer Wert aus 30 m³/h je Zimmer und Abluft nach Tabelle 3. Grundlüftung = 0.1 h⁻¹ des Wohnungsvolumens, verglichen mit der Mindestluftmenge. Externer Druck nach Tabelle 7."
+    },
+    "phaseList": "Phasen",
+    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf die Ziffern der SIA 382/5:2021 bzw. SIA 108:2014. Massgebend ist der Normtext.",
+    "phaseLabel": "Phase {code}",
+    "phaseNotes": "Bemerkungen zur Phase",
+    "save": {
+      "saved": "Gespeichert",
+      "pending": "Änderungen …",
+      "saving": "Speichert …",
+      "error": "Nicht gespeichert"
+    },
+    "checklist": {
+      "done": "Erledigt",
+      "na": "Nicht zutreffend",
+      "note": "Notiz",
+      "ref": "Referenz:"
+    },
+    "criteria": {
+      "title": "Auslegungskriterien",
+      "description": "Grundlagen für Systemwahl und Bemessung (SIA 382/5 Kapitel 3). Sie steuern, welche Prüfpunkte und Grenzwerte in den Phasen gelten, und sind mit der Bauherrschaft schriftlich festzuhalten."
+    },
+    "params": {
+      "buildingType": "Gebäude",
+      "construction": "Bauvorhaben",
+      "system": "Lüftungssystem",
+      "systemHint": "Anlagetyp nach SIA 382/1 Tabelle 1",
+      "unit": "Anlagekonzept",
+      "unitHint": "Einzel- oder Mehrwohnungsanlage (Ziffer 4.2)",
+      "operation": "Betrieb",
+      "standard": "Baustandard",
+      "dwellings": "Anzahl Wohnungen",
+      "simultaneity": "Gleichzeitigkeit",
+      "simultaneityHint": "0.70 … 1.00 für das Gerät, schriftlich vereinbaren (Ziffer 5.4.1.5)",
+      "altitude": "Höhe über Meer [m]",
+      "altitudeHint": "für die untere Feuchtegrenze (Ziffer 2.2.6.1)",
+      "storeys": "Wohnungsgeschosse",
+      "fireplace": "Feuerstätte in der Wohnung",
+      "kitchen": "Kochstellenlüftung",
+      "airtightness": "Luftdichtheit Gebäudehülle",
+      "noise": "Schallschutz",
+      "noiseHint": "Neue Anlagen: erhöhte Anforderungen (Ziffer 2.2.7.3)",
+      "radon": "Radongebiet (Wahrscheinlichkeit > 10 %)",
+      "strongWind": "Starkwindgebiet / Hochhaus",
+      "fog": "Gebiet mit starkem Nebel",
+      "publicIntake": "Aussenluft-Durchlass auf öffentlich zugänglichem Grund"
+    },
+    "options": {
+      "buildingType": {
+        "efh": "Einfamilienhaus",
+        "mfh": "Mehrfamilienhaus"
+      },
+      "construction": {
+        "new": "Neubau",
+        "renovation": "Umbau / Erneuerung"
+      },
+      "system": {
+        "balanced": "Einfache Lüftungsanlage (Zu-/Abluft mit WRG)",
+        "extract": "Einfache Abluftanlage mit ALD",
+        "singleRoom": "Einzelraum-Lüftungsgeräte",
+        "compound": "Verbundlüftung (aktive Überströmer)",
+        "reversing": "Reversierende Lüftungsgeräte"
+      },
+      "unit": {
+        "single": "Einzelwohnungsanlage",
+        "multi": "Mehrwohnungsanlage"
+      },
+      "operation": {
+        "continuous": "Dauerbetrieb",
+        "demand": "Bedarfsgesteuert ein/aus"
+      },
+      "standard": {
+        "standard": "Standardbau",
+        "minergie": "Minergie"
+      },
+      "storeys": {
+        "one": "Eingeschossig",
+        "two": "Zweigeschossig"
+      },
+      "fireplace": {
+        "none": "Keine",
+        "roomAirDependent": "Raumluftabhängig",
+        "roomAirIndependent": "Raumluftunabhängig"
+      },
+      "kitchen": {
+        "window": "Fensterlüftung (ohne Haube)",
+        "recirculationHood": "Umluft-Dunstabzugshaube",
+        "exhaustHood": "Fortluft-Dunstabzugshaube",
+        "connectedHood": "Haube an der Lüftungsanlage"
+      },
+      "airtightness": {
+        "newTarget": "Zielwert Neubau (q_a50 0.6)",
+        "renovationTarget": "Zielwert Umbau (q_a50 1.2)",
+        "limit": "Grenzwert (q_a50 1.6)",
+        "unknown": "Unbekannt"
+      },
+      "noise": {
+        "minimum": "Mindestanforderungen",
+        "increased": "Erhöhte Anforderungen"
+      }
+    },
+    "derived": {
+      "title": "Abgeleitete Anforderungen",
+      "description": "Grenzwerte, die sich aus den Auslegungskriterien ergeben.",
+      "energyClass": "Energieklasse Gerät (Tabelle 7)",
+      "externalPressure": "Externer Druckverlust (Tabelle 7)",
+      "pressureValue": "≤ {limit} Pa (Ziel {target} Pa)",
+      "none": "keine Anforderung",
+      "transfer": "Druckabfall Überström-Luftdurchlass (Tabelle 4)",
+      "infiltration": "Infiltrationsfaktor f (Tabelle 5)",
+      "ald": "Druckverlust ALD (Ziffer 5.4.2.2.1)",
+      "aldOne": "4 Pa",
+      "aldTwo": "3 Pa oben / 6 Pa unten",
+      "underPressure": "Max. Unterdruck in der Wohnung",
+      "humidity": "Untere Grenze Raumluftfeuchte",
+      "noiseLiving": "L_H Wohn- und Schlafräume",
+      "noiseWet": "L_H Bad/WC ≥ 25 m³, Küche",
+      "intake": "Aussenluft-Durchlass Höhe / Geschwindigkeit",
+      "filters": "Filter mindestens",
+      "co2": "CO₂ bei Normalbelegung"
+    },
+    "concept": {
+      "title": "Lüftungskonzept",
+      "description": "Gewähltes System gemäss Auslegungskriterien und die Hinweise der Norm dazu.",
+      "change": "Auslegungskriterien ändern",
+      "system": {
+        "balanced": [
+          "Zuluft in Zimmer, Abluft aus Küche, Bad und WC; Wohnbereich und Korridor im Durchströmbereich (Ziffer 4.4.1).",
+          "Druckverhältnisse ausgeglichen: höchstens ±3 Pa gegenüber aussen (Figur 1).",
+          "Gerät mit WRG, Energieklasse A, externer Druckverlust höchstens 150 Pa (Tabelle 7)."
+        ],
+        "extract": [
+          "Abluft aus Nassräumen und Küche, Nachströmung über Aussenbauteil-Luftdurchlässe (ALD) in den Zimmern (Anhang A.1.1).",
+          "Luftdichte Gebäudehülle nötig (Zielwert SIA 180); Abluft = f × Summe ALD (Ziffer 5.4.2.1).",
+          "Unterdruck max. 4 / 5 / 6 Pa (Figur 1); keine Nachströmung aus dem Keller (Radon)."
+        ],
+        "singleRoom": [
+          "Aussenluft-Volumenströme wie bei der einfachen Lüftungsanlage; keine Kaskade ohne Nachbarraumanschluss (Ziffer 5.4.4.1).",
+          "Druckschwankungsempfindlichkeit S1 / S2 / S3 je nach Höhe und Fassaden (Ziffer 5.4.4.4).",
+          "Kondensatableitung und Vereisungsschutz lösen (Ziffer 5.4.4.3)."
+        ],
+        "compound": [
+          "Zimmer ohne eigene Zuluftleitung über aktive Überströmer versorgt (Ziffer 4.4.2).",
+          "Volumenströme nach Tabelle 6 (Zimmer- und Personenzahl).",
+          "Gleiche Anforderungen an Schallschutz und Behaglichkeit wie bei Kaskadenlüftungen."
+        ],
+        "reversing": [
+          "Nur zwischen Räumen gleicher Luftqualität (Ziffer 4.4.3).",
+          "Geräte immer paarweise betreiben; bei ungerader Anzahl ALD vorsehen (Ziffer 5.4.7.2).",
+          "Filter beidseitig mindestens ISO ePM10 50 %, Zuluft ISO ePM1 50 % (Ziffer 5.3.6.4)."
+        ]
+      },
+      "advantages": {
+        "multi": "Vorteile Mehrwohnungsanlage",
+        "single": "Vorteile Einzelwohnungsanlage"
+      },
+      "pros": {
+        "multi": [
+          "Zentrale Wartung (Filterwechsel)",
+          "Oft geringere Investitionen und weniger Platz in den Steigzonen",
+          "Erdreich-Wärmeübertrager einfacher",
+          "Geräte nicht in der Wohnung (Akustik)"
+        ],
+        "single": [
+          "Individuelle Steuerung, bessere Anpassung an Belastung und Feuchte",
+          "Geringere Schallprobleme zwischen Wohnungen",
+          "Keine Leckluft von Wohnung zu Wohnung im Gerät",
+          "Aber: lange Aussen-/Fortluftleitungen mindern den Nutzen der WRG (Ziffer 4.2.5)"
+        ]
+      }
+    },
+    "rough": {
+      "title": "Grobdimensionierung nach Wohnungstyp",
+      "description": "Zuluft 30 m³/h je Zimmer, Abluft nach Tabelle 3 (Bad 30, WC 15, geschlossene Küche 20, kurzzeitige Nutzung 10 m³/h); massgebend ist der grössere Wert (Ziffer 5.4.3).",
+      "name": "Wohnungstyp",
+      "count": "Anzahl",
+      "rooms": "Zimmer",
+      "baths": "Bad/Dusche",
+      "wcs": "sep. WC",
+      "shortUse": "Reduit usw.",
+      "closedKitchen": "Küche geschlossen",
+      "supply": "ZUL",
+      "extract": "ABL",
+      "governing": "massgebend",
+      "remove": "Entfernen",
+      "defaultName": "Typ {n}",
+      "add": "Wohnungstyp hinzufügen",
+      "empty": "Noch keine Wohnungstypen.",
+      "dwellings": "Wohnungen",
+      "total": "Summe Luftmenge",
+      "totalHint": "alle Wohnungen, Gleichzeitigkeit 1.0",
+      "device": "Auslegung Zentralgerät",
+      "deviceHint": "mit Gleichzeitigkeit {factor}",
+      "largest": "Grösste Wohnung",
+      "largestHint": "massgebend für die Gerätegrösse je Wohnung"
+    },
+    "cascade": {
+      "title": "Prinzip Kaskadenlüftung und Druckverlauf",
+      "description": "Luft strömt von Räumen mit geringer zu Räumen mit hoher Belastung (Figur 2). Einfache Lüftungsanlage: höchstens 3 Pa Über- bzw. Unterdruck gegenüber aussen (Figur 1).",
+      "descriptionExtract": "Einfache Abluftanlage mit ALD: Unterdruck in der Wohnung stufenweise höchstens 4 / 5 / 6 Pa (Figur 1).",
+      "supplyZone": "Zuluftbereich",
+      "passageZone": "Durchströmbereich",
+      "extractZone": "Abluftbereich",
+      "supplyRooms": "Zimmer",
+      "passageRooms": "Korridor, Wohnen, offene Küche",
+      "extractRooms": "Bad, WC, Küche",
+      "max": "{pa} Pa max.",
+      "overpressure": "Überdruck",
+      "underpressure": "Unterdruck",
+      "hint": "Qualitativer Druckverlauf bei geschlossenen Fenstern und Türen. Höchstens zwei Überström-Luftdurchlässe (ÜSLD) in Serie (Ziffer 4.4.1.3)."
+    },
+    "targets": {
+      "title": "Sollwerte für Einregulierung und Abnahme",
+      "description": "Definitive Volumenströme je Raum aus den Wohnungsberechnungen – Grundlage für die Einregulierung und das Abnahmeprotokoll.",
+      "empty": "Noch keine Wohnungsberechnung.",
+      "supplyMin": "ZUL min.",
+      "supply": "ZUL Soll",
+      "extractMin": "ABL min.",
+      "extract": "ABL Soll",
+      "device": "Gerätestufe bei Nennbetrieb: Zuluft {supply}, Abluft {extract}"
+    },
+    "co2": {
+      "title": "CO₂-Kontrolle",
+      "description": "Stationärer CO₂-Gehalt im Raum bei Aussenluft 400 ppm und 20 l/h (Tag) bzw. 13.6 l/h (Nacht) pro Person (Ziffer 5.2.4.5).",
+      "flow": "Zuluft Raum [m³/h]",
+      "dayPersons": "Personen am Tag",
+      "nightPersons": "Personen in der Nacht",
+      "day": "CO₂ am Tag",
+      "night": "CO₂ in der Nacht",
+      "hint": "Ziel: 1’000 … 1’400 ppm bei Normalbelegung (Ziffer 2.2.5.6). Die Norm nennt für 30 m³/h rund 1’100 ppm (1 Person, Tag) bzw. 1’350 ppm (2 Personen, Nacht)."
+    },
+    "extract": {
+      "title": "Bemessung einfache Abluftanlage",
+      "description": "Massgebende Abluft = max(f × Zuluft Schritt 1; Abluft Schritt 2), Summe über ALD = Abluft / f (Ziffer 5.4.2.3.2).",
+      "supply": "Zuluft Schritt 1 [m³/h]",
+      "extract": "Abluft Schritt 2 [m³/h]",
+      "fromCalc": "Vorschlag aus «{name}»",
+      "factor": "Faktor f",
+      "factorHint": {
+        "newTarget": "Tabelle 5, Zielwert Neubau",
+        "renovationTarget": "Tabelle 5, Zielwert Umbau",
+        "limit": "Tabelle 5, Grenzwert",
+        "unknown": "Luftdichtheit unbekannt (Ziffer 5.4.2.1.4/5)"
+      },
+      "extractResult": "Abluft-Volumenstrom",
+      "ald": "Aussenluft über ALD",
+      "aldHint": "Die ALD werden auf die Zuluft der Räume bemessen (Infiltration nicht berücksichtigt)."
+    },
+    "frost": {
+      "title": "Vereisungsschutz der WRG",
+      "description": "Varianten nach Anhang D, Tabelle 8. Kombinationen sind möglich.",
+      "code": "Code",
+      "variant": "Variante",
+      "status": "Beurteilung",
+      "variants": {
+        "S": "Kein Vereisungsrisiko (z. B. Enthalpieübertrager)",
+        "E1": "Elektrische Vorwärmung, 1-stufig",
+        "E3": "Elektrische Vorwärmung, stufenlos nach Bedarf",
+        "E4": "Elektrische Vorwärmung stufenlos, mit Temperatur-/Druck-/Feuchteüberwachung",
+        "L1a": "Zuluftventilator aus, Nachströmung über automatisch schliessbaren ALD",
+        "L1b": "Zuluftventilator aus, ohne Nachströmung",
+        "L2a": "Aussenluft stufenlos reduziert, mit Nachströmung über ALD",
+        "L2b": "Aussenluft stufenlos reduziert, ohne Nachströmung",
+        "B2": "Bypass, stufenlos nach Bedarf",
+        "XW2": "Vorwärmung mit Heizung, stufenlos",
+        "XB1": "Vorwärmung mit Erdreich-Sole-Wärmeübertrager",
+        "XG": "Erdreich-Luft-Wärmeübertrager (Erdregister)",
+        "M": "Abluftrückführung (Mischung mit Aussenluft)"
+      },
+      "statuses": {
+        "suitable": "Geeignet",
+        "possible": "Möglich (mit Vorsicht)",
+        "notAllowed": "Nicht zulässig"
+      },
+      "notAllowed": "Diese Variante ist nach SIA 382/5 nicht zulässig.",
+      "hint": "Der Vereisungsschutz darf keinen Unterdruck über {pa} Pa verursachen; ohne Angaben zur Gebäudehülle höchstens {reduction} % Reduktion der Zuluft. Keine Abluftrückführung aus Bad, WC oder Küche (Ziffer 4.3.4)."
+    },
+    "doorGap": {
+      "title": "Überströmung über Türspalten",
+      "description": "Erforderliche Türspalthöhe nach Figur 3 (glatter Bodenbelag). Max. Druckabfall des Überström-Luftdurchlasses für dieses System: {limit} Pa.",
+      "flow": "Luftmenge [m³/h]",
+      "width": "Türbreite [cm]",
+      "dp": "Druckdifferenz [Pa]",
+      "dpHint": "Tabelle 4: höchstens {limit} Pa",
+      "gap": "Erforderliche Spalthöhe",
+      "velocity": "Geschwindigkeit im Spalt",
+      "velocityHint": "höchstens 1.5 m/s (Ziffer 5.3.5.2.3)",
+      "dpCheck": "Druckabfall",
+      "ok": "zulässig",
+      "tooHigh": "zu hoch",
+      "tooLarge": "Spalt über 10 mm: wegen Schalldämmung und Lichtdurchtritt einen anderen Überström-Luftdurchlass wählen (Ziffer 5.3.5.2.4).",
+      "tooFast": "Geschwindigkeit über 1.5 m/s: Druckdifferenz reduzieren bzw. anderen Überström-Luftdurchlass wählen.",
+      "axisGap": "Erforderliche Türspalthöhe [mm]",
+      "axisFlow": "Luftvolumenstrom [m³/h]",
+      "legendWidth": "Türbreite {w} cm",
+      "perRoom": "Je Raum",
+      "room": "Raum",
+      "hint": "Nachgebildet mit einem Durchflussbeiwert 0.7 (entspricht Figur 3). Oberflächen von Spalt und Bodenbelag (z. B. Teppich) beeinflussen den Volumenstrom stark; Absenkdichtungen nur mit separatem Überström-Luftdurchlass."
+    },
+    "acoustics": {
+      "title": "Schallschutz je Raum",
+      "description": "Anforderung L_H nach Tabelle 1 ({level}) und Projektierungswert des Mittelungspegels L_Aeq ≤ L_H − K1 − K2 − K3 − K_P (Anhang C).",
+      "levels": {
+        "minimum": "Mindestanforderungen",
+        "increased": "erhöhte Anforderungen"
+      },
+      "k1Hint": "Absorption: −2 gering, −4 ohne Ausstattung",
+      "k2Hint": "Tonhaltigkeit, typisch 2",
+      "k3Hint": "Impulshaltigkeit, typisch 0",
+      "kpHint": "Projektierungszuschlag, typisch 2",
+      "empty": "Noch keine Wohnungsberechnung.",
+      "dwelling": "Wohnung",
+      "room": "Raum",
+      "type": "Typ",
+      "volume": "Volumen",
+      "design": "Projektierungswert",
+      "hint": "Bad/Dusche/WC unter 25 m³: 38 dB (Dauerbetrieb) bzw. 43 dB (bedarfsgesteuert). Die Anforderungen gelten im Normallüftungsbetrieb (Ziffer 2.2.7.5)."
+    },
+    "intake": {
+      "title": "Aussen- und Fortluft-Durchlass",
+      "description": "Minimale Distanz nach Anhang E, Figur 17 (Fortluft ≤ 1’800 m³/h, FOL 1/2), Höhe und Anströmgeschwindigkeit des Aussenluft-Durchlasses.",
+      "flow": "Fortluftmenge [m³/h]",
+      "position": "Fortluft-Durchlass",
+      "above": "oberhalb AUL",
+      "below": "unterhalb AUL",
+      "vertical": "Vertikale Distanz [m]",
+      "horizontal": "Horizontale Distanz [m]",
+      "height": "Höhe AUL über Boden [m]",
+      "area": "Netto-Querschnitt AUL [m²]",
+      "tooLarge": "Über {max} m³/h oder Küchenfortluft (FOL 3): Distanz nach SIA 382/1 Figur 9.",
+      "required": "Minimale horizontale Distanz",
+      "heightCheck": "Mindesthöhe AUL",
+      "heightNone": "keine Mindesthöhe (Einzelwohnungsanlage, privat)",
+      "velocity": "Geschwindigkeit AUL",
+      "velocityHint": "höchstens {max} m/s, Gitter 5–10 mm",
+      "axisHorizontal": "Minimale horizontale Distanz zwischen den Durchlässen [m]",
+      "axisVertical": "Vertikale Distanz h [m]",
+      "hint": "Linien je Fortluftmenge (50 … 1’800 m³/h), blau die aktuelle Menge, roter Punkt die geplante Lage. Achsabstände; Näherung aus dem Diagramm."
+    },
+    "energy": {
+      "title": "Energiebedarf Luftförderung",
+      "description": "Grobe Schätzung des Elektrizitätsbedarfs der Ventilatoren (vereinfachte Methode, vgl. SIA 382/1 Anhang D).",
+      "flow": "Luftmenge [m³/h]",
+      "flowHint": "Grobdimensionierung: {flow} m³/h",
+      "spi": "SPI [W pro m³/h]",
+      "spiHint": "Zielwert 0.28, Grenzwert 0.35",
+      "hours": "Betriebsstunden pro Jahr",
+      "price": "Strompreis [CHF/kWh]",
+      "energy": "Elektrizitätsbedarf",
+      "cost": "Stromkosten",
+      "heatRecovery": "Wärmerückgewinnung",
+      "heatRecoveryHint": "Temperaturänderungsgrad; höhere Werte nach SIA 382/1 Ziffer 5.10 bzw. VO (EU) 1253/2014"
+    },
+    "operation": {
+      "title": "Betrieb und Unterhalt",
+      "description": "Filterwechsel Zuluft 1. Stufe spätestens nach {first} Jahr, 2. Stufe nach {second} Jahren. Neubauten in den ersten drei Monaten mit mindestens 0.3 h⁻¹ betreiben.",
+      "empty": "Noch keine Wohnungsberechnung.",
+      "dwelling": "Wohnung",
+      "nominal": "Nennluftmenge",
+      "firstMonths": "0.3 h⁻¹ (erste 3 Monate)",
+      "energy": "Strom Ventilatoren",
+      "cost": "Kosten",
+      "hint": "Rot: 0.3 h⁻¹ wird auch auf der höchsten Stufe nicht erreicht. Energie aus dem projektierten SPI im Dauerbetrieb (8’760 h)."
+    },
+    "lv": {
+      "title": "Leistungsverzeichnisse",
+      "description": "Die Ausschreibung erfolgt im LV-Modul des Projekts (Positionen aus Katalogen, Offerten, Angebotsvergleich, Vergabeantrag).",
+      "open": "Zu den LV",
+      "empty": "Noch kein Leistungsverzeichnis in diesem Projekt.",
+      "positions": "{count, plural, one {# Position} other {# Positionen}}"
+    },
+    "commissioning": {
+      "title": "Abnahmeprotokoll – Funktionsmessungen",
+      "description": "Soll-/Ist-Vergleich je Raum (Ziffern 6.2.3–6.2.8). Soll = eingesetzte Volumenströme der Wohnungsberechnung.",
+      "empty": "Noch keine Wohnungsberechnung.",
+      "dwelling": "Wohnung",
+      "room": "Raum",
+      "supplySoll": "ZUL Soll",
+      "supplyIst": "ZUL Ist",
+      "extractSoll": "ABL Soll",
+      "extractIst": "ABL Ist",
+      "noiseTotal": "L_H,tot / L_H",
+      "totals": "Total gemessen ZUL / ABL",
+      "totalsHint": "Soll: {supply} / {extract} m³/h",
+      "balance": "Differenz Zu-/Abluft",
+      "balanceHint": "höchstens 10 % (Ziffer 6.3.2)",
+      "power": "Leistung gemessen [W]",
+      "spi": "SPI gemessen",
+      "hint": "L_H,tot = L_Aeq + K1 + K2 + K3 (Anhang C, einfache Messmethode) mit den Korrekturen aus Phase 32. Minimale Volumenströme nach Tabellen 2 und 3 müssen eingehalten sein."
+    },
+    "dwellingsNav": "Wohnungen (Luftmengen, Gerät)",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Checkliste (PDF)"
   }
 }

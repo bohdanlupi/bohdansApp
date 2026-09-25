@@ -10,6 +10,7 @@ const tabs = [
   { path: "", key: "overview" },
   { path: "/lv", key: "lvs" },
   { path: "/kostenplan", key: "costPlan" },
+  { path: "/lueftung", key: "ventilation" },
 ] as const;
 
 export function ProjectNav({ projectId }: { projectId: string }) {
