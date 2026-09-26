@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { NativeSelect } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { type AirFlowSummary, findRoomType, type KwlRoom, roomDistribution, type RoomRow, roomTypes } from "@/lib/kwl/calc";
-import { airChangeFlow, baseAirChange, fourSteps } from "@/lib/kwl/sia3825";
+import { airChangeFlow, applyFourSteps, baseAirChange, fourSteps } from "@/lib/kwl/sia3825";
 
 import { fmt, NumberField, Notice, Result } from "../../fields";
 
@@ -245,7 +245,7 @@ export function RoomsTab({
       {(summary.supply < summary.recommendedSupply || summary.extract < summary.recommendedExtract) && (
         <Notice>{t("summary.belowNorm")}</Notice>
       )}
-      <NormCheck rows={rows} rooms={rooms} summary={summary} height={height} demandControlled={demandControlled} editable={editable} onHeightChange={onHeightChange} />
+      <NormCheck rows={rows} rooms={rooms} summary={summary} height={height} demandControlled={demandControlled} editable={editable} onHeightChange={onHeightChange} onApply={() => onChange(applyFourSteps(rooms, demandControlled))} />
       <Notice tone="info">{t("rooms.lupiHint")}</Notice>
     </div>
   );
@@ -302,6 +302,7 @@ function NormCheck({
   demandControlled,
   editable,
   onHeightChange,
+  onApply,
 }: {
   rows: RoomRow[];
   rooms: KwlRoom[];
@@ -310,11 +311,13 @@ function NormCheck({
   demandControlled: boolean;
   editable: boolean;
   onHeightChange: (height: number) => void;
+  onApply: () => void;
 }) {
   const t = useTranslations("kwl.norm");
   const steps = fourSteps(rooms, demandControlled);
   const base = airChangeFlow(summary.area, height, baseAirChange);
-  const lowRooms = rows.filter((r) => (r.supply ?? 0) > 0 && r.area && (r.minSupply ?? 0) < airChangeFlow(r.area, height, baseAirChange));
+  // Normal ventilation must not be below base ventilation, per room with supply and in total (5.2.3.3).
+  const lowRooms = rows.filter((r) => (r.supply ?? 0) > 0 && (r.supply ?? 0) < (r.minSupply ?? 0));
   const flowsOk = summary.supply >= steps.governing && summary.extract >= steps.governing;
 
   return (
@@ -340,9 +343,17 @@ function NormCheck({
           tone={flowsOk ? "ok" : "bad"}
           hint={steps.supplyPerRoom === null ? undefined : t("step4", { flow: fmt(steps.supplyPerRoom) })}
         />
-        <Result label={t("base")} value={fmt(base)} unit="m³/h" tone={summary.minSupply >= base && lowRooms.length === 0 ? "ok" : "bad"} hint={t("baseHint", { minimum: fmt(summary.minSupply) })} />
+        <Result label={t("base")} value={fmt(base)} unit="m³/h" tone={summary.supply >= summary.minSupply && lowRooms.length === 0 ? "ok" : "bad"} hint={t("baseHint", { minimum: fmt(summary.minSupply) })} />
       </div>
       {!flowsOk && <Notice>{t("flowsLow", { flow: fmt(steps.governing) })}</Notice>}
+      {editable && steps.governing > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={onApply}>
+            {t("apply")}
+          </Button>
+          <span className="text-xs text-muted-foreground">{t("applyHint")}</span>
+        </div>
+      )}
       {lowRooms.length > 0 && <Notice>{t("baseLow", { rooms: lowRooms.map((r) => r.name || r.number).join(", ") })}</Notice>}
     </section>
   );

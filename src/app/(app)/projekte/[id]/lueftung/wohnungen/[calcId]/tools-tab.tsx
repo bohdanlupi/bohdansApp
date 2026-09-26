@@ -14,10 +14,15 @@ import {
   exhaustDistance,
   grilleHeights,
   grilleWidth,
-  insulationDeltas,
-  type InsulationDelta,
-  insulationThickness,
+  designVelocity,
+  ductAirs,
+  type DuctAir,
+  type DuctLocation,
+  ductLocations,
+  insulationRequirement,
   maxVelocity,
+  reducedInsulation,
+  smallSystemLimits,
   overflowArea,
   requiredDiameter,
   type RoomRow,
@@ -68,8 +73,9 @@ function DuctSizing({
   const t = useTranslations("kwl.tools.duct");
   const [flow, setFlow] = useState<number | null>(totalFlow || 30);
   const [velocity, setVelocity] = useState<number | null>(null);
-  const limit = maxVelocity(flow ?? 0, standard);
-  const v = velocity ?? limit;
+  const limit = maxVelocity(flow ?? 0);
+  const recommended = designVelocity(flow ?? 0, standard);
+  const v = velocity ?? recommended;
   const needed = flow && v ? requiredDiameter(flow, v) : null;
 
   return (
@@ -88,8 +94,9 @@ function DuctSizing({
         </div>
         <div className="space-y-2">
           <Label htmlFor="duct-velocity">{t("velocity")}</Label>
-          <NumberField id="duct-velocity" value={velocity} decimals={2} label={t("velocity")} placeholder={fmt(limit, 1)} onChange={setVelocity} className="h-8 rounded-lg" />
-          <p className="text-xs text-muted-foreground">{t("velocityHint", { limit: fmt(limit, 1) })}</p>
+          <NumberField id="duct-velocity" value={velocity} decimals={2} label={t("velocity")} placeholder={fmt(recommended, 1)} onChange={setVelocity} className="h-8 rounded-lg" />
+          <p className="text-xs text-muted-foreground">{t("velocityHint", { limit: fmt(limit, 1), recommended: fmt(recommended, 1) })}</p>
+          {v > limit && <p className="text-xs text-destructive">{t("velocityTooHigh", { limit: fmt(limit, 1) })}</p>}
         </div>
       </div>
       <Result label={t("required")} value={fmt(needed, 0)} unit={t("mmInner")} />
@@ -233,29 +240,70 @@ function ExhaustDistance({ totalFlow }: { totalFlow: number }) {
   );
 }
 
+/** EN-105 Table 1 (= SIA 382/1 Table 23) and Figure 1 (reduction for small systems with ducts < 6 m). */
 function Insulation() {
   const t = useTranslations("kwl.tools.insulation");
-  const [delta, setDelta] = useState<InsulationDelta>(10);
+  const [air, setAir] = useState<DuctAir>("outdoorExhaust");
+  const [location, setLocation] = useState<DuctLocation>("inside");
+  const [delta, setDelta] = useState<number | null>(10);
+  const [preheated, setPreheated] = useState(false);
+  const [small, setSmall] = useState(false);
   const [length, setLength] = useState<number | null>(3);
+  const required = insulationRequirement(air, location, delta ?? 0, preheated);
+  const reduced = small && length !== null && length < smallSystemLimits.maxLengthM ? reducedInsulation(required, length) : null;
 
   return (
     <Section title={t("title")} description={t("description")}>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="insulation-delta">{t("delta")}</Label>
-          <NativeSelect id="insulation-delta" value={delta} onChange={(e) => setDelta(Number(e.target.value) as InsulationDelta)}>
-            {insulationDeltas.map((d) => (
-              <option key={d} value={d}>
-                {d} K
+          <Label htmlFor="insulation-air">{t("air")}</Label>
+          <NativeSelect id="insulation-air" value={air} onChange={(e) => setAir(e.target.value as DuctAir)}>
+            {ductAirs.map((a) => (
+              <option key={a} value={a}>
+                {t(`airs.${a}`)}
               </option>
             ))}
           </NativeSelect>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="insulation-length">{t("length")}</Label>
-          <NumberField id="insulation-length" value={length} decimals={1} label={t("length")} onChange={setLength} className="h-8 rounded-lg" />
+          <Label htmlFor="insulation-location">{t("location")}</Label>
+          <NativeSelect id="insulation-location" value={location} onChange={(e) => setLocation(e.target.value as DuctLocation)}>
+            {ductLocations.map((l) => (
+              <option key={l} value={l}>
+                {t(`locations.${l}`)}
+              </option>
+            ))}
+          </NativeSelect>
         </div>
-        <Result label={t("thickness")} value={length === null ? "" : fmt(insulationThickness(delta, length), 0)} unit="mm" />
+        {air === "supplyExtract" && location === "inside" ? (
+          <div className="space-y-2">
+            <Label htmlFor="insulation-delta">{t("delta")}</Label>
+            <NumberField id="insulation-delta" value={delta} decimals={1} label={t("delta")} onChange={setDelta} className="h-8 rounded-lg" />
+          </div>
+        ) : air === "outdoorExhaust" && location === "inside" ? (
+          <label className="flex items-center gap-2 self-end pb-1.5 text-sm">
+            <input type="checkbox" checked={preheated} onChange={(e) => setPreheated(e.target.checked)} />
+            {t("preheated")}
+          </label>
+        ) : (
+          <div />
+        )}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <label className="flex items-start gap-2 text-sm sm:col-span-2">
+          <input type="checkbox" className="mt-0.5" checked={small} onChange={(e) => setSmall(e.target.checked)} />
+          {t("small", { flow: smallSystemLimits.maxFlow, min: smallSystemLimits.minTemp, max: smallSystemLimits.maxTemp })}
+        </label>
+        {small && (
+          <div className="space-y-2">
+            <Label htmlFor="insulation-length">{t("length")}</Label>
+            <NumberField id="insulation-length" value={length} decimals={1} label={t("length")} onChange={setLength} className="h-8 rounded-lg" />
+          </div>
+        )}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Result label={t("required")} value={fmt(required, 0) || "0"} unit="mm" hint={t("requiredHint")} />
+        {reduced !== null && <Result label={t("reduced")} value={fmt(reduced, 0) || "0"} unit="mm" hint={t("reducedHint")} />}
       </div>
       <p className="text-xs text-muted-foreground">{t("hint")}</p>
     </Section>

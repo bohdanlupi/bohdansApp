@@ -1,5 +1,6 @@
 // Kontrollierte Wohnungslüftung (KWL): calculations of the LUPI dimensioning workbook
-// (Berechnungsvorlagen/2026-XXX_L_DimTool-Lupi.xlsm), as pure functions.
+// (Berechnungsvorlagen/Lüftung KWL/2026-XXX_L_DimTool-Lupi.xlsm), as pure functions, corrected where the
+// workbook conflicts with SIA 382/5:2021 or the EnDK aid EN-105 (2018).
 // Air flows in m³/h, pressures in Pa, areas in m², lengths in mm unless noted.
 
 import type { FanStage, KwlDevice } from "./devices";
@@ -35,11 +36,28 @@ export type KwlRoom = {
   extract: number | null;
 };
 
-/** Excel MROUND for positive values. */
-const mround = (value: number, multiple: number) => Math.round(value / multiple) * multiple;
+/** SIA 382/5 5.2.3.1: base ventilation at least 0.1 h⁻¹ (≈ 0.25 m³/h per m² net floor area). */
+export const baseAirChangeRate = 0.1;
 
-/** Minimum air flow of a dwelling (stage I): 0.25 m³/h per m², rounded to 5, at least 50 m³/h. */
-export const minimumFlow = (area: number) => Math.max(50, mround(area * 0.25, 5));
+/**
+ * Minimum (base ventilation) flows per SIA 382/5 5.2.3.1 / 5.2.3.3: 0.1 h⁻¹ in every room with supply air and as
+ * the average over the whole dwelling. Supply rooms get their own 0.1 h⁻¹, raised proportionally when the dwelling
+ * average is higher; the extract side is balanced to the same total, split like the nominal extract flows.
+ * (The workbook used 0.25 m³/h per m² for the whole dwelling, at least 50 m³/h – the 50 m³/h is the Table 3 extract
+ * value for a whole dwelling unit, not a minimum stage.)
+ */
+export function baseVentilation(rooms: KwlRoom[], heightM: number) {
+  const area = sum(rooms.map((r) => r.area));
+  const dwelling = area * heightM * baseAirChangeRate;
+  const supplyRooms = rooms.filter((r) => (r.supply ?? 0) > 0);
+  const roomMin = new Map(supplyRooms.map((r) => [r.id, (r.area ?? 0) * heightM * baseAirChangeRate]));
+  const roomSum = sum([...roomMin.values()]);
+  const total = Math.max(roomSum, dwelling);
+  const supplyTotal = sum(supplyRooms.map((r) => r.supply));
+  const perRoom = (r: KwlRoom) =>
+    !r.supply ? null : roomSum > 0 ? (roomMin.get(r.id)! * total) / roomSum : supplyTotal ? (total * r.supply) / supplyTotal : null;
+  return { dwelling, total, perRoom };
+}
 
 export const sum = (values: (number | null | undefined)[]) => values.reduce<number>((s, v) => s + (v ?? 0), 0);
 
@@ -65,14 +83,15 @@ export type AirFlowSummary = {
 };
 
 /**
- * Per-room recommended, minimum and party flows. Minimum and party totals are distributed
- * in proportion to the nominal flow of each room (like the workbook).
+ * Per-room recommended, minimum (base ventilation) and party flows. Party flows are distributed in proportion
+ * to the nominal flow of each room (like the workbook).
  */
-export function airFlows(rooms: KwlRoom[], partyFlow: number | null): { rows: RoomRow[]; summary: AirFlowSummary } {
+export function airFlows(rooms: KwlRoom[], partyFlow: number | null, heightM = 2.5): { rows: RoomRow[]; summary: AirFlowSummary } {
   const area = sum(rooms.map((r) => r.area));
   const supply = sum(rooms.map((r) => r.supply));
   const extract = sum(rooms.map((r) => r.extract));
-  const minTotal = minimumFlow(area);
+  const base = baseVentilation(rooms, heightM);
+  const minTotal = base.total;
   const share = (total: number | null, own: number | null, all: number) =>
     total !== null && own && all ? (total / all) * own : null;
 
@@ -82,7 +101,7 @@ export function airFlows(rooms: KwlRoom[], partyFlow: number | null): { rows: Ro
       ...room,
       recommendedSupply: type ? (type.side === "supply" ? type.norm : 0) : null,
       recommendedExtract: type ? (type.side === "extract" ? type.norm : 0) : null,
-      minSupply: share(minTotal, room.supply, supply),
+      minSupply: base.perRoom(room),
       minExtract: share(minTotal, room.extract, extract),
       partySupply: share(partyFlow, room.supply, supply),
       partyExtract: share(partyFlow, room.extract, extract),
@@ -286,26 +305,35 @@ export const formerFilterClasses: [string, string][] = [
 
 export type BuildingStandard = "standard" | "minergie";
 
-/** Maximum air velocity [m/s] in the relevant duct run, by air flow ("bis" = up to and including). */
-export const velocityLimits: Record<BuildingStandard, [upTo: number, velocity: number][]> = {
-  standard: [
-    [40, 2.5],
-    [1000, 3],
-    [2000, 4],
-    [4000, 5],
-    [10000, 6],
-    [Infinity, 7],
-  ],
-  minergie: [
-    [40, 2.5],
-    [1000, 2.5],
-  ],
+/**
+ * EN-105 5.1 (= SIA 382/1 5.7.2.6/7): maximum air velocity [m/s] in the duct run with the largest pressure drop,
+ * by air flow ("bis" = up to and including). In devices at most 2 m/s on the net area.
+ */
+export const velocityLimits: [upTo: number, velocity: number][] = [
+  [1000, 3],
+  [2000, 4],
+  [4000, 5],
+  [10000, 6],
+  [Infinity, 7],
+];
+export const deviceMaxVelocity = 2;
+
+/**
+ * Lower design velocities of the LUPI workbook (not in SIA 382/5 / EN-105): 2.5 m/s in connection ducts up to
+ * 40 m³/h, and 2.5 m/s up to 1'000 m³/h for Minergie.
+ */
+export const recommendedVelocities: Record<BuildingStandard, [upTo: number, velocity: number][]> = {
+  standard: [[40, 2.5]],
+  minergie: [[1000, 2.5]],
 };
 
-export function maxVelocity(flow: number, standard: BuildingStandard): number {
-  const limits = velocityLimits[standard];
-  const hit = limits.find(([upTo]) => flow <= upTo) ?? velocityLimits.standard.find(([upTo]) => flow <= upTo)!;
-  return hit[1];
+/** Legal maximum per EN-105. */
+export const maxVelocity = (flow: number) => velocityLimits.find(([upTo]) => flow <= upTo)![1];
+
+/** Design velocity: the workbook recommendation where lower, else the EN-105 maximum. */
+export function designVelocity(flow: number, standard: BuildingStandard): number {
+  const recommended = recommendedVelocities[standard].find(([upTo]) => flow <= upTo)?.[1];
+  return Math.min(maxVelocity(flow), recommended ?? Infinity);
 }
 
 /** Inner diameter [mm] needed for a flow at a velocity. */
@@ -398,20 +426,38 @@ export function exhaustDistance(flow: number, position: "above" | "below", verti
 }
 
 // ---------------------------------------------------------------------------
-// Duct insulation (diagram insulation thickness vs. duct length)
+// Duct insulation: EN-105 Table 1 (= SIA 382/1:2014 Table 23) and Figure 1 (small systems)
 // ---------------------------------------------------------------------------
 
-export const insulationDeltas = [5, 10, 15] as const;
-export type InsulationDelta = (typeof insulationDeltas)[number];
+export const ductAirs = ["outdoorExhaust", "supplyExtract"] as const;
+export type DuctAir = (typeof ductAirs)[number];
+export const ductLocations = ["inside", "closedOutside", "open"] as const;
+export type DuctLocation = (typeof ductLocations)[number];
 
-/** Insulation thickness [mm] by temperature difference air – surroundings [K] and duct length [m]. */
-export function insulationThickness(delta: InsulationDelta, lengthM: number): number {
-  const ramp = (from: number, to: number, max: number) =>
-    lengthM <= from ? 30 : lengthM >= to ? max : 30 + ((max - 30) * (lengthM - from)) / (to - from);
-  if (delta === 5) return 30;
-  if (delta === 10) return ramp(3, 6, 60);
-  return ramp(2.5, 6, 100);
+/**
+ * Minimum insulation [mm] for λ 0.03 … 0.05 W/(m·K). AUL/FOL inside the thermal envelope 100 mm (60 mm with ground
+ * heat exchanger or other preheating before the heat recovery); ZUL/ABL inside by temperature difference medium –
+ * surroundings in the design case: < 5 K 0, 5 … < 10 K 30, 10 … < 15 K 60, ≥ 15 K 100 mm.
+ */
+export function insulationRequirement(air: DuctAir, location: DuctLocation, deltaK: number, preheated = false): number {
+  if (air === "outdoorExhaust") return location === "inside" ? (preheated ? 60 : 100) : location === "closedOutside" ? 30 : 0;
+  if (location === "closedOutside") return 60;
+  if (location === "open") return 100;
+  return deltaK < 5 ? 0 : deltaK < 10 ? 30 : deltaK < 15 ? 60 : 100;
 }
 
-/** Minimum efficiency of the heat recovery. */
+/** EN-105 Figure 1: small systems may reduce the thickness for ducts shorter than 6 m. */
+export const smallSystemLimits = { maxFlow: 220, maxLengthM: 6, minTemp: 15, maxTemp: 30 };
+
+/** Reduced thickness [mm] by duct length (Figure 1): 100 → 30 mm up to 2.5 m, 60 → 30 mm up to 3 m, linear to 6 m. */
+export function reducedInsulation(requiredMm: number, lengthM: number): number {
+  if (lengthM >= smallSystemLimits.maxLengthM || requiredMm <= 30) return requiredMm;
+  const from = requiredMm >= 100 ? 2.5 : 3;
+  return lengthM <= from ? 30 : 30 + ((requiredMm - 30) * (lengthM - from)) / (smallSystemLimits.maxLengthM - from);
+}
+
+/**
+ * Heat recovery targets of the LUPI workbook (temperature ratio). Not in SIA 382/5 / EN-105: those require heat
+ * recovery for systems with outdoor and exhaust air, efficiency per EnEV (VO (EU) 1253/2014) or SIA 382/1 5.10.
+ */
 export const heatRecoveryMinimum = { standard: 0.7, minergie: 0.8 };

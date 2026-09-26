@@ -9,7 +9,7 @@ export const effectiveOda = (filter: KwlFilterInput) =>
 /** All results of a KWL calculation. */
 export function evaluateKwl(data: KwlData) {
   // The party flow depends on the device, the device on the nominal flows: nominal flows first.
-  const base = airFlows(data.rooms, null);
+  const base = airFlows(data.rooms, null, data.height);
   const device = findDevice(data.device.id);
   const deviceResult = analyseDevice(
     device,
@@ -19,7 +19,7 @@ export function evaluateKwl(data: KwlData) {
     data.device.extractDrop,
     data.device.power,
   );
-  const { rows, summary } = airFlows(data.rooms, deviceResult.partyFlow);
+  const { rows, summary } = airFlows(data.rooms, deviceResult.partyFlow, data.height);
   const oda = effectiveOda(data.filter);
   return {
     rows,

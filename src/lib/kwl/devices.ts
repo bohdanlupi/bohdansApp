@@ -1,5 +1,5 @@
 // Fan curves of common KWL units, taken from the LUPI dimensioning workbook
-// (Berechnungsvorlagen/2026-XXX_L_DimTool-Lupi.xlsm, sheet "KWL-Gerät").
+// (Berechnungsvorlagen/Lüftung KWL/2026-XXX_L_DimTool-Lupi.xlsm, sheet "KWL-Gerät").
 // Each stage: available pressure p = a·V² + b·V + c [Pa] at air flow V [m³/h];
 // power = electrical power at that stage [W] (only known for some units).
 

@@ -20,9 +20,8 @@ export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
   const area = result.summary.area;
   const base = airChangeFlow(area, data.height, baseAirChange);
   const firstMonths = airChangeFlow(area, data.height, newBuildingAirChange);
-  const supplyRoomsBelowBase = data.rooms.filter(
-    (r) => (r.supply ?? 0) > 0 && r.area && (result.rows.find((x) => x.id === r.id)?.minSupply ?? 0) < airChangeFlow(r.area, data.height, baseAirChange),
-  ).length;
+  // Normal ventilation per room with supply at least the base ventilation of that room (5.2.3.3).
+  const supplyRoomsBelowBase = result.rows.filter((r) => (r.supply ?? 0) > 0 && (r.supply ?? 0) < (r.minSupply ?? 0)).length;
   const drop = data.device.supplyDrop !== null || data.device.extractDrop !== null ? (data.device.supplyDrop ?? 0) + (data.device.extractDrop ?? 0) : null;
   const pressure = externalPressureCheck(params.system, params.operation === "demand", drop);
   const tooSmall =
@@ -33,7 +32,7 @@ export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
     extractOk: result.summary.extract >= steps.governing,
     balanced: result.summary.imbalance === 0,
     base,
-    baseOk: result.summary.minSupply >= base && supplyRoomsBelowBase === 0,
+    baseOk: result.summary.supply >= result.summary.minSupply && supplyRoomsBelowBase === 0,
     supplyRoomsBelowBase,
     firstMonths,
     firstMonthsOk: Math.max(result.summary.supply, result.deviceResult.partyFlow ?? 0) >= firstMonths,

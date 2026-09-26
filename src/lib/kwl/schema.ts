@@ -44,14 +44,14 @@ export const kwlDataSchema = z.object({
       /** Set by hand for special conditions, with a reason. */
       odaOverride: z.enum(odaClasses).nullable().catch(null),
       overrideReason: text(500),
-      ida: z.enum(idaClasses).catch("IDA 2"),
+      ida: z.enum(idaClasses).catch("IDA 3"),
     })
     .catch({
       traffic: null,
       settlement: null,
       odaOverride: null,
       overrideReason: "",
-      ida: "IDA 2",
+      ida: "IDA 3",
     }),
   device: z
     .object({
@@ -62,7 +62,7 @@ export const kwlDataSchema = z.object({
       /** Electrical power at nominal operation [W], when the device data has none. */
       power: num(10000),
     })
-    .catch({ id: null, supplyDrop: 150, extractDrop: 100, power: null }),
+    .catch({ id: null, supplyDrop: 80, extractDrop: 70, power: null }),
   notes: text(4000),
 });
 

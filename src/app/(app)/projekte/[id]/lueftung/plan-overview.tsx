@@ -114,6 +114,8 @@ export function PlanOverview({
             <Fact label={t("derived.noiseWet")} value={p.noise === "increased" ? "29 dB" : "33 dB"} />
             <Fact label={t("derived.intake")} value={`≥ ${p.publicIntake ? "3.0" : p.unit === "multi" ? "1.5" : "–"} m · ≤ ${fmt(intakeMaxVelocity(p.fog), 1)} m/s`} />
             <Fact label={t("derived.filters")} value="ZUL ISO ePM1 50 % · ABL ISO coarse 80 %" />
+            <Fact label={t("derived.velocity")} value={t("derived.velocityValue")} />
+            <Fact label={t("derived.insulation")} value={t("derived.insulationValue")} />
             <Fact label={t("derived.co2")} value="1’000–1’400 ppm" />
           </div>
         </div>

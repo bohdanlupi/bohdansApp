@@ -14,11 +14,10 @@ import { externalPressureCheck } from "@/lib/kwl/sia3825";
 import { FanChart } from "./fan-chart";
 import { fmt, Notice, NumberField, Result, Section } from "../../fields";
 
-/** Typical total pressure drops (AUL → ZUL + ABL → FOL), split 3/5 supply side and 2/5 extract side. */
+/** SIA 382/5 Table 7: external pressure drop AUL → ZUL + ABL → FOL, examples of footnotes 1) and 2). */
 const pressurePresets = [
-  { key: "small", total: 120 },
-  { key: "medium", total: 180 },
-  { key: "multiStorey", total: 240 },
+  { key: "limit", supply: 80, extract: 70 },
+  { key: "target", supply: 50, extract: 50 },
 ] as const;
 
 const manufacturers = [...new Set(kwlDevices.map((d) => d.name.split(",")[0]))];
@@ -109,9 +108,9 @@ export function DeviceTab({
                 key={p.key}
                 variant="outline"
                 size="sm"
-                onClick={() => onChange({ ...input, supplyDrop: (p.total * 3) / 5, extractDrop: (p.total * 2) / 5 })}
+                onClick={() => onChange({ ...input, supplyDrop: p.supply, extractDrop: p.extract })}
               >
-                {t(`device.preset.${p.key}`, { total: p.total })}
+                {t(`device.preset.${p.key}`, { supply: p.supply, extract: p.extract })}
               </Button>
             ))}
           </div>

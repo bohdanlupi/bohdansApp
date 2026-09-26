@@ -715,7 +715,7 @@
       "down": "Sposta giù",
       "remove": "Rimuovi locale",
       "distributionLarge": "> 60 m³/h: dimensionare le condotte (calcoli ausiliari)",
-      "lupiHint": "Valori raccomandati secondo SIA 382/5, tabelle 2 + 3. Scegliendo il tipo vengono proposti i valori di progettazione LUPI (più elevati per comfort, p. es. cucina 40 m³/h) – la portata d’aria immessa risulta quindi più elevata. Le portate minime e party sono ripartite in proporzione alle portate adottate.",
+      "lupiHint": "Valori raccomandati secondo SIA 382/5, tabelle 2 + 3. Scegliendo il tipo vengono proposti i valori LUPI (più elevati per comfort, p. es. cucina 40 m³/h); portate più elevate vanno convenute con il committente (cifra 5.2.4.2). Portate minime = ventilazione di base 0.1 h⁻¹ per locale con immissione, ripresa allo stesso totale; portate party in proporzione alle portate adottate.",
       "typical": {
         "living": "Soggiorno / pranzo",
         "kitchen": "Cucina",
@@ -728,8 +728,8 @@
       }
     },
     "summary": {
-      "minimum": "Portata minima (liv. I)",
-      "minimumHint": "0.25 m³/h per m², almeno 50 m³/h",
+      "minimum": "Ventilazione di base (portata minima)",
+      "minimumHint": "0.1 h⁻¹ per locale con immissione e in media (SIA 382/5 5.2.3.1)",
       "nominal": "Portata nominale AIM / ARI",
       "nominalHint": "Norma: {supply} / {extract} m³/h",
       "party": "Portata party (liv. III)",
@@ -737,7 +737,7 @@
       "area": "Superficie",
       "imbalance": "Aria immessa e aria ripresa non sono bilanciate: aumentare {side} di {difference} m³/h a {target} m³/h (il valore maggiore determina la portata totale dell’appartamento).",
       "belowNorm": "Le portate adottate sono inferiori ai valori della norma SIA 382/5.",
-      "minimumPdf": "Portata minima (livello I): {flow} m³/h (0.25 m³/h per m², almeno 50 m³/h)"
+      "minimumPdf": "Ventilazione di base: {flow} m³/h (0.1 h⁻¹ per locale con immissione e in media dell’appartamento, SIA 382/5 cifra 5.2.3.1)"
     },
     "device": {
       "title": "Apparecchio di ventilazione",
@@ -749,13 +749,12 @@
       "powerHint": "Necessaria solo se i dati dell’apparecchio non contengono la potenza per livello o se sono disponibili valori del fabbricante.",
       "supplyDrop": "Perdita di carico AES → AIM alla portata nominale [Pa]",
       "extractDrop": "Perdita di carico ARI → AES/scarico alla portata nominale [Pa]",
-      "presets": "Valori indicativi:",
+      "presets": "SIA 382/5 tabella 7:",
       "preset": {
-        "small": "Impianto piccolo {total} Pa",
-        "medium": "Impianto medio {total} Pa",
-        "multiStorey": "Più piani {total} Pa"
+        "limit": "Valore limite 150 Pa ({supply} / {extract})",
+        "target": "Valore obiettivo 100 Pa ({supply} / {extract})"
       },
-      "dropHint": "Secondo il calcolo nel tool VMC (Enerweb) o il progetto. Valori indicativi = somma AES → AIM + ARI → scarico, ripartiti 3/5 lato immissione e 2/5 lato ripresa. SIA 382/5 tabella 7 limita la somma a 150 Pa (obiettivo 100 Pa).",
+      "dropHint": "Secondo il calcolo nel tool VMC (Enerweb) o il progetto. SIA 382/5 tabella 7 (impianto semplice): somma AES → AIM + ARI → scarico al massimo 150 Pa, obiettivo 100 Pa; la ripartizione tra i lati è libera (esempi 80/70 o 50/50 Pa).",
       "choose": "Scegliete un apparecchio per calcolare punti di funzionamento, portata party e SPI.",
       "nominalStage": "Livello in esercizio nominale AIM / ARI",
       "nominalStageHint": "Livello più basso che raggiunge la portata nominale",
@@ -765,7 +764,7 @@
       "spiUnknown": "Nessun dato di potenza – inserire la potenza",
       "spiLimits": "Valore limite ≤ {limit}, valore obiettivo ≤ {target}",
       "spiCheck": "Valore limite / obiettivo rispettato",
-      "spiCheckHint": "SIA 382/1 capoverso 5.7.5.1",
+      "spiCheckHint": "SIA 382/1 cifra 5.7.4.1 (secondo EN-105) – determinante per apparecchi senza etichetta energetica (SIA 382/5 5.5.2); con etichetta vale la tabella 7",
       "spiFromInput": "SPI calcolato dalla potenza inserita e dalla portata nominale maggiore.",
       "tooSmall": "L’apparecchio non raggiunge la portata nominale nemmeno al livello massimo. Scegliere un apparecchio più grande o ridurre la perdita di carico.",
       "minimumNotReached": "Il livello più basso fornisce {lowest} m³/h – più della portata minima di {minimum} m³/h.",
@@ -821,7 +820,7 @@
       },
       "oda": {
         "title": "1. Classificazione dell’aria esterna",
-        "description": "Secondo SIA 382/1:2014, tabella 4. Punti: meno di 3 = ODA 1, meno di 5 = ODA 2, altrimenti ODA 3.",
+        "description": "Schema a punti del modello LUPI (meno di 3 = ODA 1, meno di 5 = ODA 2, altrimenti ODA 3) come stima. Determinanti sono i valori d’immissione NO₂, PM10 e PM2.5 alla presa d’aria (SIA 382/5 3.2.3: misure, NABEL, catasto).",
         "override": "Condizioni particolari",
         "fromCriteria": "dai criteri",
         "reason": "Motivazione",
@@ -847,9 +846,9 @@
         "ida": "Classe dell’aria interna",
         "supply": "Filtro aria esterna → aria immessa",
         "supplyHint": "per {ida}, ISO 16890",
-        "extract": "Filtro aria ripresa → aria di scarico (raccomandazione)",
-        "extractHint": "Almeno {minimum} (G4) secondo SIA 382/5 cifra 5.3.6.5.2; filtro fine raccomandato per proteggere lo scambiatore di calore.",
-        "extractPdf": "ISO ePM10 50 % raccomandato (almeno ISO coarse 80 % / G4 secondo SIA 382/5)"
+        "extract": "Filtro aria ripresa → aria espulsa",
+        "extractHint": "Almeno {minimum} a protezione dello scambiatore (SIA 382/5 5.3.6.5.3); scambiatore rotativo almeno ISO ePM10 50 % (5.3.6.5.4). ISO ePM10 50 % con scambiatore a piastre è una raccomandazione LUPI.",
+        "extractPdf": "ISO ePM10 50 % (raccomandazione LUPI; norma: almeno ISO coarse 80 %, scambiatore rotativo ISO ePM10 50 %)"
       },
       "matrix": {
         "title": "3. Filtrazione aria esterna – aria immessa",
@@ -867,11 +866,12 @@
         "standard": "Standard costruttivo",
         "standardBuilding": "Costruzione standard",
         "velocity": "Velocità dell’aria [m/s]",
-        "velocityHint": "Vuoto = valore massimo ammesso {limit} m/s",
+        "velocityHint": "Vuoto = valore di dimensionamento {recommended} m/s; ammesso secondo EN-105 al massimo {limit} m/s",
         "required": "Diametro necessario",
         "mmInner": "mm interno",
         "inner": "interno",
-        "maxFlow": "m³/h a {v} m/s"
+        "maxFlow": "m³/h a {v} m/s",
+        "velocityTooHigh": "Oltre il valore limite di {limit} m/s secondo EN-105 cifra 5.1."
       },
       "door": {
         "title": "Transito d’aria attraverso le porte",
@@ -901,11 +901,27 @@
       },
       "insulation": {
         "title": "Isolamento delle condotte d’aria",
-        "description": "Spessore dell’isolamento secondo la lunghezza della condotta e la differenza di temperatura tra aria e ambiente.",
-        "delta": "Differenza di temperatura",
-        "length": "Lunghezza condotta [m]",
-        "thickness": "Spessore isolamento",
-        "hint": "5 K: 30 mm; 10 K: 30 mm fino a 3 m, poi lineare fino a 60 mm da 6 m; 15 K: 30 mm fino a 2.5 m, poi lineare fino a 100 mm da 6 m."
+        "description": "Spessore minimo secondo EN-105 tabella 1 (= SIA 382/1 tabella 23), per isolanti con λ 0.03 … 0.05 W/(m·K).",
+        "delta": "Differenza di temperatura fluido – ambiente [K]",
+        "length": "Lunghezza della condotta [m]",
+        "hint": "In casi motivati (tratti brevi, incroci, aperture, mancanza di spazio nei rinnovi) gli spessori possono essere ridotti (EN-105 cifra 4.1).",
+        "air": "Tipo d’aria",
+        "airs": {
+          "outdoorExhaust": "Aria esterna / espulsa",
+          "supplyExtract": "Aria immessa / ripresa"
+        },
+        "location": "Posizione della condotta",
+        "locations": {
+          "inside": "all’interno dell’involucro termico",
+          "closedOutside": "locale chiuso fuori dall’involucro",
+          "open": "locale non chiuso o all’aperto"
+        },
+        "preheated": "Scambiatore geotermico o altro preriscaldamento prima del recupero",
+        "small": "Piccolo impianto: ventilazione normale ≤ {flow} m³/h, temperature {min} … {max} °C, apparecchio con recupero (senza pompa di calore sull’aria ripresa)",
+        "required": "Spessore secondo tabella 1",
+        "requiredHint": "più spesso con λ > 0.05 W/(m·K)",
+        "reduced": "Spessore ridotto (figura 1)",
+        "reducedHint": "solo per condotte più corte di 6 m"
       }
     },
     "notes": {
@@ -914,17 +930,16 @@
       "hints": {
         "stages": "Gli impianti funzionano di norma a tre livelli: 1. notte = esercizio minimo, 2. giorno = esercizio normale, 3. party = ventilazione intensiva.",
         "intensive": "L’esercizio intensivo corrisponde alla potenza massima dell’apparecchio (dimensionamento per appartamento). Attenzione: la ventilazione intensiva può generare rumore (valori acustici non rispettati).",
-        "minimum": "La portata minima (livello I) è di almeno 50 m³/h o 0.25 m³/h per m².",
+        "minimum": "La ventilazione di base è di almeno 0.1 h⁻¹ (≈ 0.25 m³/h per m²) in ogni locale con immissione e in media dell’appartamento (SIA 382/5 cifra 5.2.3.1).",
         "maximum": "La portata massima (livello III) è determinata con le curve dell’impianto e del ventilatore.",
         "simultaneity": "Con un apparecchio centrale si può applicare un fattore di contemporaneità; per 8 appartamenti calcoliamo ca. 80 %.",
-        "heatRecovery": "Gli impianti con aria esterna e aria di scarico devono disporre di un recupero di calore: costruzione standard almeno {standard} %, Minergie {minergie} %.",
+        "heatRecovery": "Gli impianti con aria esterna ed espulsa devono avere un recupero di calore (EN-105 cifra 2); rendimento secondo OEEne o SIA 382/1. Valore indicativo LUPI: standard {standard} %, Minergie {minergie} %.",
         "efficiency": "Attenzione: il rendimento degli scambiatori di calore è spesso indicato troppo alto dai fabbricanti.",
         "enerweb": "Il dimensionamento, incl. perdite di carico e acustica, avviene nel tool VMC; tutti i valori tranne il volume d’aria vanno rispettati:"
       },
-      "velocities": "Velocità dell’aria",
-      "velocitiesHint": "Negli apparecchi, riferita alla superficie netta, al massimo 2 m/s; nel tratto determinante delle condotte al massimo:",
+      "velocities": "Velocità dell’aria (EN-105)",
+      "velocitiesHint": "EN-105 cifra 5.1: negli apparecchi al massimo {device} m/s sulla superficie netta; nel tratto determinante al massimo:",
       "airFlow": "Portata",
-      "standardBuilding": "Costruzione standard",
       "upTo": "fino a {flow} m³/h",
       "above": "oltre {flow} m³/h",
       "overflow": "Perdita di carico max. delle bocchette di transito",
@@ -936,7 +951,9 @@
       },
       "fire": "Protezione antincendio",
       "fireText": "Un apparecchio VMC serve di regola una sola unità abitativa e quindi un solo compartimento tagliafuoco; normalmente non sono necessarie misure antincendio. Negli edifici plurifamiliari va rispettato il piano dei compartimenti tagliafuoco.",
-      "literature": "Letteratura"
+      "literature": "Letteratura",
+      "maximum": "ammessa",
+      "velocitiesLupi": "Dimensionamento LUPI (non nei documenti normativi): {standard} m/s nei raccordi fino a {standardFlow} m³/h; Minergie {minergie} m/s fino a {minergieFlow} m³/h."
     },
     "norm": {
       "title": "Verifica secondo SIA 382/5",
@@ -952,7 +969,9 @@
       "base": "Ventilazione di base 0.1 h⁻¹",
       "baseHint": "Portata minima dell’appartamento: {minimum} m³/h",
       "flowsLow": "Immissione o ripresa inferiore al valore determinante di {flow} m³/h. Portare entrambe a questo valore.",
-      "baseLow": "In questi locali la portata minima non basta per 0.1 h⁻¹: {rooms}."
+      "baseLow": "In questi locali l’immissione adottata è inferiore alla ventilazione di base di 0.1 h⁻¹: {rooms}.",
+      "apply": "Ripartire secondo SIA 382/5 (fasi 3 + 4)",
+      "applyHint": "Porta immissione e ripresa al valore determinante: immissione ripartita ugualmente sulle camere, ripresa secondo i valori della tabella 3. Valori più elevati (p. es. LUPI) vanno poi convenuti con il committente."
     }
   },
   "kwlPlan": {
@@ -1094,7 +1113,11 @@
       "noiseWet": "L_H bagno/WC ≥ 25 m³, cucina",
       "intake": "Presa d’aria altezza / velocità",
       "filters": "Filtri almeno",
-      "co2": "CO₂ con occupazione normale"
+      "co2": "CO₂ con occupazione normale",
+      "velocity": "Velocità nelle condotte (EN-105)",
+      "velocityValue": "≤ 3 m/s fino a 1’000 m³/h",
+      "insulation": "Isolamento aria esterna/espulsa nell’involucro (EN-105)",
+      "insulationValue": "100 mm (60 mm con preriscaldamento)"
     },
     "concept": {
       "title": "Concetto di ventilazione",
@@ -1325,8 +1348,8 @@
       "price": "Prezzo dell’elettricità [CHF/kWh]",
       "energy": "Fabbisogno di elettricità",
       "cost": "Costi dell’elettricità",
-      "heatRecovery": "Recupero di calore",
-      "heatRecoveryHint": "Rendimento di temperatura; valori più alti secondo SIA 382/1 cifra 5.10 o regolamento (UE) 1253/2014"
+      "heatRecovery": "Recupero di calore (valore LUPI)",
+      "heatRecoveryHint": "Obbligatorio con aria esterna ed espulsa (EN-105 cifra 2); esigenza secondo OEEne o SIA 382/1 cifra 5.10"
     },
     "operation": {
       "title": "Esercizio e manutenzione",

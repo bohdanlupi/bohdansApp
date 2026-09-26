@@ -187,7 +187,7 @@ Left out on purpose (free-plan size): Zehnder HK, Debrunner Acifer BW/TB/WG. Cat
 "Aus Katalog" dialog load lazily with server search; LV/offer queries now page past the 1000-row API limit.
 Tested end to end with a temporary planer (browse, search, insert into LV, read-only guard, PDF).
 
-KWL-Auslegung (2026-09-25): calculations of `Berechnungsvorlagen/2026-XXX_L_DimTool-Lupi.xlsm` ported to
+KWL-Auslegung (2026-09-25): calculations of `Berechnungsvorlagen/Lüftung KWL/2026-XXX_L_DimTool-Lupi.xlsm` ported to
 `src/lib/kwl/` (air flows per room SIA 382/5 with LUPI defaults, min/party distribution, fan curves of 16 devices
 → operating points per stage, nominal stage, party flow, SPI check SIA 382/1, ODA/IDA → ISO 16890 filters, duct
 sizing, door overflow, AUL/FOL distance, duct insulation). Results match the workbook example (Q350 ST: stages 5/4,
@@ -203,6 +203,12 @@ door gaps (Figure 3 reproduced with Cd 0.7), AUL/FOL distance (Figure 17), acous
 frost variants (Table 8), commissioning protocol (≤ 10 % balance, measured SPI). Migration
 `20260925210000_ventilation_plans.sql` applied. Norm PDFs in `Berechnungsvorlagen/` are licensed SIA documents –
 never commit them (repo is public).
+
+Corrections 2026-09-26 (workbook vs. SIA 382/5 / EnDK EN-105 in `Berechnungsvorlagen/Lüftung KWL/`): minimum flow =
+base ventilation 0.1 h⁻¹ per supply room and dwelling (was 0.25 m³/h·m², min. 50 m³/h); door gaps per Fig. 3 at
+1.5 m/s (was 2 m/s); pressure presets per Table 7 (150 / 100 Pa, was 120/180/240); default IDA 3; steps 3 + 4
+(button); duct velocities per EN-105 5.1 (workbook 2.5 m/s values kept as LUPI recommendation); insulation per
+EN-105 Table 1 / Figure 1 (was a ΔT-only chart); SPI reference SIA 382/1 5.7.4.1; EN-105/EN-110 checklist items.
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

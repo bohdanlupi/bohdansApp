@@ -63,6 +63,22 @@ export function fourSteps(rooms: KwlRoom[], demandControlled = false): FourSteps
   };
 }
 
+/**
+ * 5.4.3 steps 3 + 4: the governing flow for supply and extract; supply split equally over the rooms (Table 2
+ * type "Zimmer"), extract over the extract rooms in proportion to their Table 3 values. Other rooms get 0.
+ */
+export function applyFourSteps(rooms: KwlRoom[], demandControlled = false): KwlRoom[] {
+  const steps = fourSteps(rooms, demandControlled);
+  return rooms.map((room) => {
+    const type = findRoomType(room.type);
+    if (!type) return room;
+    const tableExtract = type.side === "extract" ? (demandControlled ? (demandExtractFlows[type.key] ?? type.norm) : type.norm) : 0;
+    const supply = type.key === "room" && steps.supplyPerRoom !== null ? Math.round(steps.supplyPerRoom) : 0;
+    const extract = steps.extractMin > 0 ? Math.round((tableExtract * steps.governing) / steps.extractMin) : 0;
+    return { ...room, supply, extract };
+  });
+}
+
 /** Rough sizing (Vorprojekt) of a dwelling type from room counts. */
 export function roughDwellingFlow(t: { rooms: number; baths: number; wcs: number; closedKitchen: boolean; shortUse: number }) {
   const supply = 30 * t.rooms;

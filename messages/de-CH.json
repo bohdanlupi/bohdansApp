@@ -715,7 +715,7 @@
       "down": "Nach unten",
       "remove": "Raum entfernen",
       "distributionLarge": "> 60 m³/h: Leitungen dimensionieren (Hilfsrechner)",
-      "lupiHint": "Empfohlene Werte gemäss SIA 382/5 Tabellen 2 + 3. Beim Wählen des Typs werden die LUPI-Planungswerte vorgeschlagen (aus Komfortgründen höher, z. B. Küche 40 m³/h) – die Zuluftmenge fällt dadurch erhöht aus. Die Mindest- und Partyluftmengen werden im Verhältnis der eingesetzten Luftmengen verteilt.",
+      "lupiHint": "Empfohlene Werte gemäss SIA 382/5 Tabellen 2 + 3. Beim Wählen des Typs werden die LUPI-Planungswerte vorgeschlagen (aus Komfortgründen höher, z. B. Küche 40 m³/h); höhere Volumenströme sind mit der Bauherrschaft zu vereinbaren (Ziffer 5.2.4.2). Mindestluftmengen = Grundlüftung 0.1 h⁻¹ je Raum mit Zuluft, Abluftseite im gleichen Total; Partyluftmengen im Verhältnis der eingesetzten Luftmengen.",
       "typical": {
         "living": "Wohnen / Essen",
         "kitchen": "Küche",
@@ -728,8 +728,8 @@
       }
     },
     "summary": {
-      "minimum": "Mindestluftmenge (St. I)",
-      "minimumHint": "0.25 m³/h je m², mindestens 50 m³/h",
+      "minimum": "Grundlüftung (Mindestluftmenge)",
+      "minimumHint": "0.1 h⁻¹ je Raum mit Zuluft und im Mittel (SIA 382/5 5.2.3.1)",
       "nominal": "Nennluftmenge ZUL / ABL",
       "nominalHint": "Norm: {supply} / {extract} m³/h",
       "party": "Partyluftmenge (St. III)",
@@ -737,7 +737,7 @@
       "area": "Fläche",
       "imbalance": "Zu- und Abluft sind nicht ausgeglichen: {side} um {difference} m³/h auf {target} m³/h anheben (der grössere Wert ergibt die Gesamtluftmenge der Wohnung).",
       "belowNorm": "Die eingesetzten Luftmengen liegen unter den Normwerten nach SIA 382/5.",
-      "minimumPdf": "Mindestluftmenge (Stufe I): {flow} m³/h (0.25 m³/h je m², mindestens 50 m³/h)"
+      "minimumPdf": "Grundlüftung: {flow} m³/h (0.1 h⁻¹ je Raum mit Zuluft und im Mittel der Wohnung, SIA 382/5 Ziffer 5.2.3.1)"
     },
     "device": {
       "title": "Lüftungsgerät",
@@ -749,13 +749,12 @@
       "powerHint": "Nur nötig, wenn die Gerätedaten keine Leistung je Stufe enthalten oder Herstellerwerte vorliegen.",
       "supplyDrop": "Druckverlust AUL → ZUL bei Nennvolumenstrom [Pa]",
       "extractDrop": "Druckverlust ABL → FOL bei Nennvolumenstrom [Pa]",
-      "presets": "Richtwerte:",
+      "presets": "SIA 382/5 Tabelle 7:",
       "preset": {
-        "small": "Kleine Anlage {total} Pa",
-        "medium": "Mittlere Anlage {total} Pa",
-        "multiStorey": "Mehrgeschossig {total} Pa"
+        "limit": "Grenzwert 150 Pa ({supply} / {extract})",
+        "target": "Zielwert 100 Pa ({supply} / {extract})"
       },
-      "dropHint": "Gemäss Berechnung im KWL-Tool (Enerweb) oder Bauprojekt. Richtwerte = Summe AUL → ZUL + ABL → FOL, aufgeteilt 3/5 Zuluft- und 2/5 Abluftseite. SIA 382/5 Tabelle 7 begrenzt die Summe auf 150 Pa (Zielwert 100 Pa).",
+      "dropHint": "Gemäss Berechnung im KWL-Tool (Enerweb) oder Bauprojekt. SIA 382/5 Tabelle 7 (einfache Lüftungsanlage): Summe AUL → ZUL + ABL → FOL höchstens 150 Pa, Zielwert 100 Pa; die Aufteilung auf Zu- und Abluftseite ist frei (Beispiele 80/70 bzw. 50/50 Pa).",
       "choose": "Wählen Sie ein Lüftungsgerät, um Betriebspunkte, Partyluftmenge und SPI zu berechnen.",
       "nominalStage": "Stufe bei Nennbetrieb ZUL / ABL",
       "nominalStageHint": "Tiefste Stufe, welche die Nennluftmenge erreicht",
@@ -765,7 +764,7 @@
       "spiUnknown": "Keine Leistungsdaten – Leistung eingeben",
       "spiLimits": "Grenzwert ≤ {limit}, Zielwert ≤ {target}",
       "spiCheck": "Grenzwert / Zielwert erfüllt",
-      "spiCheckHint": "SIA 382/1 Absatz 5.7.5.1",
+      "spiCheckHint": "SIA 382/1 Ziffer 5.7.4.1 (gemäss EN-105) – massgebend für Geräte ohne Energieetikette (SIA 382/5 5.5.2); mit Etikette gilt Tabelle 7",
       "spiFromInput": "SPI aus der eingegebenen Leistung und der grösseren Nennluftmenge.",
       "tooSmall": "Das Gerät erreicht die Nennluftmenge auch auf der höchsten Stufe nicht. Grösseres Gerät wählen oder Druckverlust reduzieren.",
       "minimumNotReached": "Die tiefste Gerätestufe liefert {lowest} m³/h – mehr als die Mindestluftmenge von {minimum} m³/h.",
@@ -821,7 +820,7 @@
       },
       "oda": {
         "title": "1. Klassierung der Aussenluft",
-        "description": "Nach SIA 382/1:2014, Tabelle 4. Punkte: unter 3 = ODA 1, unter 5 = ODA 2, sonst ODA 3.",
+        "description": "Punkteschema aus der LUPI-Vorlage (unter 3 = ODA 1, unter 5 = ODA 2, sonst ODA 3) als Schätzung. Massgebend sind die Immissionswerte NO₂, PM10 und PM2.5 am Aussenluft-Durchlass (SIA 382/5 3.2.3: Messungen, NABEL, Immissionskataster).",
         "override": "Besondere Bedingungen",
         "fromCriteria": "aus Kriterien",
         "reason": "Begründung",
@@ -847,9 +846,9 @@
         "ida": "Klasse der Raumluft",
         "supply": "Filter Aussenluft → Zuluft",
         "supplyHint": "für {ida}, ISO 16890",
-        "extract": "Filter Abluft → Fortluft (Empfehlung)",
-        "extractHint": "Mindestens {minimum} (G4) gemäss SIA 382/5 Ziff. 5.3.6.5.2; Feinfilter zum Schutz des Wärmeübertragers empfohlen.",
-        "extractPdf": "ISO ePM10 50 % empfohlen (mindestens ISO coarse 80 % / G4 gemäss SIA 382/5)"
+        "extract": "Filter Abluft → Fortluft",
+        "extractHint": "Mindestens {minimum} zum Schutz der WRG (SIA 382/5 5.3.6.5.3); rotierende WRG mindestens ISO ePM10 50 % (5.3.6.5.4). ISO ePM10 50 % bei Platten-WRG ist eine LUPI-Empfehlung.",
+        "extractPdf": "ISO ePM10 50 % (LUPI-Empfehlung; Norm: mindestens ISO coarse 80 %, rotierende WRG ISO ePM10 50 %)"
       },
       "matrix": {
         "title": "3. Filterstufen Aussenluft – Zuluft",
@@ -867,11 +866,12 @@
         "standard": "Baustandard",
         "standardBuilding": "Standardbau",
         "velocity": "Luftgeschwindigkeit [m/s]",
-        "velocityHint": "Leer = zulässiger Höchstwert {limit} m/s",
+        "velocityHint": "Leer = Auslegungswert {recommended} m/s; zulässig nach EN-105 höchstens {limit} m/s",
         "required": "Notwendiger Durchmesser",
         "mmInner": "mm innen",
         "inner": "innen",
-        "maxFlow": "m³/h bei {v} m/s"
+        "maxFlow": "m³/h bei {v} m/s",
+        "velocityTooHigh": "Über dem Grenzwert von {limit} m/s nach EN-105 Ziffer 5.1."
       },
       "door": {
         "title": "Überströmung über Türen",
@@ -901,11 +901,27 @@
       },
       "insulation": {
         "title": "Dämmung von Luftleitungen",
-        "description": "Dämmstärke nach Leitungslänge und Temperaturdifferenz zwischen Luft und Umgebung.",
-        "delta": "Temperaturdifferenz",
+        "description": "Mindest-Dämmstärke nach EN-105 Tabelle 1 (= SIA 382/1 Tabelle 23), für Dämmstoffe mit λ 0.03 … 0.05 W/(m·K).",
+        "delta": "Temperaturdifferenz Medium – Umgebung [K]",
         "length": "Leitungslänge [m]",
-        "thickness": "Dämmstärke",
-        "hint": "5 K: 30 mm; 10 K: 30 mm bis 3 m, dann linear bis 60 mm ab 6 m; 15 K: 30 mm bis 2.5 m, dann linear bis 100 mm ab 6 m."
+        "hint": "In begründeten Fällen (kurze Leitungsstücke, Kreuzungen, Durchbrüche, Platzprobleme bei Erneuerungen) können die Dämmstärken reduziert werden (EN-105 Ziffer 4.1).",
+        "air": "Luftart",
+        "airs": {
+          "outdoorExhaust": "Aussenluft / Fortluft",
+          "supplyExtract": "Zuluft / Abluft"
+        },
+        "location": "Lage der Leitung",
+        "locations": {
+          "inside": "innerhalb der thermischen Gebäudehülle",
+          "closedOutside": "allseitig geschlossener Raum ausserhalb der Hülle",
+          "open": "nicht allseitig geschlossener Raum oder im Freien"
+        },
+        "preheated": "Erdreich-Wärmeübertrager oder andere Lufterwärmung vor der WRG",
+        "small": "Kleinanlage: Normallüftung ≤ {flow} m³/h, Zu- und Ablufttemperatur {min} … {max} °C, Gerät mit WRG (keine Abluft-Wärmepumpe)",
+        "required": "Dämmstärke nach Tabelle 1",
+        "requiredHint": "bei λ > 0.05 W/(m·K) entsprechend dicker",
+        "reduced": "Reduzierte Dämmstärke (Figur 1)",
+        "reducedHint": "nur für Leitungen kürzer als 6 m"
       }
     },
     "notes": {
@@ -914,17 +930,16 @@
       "hints": {
         "stages": "Die Anlagen werden im Normalfall dreistufig betrieben: 1. Nacht = Minimalbetrieb, 2. Tag = Normalbetrieb, 3. Party = Intensivlüftung.",
         "intensive": "Der Intensivbetrieb entspricht der maximalen Geräteleistung (Auslegung pro Wohnung). Achtung: Intensivlüftung kann zu Geräuschen führen (Schallwerte nicht eingehalten).",
-        "minimum": "Die minimale Luftmenge (Stufe I) beträgt mindestens 50 m³/h oder 0.25 m³/h je m².",
+        "minimum": "Die Grundlüftung beträgt mindestens 0.1 h⁻¹ (≈ 0.25 m³/h je m²) in jedem Raum mit Zuluft und im Mittel der Wohnung (SIA 382/5 Ziffer 5.2.3.1).",
         "maximum": "Die maximale Luftmenge (Stufe III) wird anhand der Anlagen- und der Ventilatorkennlinie bestimmt.",
         "simultaneity": "Bei einem zentralen Gerät kann ein Gleichzeitigkeitsfaktor eingesetzt werden; für 8 Wohnungen rechnen wir mit ca. 80 %.",
-        "heatRecovery": "Lüftungsanlagen mit Aussen- und Fortluft sind mit einer Wärmerückgewinnung auszurüsten: Standardbau mindestens {standard} %, Minergie {minergie} %.",
+        "heatRecovery": "Lüftungsanlagen mit Aussen- und Fortluft sind mit einer Wärmerückgewinnung auszurüsten (EN-105 Ziffer 2); Temperaturänderungsgrad nach EnEV bzw. SIA 382/1. LUPI-Richtwert: Standardbau {standard} %, Minergie {minergie} %.",
         "efficiency": "Vorsicht: Der Wirkungsgrad von Wärmetauschern wird von Herstellern häufig zu hoch angegeben.",
         "enerweb": "Die Dimensionierung inkl. Druckverlust und Schall erfolgt im KWL-Tool; alle Werte ausser dem Luftvolumen sind einzuhalten:"
       },
-      "velocities": "Luftgeschwindigkeiten",
-      "velocitiesHint": "In Apparaten, bezogen auf die Nettofläche, höchstens 2 m/s; im massgebenden Strang der Kanäle höchstens:",
+      "velocities": "Luftgeschwindigkeiten (EN-105)",
+      "velocitiesHint": "EN-105 Ziffer 5.1: in Apparaten höchstens {device} m/s bezogen auf die Nettofläche; im Strang mit dem grössten Druckverlust höchstens:",
       "airFlow": "Luftmenge",
-      "standardBuilding": "Standardbau",
       "upTo": "bis {flow} m³/h",
       "above": "über {flow} m³/h",
       "overflow": "Max. Druckabfall von Überström-Luftdurchlässen",
@@ -936,7 +951,9 @@
       },
       "fire": "Brandschutz",
       "fireText": "Ein KWL-Gerät versorgt in der Regel nur eine Wohneinheit und somit nur einen Brandabschnitt; im Normalfall sind keine Brandschutzmassnahmen notwendig. Bei Mehrfamilienhäusern ist der Brandabschnittsplan zu beachten.",
-      "literature": "Literatur"
+      "literature": "Literatur",
+      "maximum": "zulässig",
+      "velocitiesLupi": "LUPI-Auslegung (nicht in den Normunterlagen): {standard} m/s in Anschlussleitungen bis {standardFlow} m³/h; Minergie {minergie} m/s bis {minergieFlow} m³/h."
     },
     "norm": {
       "title": "Nachweis nach SIA 382/5",
@@ -952,7 +969,9 @@
       "base": "Grundlüftung 0.1 h⁻¹",
       "baseHint": "Mindestluftmenge der Wohnung: {minimum} m³/h",
       "flowsLow": "Zu- oder Abluft liegt unter dem massgebenden Wert von {flow} m³/h. Beide Luftarten auf diesen Wert setzen.",
-      "baseLow": "In diesen Räumen reicht die Mindestluftmenge nicht für 0.1 h⁻¹: {rooms}."
+      "baseLow": "In diesen Räumen liegt die eingesetzte Zuluft unter der Grundlüftung von 0.1 h⁻¹: {rooms}.",
+      "apply": "Nach SIA 382/5 verteilen (Schritte 3 + 4)",
+      "applyHint": "Setzt Zu- und Abluft auf den massgebenden Wert: Zuluft gleichmässig auf die Zimmer, Abluft im Verhältnis der Werte nach Tabelle 3. Höhere Werte (z. B. LUPI-Werte) danach mit der Bauherrschaft vereinbaren."
     }
   },
   "kwlPlan": {
@@ -1094,7 +1113,11 @@
       "noiseWet": "L_H Bad/WC ≥ 25 m³, Küche",
       "intake": "Aussenluft-Durchlass Höhe / Geschwindigkeit",
       "filters": "Filter mindestens",
-      "co2": "CO₂ bei Normalbelegung"
+      "co2": "CO₂ bei Normalbelegung",
+      "velocity": "Luftgeschwindigkeit Kanal (EN-105)",
+      "velocityValue": "≤ 3 m/s bis 1’000 m³/h",
+      "insulation": "Dämmung AUL/FOL in der Hülle (EN-105)",
+      "insulationValue": "100 mm (60 mm mit Vorwärmung)"
     },
     "concept": {
       "title": "Lüftungskonzept",
@@ -1325,8 +1348,8 @@
       "price": "Strompreis [CHF/kWh]",
       "energy": "Elektrizitätsbedarf",
       "cost": "Stromkosten",
-      "heatRecovery": "Wärmerückgewinnung",
-      "heatRecoveryHint": "Temperaturänderungsgrad; höhere Werte nach SIA 382/1 Ziffer 5.10 bzw. VO (EU) 1253/2014"
+      "heatRecovery": "Wärmerückgewinnung (LUPI-Richtwert)",
+      "heatRecoveryHint": "Pflicht bei Aussen- und Fortluft (EN-105 Ziffer 2); Anforderung nach EnEV bzw. SIA 382/1 Ziffer 5.10"
     },
     "operation": {
       "title": "Betrieb und Unterhalt",

@@ -3,12 +3,12 @@
 import { useTranslations } from "next-intl";
 
 import { Textarea } from "@/components/ui/textarea";
-import { heatRecoveryMinimum, overflowPressureLimits, velocityLimits } from "@/lib/kwl/calc";
+import { deviceMaxVelocity, heatRecoveryMinimum, overflowPressureLimits, recommendedVelocities, velocityLimits } from "@/lib/kwl/calc";
 
 import { fmt, Section } from "../../fields";
 
 const planningHints = ["stages", "intensive", "minimum", "maximum", "simultaneity", "heatRecovery", "efficiency", "enerweb"] as const;
-const literature = ["SIA 382/1", "SIA 382/5", "SIA 180", "SWKI VA 104-01", "Minergie", "EnFK Vollzugshilfe EN-4"];
+const literature = ["SIA 382/1", "SIA 382/5", "SIA 180", "SWKI VA 104-01", "Minergie", "EnDK Vollzugshilfe EN-105", "EnDK Vollzugshilfe EN-110"];
 
 export function NotesTab({ notes, editable, onChange }: { notes: string; editable: boolean; onChange: (notes: string) => void }) {
   const t = useTranslations("kwl.notes");
@@ -48,29 +48,34 @@ export function NotesTab({ notes, editable, onChange }: { notes: string; editabl
       </Section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Section title={t("velocities")} description={t("velocitiesHint")}>
+        <Section title={t("velocities")} description={t("velocitiesHint", { device: fmt(deviceMaxVelocity, 1) })}>
           <table className="text-sm">
             <thead className="text-xs text-muted-foreground">
               <tr className="border-b">
                 <th className="py-1 pr-6 text-left font-medium">{t("airFlow")}</th>
-                <th className="pr-6 text-right font-medium">{t("standardBuilding")}</th>
-                <th className="text-right font-medium">Minergie</th>
+                <th className="text-right font-medium">{t("maximum")}</th>
               </tr>
             </thead>
             <tbody>
-              {velocityLimits.standard.map(([upTo, v], i) => {
-                const minergie = velocityLimits.minergie[i];
-                const from = velocityLimits.standard[i - 1]?.[0];
+              {velocityLimits.map(([upTo, v], i) => {
+                const from = velocityLimits[i - 1]?.[0];
                 return (
                   <tr key={upTo} className="border-b last:border-0">
                     <td className="py-1 pr-6">{Number.isFinite(upTo) ? t("upTo", { flow: fmt(upTo) }) : t("above", { flow: fmt(from) })}</td>
-                    <td className="pr-6 text-right tabular-nums">{fmt(v, 1)} m/s</td>
-                    <td className="text-right tabular-nums">{minergie ? `${fmt(minergie[1], 1)} m/s` : ""}</td>
+                    <td className="text-right tabular-nums">{fmt(v, 1)} m/s</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+          <p className="text-xs text-muted-foreground">
+            {t("velocitiesLupi", {
+              standard: fmt(recommendedVelocities.standard[0][1], 1),
+              standardFlow: fmt(recommendedVelocities.standard[0][0]),
+              minergie: fmt(recommendedVelocities.minergie[0][1], 1),
+              minergieFlow: fmt(recommendedVelocities.minergie[0][0]),
+            })}
+          </p>
         </Section>
 
         <Section title={t("overflow")}>
