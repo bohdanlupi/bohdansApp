@@ -172,7 +172,7 @@ export function TreeEditor({
   };
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1fr_24rem]">
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="space-y-3">
         {lists.map((key) => (
           <section key={key} className="rounded-xl border">

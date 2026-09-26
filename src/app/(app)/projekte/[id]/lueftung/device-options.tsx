@@ -29,17 +29,17 @@ export function DeviceOptionsFields({
   const set = (patch: Partial<DeviceOptions>) => onChange({ ...o, ...patch });
 
   return (
-    <fieldset className="space-y-2 rounded-lg border p-2.5">
+    <fieldset className="flex flex-wrap items-end gap-x-4 gap-y-2 rounded-lg border p-2.5">
       <legend className="px-1 text-xs text-muted-foreground">{t("attachments")}</legend>
       {available.erv && (
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex h-8 items-center gap-2 text-sm">
           <input type="checkbox" checked={o.erv} disabled={disabled} onChange={(e) => set({ erv: e.target.checked })} />
           {t("erv")}
         </label>
       )}
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="flex flex-wrap items-end gap-2">
         {available.fond && (
-          <div className="space-y-1">
+          <div className="w-48 space-y-1">
             <label htmlFor={`${idPrefix}-fond`} className="text-xs text-muted-foreground">
               {t("fond")}
             </label>
@@ -51,7 +51,7 @@ export function DeviceOptionsFields({
           </div>
         )}
         {available.fond && o.fond !== "none" && (
-          <div className="space-y-1">
+          <div className="w-48 space-y-1">
             <label htmlFor={`${idPrefix}-fond-side`} className="text-xs text-muted-foreground">
               {t("fondSide")}
             </label>
@@ -62,7 +62,7 @@ export function DeviceOptionsFields({
           </div>
         )}
         {available.clime.length > 0 && (
-          <div className="space-y-1">
+          <div className="w-48 space-y-1">
             <label htmlFor={`${idPrefix}-clime`} className="text-xs text-muted-foreground">
               {t("clime")}
             </label>

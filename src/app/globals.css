@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Ultrawide screens (e.g. 34" 3440 × 1440): side-by-side layouts. */
+@theme {
+  --breakpoint-ultra: 150rem;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

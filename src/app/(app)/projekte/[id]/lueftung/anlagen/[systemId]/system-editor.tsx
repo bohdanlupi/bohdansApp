@@ -107,7 +107,7 @@ export function SystemEditor({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="grid w-full max-w-3xl gap-3 sm:grid-cols-2">
+        <div className="grid w-full max-w-3xl gap-3 sm:grid-cols-2 ultra:max-w-none ultra:flex-1 ultra:grid-cols-[18rem_18rem_minmax(0,1fr)] ultra:items-start">
           <div className="space-y-1">
             <label htmlFor="system-name" className="text-xs text-muted-foreground">
               {t("name")}
@@ -136,6 +136,8 @@ export function SystemEditor({
                 </optgroup>
               )}
             </select>
+          </div>
+          <div className="sm:col-span-2 ultra:col-span-1">
             <DeviceOptionsFields
               deviceKey={data.device}
               value={data.deviceOptions}
@@ -240,54 +242,58 @@ export function SystemEditor({
         </Notice>
       )}
 
-      <ResultsPanel result={result} device={device} rooms={rooms} data={data} planParams={planParams} />
-
-      {!empty && (
-        <section className="space-y-2 rounded-xl border p-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-semibold">{t("schema")}</h2>
-            <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
-          </div>
-          <div className="overflow-x-auto">
-            <SchemaView
-              layout={layout}
-              selected={selected}
-              highlight={highlight}
-              nodeInfo={(n) => {
-                const r = nodeResult(n.id);
-                return shortInfo(r?.flow, r?.dp);
-              }}
-              labels={{
-                device: device.name ?? t("device"),
-                deviceLines: optionsList(data.device, data.deviceOptions, {
-                  erv: tDevice("ervShort"),
-                  fond: "ComfoFond-L Q",
-                  fondFilter: tDevice("fondFilter"),
-                  fondLeft: tDevice("fondLeft"),
-                  fondRight: tDevice("fondRight"),
-                }),
-                outdoor: t("air.outdoor"),
-                supply: t("air.supply"),
-                extract: t("air.extract"),
-                exhaust: t("air.exhaust"),
-              }}
-              onSelect={setSelected}
-            />
-          </div>
-        </section>
-      )}
-
-      <TreeEditor
-        data={data}
-        rooms={rooms}
-        result={result}
-        selected={selected}
-        editable={editable}
-        onSelect={setSelected}
-        onChange={(change) => setData(change)}
-      />
-
-      <QuantitiesPanel data={data} systemId={id} projectId={projectId} systemName={name} lvs={lvs} dirty={dirty} editable={editable} />
+      {/* Ultrawide: schema and results left (sticky), elements and quantities right. */}
+      <div className="space-y-4 ultra:grid ultra:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ultra:items-start ultra:gap-6 ultra:space-y-0">
+        <div className="flex flex-col gap-4 ultra:sticky ultra:top-4 ultra:max-h-[calc(100vh-2rem)] ultra:overflow-y-auto">
+          <ResultsPanel result={result} device={device} rooms={rooms} data={data} planParams={planParams} />
+          {!empty && (
+            <section className="space-y-2 rounded-xl border p-3 ultra:order-first">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="font-semibold">{t("schema")}</h2>
+                <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
+              </div>
+              <div className="overflow-x-auto">
+                <SchemaView
+                  layout={layout}
+                  selected={selected}
+                  highlight={highlight}
+                  nodeInfo={(n) => {
+                    const r = nodeResult(n.id);
+                    return shortInfo(r?.flow, r?.dp);
+                  }}
+                  labels={{
+                    device: device.name ?? t("device"),
+                    deviceLines: optionsList(data.device, data.deviceOptions, {
+                      erv: tDevice("ervShort"),
+                      fond: "ComfoFond-L Q",
+                      fondFilter: tDevice("fondFilter"),
+                      fondLeft: tDevice("fondLeft"),
+                      fondRight: tDevice("fondRight"),
+                    }),
+                    outdoor: t("air.outdoor"),
+                    supply: t("air.supply"),
+                    extract: t("air.extract"),
+                    exhaust: t("air.exhaust"),
+                  }}
+                  onSelect={setSelected}
+                />
+              </div>
+            </section>
+          )}
+        </div>
+        <div className="space-y-4">
+          <TreeEditor
+            data={data}
+            rooms={rooms}
+            result={result}
+            selected={selected}
+            editable={editable}
+            onSelect={setSelected}
+            onChange={(change) => setData(change)}
+          />
+          <QuantitiesPanel data={data} systemId={id} projectId={projectId} systemName={name} lvs={lvs} dirty={dirty} editable={editable} />
+        </div>
+      </div>
     </div>
   );
 }
