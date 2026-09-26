@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { idaClasses, odaClasses, roomTypeKeys, settlementOptions, trafficOptions } from "./calc";
 import { ductMaterials, type DuctMaterial } from "./pressure";
+import { deviceOptionsSchema, noDeviceOptions } from "./attachments";
+import { datasheetDevice } from "./products";
 
 // Input data of a KWL calculation, stored as jsonb in ventilation_calcs.data.
 
@@ -120,14 +122,22 @@ export const kwlDataSchema = z.object({
     }),
   device: z
     .object({
-      id: z.string().max(80).nullable().catch(null),
+      /** Zehnder datasheet device key; older keys (workbook «…-st», other manufacturers) are mapped or dropped. */
+      id: z
+        .string()
+        .max(80)
+        .nullable()
+        .catch(null)
+        .transform((id) => datasheetDevice(id)?.key ?? null),
       /** Pressure drop at nominal flow AUL → ZUL and ABL → FOL (from the KWL tool / Enerweb). */
       supplyDrop: num(5000),
       extractDrop: num(5000),
       /** Electrical power at nominal operation [W], when the device data has none. */
       power: num(10000),
+      /** Attachments (ComfoFond-L Q, enthalpy exchanger, ComfoClime). */
+      options: deviceOptionsSchema,
     })
-    .catch({ id: null, supplyDrop: 80, extractDrop: 70, power: null }),
+    .catch({ id: null, supplyDrop: 80, extractDrop: 70, power: null, options: noDeviceOptions }),
   notes: text(4000),
 });
 

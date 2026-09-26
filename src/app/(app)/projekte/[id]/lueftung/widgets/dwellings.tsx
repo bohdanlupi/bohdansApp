@@ -26,7 +26,9 @@ export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
   const drop = drops.supply !== null || drops.extract !== null ? (drops.supply ?? 0) + (drops.extract ?? 0) : null;
   const pressure = externalPressureCheck(params.system, params.operation === "demand", drop);
   const tooSmall =
-    result.device && ((result.deviceResult.supply && !result.deviceResult.supply.nominalStage) || (result.deviceResult.extract && !result.deviceResult.extract.nominalStage));
+    (result.device && ((result.deviceResult.supply && !result.deviceResult.supply.nominalStage) || (result.deviceResult.extract && !result.deviceResult.extract.nominalStage))) ||
+    result.datasheet?.supply.ok === false ||
+    result.datasheet?.extract.ok === false;
   return {
     steps,
     supplyOk: result.summary.supply >= steps.governing,

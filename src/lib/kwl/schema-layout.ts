@@ -24,6 +24,8 @@ export type SchemaLayout = {
   width: number;
   height: number;
   device: { x: number; y: number; w: number; h: number };
+  /** Height of the supply / extract main line at the device (for the air type labels). */
+  airY: { supply: number; extract: number };
   nodes: LayoutNode[];
   edges: LayoutEdge[];
   labels: LayoutLeafLabel[];
@@ -136,6 +138,6 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
 
   const maxDepth = Math.max(0, ...nodes.filter((n) => n.air === "supply" || n.air === "extract").map((n) => n.depth));
   const width = treeX0 + (maxDepth + 1) * DX + 200;
-  const height = extractTop + extract.height + 20;
-  return { width, height, device: { x: deviceX, y: deviceY, w: deviceW, h: Math.max(deviceH, 80) }, nodes, edges, labels, floors };
+  const height = extractTop + extract.height + 50; // room below the device for the attachment labels
+  return { width, height, device: { x: deviceX, y: deviceY, w: deviceW, h: Math.max(deviceH, 80) }, airY: { supply: supplyY, extract: extractY }, nodes, edges, labels, floors };
 }

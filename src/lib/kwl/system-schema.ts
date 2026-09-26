@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 import type { NetNode, SystemData } from "./network";
+import { deviceOptionsSchema, normalizeOptions } from "./attachments";
 import { ductMaterials, type DuctMaterial } from "./pressure";
+import { currentProductKey, datasheetDevice } from "./products";
 
 // Data of a ventilation system (ventilation_systems.data). Parsed leniently: invalid nodes are dropped one by one.
 
@@ -13,7 +15,7 @@ const nodeFields = z.object({
   id,
   type: z.enum(["duct", "bend", "tee", "distributor", "component", "terminal"]),
   label: text(120),
-  product: z.string().max(80).nullable().catch(null),
+  product: z.string().max(80).nullable().catch(null).transform(currentProductKey),
   curve: z.string().max(120).nullable().catch(null),
   length: num(1000),
   count: z.number().int().min(1).max(50).catch(1),
@@ -50,8 +52,10 @@ function parseNodes(raw: unknown, depth: number, budget: { left: number }): NetN
 export function parseSystemData(value: unknown): SystemData {
   const v = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
   const budget = { left: MAX_NODES };
+  const device = typeof v.device === "string" && v.device.length <= 80 ? (datasheetDevice(v.device)?.key ?? null) : null;
   return {
-    device: typeof v.device === "string" && v.device.length <= 80 ? v.device : null,
+    device,
+    deviceOptions: normalizeOptions(device, deviceOptionsSchema.parse(v.deviceOptions)),
     calcIds: Array.isArray(v.calcIds) ? v.calcIds.filter((x): x is string => typeof x === "string" && x.length <= 40).slice(0, 200) : [],
     outdoor: parseNodes(v.outdoor, 0, budget),
     supply: parseNodes(v.supply, 0, budget),

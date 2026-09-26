@@ -1,7 +1,10 @@
-// Product data for the network calculation. Zehnder data (digitised from the Zehnder CH datasheets in
-// Berechnungsvorlagen/Lüftung KWL/Zehnder Daten) has priority; generic duct sizes are the fallback.
-// Curves are pressure drop [Pa] over air flow [m³/h]; duct curves are [Pa/m].
+// Product data for the network calculation: Zehnder (digitised from the Zehnder CH datasheets in
+// Berechnungsvorlagen/Lüftung KWL/Zehnder Daten) and the Meier Tobler spiro range (IGH catalogue).
+// Curves are pressure drop [Pa] over air flow [m³/h]; duct curves are [Pa/m]. Without a curve: ducts by
+// Darcy–Weisbach, fittings by their loss coefficient ζ.
 
+import type { DuctMaterial } from "./pressure";
+import { meierToblerProducts } from "./meiertobler-data";
 import { zehnderProducts } from "./zehnder-data";
 
 export type Curve = {
@@ -32,7 +35,17 @@ export type Product = {
   key: string;
   manufacturer: string;
   name: string;
+  /** Product family for grouping in selections (e.g. «ComfoTube Flow», «T-Stücke»). */
+  family?: string;
   kind: ProductKind;
+  /** Role of a fitting in the network. */
+  fitting?: "bend" | "tee" | "reducer" | "joint" | "cap";
+  /** Loss coefficient related to the velocity in `inner` (used when there is no curve). */
+  zeta?: number;
+  /** Duct material for the friction calculation when there is no curve. */
+  material?: DuctMaterial;
+  /** Ducts sold in pieces: metres per piece (quantity in the LV in pieces). */
+  lvPiece?: number;
   /** Pressure-drop curves (Pa over m³/h), or duct friction (Pa/m over m³/h) for ducts. */
   curves: Curve[];
   /** Inner cross-section of ducts / connections for velocity and dynamic pressure. */
@@ -51,21 +64,21 @@ export type Product = {
   };
 };
 
-/** Generic ducts (no manufacturer curve): friction by Darcy–Weisbach with textbook roughness. */
-const genericDucts: Product[] = [80, 100, 125, 150, 160, 180, 200, 250, 315].map((d) => ({
-  key: `spiro-${d}`,
-  manufacturer: "",
-  name: `Wickelfalzrohr ø ${d}`,
-  kind: "duct" as const,
-  curves: [],
-  inner: { diameter: d },
-  articles: [],
-}));
-
-export const products: Product[] = [...zehnderProducts, ...genericDucts];
+export const products: Product[] = [...zehnderProducts, ...meierToblerProducts];
 
 const byKey = new Map(products.map((p) => [p.key, p]));
 export const findProduct = (key: string | null | undefined) => (key ? (byKey.get(key) ?? null) : null);
+
+/** Keys saved before the product range changed: generic spiro ducts → Meier Tobler spiro pipes. */
+export function currentProductKey(key: string | null): string | null {
+  if (!key || byKey.has(key)) return key;
+  const spiro = /^spiro-(\d+)$/.exec(key);
+  if (spiro && byKey.has(`meiertobler-spirorohr-dn-${spiro[1]}-3-m`)) return `meiertobler-spirorohr-dn-${spiro[1]}-3-m`;
+  return datasheetDevice(key)?.key ?? null;
+}
+
+/** Group label for selections: manufacturer and family. */
+export const productGroup = (p: Product) => [p.manufacturer, p.family].filter(Boolean).join(" · ");
 export const productsOfKind = (...kinds: ProductKind[]) => products.filter((p) => kinds.includes(p.kind));
 
 /**

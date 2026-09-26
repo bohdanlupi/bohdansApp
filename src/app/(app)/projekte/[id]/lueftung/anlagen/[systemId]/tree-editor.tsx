@@ -8,7 +8,7 @@ import { NativeSelect } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { findNode, mapTree, type NetNode, newNode, type NodeResult, type NodeType, type RoomFlow, type SystemData, type SystemResult } from "@/lib/kwl/network";
-import { findProduct, productCurve, type ProductKind, productsOfKind } from "@/lib/kwl/products";
+import { findProduct, type Product, productCurve, productGroup, products } from "@/lib/kwl/products";
 import { ductMaterials, type DuctMaterial } from "@/lib/kwl/pressure";
 import { airColors } from "@/lib/kwl/schema-layout";
 import { cn } from "@/lib/utils";
@@ -18,14 +18,35 @@ import { fmt, NumberField } from "../../fields";
 type ListKey = "outdoor" | "supply" | "extract" | "exhaust";
 const lists: ListKey[] = ["outdoor", "supply", "extract", "exhaust"];
 const nodeTypes: NodeType[] = ["duct", "bend", "tee", "distributor", "component", "terminal"];
-const productKinds: Record<NodeType, ProductKind[]> = {
-  duct: ["duct"],
-  bend: ["duct", "fitting"],
-  tee: ["fitting"],
-  distributor: ["distributor"],
-  component: ["silencer", "filter", "grille", "valve", "extension", "transfer", "terminal", "fitting"],
-  terminal: ["terminal", "grille", "valve"],
-};
+/** Products that fit a node type (fittings by their role). */
+function productOptions(type: NodeType): Product[] {
+  switch (type) {
+    case "duct":
+      return products.filter((p) => p.kind === "duct");
+    case "bend":
+      return products.filter((p) => p.kind === "fitting" && p.fitting === "bend");
+    case "tee":
+      return products.filter((p) => p.kind === "fitting" && p.fitting === "tee");
+    case "distributor":
+      return products.filter((p) => p.kind === "distributor");
+    case "terminal":
+      return products.filter((p) => p.kind === "terminal" || p.kind === "grille" || p.kind === "valve");
+    default:
+      return products.filter(
+        (p) => !["device", "duct", "distributor"].includes(p.kind) && !(p.kind === "fitting" && (p.fitting === "bend" || p.fitting === "tee")),
+      );
+  }
+}
+
+/** Options grouped by manufacturer · family, in data order. */
+function groupedOptions(list: Product[]) {
+  const groups = new Map<string, Product[]>();
+  for (const p of list) {
+    const g = productGroup(p);
+    groups.set(g, [...(groups.get(g) ?? []), p]);
+  }
+  return [...groups.entries()];
+}
 
 /** The list a node lives in. */
 function listOf(data: SystemData, id: string): ListKey | null {
@@ -301,7 +322,7 @@ function NodePanel({
 }) {
   const t = useTranslations("kwlSystem");
   const product = findProduct(node.product);
-  const options = productsOfKind(...productKinds[node.type]);
+  const options = groupedOptions(productOptions(node.type));
   const side = list === "supply" || list === "outdoor" ? "supply" : "extract";
   const numberField = (key: keyof NetNode, label: string, decimals = 1, placeholder?: string) => (
     <div className="space-y-1">
@@ -350,10 +371,14 @@ function NodePanel({
           onChange={(e) => onPatch({ product: e.target.value || null, curve: null })}
         >
           <option value="">{node.type === "duct" || node.type === "bend" ? t("customDuct") : t("manualValue")}</option>
-          {options.map((p) => (
-            <option key={p.key} value={p.key}>
-              {p.name}
-            </option>
+          {options.map(([group, list]) => (
+            <optgroup key={group} label={group}>
+              {list.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.name}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </NativeSelect>
         {product?.source && (

@@ -122,19 +122,22 @@ function addDevices(json) {
           key: uniqueKey(name),
           manufacturer: "Zehnder",
           name,
+          family: "ComfoAir",
           kind: "device",
           curves: [],
           articles: arts(v.articles),
           source: { file: p.file, page: num(v.pages?.data) ?? num(p.page) ?? undefined },
           device: { measurements, maxExternalCurve: maxCurve, maxFlow: num(v.maxFlow) ?? undefined, nominalFlow: num(v.nominalFlow?.qv) ?? undefined },
         });
-      } else if (v.pressureDrop) {
+      } else if (v.pressureDrop && !/ComfoFond/.test(p.product)) {
+        // (ComfoFond-L Q is modelled as a device attachment, see attachments() below.)
         const pd = v.pressureDrop;
         const list = Object.values(pd).filter((c) => c && typeof c === "object" && Array.isArray(c.points));
         products.push({
           key: uniqueKey(name),
           manufacturer: "Zehnder",
           name,
+          family: "Erweiterungen",
           kind: "extension",
           curves: curves(list, name),
           articles: arts(v.articles),
@@ -149,6 +152,19 @@ const articleNo = (n) => {
   const m = /(\d{3}) ?(\d{3}) ?(\d{3})/.exec(n);
   return m ? `${m[1]} ${m[2]} ${m[3]}` : n.trim();
 };
+// Family for grouping in selections: product group of the datasheet without «Zehnder» and suffixes.
+const familyOf = (product) =>
+  cleanName(product)
+    .replace(/\s*[–-]\s*Formteile\/Zubehör$/, "")
+    .replace(/\s*\(.*\)$/, "")
+    .trim();
+const fittingRole = (name) =>
+  /y-stück|kreuzungsstück/i.test(name)
+    ? "tee"
+    : /bogen|gebogen/i.test(name)
+      ? "bend"
+      : "joint";
+
 const kindMap = { throttle: "valve" };
 const airUseOf = (u) => {
   if (!u) return undefined;
@@ -169,11 +185,13 @@ function addGroup(json, defaults = {}) {
         key: uniqueKey(name),
         manufacturer: "Zehnder",
         name,
+        family: familyOf(p.product),
         kind,
         curves: curves(v.pressureLoss, name, airUseOf(v.use)),
         articles: articles(v),
         source: { file: p.file, page: num(v.page) ?? undefined },
       };
+      if (kind === "fitting") product.fitting = fittingRole(name);
       const i = kind === "duct" ? inner(v) : undefined;
       if (i) product.inner = i;
       const outlets = num(v.connections?.outlets?.count);
@@ -197,17 +215,93 @@ addGroup(read("terminals.json"), { kind: "terminal" });
 addGroup(read("grilles.json"), { kind: "grille" });
 
 const body = products.map((p) => "  " + JSON.stringify(p)).join(",\n");
+
+// Attachments of the ComfoAir Q units: ComfoFond-L Q, enthalpy exchanger (ERV), ComfoClime 24 / 36.
+function attachments(json) {
+  const compact = (s) => s.replace(/\s+/g, "").replace(/ERV$/, "");
+  const keyOf = (model) => products.find((p) => p.kind === "device" && compact(p.name) === compact(model))?.key;
+  const find = (re) => json.products.find((p) => re.test(p.product));
+  const arts = (list) =>
+    (list || []).map((a) => ({
+      number: articleNo(a.nr),
+      // Without digitising remarks such as «(Artikeltabelle S.17; …)».
+      text: String(a.desc || "").replace(/\s*\((?:Artikeltabelle|Ausschreibungstext)[^)]*\)/g, "").replace(/\s+/g, " ").trim().slice(0, 300),
+    }));
+
+  const fondP = find(/ComfoFond/);
+  const fv = fondP.variants[0];
+  const fond = {
+    name: "ComfoFond-L Q",
+    source: { file: fondP.file, page: fv.pages?.pressureDrop },
+    withFilter: points(fv.pressureDrop.withFilter.points),
+    withoutFilter: points(fv.pressureDrop.withoutFilter.points),
+    devices: Object.fromEntries(
+      fv.electrical.nominal.map((n) => [keyOf(n.with), { pumpW: n.powerW, maxFlow: fv.maxFlow["with" + n.with.replace("ComfoAir ", "")] ?? null }]),
+    ),
+    articles: arts(fv.articles),
+  };
+
+  const ervP = find(/Enthalpietauscher/);
+  const erv = {
+    source: { file: ervP.file, page: ervP.page },
+    devices: Object.fromEntries(
+      ervP.variants
+        .filter((v) => keyOf(v.forDevice))
+        .map((v) => [
+          keyOf(v.forDevice),
+          {
+            heatRecoveryPct: v.phi?.heatRecoveryPct ?? null,
+            humidityRecoveryPct: v.phi?.humidityRecoveryPct ?? null,
+            spiPhi: v.phi?.spiWhM3 ?? null,
+            tempEfficiencyPct: v.en13141_7?.tempEfficiencyPct ?? null,
+            retrofitArticle: arts(v.articles)[0] ?? null,
+          },
+        ]),
+    ),
+  };
+
+  const ccP = find(/ComfoClime/);
+  const clime = ccP.variants.map((v) => {
+    const a = arts(v.articles);
+    return {
+      key: v.model.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      name: v.model,
+      source: { file: ccP.file, page: v.pages?.fanCurves },
+      heatingKW: v.heatingCapacityKW,
+      coolingKW: v.coolingCapacityKW,
+      maxPowerW: v.maxPowerW,
+      flowRange: v.flowRange,
+      article: a[0],
+      combinations: v.combinations.map((c) => {
+        const q = c.with.replace("ComfoAir ", "");
+        const adapters = a.filter((x) => /adapter/i.test(x.text));
+        return {
+          device: keyOf(c.with),
+          supply: points(c.fanCurve100.supply),
+          extract: points(c.fanCurve100.extract),
+          adapter: adapters.find((x) => x.text.includes(q)) ?? adapters[0] ?? null,
+        };
+      }),
+      accessories: a.slice(1).filter((x) => !/adapter/i.test(x.text)),
+    };
+  });
+  return { fond, erv, clime };
+}
+const attachmentData = attachments(read("devices.json"));
 fs.writeFileSync(
   out,
   `// Generated from the Zehnder CH datasheets (Berechnungsvorlagen/Lüftung KWL/Zehnder Daten): pressure-drop
 // curves digitised from the diagrams (vector paths calibrated on the grid) and tables, article numbers from the
 // order lists. Do not edit by hand – regenerate from the digitised JSON.
 
+import type { ZehnderAttachments } from "./attachments";
 import type { Product } from "./products";
 
 export const zehnderProducts: Product[] = [
 ${body},
 ];
+
+export const zehnderAttachments: ZehnderAttachments = ${JSON.stringify(attachmentData)};
 `,
 );
 const count = {};

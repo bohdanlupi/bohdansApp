@@ -1,6 +1,7 @@
 import { Circle, Document, G, Line, Path, Svg, Text, View } from "@react-pdf/renderer";
 
 import { fanChart, findRoomType, type SideResult, spiLimit, spiTarget } from "@/lib/kwl/calc";
+import { hasOptions, optionsLabel } from "@/lib/kwl/attachments";
 import type { KwlDevice } from "@/lib/kwl/devices";
 import type { KwlEvaluation } from "@/lib/kwl/evaluate";
 import type { KwlData } from "@/lib/kwl/schema";
@@ -47,7 +48,7 @@ export function KwlDocument({
   result: KwlEvaluation;
 }) {
   const t: KwlTranslate = (key, values) => winAnsi(translate(key, values));
-  const { rows, summary, device, deviceResult, oda, supplyFilter } = result;
+  const { rows, summary, device, product, datasheet, deviceResult, oda, supplyFilter } = result;
   const { supply, extract, spi, partyFlow } = deviceResult;
   const yesNo = (ok: boolean) => (ok ? t("yes") : t("no"));
 
@@ -133,14 +134,27 @@ export function KwlDocument({
         </View>
 
         <Heading>{t("tabs.device")}</Heading>
-        {device ? (
+        {product ? (
           <>
             <KeyValues
               rows={[
-                [t("device.device"), device.name],
-                [t("device.supplyDrop"), `${n(result.drops.supply)} Pa${result.drops.system ? ` (${result.drops.system.name})` : ""}`],
+                [t("device.device"), `Zehnder ${product.name}`],
+                ...(hasOptions(result.options)
+                  ? ([[t("device.attachmentsPdf"), optionsLabel(product.key, result.options, { erv: t("device.ervPdf"), fond: "ComfoFond-L Q", fondFilter: t("device.fondFilterPdf"), fondLeft: t("device.fondLeftPdf"), fondRight: t("device.fondRightPdf") })]] as [string, string][])
+                  : []),
+                [
+                  t("device.supplyDrop"),
+                  `${n(result.drops.supply)} Pa${result.drops.system ? ` (${result.drops.system.name})` : ""}${result.drops.fond !== null ? `, ${t("device.inclFondPdf", { dp: n(result.drops.fond) })}` : ""}`,
+                ],
                 [t("device.extractDrop"), `${n(result.drops.extract)} Pa${result.drops.system ? ` (${result.drops.system.name})` : ""}`],
-                [t("device.nominalStage"), `${supply?.nominalStage?.stage ?? "–"} / ${extract?.nominalStage?.stage ?? "–"}`],
+                ...(datasheet
+                  ? ([
+                      [t("device.datasheet.supply"), `${n(datasheet.supply.maxPressure)} Pa`],
+                      [t("device.datasheet.extract"), `${n(datasheet.extract.maxPressure)} Pa`],
+                      [t("device.datasheet.power"), `${n(datasheet.powerW)} W`],
+                    ] as [string, string][])
+                  : []),
+                ...(device ? ([[t("device.nominalStage"), `${supply?.nominalStage?.stage ?? "–"} / ${extract?.nominalStage?.stage ?? "–"}`]] as [string, string][]) : []),
                 [t("summary.party"), `${n(partyFlow)} m³/h`],
                 [t("device.spi"), spi === null ? t("device.spiUnknown") : `${formatNumber(spi, 2)} ${t("device.spiUnit")}`],
                 ...(spi === null
@@ -151,37 +165,44 @@ export function KwlDocument({
                     ] as [string, string][])),
               ]}
             />
+            {(datasheet?.supply.ok === false || datasheet?.extract.ok === false) && (
+              <Text style={{ color: "#b91c1c", marginTop: 4 }}>{t("device.datasheet.tooSmall")}</Text>
+            )}
             {((supply && !supply.nominalStage) || (extract && !extract.nominalStage)) && (
               <Text style={{ color: "#b91c1c", marginTop: 4 }}>{t("device.tooSmall")}</Text>
             )}
-            <View wrap={false} style={{ marginTop: 8 }}>
-              <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, ...styles.bold, fontSize: 7.5 }}>
-                <Text style={{ ...cell, width: 60 }}>{t("device.stage")}</Text>
-                <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("supplyShort")} m³/h</Text>
-                <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("supplyShort")} Pa</Text>
-                <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("extractShort")} m³/h</Text>
-                <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("extractShort")} Pa</Text>
-                <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("device.stagePower")}</Text>
-              </View>
-              {device.stages.map((stage, i) => {
-                const nominal = stage.stage === supply?.nominalStage?.stage || stage.stage === extract?.nominalStage?.stage;
-                return (
-                  <View key={stage.stage} style={{ flexDirection: "row", fontSize: 7.5, borderBottomWidth: 0.5, borderBottomColor: colors.line, ...(nominal ? styles.bold : {}) }}>
-                    <Text style={{ ...cell, width: 60 }}>{t("device.stageN", { stage: stage.stage })}</Text>
-                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(supply?.points[i].flow)}</Text>
-                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(supply?.points[i].pressure)}</Text>
-                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(extract?.points[i].flow)}</Text>
-                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(extract?.points[i].pressure)}</Text>
-                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{stage.power ?? ""}</Text>
+            {device && (
+              <>
+                <View wrap={false} style={{ marginTop: 8 }}>
+                  <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, ...styles.bold, fontSize: 7.5 }}>
+                    <Text style={{ ...cell, width: 60 }}>{t("device.stage")}</Text>
+                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("supplyShort")} m³/h</Text>
+                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("supplyShort")} Pa</Text>
+                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("extractShort")} m³/h</Text>
+                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("extractShort")} Pa</Text>
+                    <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("device.stagePower")}</Text>
                   </View>
-                );
-              })}
-            </View>
-            <View wrap={false} style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
-              <PdfFanChart device={device} side={supply} title={t("device.chart.supplyPdf")} />
-              <PdfFanChart device={device} side={extract} title={t("device.chart.extractPdf")} />
-            </View>
-            <Text style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>{t("device.chart.pdfLegend")}</Text>
+                  {device.stages.map((stage, i) => {
+                    const nominal = stage.stage === supply?.nominalStage?.stage || stage.stage === extract?.nominalStage?.stage;
+                    return (
+                      <View key={stage.stage} style={{ flexDirection: "row", fontSize: 7.5, borderBottomWidth: 0.5, borderBottomColor: colors.line, ...(nominal ? styles.bold : {}) }}>
+                        <Text style={{ ...cell, width: 60 }}>{t("device.stageN", { stage: stage.stage })}</Text>
+                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(supply?.points[i].flow)}</Text>
+                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(supply?.points[i].pressure)}</Text>
+                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(extract?.points[i].flow)}</Text>
+                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(extract?.points[i].pressure)}</Text>
+                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{stage.power ?? ""}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+                <View wrap={false} style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
+                  <PdfFanChart device={device} side={supply} title={t("device.chart.supplyPdf")} />
+                  <PdfFanChart device={device} side={extract} title={t("device.chart.extractPdf")} />
+                </View>
+                <Text style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>{t("device.chart.pdfLegend")}</Text>
+              </>
+            )}
           </>
         ) : (
           <Text>{t("device.choose")}</Text>

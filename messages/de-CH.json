@@ -743,7 +743,7 @@
     "device": {
       "title": "Lüftungsgerät",
       "description": "Gerätewahl und Druckverlust bei Nennvolumenstrom. Massgebend ist die gewünschte Luftmenge auf Stufe III.",
-      "device": "Gerät (Lieferant / Typ)",
+      "device": "Gerät (Zehnder)",
       "none": "– Gerät wählen –",
       "power": "Leistungsaufnahme bei Nennbetrieb [W]",
       "powerPlaceholder": "aus Gerätedaten",
@@ -795,13 +795,19 @@
       "openSystem": "Zur Anlage",
       "datasheet": {
         "title": "Zehnder-Datenblatt: {name}",
-        "hint": "Die Werte aus dem Hersteller-Datenblatt (maximale externe Pressung, Leistungsaufnahme aus der Messtabelle) haben Vorrang vor den Kennlinien der Arbeitsmappe.",
+        "hint": "Werte aus dem Zehnder-Datenblatt: maximale externe Pressung und Leistungsaufnahme aus der Messtabelle (daraus die SPI). Die Stufentabelle und die Ventilatorkennlinien darunter dienen der Stufenwahl.",
         "supply": "Max. ext. Pressung Zuluft",
         "extract": "Max. ext. Pressung Abluft",
         "sideHint": "bei {flow} m³/h; erforderlich {dp} Pa",
         "power": "Leistungsaufnahme",
         "tooSmall": "Nach Datenblatt reicht das Gerät für diesen Betriebspunkt nicht (Volumenstrom oder externe Pressung über der maximalen Kennlinie)."
-      }
+      },
+      "attachmentsPdf": "Zubehör",
+      "ervPdf": "Enthalpietauscher",
+      "fondFilterPdf": "mit Filter",
+      "inclFondPdf": "inkl. ComfoFond-L Q {dp} Pa",
+      "fondLeftPdf": "Zuluft links",
+      "fondRightPdf": "Zuluft rechts"
     },
     "filter": {
       "traffic": {
@@ -1420,8 +1426,7 @@
     "external": "Ext. Δp ZUL / ABL Pa",
     "unassigned": "ohne Geschoss",
     "noDevice": "– kein Gerät gewählt –",
-    "datasheetDevices": "Zehnder (Datenblätter)",
-    "workbookDevices": "Arbeitsmappe LUPI",
+    "datasheetDevices": "Zehnder",
     "delete": "Löschen",
     "deleteTitle": "Anlage löschen?",
     "deleteText": "«{name}» mit dem ganzen Netz wird endgültig gelöscht.",
@@ -1459,7 +1464,6 @@
     "spi": "SPI (Datenblatt)",
     "power": "Leistungsaufnahme {w} W",
     "chooseDevice": "Gerät wählen",
-    "workbookStages": "Arbeitsmappe: Zuluft Stufe {supply}, Abluft Stufe {extract}",
     "deviceTooSmall": "Das Gerät erreicht den Betriebspunkt nicht (Volumenstrom oder externe Pressung über der maximalen Kennlinie). Grösseres Gerät wählen oder Netz optimieren.",
     "missingTerminals": "Räume mit Luftmenge ohne Luftdurchlass im Netz: {rooms}",
     "tooFast": "{count, plural, one {# Element überschreitet} other {# Elemente überschreiten}} die Luftgeschwindigkeit nach EN-105.",
@@ -1532,7 +1536,7 @@
       "none": "keine"
     },
     "quantities": "Mengen",
-    "quantitiesHint": "Leitungen in Metern, übrige Elemente in Stück, zusammengefasst je Produkt. Mit Zehnder-Artikelnummer werden die Artikel aus dem IGH-Katalog übernommen, sonst R-Positionen.",
+    "quantitiesHint": "Leitungen in Metern (Spirorohre in Stück à 3 m), übrige Elemente in Stück, zusammengefasst je Produkt. Mit Artikelnummer werden die Artikel aus den IGH-Katalogen von Zehnder und Meier Tobler übernommen, sonst R-Positionen.",
     "noQuantities": "Noch keine Mengen.",
     "article": "Art.-Nr.",
     "quantity": "Menge",
@@ -1547,5 +1551,25 @@
     "inserted": "{count, plural, one {# Position} other {# Positionen}} ins LV übernommen.",
     "saveFirst": "Zuerst speichern",
     "overRange": "Über dem empfohlenen Einsatzbereich des Herstellers (Volumenstrom je Stück bzw. je Rohr / Maximum): {items}. Grösseres Produkt oder mehr Rohre/Durchlässe wählen (Schall)."
+  },
+  "kwlDevice": {
+    "attachments": "Zubehör zum Gerät",
+    "erv": "Enthalpietauscher (Feuchterückgewinnung)",
+    "ervShort": "Enthalpietauscher",
+    "fond": "ComfoFond-L Q (Sole-Erdwärmetauscher)",
+    "fondFilter": "mit Filter",
+    "fondNoFilter": "ohne Filter",
+    "clime": "ComfoClime (Lufttemperierung)",
+    "without": "ohne",
+    "inclFond": "Zuluftseite inkl. ComfoFond-L Q: +{dp} Pa → {total} Pa extern.",
+    "fondInfo": "ComfoFond-L Q ({filter}): +{dp} Pa auf der Zuluftseite (Aussenluft), Solepumpe {pump} W (nicht in der SPI).",
+    "ervInfo": "Enthalpietauscher: Wärmerückgewinnung {heat} %, Feuchterückgewinnung {humidity} % (PHI). Druckverlust im Datenblatt nicht angegeben.",
+    "ervInfoEn": "Enthalpietauscher: Temperaturänderungsgrad {temp} % (EN 13141-7). Druckverlust im Datenblatt nicht angegeben.",
+    "climeInfo": "{name}: Heizen {heating} kW, Kühlen {cooling} kW, max. {power} W. Verfügbare Pressung nach der 100-%-Kennlinie der Kombination; Leistung der Ventilatoren ohne ComfoClime (keine Angaben im Datenblatt).",
+    "flowWarning": "Der Volumenstrom liegt ausserhalb des Einsatzbereichs des Zubehörs ({detail}).",
+    "noStagesClime": "Mit ComfoClime gelten die Ventilatorstufen des Geräts allein nicht – massgebend ist die Kennlinie der Kombination (Zehnder-Datenblatt oben).",
+    "fondSide": "ComfoFond-L Q Ausführung",
+    "fondLeft": "Zuluft links",
+    "fondRight": "Zuluft rechts"
   }
 }

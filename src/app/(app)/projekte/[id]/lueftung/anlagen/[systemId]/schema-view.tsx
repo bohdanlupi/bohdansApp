@@ -23,7 +23,7 @@ export function SchemaView({
   highlight: Set<string>;
   /** Short text shown next to a node, e.g. "34 m³/h · 12 Pa". */
   nodeInfo: (node: NetNode) => string;
-  labels: { device: string; outdoor: string; supply: string; extract: string; exhaust: string };
+  labels: { device: string; deviceLines?: string[]; outdoor: string; supply: string; extract: string; exhaust: string };
   onSelect: (id: string) => void;
 }) {
   const { width, height, device } = layout;
@@ -74,6 +74,11 @@ export function SchemaView({
         <text x={device.x + device.w / 2} y={device.y + 14} textAnchor="middle" className="fill-foreground text-[11px] font-semibold">
           {labels.device}
         </text>
+        {(labels.deviceLines ?? []).map((line, i) => (
+          <text key={line} x={device.x + device.w / 2} y={device.y + device.h + 12 + i * 11} textAnchor="middle" className="fill-muted-foreground text-[9px]">
+            + {line}
+          </text>
+        ))}
         <g transform={`translate(${device.x + device.w / 2 - 18}, ${device.y + device.h / 2 - 18})`}>
           <rect width={36} height={36} className="fill-none stroke-foreground" strokeWidth={1.3} />
           <line x1={0} y1={0} x2={36} y2={36} className="stroke-foreground" strokeWidth={1.3} />
@@ -85,16 +90,16 @@ export function SchemaView({
             <path d={i === 0 ? "M-5,-6 L7,0 L-5,6 Z" : "M5,-6 L-7,0 L5,6 Z"} className="fill-none stroke-foreground" strokeWidth={1.1} />
           </g>
         ))}
-        <text x={device.x - 4} y={device.y + 30} textAnchor="end" className="text-[10px] font-semibold" fill={airColors.outdoor}>
+        <text x={device.x - 4} y={layout.airY.supply + 14} textAnchor="end" className="text-[10px] font-semibold" fill={airColors.outdoor}>
           {labels.outdoor}
         </text>
-        <text x={device.x - 4} y={device.y + device.h - 24} textAnchor="end" className="text-[10px] font-semibold" fill={airColors.exhaust}>
+        <text x={device.x - 4} y={layout.airY.extract + 14} textAnchor="end" className="text-[10px] font-semibold" fill={airColors.exhaust}>
           {labels.exhaust}
         </text>
-        <text x={device.x + device.w + 4} y={device.y + 26} className="text-[10px] font-semibold" fill={airColors.supply}>
+        <text x={device.x + device.w + 4} y={layout.airY.supply + 14} className="text-[10px] font-semibold" fill={airColors.supply}>
           {labels.supply}
         </text>
-        <text x={device.x + device.w + 4} y={device.y + device.h - 30} className="text-[10px] font-semibold" fill={airColors.extract}>
+        <text x={device.x + device.w + 4} y={layout.airY.extract + 14} className="text-[10px] font-semibold" fill={airColors.extract}>
           {labels.extract}
         </text>
       </g>

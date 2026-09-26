@@ -8,7 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { requireProfile } from "@/lib/auth";
 import { evaluateSystem, roomFlows } from "@/lib/kwl/network";
 import { findProduct } from "@/lib/kwl/products";
-import { findDevice } from "@/lib/kwl/devices";
 import { formatNumber } from "@/lib/number-input";
 
 import { loadProject } from "../../load-project";
@@ -54,7 +53,7 @@ export default async function SystemsPage({ params }: PageProps<"/projekte/[id]/
             <TableBody>
               {systems.map((s) => {
                 const result = evaluateSystem(s.data, roomFlows(calcs, s.data.calcIds));
-                const device = findProduct(s.data.device)?.name ?? findDevice(s.data.device)?.name ?? "–";
+                const device = findProduct(s.data.device)?.name ?? "–";
                 return (
                   <TableRow key={s.id} className="relative">
                     <TableCell className="pl-4">

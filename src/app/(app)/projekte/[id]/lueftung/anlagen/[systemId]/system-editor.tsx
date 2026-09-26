@@ -9,7 +9,7 @@ import { ConfirmButton } from "@/components/confirm-button";
 import type { FormMessageKey } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { kwlDevices } from "@/lib/kwl/devices";
+import { normalizeOptions, optionsLabel } from "@/lib/kwl/attachments";
 import { evaluateSystem, type NetNode, pathTo, roomFlows, type SystemData } from "@/lib/kwl/network";
 import { defaultSystem, starToSystem } from "@/lib/kwl/network-defaults";
 import { checkDevice } from "@/lib/kwl/network-device";
@@ -18,6 +18,7 @@ import { productsOfKind } from "@/lib/kwl/products";
 import type { KwlData } from "@/lib/kwl/schema";
 import { layoutSystem } from "@/lib/kwl/schema-layout";
 
+import { DeviceOptionsFields } from "../../device-options";
 import { deleteSystem, saveSystem } from "../actions";
 import { Notice } from "../../fields";
 import { QuantitiesPanel } from "./quantities-panel";
@@ -48,6 +49,7 @@ export function SystemEditor({
 }) {
   const t = useTranslations("kwlSystem");
   const tForms = useTranslations("forms");
+  const tDevice = useTranslations("kwlDevice");
   const [name, setName] = useState(initialName);
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState({ name: initialName, data: initialData });
@@ -63,8 +65,9 @@ export function SystemEditor({
         data.device,
         { flow: result.supply.flow, dp: result.external.supply ?? 0 },
         { flow: result.extract.flow, dp: result.external.extract ?? 0 },
+        data.deviceOptions,
       ),
-    [data.device, result],
+    [data.device, data.deviceOptions, result],
   );
   const roomLabel = (n: NetNode) => rooms.find((r) => r.calcId === n.calcId && r.roomId === n.roomId)?.name ?? (n.label || t("unassigned"));
   const layout = useMemo(() => layoutSystem(data, rooms, roomLabel), [data, rooms]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -120,7 +123,7 @@ export function SystemEditor({
               className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
               value={data.device ?? ""}
               disabled={!editable}
-              onChange={(e) => setData((d) => ({ ...d, device: e.target.value || null }))}
+              onChange={(e) => setData((d) => ({ ...d, device: e.target.value || null, deviceOptions: normalizeOptions(e.target.value || null, d.deviceOptions) }))}
             >
               <option value="">{t("noDevice")}</option>
               {zehnderDevices.length > 0 && (
@@ -132,14 +135,14 @@ export function SystemEditor({
                   ))}
                 </optgroup>
               )}
-              <optgroup label={t("workbookDevices")}>
-                {kwlDevices.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </optgroup>
             </select>
+            <DeviceOptionsFields
+              deviceKey={data.device}
+              value={data.deviceOptions}
+              disabled={!editable}
+              idPrefix="system"
+              onChange={(deviceOptions) => setData((d) => ({ ...d, deviceOptions }))}
+            />
           </div>
         </div>
         {editable && (
@@ -239,6 +242,9 @@ export function SystemEditor({
               }}
               labels={{
                 device: device.name ?? t("device"),
+                deviceLines: optionsLabel(data.device, data.deviceOptions, { erv: tDevice("ervShort"), fond: "ComfoFond-L Q", fondFilter: tDevice("fondFilter"), fondLeft: tDevice("fondLeft"), fondRight: tDevice("fondRight") })
+                  .split(", ")
+                  .filter(Boolean),
                 outdoor: t("air.outdoor"),
                 supply: t("air.supply"),
                 extract: t("air.extract"),

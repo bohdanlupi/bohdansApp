@@ -743,7 +743,7 @@
     "device": {
       "title": "Appareil de ventilation",
       "description": "Choix de l’appareil et perte de charge au débit nominal. Le débit souhaité au niveau III est déterminant.",
-      "device": "Appareil (fournisseur / type)",
+      "device": "Appareil (Zehnder)",
       "none": "– choisir un appareil –",
       "power": "Puissance absorbée en service nominal [W]",
       "powerPlaceholder": "selon données",
@@ -795,13 +795,19 @@
       "openSystem": "Vers l’installation",
       "datasheet": {
         "title": "Fiche technique Zehnder : {name}",
-        "hint": "Les valeurs de la fiche technique du fabricant (pression externe maximale, puissance absorbée selon le tableau de mesures) priment sur les courbes du classeur.",
+        "hint": "Valeurs de la fiche technique Zehnder : pression externe maximale et puissance absorbée selon le tableau de mesures (d’où le SPI). Le tableau des niveaux et les courbes des ventilateurs ci-dessous servent au choix du niveau.",
         "supply": "Pression ext. max. air fourni",
         "extract": "Pression ext. max. air repris",
         "sideHint": "à {flow} m³/h ; requis {dp} Pa",
         "power": "Puissance absorbée",
         "tooSmall": "Selon la fiche technique, l’appareil ne suffit pas pour ce point de fonctionnement (débit ou pression externe au-dessus de la courbe maximale)."
-      }
+      },
+      "attachmentsPdf": "Accessoires",
+      "ervPdf": "Échangeur enthalpique",
+      "fondFilterPdf": "avec filtre",
+      "inclFondPdf": "y c. ComfoFond-L Q {dp} Pa",
+      "fondLeftPdf": "air fourni à gauche",
+      "fondRightPdf": "air fourni à droite"
     },
     "filter": {
       "traffic": {
@@ -1420,8 +1426,7 @@
     "external": "Δp ext. AFO / ARE Pa",
     "unassigned": "sans étage",
     "noDevice": "– aucun appareil –",
-    "datasheetDevices": "Zehnder (fiches techniques)",
-    "workbookDevices": "Classeur LUPI",
+    "datasheetDevices": "Zehnder",
     "delete": "Supprimer",
     "deleteTitle": "Supprimer l’installation ?",
     "deleteText": "« {name} » et tout son réseau seront supprimés définitivement.",
@@ -1459,7 +1464,6 @@
     "spi": "SPI (fiche technique)",
     "power": "Puissance absorbée {w} W",
     "chooseDevice": "Choisir l’appareil",
-    "workbookStages": "Classeur : air fourni niveau {supply}, air repris niveau {extract}",
     "deviceTooSmall": "L’appareil n’atteint pas le point de fonctionnement (débit ou pression externe au-dessus de la courbe maximale). Choisir un appareil plus grand ou optimiser le réseau.",
     "missingTerminals": "Pièces avec débit sans bouche dans le réseau : {rooms}",
     "tooFast": "{count, plural, one {# élément dépasse} other {# éléments dépassent}} la vitesse d’air selon EN-105.",
@@ -1532,7 +1536,7 @@
       "none": "aucune"
     },
     "quantities": "Quantités",
-    "quantitiesHint": "Conduits en mètres, autres éléments en pièces, regroupés par produit. Avec un numéro d’article Zehnder, les articles du catalogue IGH sont repris, sinon des positions R.",
+    "quantitiesHint": "Conduits en mètres (tubes spiralés en pièces de 3 m), autres éléments en pièces, regroupés par produit. Avec un numéro d’article, les articles des catalogues IGH de Zehnder et Meier Tobler sont repris, sinon des positions R.",
     "noQuantities": "Pas encore de quantités.",
     "article": "N° d’art.",
     "quantity": "Quantité",
@@ -1547,5 +1551,25 @@
     "inserted": "{count, plural, one {# position reprise} other {# positions reprises}} dans le descriptif.",
     "saveFirst": "Enregistrer d’abord",
     "overRange": "Au-dessus de la plage d’utilisation recommandée par le fabricant (débit par pièce ou par conduit / maximum) : {items}. Choisir un produit plus grand ou plus de conduits/bouches (acoustique)."
+  },
+  "kwlDevice": {
+    "attachments": "Accessoires de l’appareil",
+    "erv": "Échangeur enthalpique (récupération d’humidité)",
+    "ervShort": "Échangeur enthalpique",
+    "fond": "ComfoFond-L Q (échangeur géothermique à eau glycolée)",
+    "fondFilter": "avec filtre",
+    "fondNoFilter": "sans filtre",
+    "clime": "ComfoClime (climatisation de l’air)",
+    "without": "sans",
+    "inclFond": "Côté air fourni y c. ComfoFond-L Q : +{dp} Pa → {total} Pa externe.",
+    "fondInfo": "ComfoFond-L Q ({filter}) : +{dp} Pa côté air fourni (air extérieur), pompe {pump} W (hors SPI).",
+    "ervInfo": "Échangeur enthalpique : récupération de chaleur {heat} %, récupération d’humidité {humidity} % (PHI). Perte de charge non indiquée dans la fiche technique.",
+    "ervInfoEn": "Échangeur enthalpique : rendement de température {temp} % (EN 13141-7). Perte de charge non indiquée dans la fiche technique.",
+    "climeInfo": "{name} : chauffage {heating} kW, refroidissement {cooling} kW, max. {power} W. Pression disponible selon la courbe 100 % de la combinaison ; puissance des ventilateurs sans ComfoClime (pas d’indication dans la fiche technique).",
+    "flowWarning": "Le débit est hors de la plage d’utilisation de l’accessoire ({detail}).",
+    "noStagesClime": "Avec ComfoClime, les niveaux des ventilateurs de l’appareil seul ne s’appliquent pas – la courbe de la combinaison est déterminante (fiche technique Zehnder ci-dessus).",
+    "fondSide": "Exécution ComfoFond-L Q",
+    "fondLeft": "air fourni à gauche",
+    "fondRight": "air fourni à droite"
   }
 }

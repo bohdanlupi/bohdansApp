@@ -1,14 +1,16 @@
-// Device check for a ventilation system: Zehnder devices from the datasheet data (maximum external pressure
-// and power from the measurement table), otherwise the fan curves of the LUPI workbook (devices.ts).
+// Device check from the Zehnder datasheet data: maximum external pressure line and power from the measurement
+// table → SPI; with attachments: ComfoFond-L Q adds its pressure drop on the supply side (outdoor air), ComfoClime
+// limits the available pressure to the 100 % fan curve of the combination.
 
-import { analyseSide, spiLimit, spiTarget } from "./calc";
-import { findDevice } from "./devices";
+import { type AttachmentEffects, attachmentEffects, type DeviceOptions, noDeviceOptions } from "./attachments";
+import { spiLimit, spiTarget } from "./calc";
 import { curveValue, datasheetDevice, type DeviceMeasurement } from "./products";
 
+/** dp = external pressure the device has to deliver (incl. ComfoFond-L Q on the supply side). */
 export type DeviceSideCheck = { flow: number; dp: number; maxPressure: number | null; ok: boolean | null; stage: number | null };
 
 export type DeviceCheck = {
-  source: "datasheet" | "workbook" | null;
+  source: "datasheet" | null;
   name: string | null;
   supply: DeviceSideCheck;
   extract: DeviceSideCheck;
@@ -17,24 +19,34 @@ export type DeviceCheck = {
   spi: number | null;
   spiStatus: "target" | "limit" | "exceeded" | null;
   maxFlow: number | null;
+  attachments: AttachmentEffects | null;
+  /** Air flow outside the range of an attachment (ComfoClime range, ComfoFond max. flow). */
+  attachmentFlowWarning: boolean;
 };
 
-/** Least-squares fit P = a + b·q + c·p + d·q·p over the measurement points (bilinear surface). */
+/**
+ * Power from the measurement table: least-squares fit of the specific power SPI = P / q = a + b·p + c·q, then
+ * P = SPI · q. Fitting the SPI (rather than P) stays plausible below the measured flows, where P → 0 otherwise.
+ * The SPI is not taken below half the lowest measured value.
+ */
 export function fitPower(points: DeviceMeasurement[]) {
-  if (points.length < 4) {
+  const valid = points.filter((m) => m.qv > 0);
+  if (!valid.length) return () => null;
+  const spiOf = (m: DeviceMeasurement) => m.powerW / m.qv;
+  const floor = Math.min(...valid.map(spiOf)) / 2;
+  if (valid.length < 3) {
     return (q: number, p: number) => {
-      if (!points.length) return null;
-      const n = points.reduce((best, m) => (Math.hypot((m.qv - q) / 100, (m.pst - p) / 100) < Math.hypot((best.qv - q) / 100, (best.pst - p) / 100) ? m : best));
-      return n.powerW;
+      const n = valid.reduce((best, m) => (Math.hypot((m.qv - q) / 100, (m.pst - p) / 100) < Math.hypot((best.qv - q) / 100, (best.pst - p) / 100) ? m : best));
+      return Math.max(spiOf(n), floor) * q;
     };
   }
-  // Normal equations for 4 unknowns.
-  const rows = points.map((m) => [1, m.qv, m.pst, m.qv * m.pst]);
-  const ata = [0, 1, 2, 3].map((i) => [0, 1, 2, 3].map((j) => rows.reduce((s, r) => s + r[i] * r[j], 0)));
-  const atb = [0, 1, 2, 3].map((i) => rows.reduce((s, r, k) => s + r[i] * points[k].powerW, 0));
+  // Normal equations for 3 unknowns.
+  const rows = valid.map((m) => [1, m.pst, m.qv]);
+  const ata = [0, 1, 2].map((i) => [0, 1, 2].map((j) => rows.reduce((sum, r) => sum + r[i] * r[j], 0)));
+  const atb = [0, 1, 2].map((i) => rows.reduce((sum, r, k) => sum + r[i] * spiOf(valid[k]), 0));
   const coef = solve(ata, atb);
   if (!coef) return () => null;
-  return (q: number, p: number) => Math.max(0, coef[0] + coef[1] * q + coef[2] * p + coef[3] * q * p);
+  return (q: number, p: number) => Math.max(floor, coef[0] + coef[1] * p + coef[2] * q) * q;
 }
 
 function solve(a: number[][], b: number[]): number[] | null {
@@ -56,35 +68,57 @@ function solve(a: number[][], b: number[]): number[] | null {
 
 const spiStatusOf = (spi: number | null) => (spi === null ? null : spi <= spiTarget ? "target" : spi <= spiLimit ? "limit" : "exceeded");
 
-export function checkDevice(deviceKey: string | null, supply: { flow: number; dp: number }, extract: { flow: number; dp: number }): DeviceCheck {
+export function checkDevice(
+  deviceKey: string | null,
+  supplyIn: { flow: number; dp: number },
+  extract: { flow: number; dp: number },
+  options: DeviceOptions = noDeviceOptions,
+): DeviceCheck {
   const side = (s: { flow: number; dp: number }): DeviceSideCheck => ({ ...s, maxPressure: null, ok: null, stage: null });
   const product = datasheetDevice(deviceKey);
   if (product?.device) {
     const d = product.device;
-    const max = (q: number) => (d.maxExternalCurve.length ? curveValue(d.maxExternalCurve, q, false) : null);
-    const check = (s: { flow: number; dp: number }): DeviceSideCheck => {
-      const maxPressure = max(s.flow);
+    const effects = attachmentEffects(product.key, options, supplyIn.flow);
+    const supply = { flow: supplyIn.flow, dp: supplyIn.dp + (effects.fond?.dp ?? 0) };
+    const max = (q: number, s: "supply" | "extract") => {
+      const own = d.maxExternalCurve.length ? curveValue(d.maxExternalCurve, q, false) : null;
+      // With ComfoClime: the combination's 100 % fan curve, not above the device's own limit line.
+      return effects.clime ? Math.min(own ?? Infinity, effects.clime.maxPressure(s, q)) : own;
+    };
+    const check = (s: { flow: number; dp: number }, key: "supply" | "extract"): DeviceSideCheck => {
+      const maxPressure = max(s.flow, key);
       const withinFlow = d.maxFlow == null || s.flow <= d.maxFlow;
       return { ...s, maxPressure, ok: maxPressure === null ? null : withinFlow && s.dp <= maxPressure, stage: null };
     };
     const q = Math.max(supply.flow, extract.flow);
     const powerW = q > 0 ? fitPower(d.measurements)(q, Math.max(supply.dp, extract.dp)) : null;
     const spi = powerW !== null && q > 0 ? powerW / q : null;
-    return { source: "datasheet", name: product.name, supply: check(supply), extract: check(extract), powerW, spi, spiStatus: spiStatusOf(spi), maxFlow: d.maxFlow ?? null };
+    const climeRange = effects.clime?.flowRange;
+    const attachmentFlowWarning =
+      (!!climeRange && (q < climeRange[0] || q > climeRange[1])) || (!!effects.fond?.maxFlow && supply.flow > effects.fond.maxFlow);
+    return {
+      source: "datasheet",
+      name: product.name,
+      supply: check(supply, "supply"),
+      extract: check(extract, "extract"),
+      powerW,
+      spi,
+      spiStatus: spiStatusOf(spi),
+      maxFlow: d.maxFlow ?? null,
+      attachments: effects,
+      attachmentFlowWarning,
+    };
   }
-  const device = findDevice(deviceKey);
-  if (device) {
-    const s = analyseSide(device, supply.flow, supply.dp);
-    const e = analyseSide(device, extract.flow, extract.dp);
-    const toCheck = (x: typeof s, input: { flow: number; dp: number }): DeviceSideCheck => ({
-      ...input,
-      maxPressure: null,
-      ok: x ? x.nominalStage !== null : null,
-      stage: x?.nominalStage?.stage ?? null,
-    });
-    const spis = [s?.spi, e?.spi].filter((v): v is number => v != null);
-    const spi = spis.length ? Math.max(...spis) : null;
-    return { source: "workbook", name: device.name, supply: toCheck(s, supply), extract: toCheck(e, extract), powerW: null, spi, spiStatus: spiStatusOf(spi), maxFlow: null };
-  }
-  return { source: null, name: null, supply: side(supply), extract: side(extract), powerW: null, spi: null, spiStatus: null, maxFlow: null };
+  return {
+    source: null,
+    name: null,
+    supply: side(supplyIn),
+    extract: side(extract),
+    powerW: null,
+    spi: null,
+    spiStatus: null,
+    maxFlow: null,
+    attachments: null,
+    attachmentFlowWarning: false,
+  };
 }

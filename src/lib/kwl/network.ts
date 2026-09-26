@@ -7,6 +7,7 @@
 // below it. The path with the largest pressure drop is the external pressure of the device on that side;
 // the other paths need throttling by the difference.
 
+import { type DeviceOptions, deviceArticles } from "./attachments";
 import { maxVelocity } from "./calc";
 import { curveValue, findProduct, type Product, productCurve } from "./products";
 import { airDensity, ductMaterials, type DuctMaterial, frictionFactor } from "./pressure";
@@ -44,8 +45,10 @@ export type NetNode = {
 export type SystemSide = "outdoor" | "supply" | "extract" | "exhaust";
 
 export type SystemData = {
-  /** Device product key (Zehnder device) or a device of the workbook (devices.ts). */
+  /** Zehnder device product key. */
   device: string | null;
+  /** Attachments of the device (ComfoFond-L Q, enthalpy exchanger, ComfoClime). */
+  deviceOptions: DeviceOptions;
   /** Dwelling calculations this system serves. */
   calcIds: string[];
   outdoor: NetNode[];
@@ -108,7 +111,8 @@ export function nodeResult(node: NetNode, flow: number, side: "supply" | "extrac
     const q = flow / count;
     const v = geometry ? q / 3600 / geometry.area : null;
     const dynamic = v !== null ? (airDensity * v * v) / 2 : 0;
-    const zeta = (node.type === "bend" ? 1 : (node.bends ?? 0)) * 0.3 + (node.zeta ?? 0);
+    // Bend: loss coefficient of the fitting (e.g. Meier Tobler ζ reference value), else 0.3 per 90° bend.
+    const zeta = (node.type === "bend" ? (product?.zeta ?? 0.3) : (node.bends ?? 0) * 0.3) + (node.zeta ?? 0);
     // Manufacturer friction curve (Pa/m over flow per duct) has priority over the calculation.
     const curve = productCurve(product, node.curve, side);
     let r: number | null = null;
@@ -122,7 +126,7 @@ export function nodeResult(node: NetNode, flow: number, side: "supply" | "extrac
       r = curveValue(curve.points, q);
       source = "product";
     } else if (geometry && v) {
-      const roughness = ductMaterials[node.material] / 1000;
+      const roughness = ductMaterials[product?.material ?? node.material] / 1000;
       const lambda = frictionFactor((v * geometry.dh) / 15.1e-6, roughness / geometry.dh);
       r = (lambda / geometry.dh) * dynamic;
       source = "calculated";
@@ -137,6 +141,12 @@ export function nodeResult(node: NetNode, flow: number, side: "supply" | "extrac
     const outlets = Math.max(1, node.children.length);
     const q = curve.flowRefersTo === "perOutlet" ? flow / outlets : flow;
     return { ...empty, dp: curveValue(curve.points, q) ?? 0, source: "product" };
+  }
+  // Fittings / components without a curve: loss coefficient ζ at the velocity in the connection diameter.
+  const geometry = product?.zeta != null ? ductGeometry(node) : null;
+  if (product?.zeta != null && geometry) {
+    const v = flow / 3600 / geometry.area;
+    return { ...empty, dp: product.zeta * ((airDensity * v * v) / 2), velocity: v, source: "calculated" };
   }
   if (node.dpRef != null) {
     return { ...empty, dp: node.qRef ? node.dpRef * (flow / node.qRef) ** 2 : node.dpRef, source: "manual" };
@@ -232,7 +242,16 @@ export type SystemResult = ReturnType<typeof evaluateSystem>;
 // Quantities (for the LV)
 // ---------------------------------------------------------------------------
 
-export type Quantity = { product: string | null; label: string; unit: "m" | "Stk"; quantity: number; articles: string[] };
+export type Quantity = {
+  product: string | null;
+  manufacturer: string | null;
+  label: string;
+  unit: "m" | "Stk";
+  quantity: number;
+  articles: string[];
+  /** Ducts sold in pieces: metres per piece (quantity converted to pieces at the end). */
+  piece?: number;
+};
 
 const genericWords = new Set(["zuluft", "abluft", "ohne", "mit", "filter", "einstellung", "einstellstufe", "einstellposition", "druckverlust", "comfovalve", "comfogrid", "comfocase", "kurve", "breit"]);
 
@@ -271,19 +290,34 @@ export function systemQuantities(data: SystemData): Quantity[] {
     const label = product?.name ?? n.label;
     const accessory = product && n.type !== "duct" ? curveArticle(product, productCurve(product, n.curve, side)?.label) : null;
     if (accessory) {
-      add(`${n.product}|${accessory.number}`, { product: n.product, label: accessory.text, unit: "Stk", articles: [accessory.number] }, Math.max(1, n.count));
+      add(`${n.product}|${accessory.number}`, { product: n.product, manufacturer: product?.manufacturer ?? null, label: accessory.text, unit: "Stk", articles: [accessory.number] }, Math.max(1, n.count));
     }
     if (n.type === "duct") {
       const key = n.product ?? `custom-${n.diameter ?? `${n.width}x${n.height}`}-${n.material}`;
-      add(key, { product: n.product, label: product?.name ?? `${n.label} ${n.diameter ? `ø ${n.diameter}` : `${n.width}×${n.height}`}`, unit: "m", articles }, (n.length ?? 0) * Math.max(1, n.count));
+      add(
+        key,
+        { product: n.product, manufacturer: product?.manufacturer ?? null, label: product?.name ?? `${n.label} ${n.diameter ? `ø ${n.diameter}` : `${n.width}×${n.height}`}`, unit: "m", articles, piece: product?.lvPiece },
+        (n.length ?? 0) * Math.max(1, n.count),
+      );
     } else if (n.type !== "tee" || n.product) {
-      add(n.product ?? `${n.type}-${n.label}`, { product: n.product, label, unit: "Stk", articles }, Math.max(1, n.count));
+      add(n.product ?? `${n.type}-${n.label}`, { product: n.product, manufacturer: product?.manufacturer ?? null, label, unit: "Stk", articles }, Math.max(1, n.count));
     }
     n.children.forEach(walk(side));
   };
+  // Device with its attachments (one piece each).
+  const device = findProduct(data.device);
+  if (device) {
+    for (const d of deviceArticles(device.key, device.name, device.articles, data.deviceOptions)) {
+      add(`device|${d.article?.number ?? d.label}`, { product: device.key, manufacturer: device.manufacturer, label: d.label, unit: "Stk", articles: d.article ? [d.article.number] : [] }, 1);
+    }
+  }
   [...data.outdoor, ...data.supply].forEach(walk("supply"));
   [...data.extract, ...data.exhaust].forEach(walk("extract"));
-  return [...map.values()].map((q) => ({ ...q, quantity: q.unit === "m" ? Math.ceil(q.quantity * 10) / 10 : q.quantity }));
+  return [...map.values()].map((q) =>
+    q.piece
+      ? { ...q, unit: "Stk" as const, quantity: Math.ceil(q.quantity / q.piece - 1e-9) }
+      : { ...q, quantity: q.unit === "m" ? Math.ceil(q.quantity * 10) / 10 : q.quantity },
+  );
 }
 
 // ---------------------------------------------------------------------------

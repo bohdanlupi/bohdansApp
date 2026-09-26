@@ -93,9 +93,9 @@ export async function insertSystemQuantities(systemId: string, projectId: string
   const quantities = systemQuantities(parseSystemData(system.data)).filter((q) => q.quantity > 0);
   if (!quantities.length) return { error: "invalidInput" };
 
-  // Catalogue positions by article number (Zehnder IGH catalogue).
+  // Catalogue positions by article number (IGH catalogues of Zehnder and Meier Tobler).
   const articles = [...new Set(quantities.flatMap((q) => q.articles.map(normalizeArticle)))];
-  const { data: catalogs } = await supabase.from("catalogs").select("id, supplier").eq("source", "igh").ilike("name", "%zehnder%");
+  const { data: catalogs } = await supabase.from("catalogs").select("id, supplier").eq("source", "igh").or("name.ilike.%zehnder%,name.ilike.%meier tobler%");
   const catalogIds = (catalogs ?? []).map((c) => c.id);
   const { data: entries } = articles.length && catalogIds.length
     ? await supabase
@@ -144,7 +144,7 @@ export async function insertSystemQuantities(systemId: string, projectId: string
         parent_id: groupId,
         kind: "r_position",
         short_text: { [language]: q.label },
-        long_text: q.articles[0] ? { [language]: `${makeLabel[language].make}: Zehnder, ${makeLabel[language].number} ${q.articles[0]}` } : {},
+        long_text: q.articles[0] ? { [language]: `${makeLabel[language].make}: ${q.manufacturer ?? ""}, ${makeLabel[language].number} ${q.articles[0]}` } : {},
         unit: q.unit,
         quantity: q.quantity,
         sort: sort++,

@@ -8,6 +8,7 @@ import type { PlanParams } from "@/lib/kwl/plan-schema";
 import { externalPressureCheck } from "@/lib/kwl/sia3825";
 import { cn } from "@/lib/utils";
 
+import { AttachmentNotes } from "../../device-options";
 import { fmt, Notice, Result } from "../../fields";
 
 export function ResultsPanel({
@@ -24,7 +25,10 @@ export function ResultsPanel({
   planParams: PlanParams;
 }) {
   const t = useTranslations("kwlSystem");
-  const total = result.external.supply !== null || result.external.extract !== null ? (result.external.supply ?? 0) + (result.external.extract ?? 0) : null;
+  // ComfoFond-L Q in the outdoor air: its pressure drop belongs to the external pressure on the supply side.
+  const fondDp = device.attachments?.fond?.dp ?? null;
+  const supplyTotal = result.external.supply !== null || fondDp !== null ? (result.external.supply ?? 0) + (fondDp ?? 0) : null;
+  const total = supplyTotal !== null || result.external.extract !== null ? (supplyTotal ?? 0) + (result.external.extract ?? 0) : null;
   const table7 = externalPressureCheck(planParams.system, planParams.operation === "demand", total);
   const tone = (s: string | null) => (s === null ? undefined : s === "target" ? "ok" : s === "limit" ? "warn" : "bad");
   const sideTone = (ok: boolean | null) => (ok === null ? undefined : ok ? "ok" : "bad");
@@ -56,7 +60,7 @@ export function ResultsPanel({
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Result
           label={t("externalSupply")}
-          value={fmt(result.external.supply, 0)}
+          value={fmt(supplyTotal, 0)}
           unit="Pa"
           tone={sideTone(device.supply.ok)}
           hint={t("sideHint", { flow: fmt(result.supply.flow), max: device.supply.maxPressure === null ? "–" : fmt(device.supply.maxPressure) })}
@@ -83,11 +87,7 @@ export function ResultsPanel({
           hint={device.powerW !== null ? t("power", { w: fmt(device.powerW, 0) }) : device.source ? undefined : t("chooseDevice")}
         />
       </div>
-      {device.source === "workbook" && (
-        <p className="text-xs text-muted-foreground">
-          {t("workbookStages", { supply: device.supply.stage ?? "–", extract: device.extract.stage ?? "–" })}
-        </p>
-      )}
+      <AttachmentNotes check={device} />
       {device.source === "datasheet" && (device.supply.ok === false || device.extract.ok === false) && <Notice>{t("deviceTooSmall")}</Notice>}
       {missing.length > 0 && <Notice>{t("missingTerminals", { rooms: missing.join(", ") })}</Notice>}
       {fast > 0 && <Notice>{t("tooFast", { count: fast })}</Notice>}

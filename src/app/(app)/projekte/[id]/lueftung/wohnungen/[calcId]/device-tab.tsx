@@ -6,14 +6,17 @@ import { useTranslations } from "next-intl";
 import { NativeSelect } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { normalizeOptions } from "@/lib/kwl/attachments";
 import { type DeviceResult, spiLimit, spiTarget } from "@/lib/kwl/calc";
-import { findDevice, kwlDevices } from "@/lib/kwl/devices";
+import { findDevice } from "@/lib/kwl/devices";
 import type { DeviceCheck } from "@/lib/kwl/network-device";
 import type { PlanParams } from "@/lib/kwl/plan-schema";
+import { datasheetDevice, productsOfKind } from "@/lib/kwl/products";
 import type { KwlData } from "@/lib/kwl/schema";
 import { externalPressureCheck } from "@/lib/kwl/sia3825";
 
 import { FanChart } from "./fan-chart";
+import { AttachmentNotes, DeviceOptionsFields } from "../../device-options";
 import { fmt, Notice, NumberField, Result, Section } from "../../fields";
 
 /** SIA 382/5 Table 7: external pressure drop AUL → ZUL + ABL → FOL, examples of footnotes 1) and 2). */
@@ -22,7 +25,7 @@ const pressurePresets = [
   { key: "target", supply: 50, extract: 50 },
 ] as const;
 
-const manufacturers = [...new Set(kwlDevices.map((d) => d.name.split(",")[0]))];
+const zehnderDevices = productsOfKind("device");
 
 export function DeviceTab({
   device: input,
@@ -45,13 +48,24 @@ export function DeviceTab({
   minimumFlow: number;
   planParams: PlanParams;
   /** Effective external pressure drops (manual or from the duct network). */
-  drops: { supply: number | null; extract: number | null; source: "manual" | "system"; system: { systemId: string; name: string } | null };
+  drops: {
+    supply: number | null;
+    extract: number | null;
+    given: { supply: number | null; extract: number | null };
+    fond: number | null;
+    source: "manual" | "system";
+    system: { systemId: string; name: string } | null;
+  };
   projectId: string;
   editable: boolean;
   onChange: (device: KwlData["device"]) => void;
 }) {
   const t = useTranslations("kwl");
-  const device = findDevice(input.id);
+  const tDevice = useTranslations("kwlDevice");
+  const product = datasheetDevice(input.id);
+  const options = normalizeOptions(product?.key ?? null, input.options);
+  // Fan stage curves (stage selection, fan diagram) exist for some Zehnder units, and only for the device alone.
+  const device = options.clime ? null : findDevice(product?.key);
   const { supply, extract, spi } = result;
   const tooSmall = device && ((supply && !supply.nominalStage) || (extract && !extract.nominalStage));
   const lowestFlow = (side: typeof supply) => side?.points.filter((p) => p.flow > 0).at(-1)?.flow ?? null;
@@ -71,21 +85,18 @@ export function DeviceTab({
               id="kwl-device"
               value={input.id ?? ""}
               disabled={!editable}
-              onChange={(e) => onChange({ ...input, id: e.target.value || null })}
+              onChange={(e) => onChange({ ...input, id: e.target.value || null, options: normalizeOptions(e.target.value || null, input.options) })}
             >
               <option value="">{t("device.none")}</option>
-              {manufacturers.map((m) => (
-                <optgroup key={m} label={m}>
-                  {kwlDevices
-                    .filter((d) => d.name.startsWith(`${m},`))
-                    .map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name.slice(m.length + 1).trim()}
-                      </option>
-                    ))}
-                </optgroup>
-              ))}
+              <optgroup label="Zehnder">
+                {zehnderDevices.map((p) => (
+                  <option key={p.key} value={p.key}>
+                    {p.name}
+                  </option>
+                ))}
+              </optgroup>
             </NativeSelect>
+            <DeviceOptionsFields deviceKey={product?.key ?? null} value={input.options} disabled={!editable} idPrefix="kwl" onChange={(options) => onChange({ ...input, options })} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="kwl-power">{t("device.power")}</Label>
@@ -103,13 +114,14 @@ export function DeviceTab({
           </div>
           <div className="space-y-2">
             <Label htmlFor="kwl-supply-drop">{t("device.supplyDrop")}</Label>
-            <NumberField id="kwl-supply-drop" value={fromNetwork ? drops.supply : input.supplyDrop} decimals={0} label={t("device.supplyDrop")} disabled={!editable || fromNetwork} onChange={(supplyDrop) => onChange({ ...input, supplyDrop })} className="h-8 max-w-40 rounded-lg" />
+            <NumberField id="kwl-supply-drop" value={fromNetwork ? drops.given.supply : input.supplyDrop} decimals={0} label={t("device.supplyDrop")} disabled={!editable || fromNetwork} onChange={(supplyDrop) => onChange({ ...input, supplyDrop })} className="h-8 max-w-40 rounded-lg" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="kwl-extract-drop">{t("device.extractDrop")}</Label>
-            <NumberField id="kwl-extract-drop" value={fromNetwork ? drops.extract : input.extractDrop} decimals={0} label={t("device.extractDrop")} disabled={!editable || fromNetwork} onChange={(extractDrop) => onChange({ ...input, extractDrop })} className="h-8 max-w-40 rounded-lg" />
+            <NumberField id="kwl-extract-drop" value={fromNetwork ? drops.given.extract : input.extractDrop} decimals={0} label={t("device.extractDrop")} disabled={!editable || fromNetwork} onChange={(extractDrop) => onChange({ ...input, extractDrop })} className="h-8 max-w-40 rounded-lg" />
           </div>
         </div>
+        {drops.fond !== null && <p className="text-xs text-muted-foreground">{tDevice("inclFond", { dp: fmt(drops.fond, 0), total: fmt(drops.supply, 0) })}</p>}
         {fromNetwork && drops.system && (
           <Notice tone="info">
             {t("device.fromSystem", { name: drops.system.name })}{" "}
@@ -141,13 +153,13 @@ export function DeviceTab({
         )}
       </Section>
 
-      {!device ? (
+      {!product ? (
         <Notice tone="info">{t("device.choose")}</Notice>
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Result label={t("device.nominalStage")} value={supply?.nominalStage || extract?.nominalStage ? `${supply?.nominalStage?.stage ?? "–"} / ${extract?.nominalStage?.stage ?? "–"}` : ""} hint={t("device.nominalStageHint")} tone={tooSmall ? "bad" : undefined} />
-            <Result label={t("summary.party")} value={fmt(result.partyFlow)} unit="m³/h" hint={t("device.partyHint")} />
+            {device && <Result label={t("device.nominalStage")} value={supply?.nominalStage || extract?.nominalStage ? `${supply?.nominalStage?.stage ?? "–"} / ${extract?.nominalStage?.stage ?? "–"}` : ""} hint={t("device.nominalStageHint")} tone={tooSmall ? "bad" : undefined} />}
+            {device && <Result label={t("summary.party")} value={fmt(result.partyFlow)} unit="m³/h" hint={t("device.partyHint")} />}
             <Result
               label={t("device.spi")}
               value={fmt(spi, 2)}
@@ -188,6 +200,7 @@ export function DeviceTab({
                   tone={datasheet.spiStatus === null ? undefined : datasheet.spiStatus === "target" ? "ok" : datasheet.spiStatus === "limit" ? "warn" : "bad"}
                 />
               </div>
+              <AttachmentNotes check={datasheet} />
               {(datasheet.supply.ok === false || datasheet.extract.ok === false) && <Notice>{t("device.datasheet.tooSmall")}</Notice>}
             </div>
           )}
@@ -195,56 +208,61 @@ export function DeviceTab({
           {lowest > minimumFlow && <Notice>{t("device.minimumNotReached", { lowest: fmt(lowest), minimum: fmt(minimumFlow) })}</Notice>}
           {(!supplyFlow || !extractFlow) && <Notice>{t("device.noFlows")}</Notice>}
 
-          <div className="overflow-x-auto rounded-xl border">
-            <table className="w-full min-w-[560px] text-sm">
-              <thead className="border-b bg-muted/40 text-xs text-muted-foreground">
-                <tr>
-                  <th className="py-2 pl-4 text-left font-medium">{t("device.stage")}</th>
-                  <th className="px-2 text-right font-medium">{t("supply")} m³/h</th>
-                  <th className="px-2 text-right font-medium">{t("supply")} Pa</th>
-                  <th className="px-2 text-right font-medium">{t("extract")} m³/h</th>
-                  <th className="px-2 text-right font-medium">{t("extract")} Pa</th>
-                  <th className="pr-4 pl-2 text-right font-medium">{t("device.stagePower")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {device.stages.map((stage, i) => {
-                  const s = supply?.points[i];
-                  const e = extract?.points[i];
-                  const nominal = stage.stage === supply?.nominalStage?.stage || stage.stage === extract?.nominalStage?.stage;
-                  return (
-                    <tr key={stage.stage} className={`border-b last:border-0 ${nominal ? "bg-brand/10 font-medium" : ""}`}>
-                      <td className="py-1.5 pl-4">
-                        {t("device.stageN", { stage: stage.stage })}
-                        {stage.stage === supply?.nominalStage?.stage && ` · ${t("supplyShort")}`}
-                        {stage.stage === extract?.nominalStage?.stage && ` · ${t("extractShort")}`}
-                      </td>
-                      <td className="px-2 text-right tabular-nums">{fmt(s?.flow)}</td>
-                      <td className="px-2 text-right tabular-nums">{fmt(s?.pressure)}</td>
-                      <td className="px-2 text-right tabular-nums">{fmt(e?.flow)}</td>
-                      <td className="px-2 text-right tabular-nums">{fmt(e?.pressure)}</td>
-                      <td className="pr-4 pl-2 text-right tabular-nums">{stage.power ?? ""}</td>
+          {!device && options.clime && <Notice tone="info">{tDevice("noStagesClime")}</Notice>}
+          {device && (
+            <>
+              <div className="overflow-x-auto rounded-xl border">
+                <table className="w-full min-w-[560px] text-sm">
+                  <thead className="border-b bg-muted/40 text-xs text-muted-foreground">
+                    <tr>
+                      <th className="py-2 pl-4 text-left font-medium">{t("device.stage")}</th>
+                      <th className="px-2 text-right font-medium">{t("supply")} m³/h</th>
+                      <th className="px-2 text-right font-medium">{t("supply")} Pa</th>
+                      <th className="px-2 text-right font-medium">{t("extract")} m³/h</th>
+                      <th className="px-2 text-right font-medium">{t("extract")} Pa</th>
+                      <th className="pr-4 pl-2 text-right font-medium">{t("device.stagePower")}</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {device.stages.map((stage, i) => {
+                      const s = supply?.points[i];
+                      const e = extract?.points[i];
+                      const nominal = stage.stage === supply?.nominalStage?.stage || stage.stage === extract?.nominalStage?.stage;
+                      return (
+                        <tr key={stage.stage} className={`border-b last:border-0 ${nominal ? "bg-brand/10 font-medium" : ""}`}>
+                          <td className="py-1.5 pl-4">
+                            {t("device.stageN", { stage: stage.stage })}
+                            {stage.stage === supply?.nominalStage?.stage && ` · ${t("supplyShort")}`}
+                            {stage.stage === extract?.nominalStage?.stage && ` · ${t("extractShort")}`}
+                          </td>
+                          <td className="px-2 text-right tabular-nums">{fmt(s?.flow)}</td>
+                          <td className="px-2 text-right tabular-nums">{fmt(s?.pressure)}</td>
+                          <td className="px-2 text-right tabular-nums">{fmt(e?.flow)}</td>
+                          <td className="px-2 text-right tabular-nums">{fmt(e?.pressure)}</td>
+                          <td className="pr-4 pl-2 text-right tabular-nums">{stage.power ?? ""}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            {(["supply", "extract"] as const).map((key) => (
-              <FanChart
-                key={key}
-                device={device}
-                side={key === "supply" ? supply : extract}
-                title={t(`device.chart.${key}`, { flow: fmt(key === "supply" ? supplyFlow : extractFlow), drop: fmt(key === "supply" ? drops.supply : drops.extract) })}
-                flowLabel={t("device.chart.flow")}
-                pressureLabel={t("device.chart.pressure")}
-                systemLabel={t("device.chart.system")}
-              />
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground">{t("device.chart.hint")}</p>
+              <div className="grid gap-6 lg:grid-cols-2">
+                {(["supply", "extract"] as const).map((key) => (
+                  <FanChart
+                    key={key}
+                    device={device}
+                    side={key === "supply" ? supply : extract}
+                    title={t(`device.chart.${key}`, { flow: fmt(key === "supply" ? supplyFlow : extractFlow), drop: fmt(key === "supply" ? drops.supply : drops.extract) })}
+                    flowLabel={t("device.chart.flow")}
+                    pressureLabel={t("device.chart.pressure")}
+                    systemLabel={t("device.chart.system")}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">{t("device.chart.hint")}</p>
+            </>
+          )}
         </>
       )}
     </div>
