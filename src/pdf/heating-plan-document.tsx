@@ -1,13 +1,14 @@
-import { type Phase, phaseItems } from "@/lib/kwl/phases";
-import type { PlanData } from "@/lib/kwl/plan-schema";
+import { type HeatingPhase } from "@/lib/heating/phases";
+import type { HeatingPlan } from "@/lib/heating/plan-schema";
+import { phaseItems } from "@/lib/planning";
 import type { AppLanguage, FirmSettings } from "@/lib/supabase/types";
 
 import type { KwlTranslate } from "./kwl-document";
 import type { LogoSource } from "./letterhead";
 import { PlanChecklistDocument } from "./plan-checklist-document";
 
-/** KWL-Planung: design criteria and checklist status of the chosen SIA 108 phases. */
-export function KwlPlanDocument({
+/** Heizungsplanung: Planungsgrundlagen and checklist status of the chosen SIA 108 phases. */
+export function HeatingPlanDocument({
   firm,
   logo,
   t,
@@ -21,31 +22,31 @@ export function KwlPlanDocument({
 }: {
   firm: FirmSettings;
   logo: LogoSource | null;
-  /** Translator for the `kwlPlan` namespace. */
+  /** Translator for the `heatingPlan` namespace. */
   t: KwlTranslate;
   language: AppLanguage;
   pageLabel: (page: number, total: number) => string;
   projectLabel: string;
   dateLabel: string;
   project: { number: string; name: string };
-  plan: PlanData;
-  phases: Phase[];
+  plan: HeatingPlan;
+  phases: HeatingPhase[];
 }) {
   const p = plan.params;
   const o = (group: string, value: string) => t(`options.${group}.${value}`);
+  const many = (group: string, values: string[]) => (values.length ? values.map((v) => o(group, v)).join(", ") : "-");
+  const yes = (on: boolean) => (on ? t("yes") : t("no"));
   const criteria: [string, string][] = [
     [t("params.buildingType"), o("buildingType", p.buildingType)],
     [t("params.construction"), o("construction", p.construction)],
-    [t("params.system"), o("system", p.system)],
-    [t("params.unit"), o("unit", p.unit) + (p.unit === "multi" && p.simultaneity ? ` (${p.simultaneity})` : "")],
-    [t("params.operation"), o("operation", p.operation)],
     [t("params.standard"), o("standard", p.standard)],
-    [t("params.dwellings"), p.dwellings === null ? "-" : String(p.dwellings)],
-    [t("params.altitude"), p.altitude === null ? "-" : `${p.altitude} m`],
-    [t("params.fireplace"), o("fireplace", p.fireplace)],
-    [t("params.kitchen"), o("kitchen", p.kitchen)],
-    [t("params.airtightness"), o("airtightness", p.airtightness)],
-    [t("params.noise"), o("noise", p.noise)],
+    [t("params.power"), p.power === null ? "-" : `${p.power} kW`],
+    [t("params.energyArea"), p.energyArea === null ? "-" : `${p.energyArea} m²`],
+    [t("params.multiUnit"), yes(p.multiUnit)],
+    [t("params.generators"), many("generators", p.generators)],
+    [t("params.emitters"), many("emitters", p.emitters)],
+    [t("params.storage"), yes(p.storage)],
+    [t("params.cooling"), yes(p.cooling)],
   ];
 
   return (
@@ -63,11 +64,7 @@ export function KwlPlanDocument({
         code: phase.code,
         title: phase.title[language],
         goal: phase.goal[language],
-        items: phaseItems(phase, p).map((item) => ({
-          id: item.id,
-          text: item.text[language],
-          ref: item.ref.startsWith("SIA") ? item.ref : `SIA 382/5 ${item.ref}`,
-        })),
+        items: phaseItems(phase, p).map((item) => ({ id: item.id, text: item.text[language], ref: item.ref })),
       }))}
       checks={plan.checks}
       notes={plan.notes}

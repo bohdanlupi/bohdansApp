@@ -9,7 +9,7 @@ import type { PlanData } from "@/lib/kwl/plan-schema";
 import { balanceDeviation, balanceTolerance, defaultNoiseCorrections, measuredNoiseTotal, noiseRequirement } from "@/lib/kwl/sia3825";
 import { cn } from "@/lib/utils";
 
-import { fmt, Notice, NumberField, Result, Section } from "../fields";
+import { fmt, Notice, NumberField, Result, Section } from "@/components/planning/fields";
 import type { WidgetProps } from "./types";
 
 type Measurement = PlanData["measurements"][string];

@@ -5,14 +5,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import type { FormMessageKey } from "@/components/form";
-import type { PlanData } from "@/lib/kwl/plan-schema";
-
-import { savePlan } from "./actions";
 
 export type SaveStatus = "saved" | "pending" | "saving" | "error";
 
+export type SavePlan = (projectId: string, data: unknown) => Promise<{ error?: string }>;
+
 /** Plan data with debounced autosave (every change is saved ~0.8 s later). */
-export function usePlan(projectId: string, initial: PlanData, editable: boolean) {
+export function usePlan<T>(projectId: string, initial: T, editable: boolean, savePlan: SavePlan) {
   const tForms = useTranslations("forms");
   const [plan, setPlan] = useState(initial);
   const [status, setStatus] = useState<SaveStatus>("saved");
@@ -29,10 +28,10 @@ export function usePlan(projectId: string, initial: PlanData, editable: boolean)
     } else if (!timer.current) {
       setStatus("saved");
     }
-  }, [projectId, tForms]);
+  }, [projectId, savePlan, tForms]);
 
   const update = useCallback(
-    (change: (plan: PlanData) => PlanData) => {
+    (change: (plan: T) => T) => {
       if (!editable) return;
       setPlan((prev) => {
         const next = change(prev);
@@ -59,7 +58,7 @@ export function usePlan(projectId: string, initial: PlanData, editable: boolean)
         void savePlan(projectId, latest.current);
       }
     };
-  }, [projectId]);
+  }, [projectId, savePlan]);
 
   return { plan, update, status };
 }

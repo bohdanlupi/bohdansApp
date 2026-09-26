@@ -30,7 +30,7 @@ import {
 import { doorGapHeight, doorGapMaxHeight } from "@/lib/kwl/sia3825";
 import { cn } from "@/lib/utils";
 
-import { fmt, Notice, NumberField, Result, Section } from "../../fields";
+import { fmt, Notice, NumberField, Result, Section } from "@/components/planning/fields";
 
 export function ToolsTab({
   standard,

@@ -10,7 +10,7 @@ import type { PlanParams } from "@/lib/kwl/plan-schema";
 import { airChangeFlow, baseAirChange, externalPressureCheck, fourSteps, newBuildingAirChange } from "@/lib/kwl/sia3825";
 import { cn } from "@/lib/utils";
 
-import { fmt, Notice, Section } from "../fields";
+import { fmt, Notice, Section } from "@/components/planning/fields";
 import type { WidgetCalc, WidgetProps } from "./types";
 
 /** All checks of one dwelling calculation against SIA 382/5. */

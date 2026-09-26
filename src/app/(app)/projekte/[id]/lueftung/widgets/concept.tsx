@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import { Section } from "../fields";
+import { Section } from "@/components/planning/fields";
 import type { WidgetProps } from "./types";
 
 /** Chosen ventilation concept with the norm's notes on it (4.1, 4.2, 5.4). */

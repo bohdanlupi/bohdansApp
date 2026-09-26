@@ -14,8 +14,8 @@ import {
 } from "@/lib/kwl/sia3825";
 import { cn } from "@/lib/utils";
 
-import { fmt, Notice, Result, Section } from "../fields";
-import { NumberParam } from "../plan-ui";
+import { fmt, Notice, Result, Section } from "@/components/planning/fields";
+import { NumberParam } from "@/components/planning/plan-ui";
 import { planInput, type WidgetProps } from "./types";
 
 /** 5.2.4.3–5: steady-state CO₂ in a room at a supply flow. */

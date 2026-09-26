@@ -15,7 +15,7 @@ import type { KwlData } from "@/lib/kwl/schema";
 import { externalPressureCheck } from "@/lib/kwl/sia3825";
 
 import { AttachmentNotes, DeviceOptionsFields } from "../../device-options";
-import { fmt, Notice, NumberField, Result, Section } from "../../fields";
+import { fmt, Notice, NumberField, Result, Section } from "@/components/planning/fields";
 
 /** SIA 382/5 Table 7: external pressure drop AUL → ZUL + ABL → FOL, examples of footnotes 1) and 2). */
 const pressurePresets = [

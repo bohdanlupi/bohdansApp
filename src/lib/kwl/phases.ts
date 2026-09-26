@@ -2,13 +2,13 @@
 // of SIA 382/5:2021, the EnDK aids EN-105 / EN-110 (2018) and the SIA 108 basic services; `ref` names the
 // clause to look up (bare numbers are SIA 382/5).
 
-import type { AppLanguage } from "@/lib/supabase/types";
+import type { L10n, PlanChecklistItem } from "@/lib/planning";
 
 import type { PlanParams } from "./plan-schema";
 
-export type L10n = Record<AppLanguage, string>;
+export type { L10n };
 
-export type ChecklistItem = { id: string; ref: string; text: L10n; when?: (p: PlanParams) => boolean };
+export type ChecklistItem = PlanChecklistItem<PlanParams>;
 
 /** Calculation / diagram widgets that phase pages can show. */
 export type WidgetKey =
@@ -369,15 +369,4 @@ export const phases: Phase[] = [
 
 export const findPhase = (code: string) => phases.find((p) => p.code === code) ?? null;
 
-/** Checklist items of a phase that apply to the project. */
-export const phaseItems = (phase: Phase, params: PlanParams) =>
-  phase.sections.flatMap((s) => (s.kind === "checklist" ? s.items.filter((item) => !item.when || item.when(params)) : []));
-
-/** An item counts as handled when it is done or not applicable. */
-export const isHandled = (state: { s: string } | undefined) => state?.s === "done" || state?.s === "na";
-
-export function phaseProgress(phase: Phase, params: PlanParams, checks: Record<string, { s: string }>) {
-  const items = phaseItems(phase, params);
-  const done = items.filter((item) => isHandled(checks[item.id])).length;
-  return { done, total: items.length };
-}
+export { isHandled, phaseItems, phaseProgress } from "@/lib/planning";

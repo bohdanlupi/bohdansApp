@@ -141,6 +141,7 @@
       "overview": "Aperçu",
       "lvs": "Descriptifs",
       "costPlan": "Plan des coûts",
+      "heating": "Chauffage",
       "ventilation": "Ventilation"
     }
   },
@@ -1637,5 +1638,99 @@
     "los": "Lot {n}",
     "create": "Créer les chapitres",
     "created": "{count} chapitres créés."
+  },
+  "heatingPlan": {
+    "title": "Planification du chauffage",
+    "description": "Planification de l’installation de chauffage selon les phases de la SIA 108 – avec les exigences des normes SIA 384/1, SIA 384/2 et SIA 384/6, de l’aide à l’application EnDK EN-103 et de la directive SICC HE301-01.",
+    "navLabel": "Planification du chauffage",
+    "overview": "Vue d’ensemble et bases de planification",
+    "phases": "Phases SIA 108",
+    "phaseList": "Phases",
+    "phaseLabel": "Phase {code}",
+    "phaseNotes": "Remarques sur la phase",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Liste de contrôle (PDF)",
+    "chooseGenerators": "Choisir la production et l’émission de chaleur dans la vue d’ensemble pour afficher les points de contrôle correspondants.",
+    "normsHint": "Les listes de contrôle reprennent les exigences par analogie et renvoient aux normes SIA 384/1:2022, SIA 384/2:2020, SIA 384/6:2021, EnDK EN-103 (2020), SICC HE301-01 et SIA 108:2014. Le texte des normes fait foi. L’eau chaude suivra avec la planification sanitaire.",
+    "yes": "oui",
+    "no": "non",
+    "criteria": {
+      "title": "Bases de planification",
+      "description": "Bases pour le choix du système et le dimensionnement (SIA 384/1 chapitre 2). Elles déterminent les points de contrôle valables dans les phases et doivent être consignées par écrit avec le maître d’ouvrage."
+    },
+    "params": {
+      "buildingType": "Bâtiment",
+      "construction": "Projet",
+      "standard": "Standard",
+      "power": "Puissance de chauffage (kW)",
+      "powerHint": "Valeur approximative pour les seuils de la SIA 384/1 et de la HE301 ; vide = tous les points.",
+      "energyArea": "Surface de référence énergétique (m²)",
+      "generators": "Production de chaleur",
+      "generatorsHint": "Choix multiple ; les points des générateurs non choisis sont masqués.",
+      "emitters": "Émission de chaleur",
+      "more": "Autres caractéristiques",
+      "multiUnit": "Plusieurs unités d’utilisation (comptage de chaleur, décompte des frais)",
+      "storage": "Accumulateur (technique)",
+      "cooling": "Refroidissement par le système de chauffage"
+    },
+    "options": {
+      "buildingType": {
+        "efh": "Maison individuelle",
+        "mfh": "Immeuble collectif",
+        "nonResidential": "Bâtiment non résidentiel"
+      },
+      "construction": {
+        "new": "Construction neuve",
+        "renovation": "Transformation / rénovation",
+        "replacement": "Remplacement du générateur"
+      },
+      "standard": {
+        "standard": "Standard légal",
+        "minergie": "Minergie"
+      },
+      "generators": {
+        "hpAir": "Pompe à chaleur air/eau",
+        "hpBrine": "Pompe à chaleur eau glycolée/eau (sondes géothermiques)",
+        "hpWater": "Pompe à chaleur eau/eau (eaux souterraines)",
+        "pellets": "Pellets / plaquettes",
+        "logWood": "Bûches (chargement manuel)",
+        "district": "Chauffage à distance",
+        "gasOil": "Gaz / mazout (condensation)"
+      },
+      "emitters": {
+        "floor": "Chauffage au sol",
+        "radiators": "Radiateurs",
+        "tabs": "Éléments thermoactifs (TABS)",
+        "air": "Aérothermes / convecteurs"
+      }
+    },
+    "derived": {
+      "title": "Valeurs limites et cibles",
+      "description": "Exigences déduites des bases de planification ; détails et sources dans les listes de contrôle.",
+      "flowTemp": "Départ max. {emitter}",
+      "flowTempValue": "{limit} °C (cible {target} °C)",
+      "roomControl": "Régulation des pièces",
+      "roomControlAll": "Régulation individuelle dans chaque pièce",
+      "roomControlLow": "Pièce de référence suffisante avec départ ≤ 30 °C",
+      "pipes": "Réseau, branche défavorable",
+      "pipesValue": "≤ 70 Pa/m",
+      "trv": "Pression aux robinets thermostatiques",
+      "trvValue": "≤ 30 kPa, sinon indépendants de la pression",
+      "fbhSurface": "Température de surface du chauffage au sol",
+      "fbhSurfaceValue": "≤ 28 °C, bain ≤ 30 °C",
+      "fbhCircuit": "Perte de charge par circuit",
+      "fbhCircuitValue": "≤ 10 kPa (sans distributeur)",
+      "tolerance": "Puissance du générateur",
+      "toleranceValue": "−5 % à +30 % de la valeur de base",
+      "emergency": "Chauffage électrique de secours",
+      "emergencyValue": "≤ 50 %, enclenchement manuel uniquement",
+      "bhe": "Température du fluide (moyenne, 50 ans)",
+      "bheValue": "≥ −1.5 °C, distance entre sondes ≥ 5 m",
+      "insulation": "Isolation de la distribution",
+      "insulationValue": "EN-103 tableau 2, aucune sous 26 °C",
+      "measureConcept": "Concept de mesure",
+      "measureConceptValue": "SICC 98-1 (SRE supérieure à 2000 m²)",
+      "none": "pas nécessaire"
+    }
   }
 }

@@ -6,8 +6,8 @@ import { heatRecoveryMinimum, spiTarget } from "@/lib/kwl/calc";
 import { airChangeFlow, fanEnergy, filterLife, newBuildingAirChange, roughDwellingFlow } from "@/lib/kwl/sia3825";
 import { cn } from "@/lib/utils";
 
-import { fmt, Result, Section } from "../fields";
-import { NumberParam } from "../plan-ui";
+import { fmt, Result, Section } from "@/components/planning/fields";
+import { NumberParam } from "@/components/planning/plan-ui";
 import { planInput, type WidgetProps } from "./types";
 
 /** Vorprojekt: estimate of the fan electricity and heat recovery requirement. */

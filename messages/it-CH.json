@@ -141,6 +141,7 @@
       "overview": "Panoramica",
       "lvs": "Capitolati",
       "costPlan": "Piano dei costi",
+      "heating": "Riscaldamento",
       "ventilation": "Ventilazione"
     }
   },
@@ -1637,5 +1638,99 @@
     "los": "Lotto {n}",
     "create": "Creare i capitoli",
     "created": "{count} capitoli creati."
+  },
+  "heatingPlan": {
+    "title": "Progettazione del riscaldamento",
+    "description": "Progettazione dell’impianto di riscaldamento secondo le fasi della SIA 108 – con le esigenze delle norme SIA 384/1, SIA 384/2 e SIA 384/6, dell’aiuto all’applicazione EnDK EN-103 e della direttiva SITC HE301-01.",
+    "navLabel": "Progettazione del riscaldamento",
+    "overview": "Panoramica e basi di progettazione",
+    "phases": "Fasi SIA 108",
+    "phaseList": "Fasi",
+    "phaseLabel": "Fase {code}",
+    "phaseNotes": "Osservazioni sulla fase",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Lista di controllo (PDF)",
+    "chooseGenerators": "Scegliere la produzione e l’emissione di calore nella panoramica per visualizzare i punti di controllo corrispondenti.",
+    "normsHint": "Le liste di controllo riprendono le esigenze per analogia e rimandano alle norme SIA 384/1:2022, SIA 384/2:2020, SIA 384/6:2021, EnDK EN-103 (2020), SITC HE301-01 e SIA 108:2014. Fa stato il testo delle norme. L’acqua calda seguirà con la progettazione sanitaria.",
+    "yes": "sì",
+    "no": "no",
+    "criteria": {
+      "title": "Basi di progettazione",
+      "description": "Basi per la scelta del sistema e il dimensionamento (SIA 384/1 capitolo 2). Determinano i punti di controllo validi nelle fasi e vanno fissate per iscritto con il committente."
+    },
+    "params": {
+      "buildingType": "Edificio",
+      "construction": "Intervento",
+      "standard": "Standard",
+      "power": "Potenza di riscaldamento (kW)",
+      "powerHint": "Valore approssimativo per le soglie della SIA 384/1 e della HE301; vuoto = tutti i punti.",
+      "energyArea": "Superficie di riferimento energetico (m²)",
+      "generators": "Produzione di calore",
+      "generatorsHint": "Scelta multipla; i punti dei generatori non scelti sono nascosti.",
+      "emitters": "Emissione di calore",
+      "more": "Altre caratteristiche",
+      "multiUnit": "Più unità d’utilizzazione (conteggio del calore, conteggio delle spese)",
+      "storage": "Accumulo (tecnico)",
+      "cooling": "Raffrescamento tramite il sistema di riscaldamento"
+    },
+    "options": {
+      "buildingType": {
+        "efh": "Casa unifamiliare",
+        "mfh": "Casa plurifamiliare",
+        "nonResidential": "Edificio non residenziale"
+      },
+      "construction": {
+        "new": "Nuova costruzione",
+        "renovation": "Trasformazione / risanamento",
+        "replacement": "Sostituzione del generatore"
+      },
+      "standard": {
+        "standard": "Standard legale",
+        "minergie": "Minergie"
+      },
+      "generators": {
+        "hpAir": "Pompa di calore aria/acqua",
+        "hpBrine": "Pompa di calore acqua glicolata/acqua (sonde geotermiche)",
+        "hpWater": "Pompa di calore acqua/acqua (acque sotterranee)",
+        "pellets": "Pellet / cippato",
+        "logWood": "Legna in ciocchi (carica manuale)",
+        "district": "Teleriscaldamento",
+        "gasOil": "Gas / olio (condensazione)"
+      },
+      "emitters": {
+        "floor": "Riscaldamento a pavimento",
+        "radiators": "Radiatori",
+        "tabs": "Elementi termoattivi (TABS)",
+        "air": "Aerotermi / convettori"
+      }
+    },
+    "derived": {
+      "title": "Valori limite e obiettivo",
+      "description": "Esigenze derivate dalle basi di progettazione; dettagli e fonti nelle liste di controllo.",
+      "flowTemp": "Mandata max. {emitter}",
+      "flowTempValue": "{limit} °C (obiettivo {target} °C)",
+      "roomControl": "Regolazione dei locali",
+      "roomControlAll": "Regolazione individuale in ogni locale",
+      "roomControlLow": "Locale di riferimento sufficiente con mandata ≤ 30 °C",
+      "pipes": "Rete, ramo sfavorevole",
+      "pipesValue": "≤ 70 Pa/m",
+      "trv": "Pressione alle valvole termostatiche",
+      "trvValue": "≤ 30 kPa, altrimenti indipendenti dalla pressione",
+      "fbhSurface": "Temperatura superficiale del pavimento",
+      "fbhSurfaceValue": "≤ 28 °C, bagno ≤ 30 °C",
+      "fbhCircuit": "Perdita di carico per circuito",
+      "fbhCircuitValue": "≤ 10 kPa (senza collettore)",
+      "tolerance": "Potenza del generatore",
+      "toleranceValue": "da −5 % a +30 % del valore di base",
+      "emergency": "Riscaldamento elettrico d’emergenza",
+      "emergencyValue": "≤ 50 %, inseribile solo manualmente",
+      "bhe": "Temperatura del fluido (media, 50 anni)",
+      "bheValue": "≥ −1.5 °C, distanza tra le sonde ≥ 5 m",
+      "insulation": "Isolamento della distribuzione",
+      "insulationValue": "EN-103 tabella 2, nessuno sotto 26 °C",
+      "measureConcept": "Concetto di misura",
+      "measureConceptValue": "SITC 98-1 (SRE oltre 2000 m²)",
+      "none": "non necessario"
+    }
   }
 }

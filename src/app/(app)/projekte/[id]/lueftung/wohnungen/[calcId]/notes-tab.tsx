@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Textarea } from "@/components/ui/textarea";
 import { deviceMaxVelocity, heatRecoveryMinimum, overflowPressureLimits, recommendedVelocities, velocityLimits } from "@/lib/kwl/calc";
 
-import { fmt, Section } from "../../fields";
+import { fmt, Section } from "@/components/planning/fields";
 
 const planningHints = ["stages", "intensive", "minimum", "maximum", "simultaneity", "heatRecovery", "efficiency", "enerweb"] as const;
 const literature = ["SIA 382/1", "SIA 382/5", "SIA 180", "SWKI VA 104-01", "Minergie", "EnDK Vollzugshilfe EN-105", "EnDK Vollzugshilfe EN-110"];

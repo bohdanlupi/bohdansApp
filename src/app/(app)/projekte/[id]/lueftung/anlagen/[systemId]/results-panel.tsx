@@ -9,7 +9,7 @@ import { externalPressureCheck } from "@/lib/kwl/sia3825";
 import { cn } from "@/lib/utils";
 
 import { AttachmentNotes } from "../../device-options";
-import { fmt, Notice, Result } from "../../fields";
+import { fmt, Notice, Result } from "@/components/planning/fields";
 
 export function ResultsPanel({
   result,

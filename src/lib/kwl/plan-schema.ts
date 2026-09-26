@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { checkSchema, lenientRecord } from "@/lib/planning";
+
 import { airtightnessClasses, fireplaceTypes, frostVariants, kitchenConcepts, noiseLevels, systemTypes } from "./sia3825";
 
 // KWL-Planung of a project (ventilation_plans.data): design criteria, checklist states, inputs of the
@@ -9,20 +11,6 @@ const num = (min: number, max: number, fallback: number | null = null) =>
   z.number().finite().min(min).max(max).nullable().catch(fallback);
 const text = (max: number) => z.string().max(max).catch("");
 const bool = z.boolean().catch(false);
-
-/** Record whose invalid entries are dropped one by one (instead of losing the whole record). */
-const lenientRecord = <T extends z.ZodType>(value: T, keyMax = 60) =>
-  z
-    .record(z.string(), z.unknown())
-    .transform((obj) => {
-      const out: Record<string, z.infer<T>> = {};
-      for (const [key, raw] of Object.entries(obj)) {
-        const parsed = value.safeParse(raw);
-        if (key.length <= keyMax && parsed.success) out[key] = parsed.data;
-      }
-      return out;
-    })
-    .catch({});
 
 export const planParamsSchema = z.object({
   buildingType: z.enum(["efh", "mfh"]).catch("mfh"),
@@ -59,11 +47,6 @@ export const dwellingTypeSchema = z.object({
   wcs: num(0, 20),
   shortUse: num(0, 20),
   closedKitchen: bool,
-});
-
-const checkSchema = z.object({
-  s: z.enum(["done", "na", "open"]),
-  n: text(1000).optional(),
 });
 
 const measurementSchema = z.object({

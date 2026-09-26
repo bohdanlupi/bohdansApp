@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/button";
 import { formatMoney } from "@/lib/number-input";
 
-import { Notice, Section } from "../fields";
+import { Notice, Section } from "@/components/planning/fields";
 import type { WidgetProps } from "./types";
 
 /** Ausschreibung: the project's Leistungsverzeichnisse (the LV module does the tender itself). */

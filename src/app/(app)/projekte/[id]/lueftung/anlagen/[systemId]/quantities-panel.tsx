@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type Quantity, type SystemData, systemQuantities } from "@/lib/kwl/network";
 
-import { fmt } from "../../fields";
+import { fmt } from "@/components/planning/fields";
 import { insertSystemQuantities } from "../actions";
 
 export type LvChapter = { id: string; parentId: string | null; number: string | null; text: string };

@@ -12,9 +12,11 @@ import type { PlanData } from "@/lib/kwl/plan-schema";
 import type { KwlData } from "@/lib/kwl/schema";
 import type { AppLanguage } from "@/lib/supabase/types";
 
-import { Section } from "../fields";
-import { Checklist, SaveIndicator } from "../plan-ui";
-import { usePlan } from "../use-plan";
+import { Section } from "@/components/planning/fields";
+import { Checklist, SaveIndicator } from "@/components/planning/plan-ui";
+import { usePlan } from "@/components/planning/use-plan";
+
+import { savePlan } from "../actions";
 import { AcousticsWidget } from "../widgets/acoustics";
 import { CascadeWidget } from "../widgets/cascade";
 import { CommissioningWidget } from "../widgets/commissioning";
@@ -65,7 +67,7 @@ export function PhaseView({
 }) {
   const t = useTranslations("kwlPlan");
   const phase = findPhase(code)!;
-  const { plan, update, status } = usePlan(projectId, initial, editable);
+  const { plan, update, status } = usePlan(projectId, initial, editable, savePlan);
   const evaluated = useMemo(() => calcs.map((c) => ({ ...c, result: evaluateKwl(c.data, c.system) })), [calcs]);
   const props: WidgetProps = { plan, update, projectId, calcs: evaluated, lvs, language, editable };
 

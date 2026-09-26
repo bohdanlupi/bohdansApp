@@ -7,8 +7,8 @@ import { NativeSelect } from "@/components/form";
 import { findRoomType } from "@/lib/kwl/calc";
 import { defaultNoiseCorrections, designNoiseLevel, noiseRequirement } from "@/lib/kwl/sia3825";
 
-import { fmt, Notice, Section } from "../fields";
-import { NumberParam } from "../plan-ui";
+import { fmt, Notice, Section } from "@/components/planning/fields";
+import { NumberParam } from "@/components/planning/plan-ui";
 import { planInput, type WidgetProps } from "./types";
 
 /** 2.2.7 / Annex C: requirement L_H per room and the design value of the A-weighted level L_Aeq. */

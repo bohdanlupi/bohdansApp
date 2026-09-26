@@ -141,6 +141,7 @@
       "overview": "Übersicht",
       "lvs": "Leistungsverzeichnisse",
       "costPlan": "Kostenplan",
+      "heating": "Heizung",
       "ventilation": "Lüftung"
     }
   },
@@ -1637,5 +1638,99 @@
     "los": "Los {n}",
     "create": "Kapitel anlegen",
     "created": "{count} Kapitel angelegt."
+  },
+  "heatingPlan": {
+    "title": "Heizungsplanung",
+    "description": "Planung der Heizungsanlage nach den Phasen der SIA 108 – mit den Anforderungen der SIA 384/1, SIA 384/2 und SIA 384/6, der EnDK-Vollzugshilfe EN-103 und der SWKI HE301-01.",
+    "navLabel": "Heizungsplanung",
+    "overview": "Übersicht und Planungsgrundlagen",
+    "phases": "Phasen SIA 108",
+    "phaseList": "Phasen",
+    "phaseLabel": "Phase {code}",
+    "phaseNotes": "Bemerkungen zur Phase",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Checkliste (PDF)",
+    "chooseGenerators": "Wärmeerzeugung und Wärmeabgabe in der Übersicht wählen, damit die zugehörigen Prüfpunkte erscheinen.",
+    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf SIA 384/1:2022, SIA 384/2:2020, SIA 384/6:2021, EnDK EN-103 (2020), SWKI HE301-01 und SIA 108:2014. Massgebend ist der Normtext. Warmwasser folgt mit der Sanitärplanung.",
+    "yes": "ja",
+    "no": "nein",
+    "criteria": {
+      "title": "Planungsgrundlagen",
+      "description": "Grundlagen für Systemwahl und Bemessung (SIA 384/1 Kapitel 2). Sie steuern, welche Prüfpunkte in den Phasen gelten, und sind mit der Bauherrschaft schriftlich festzuhalten."
+    },
+    "params": {
+      "buildingType": "Gebäude",
+      "construction": "Vorhaben",
+      "standard": "Standard",
+      "power": "Heizleistung (kW)",
+      "powerHint": "Grobwert für die Schwellen von SIA 384/1 und HE301; leer = alle Prüfpunkte.",
+      "energyArea": "Energiebezugsfläche (m²)",
+      "generators": "Wärmeerzeugung",
+      "generatorsHint": "Mehrfachauswahl; Prüfpunkte nicht gewählter Erzeuger werden ausgeblendet.",
+      "emitters": "Wärmeabgabe",
+      "more": "Weitere Merkmale",
+      "multiUnit": "Mehrere Nutzeinheiten (Wärmezählung, Heizkostenabrechnung)",
+      "storage": "Wärmespeicher (technischer Speicher)",
+      "cooling": "Kühlung über das Heizsystem"
+    },
+    "options": {
+      "buildingType": {
+        "efh": "Einfamilienhaus",
+        "mfh": "Mehrfamilienhaus",
+        "nonResidential": "Nichtwohnbau"
+      },
+      "construction": {
+        "new": "Neubau",
+        "renovation": "Umbau / Sanierung",
+        "replacement": "Ersatz Wärmeerzeuger"
+      },
+      "standard": {
+        "standard": "Gesetzlicher Standard",
+        "minergie": "Minergie"
+      },
+      "generators": {
+        "hpAir": "Wärmepumpe Luft/Wasser",
+        "hpBrine": "Wärmepumpe Sole/Wasser (Erdwärmesonden)",
+        "hpWater": "Wärmepumpe Wasser/Wasser (Grundwasser)",
+        "pellets": "Pellets / Holzschnitzel",
+        "logWood": "Stückholz (handbeschickt)",
+        "district": "Fernwärme",
+        "gasOil": "Gas / Öl (Brennwert)"
+      },
+      "emitters": {
+        "floor": "Fussbodenheizung",
+        "radiators": "Heizkörper",
+        "tabs": "Thermoaktive Bauteile (TABS)",
+        "air": "Lufterhitzer / Konvektoren"
+      }
+    },
+    "derived": {
+      "title": "Grenz- und Zielwerte",
+      "description": "Aus den Planungsgrundlagen abgeleitete Anforderungen; Details und Quellen in den Checklisten.",
+      "flowTemp": "Max. Vorlauf {emitter}",
+      "flowTempValue": "{limit} °C (Ziel {target} °C)",
+      "roomControl": "Raumregelung",
+      "roomControlAll": "Einzelraumregelung in jedem Raum",
+      "roomControlLow": "Referenzraum genügt bei Vorlauf ≤ 30 °C",
+      "pipes": "Rohrnetz, ungünstigster Strang",
+      "pipesValue": "≤ 70 Pa/m",
+      "trv": "Vordruck Thermostatventile",
+      "trvValue": "≤ 30 kPa, sonst druckunabhängig",
+      "fbhSurface": "Oberflächentemperatur FBH",
+      "fbhSurfaceValue": "≤ 28 °C, Bad ≤ 30 °C",
+      "fbhCircuit": "Druckverlust je FBH-Kreis",
+      "fbhCircuitValue": "≤ 10 kPa (ohne Verteiler)",
+      "tolerance": "Erzeugerleistung",
+      "toleranceValue": "−5 % bis +30 % des Basiswerts",
+      "emergency": "Elektro-Notheizung",
+      "emergencyValue": "≤ 50 %, nur manuell zuschaltbar",
+      "bhe": "Soletemperatur (Mittel, 50 Jahre)",
+      "bheValue": "≥ −1.5 °C, Sondenabstand ≥ 5 m",
+      "insulation": "Dämmung der Verteilung",
+      "insulationValue": "EN-103 Tabelle 2, unter 26 °C keine",
+      "measureConcept": "Messkonzept",
+      "measureConceptValue": "SWKI 98-1 (EBF über 2000 m²)",
+      "none": "nicht erforderlich"
+    }
   }
 }

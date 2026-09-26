@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { Section } from "../fields";
+import { Section } from "@/components/planning/fields";
 import type { WidgetProps } from "./types";
 
 /** Diagram of the cascade principle (Figure 2) and the pressure profile in the dwelling (Figure 1). */

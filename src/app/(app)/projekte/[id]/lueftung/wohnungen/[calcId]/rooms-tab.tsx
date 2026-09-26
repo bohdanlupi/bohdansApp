@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { type AirFlowSummary, findRoomType, type KwlRoom, roomDistribution, type RoomRow, roomTypes } from "@/lib/kwl/calc";
 import { airChangeFlow, applyFourSteps, baseAirChange, fourSteps } from "@/lib/kwl/sia3825";
 
-import { fmt, NumberField, Notice, Result } from "../../fields";
+import { fmt, NumberField, Notice, Result } from "@/components/planning/fields";
 
 /** Typical rooms of a dwelling, for a quick start. */
 const typicalRooms = [

@@ -20,7 +20,7 @@ import { layoutSystem } from "@/lib/kwl/schema-layout";
 
 import { DeviceOptionsFields } from "../../device-options";
 import { deleteSystem, saveSystem } from "../actions";
-import { Notice } from "../../fields";
+import { Notice } from "@/components/planning/fields";
 import { type LvWithChapters, QuantitiesPanel } from "./quantities-panel";
 import { ResultsPanel } from "./results-panel";
 import { SchemaView, shortInfo } from "./schema-view";

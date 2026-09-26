@@ -6,7 +6,7 @@ import { NativeSelect } from "@/components/form";
 import { availableOptions, type DeviceOptions, type FondOption, type FondSide, normalizeOptions } from "@/lib/kwl/attachments";
 import type { DeviceCheck } from "@/lib/kwl/network-device";
 
-import { fmt, Notice } from "./fields";
+import { fmt, Notice } from "@/components/planning/fields";
 
 /** Attachments of the selected Zehnder device: enthalpy exchanger, ComfoFond-L Q, ComfoClime. */
 export function DeviceOptionsFields({

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import type { DwellingType } from "@/lib/kwl/plan-schema";
 import { roughDwellingFlow } from "@/lib/kwl/sia3825";
 
-import { fmt, NumberField, Result, Section } from "../fields";
+import { fmt, NumberField, Result, Section } from "@/components/planning/fields";
 import type { WidgetProps } from "./types";
 
 const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Math.random()).slice(2));

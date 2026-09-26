@@ -93,6 +93,10 @@ ventilation_calcs   id, project_id, name (Wohnung / Einheit), sort, data jsonb (
                     → schema src/lib/kwl/schema.ts, all results computed in src/lib/kwl/calc.ts + sia3825.ts
 ventilation_plans   project_id (PK), data jsonb (design criteria, checklist states, phase inputs,
                     commissioning measurements, notes per phase) → src/lib/kwl/plan-schema.ts
+
+-- Heizungsplanung
+heating_plans       project_id (PK), data jsonb (Planungsgrundlagen, checklist states, notes per phase)
+                    → src/lib/heating/plan-schema.ts
 ```
 
 All tables get `created_at/updated_at/created_by`. RLS policies: authenticated users of the firm
@@ -105,6 +109,8 @@ can read everything; write access by role.
 /projekte                      list + create
 /projekte/[id]                 overview, Beteiligte, documents
 /projekte/[id]/kostenplan      BKP / KV
+/projekte/[id]/heizung         Heizungsplanung: Planungsgrundlagen + phase progress, PDF /api/pdf/heating-plan/[id]
+/projekte/[id]/heizung/[31…61] SIA 108 phase: checklists (SIA 384/1, 384/2, 384/6, EN-103, HE301 refs)
 /projekte/[id]/lueftung        KWL-Planung: design criteria + phase progress, PDF /api/pdf/kwl-plan/[id]
 /projekte/[id]/lueftung/[31…61] SIA 108 phase: checklists (SIA 382/5 refs) + calculations + diagrams
 /projekte/[id]/lueftung/wohnungen[/calcId]  dwelling calculations, PDF /api/pdf/kwl/[calcId]
@@ -194,6 +200,17 @@ sizing, door overflow, AUL/FOL distance, duct insulation). Results match the wor
 SPI 0.20, party 235.9 m³/h). Migration `20260925200000_ventilation_calcs.sql` applied to Zurich.
 Since 2026-09-26 only Zehnder devices (see Lüftungsanlagen); the stage power table of the workbook is superseded by
 the datasheet SPI. The AUL/FOL distance and insulation charts were digitised from images.
+
+Heizungsplanung (2026-09-26): project tab «Heizung» (before «Lüftung»), a planning dossier by the SIA 108 phases
+31–61 like the Lüftung (src/lib/heating/phases.ts: goals + checklists DE/FR/IT). Sources in `Berechnungsvorlagen/Heizung/`
+(PDFs have priority over the Excel DimTool): SIA 384/1:2022, SIA 384/2:2020, SIA 384/6:2021 (EWS), EnDK EN-103 (2020),
+SWKI HE301-01 (safety), HAKA floor heating planning guide; refs are written out in full. Items are filtered by the
+Planungsgrundlagen: building, Neubau / Umbau / Ersatz Wärmeerzeuger, generators (WP Luft, Sole/EWS, Grundwasser, Pellets,
+Stückholz, Fernwärme, Gas/Öl; multi-select), emitters (FBH, Heizkörper, TABS, Lufterhitzer), power / EBF thresholds,
+Nutzeinheiten, Speicher, Kühlung. Warmwasser is left to the later Sanitär module (user decision). Calculations of the
+DimTool (expansion vessel, pump, EWS, safety valve, heating curve, energy, HGT) are still to come. Shared parts:
+src/lib/planning.ts (item/check types, lenient parsing, progress), src/components/planning/ (fields, plan-ui checklist,
+autosave hook usePlan), src/pdf/plan-checklist-document.tsx. Migration `20260926200000_heating_plans.sql` applied.
 
 KWL-Planung (2026-09-25): the Lüftung tab is a planning dossier by SIA 108 phases 31, 32, 33, 41, 51, 52, 53, 61
 (src/lib/kwl/phases.ts: goals + checklists DE/FR/IT with SIA 382/5 / SIA 108 references, conditional on the design

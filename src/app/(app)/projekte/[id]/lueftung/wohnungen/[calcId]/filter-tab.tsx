@@ -19,7 +19,7 @@ import { effectiveOda } from "@/lib/kwl/evaluate";
 import type { KwlFilterInput } from "@/lib/kwl/schema";
 import { cn } from "@/lib/utils";
 
-import { Result, Section } from "../../fields";
+import { Result, Section } from "@/components/planning/fields";
 
 const odaKeys = ["class1", "class2", "class3"] as const;
 const idaKeys = ["class1", "class2", "class3", "class4"] as const;

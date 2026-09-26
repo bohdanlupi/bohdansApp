@@ -6,13 +6,17 @@ import { useId, useState } from "react";
 
 import { NativeSelect } from "@/components/form";
 import { Label } from "@/components/ui/label";
-import { type ChecklistItem, isHandled } from "@/lib/kwl/phases";
-import type { PlanData } from "@/lib/kwl/plan-schema";
+import { type CheckState, isHandled, type L10n } from "@/lib/planning";
 import type { AppLanguage } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
 
 import { NumberField } from "./fields";
 import type { SaveStatus } from "./use-plan";
+
+type Item = { id: string; ref: string; text: L10n };
+
+/** Lüftung references without a norm name are clauses of SIA 382/5. */
+const defaultRef = (ref: string) => (ref.startsWith("SIA") ? ref : `SIA 382/5 ${ref}`);
 
 export function SaveIndicator({ status }: { status: SaveStatus }) {
   const t = useTranslations("kwlPlan.save");
@@ -32,13 +36,15 @@ export function Checklist({
   language,
   editable,
   onChange,
+  formatRef = defaultRef,
 }: {
   title: string;
-  items: ChecklistItem[];
-  checks: PlanData["checks"];
+  items: Item[];
+  checks: Record<string, CheckState>;
   language: AppLanguage;
   editable: boolean;
-  onChange: (id: string, value: PlanData["checks"][string] | null) => void;
+  onChange: (id: string, value: CheckState | null) => void;
+  formatRef?: (ref: string) => string;
 }) {
   const t = useTranslations("kwlPlan.checklist");
   const done = items.filter((item) => isHandled(checks[item.id])).length;
@@ -61,6 +67,7 @@ export function Checklist({
             language={language}
             editable={editable}
             labels={{ done: t("done"), na: t("na"), note: t("note"), ref: t("ref") }}
+            formatRef={formatRef}
             onChange={(value) => onChange(item.id, value)}
           />
         ))}
@@ -75,14 +82,16 @@ function ChecklistRow({
   language,
   editable,
   labels,
+  formatRef,
   onChange,
 }: {
-  item: ChecklistItem;
-  state: PlanData["checks"][string] | null;
+  item: Item;
+  state: CheckState | null;
   language: AppLanguage;
   editable: boolean;
   labels: { done: string; na: string; note: string; ref: string };
-  onChange: (value: PlanData["checks"][string] | null) => void;
+  formatRef: (ref: string) => string;
+  onChange: (value: CheckState | null) => void;
 }) {
   const [noteOpen, setNoteOpen] = useState(Boolean(state?.n));
   const id = useId();
@@ -109,7 +118,7 @@ function ChecklistRow({
         <div className="min-w-0 flex-1">
           <p className={cn("text-sm", state?.s === "na" && "line-through")}>{item.text[language]}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {labels.ref} {item.ref.startsWith("SIA") ? item.ref : `SIA 382/5 ${item.ref}`}
+            {labels.ref} {formatRef(item.ref)}
           </p>
           {noteOpen && (
             <textarea

@@ -14,8 +14,8 @@ import {
 } from "@/lib/kwl/sia3825";
 import { cn } from "@/lib/utils";
 
-import { fmt, Notice, Result, Section } from "../fields";
-import { NumberParam } from "../plan-ui";
+import { fmt, Notice, Result, Section } from "@/components/planning/fields";
+import { NumberParam } from "@/components/planning/plan-ui";
 import { planInput, type WidgetProps } from "./types";
 
 const widths = [80, 90, 100] as const;

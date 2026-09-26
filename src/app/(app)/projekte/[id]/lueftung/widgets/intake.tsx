@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { exhaustBaseDistance, exhaustDiagramMaxFlow, exhaustDistance } from "@/lib/kwl/calc";
 import { intakeMaxVelocity, intakeMinHeight, intakeVelocity } from "@/lib/kwl/sia3825";
 
-import { fmt, Notice, Result, Section } from "../fields";
-import { NumberParam } from "../plan-ui";
+import { fmt, Notice, Result, Section } from "@/components/planning/fields";
+import { NumberParam } from "@/components/planning/plan-ui";
 import { planInput, type WidgetProps } from "./types";
 
 const diagramFlows = [50, 100, 200, 300, 500, 1000, 1800];

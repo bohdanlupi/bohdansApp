@@ -24,9 +24,11 @@ import { buttonVariants } from "@/components/ui/button";
 import type { AppLanguage } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
 
-import { fmt, Section } from "./fields";
-import { Fact, NumberParam, OptionField, SaveIndicator, Toggle } from "./plan-ui";
-import { usePlan } from "./use-plan";
+import { fmt, Section } from "@/components/planning/fields";
+import { Fact, NumberParam, OptionField, SaveIndicator, Toggle } from "@/components/planning/plan-ui";
+import { usePlan } from "@/components/planning/use-plan";
+
+import { savePlan } from "./actions";
 
 export function PlanOverview({
   projectId,
@@ -40,7 +42,7 @@ export function PlanOverview({
   editable: boolean;
 }) {
   const t = useTranslations("kwlPlan");
-  const { plan, update, status } = usePlan(projectId, initial, editable);
+  const { plan, update, status } = usePlan(projectId, initial, editable, savePlan);
   const p = plan.params;
   const set = <K extends keyof PlanParams>(key: K, value: PlanParams[K]) => update((d) => ({ ...d, params: { ...d.params, [key]: value } }));
   const o = (group: string) => (value: string) => t(`options.${group}.${value}` as never);

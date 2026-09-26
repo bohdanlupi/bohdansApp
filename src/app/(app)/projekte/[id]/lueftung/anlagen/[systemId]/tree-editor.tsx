@@ -27,7 +27,7 @@ import { ductMaterials, type DuctMaterial } from "@/lib/kwl/pressure";
 import { airColors } from "@/lib/kwl/schema-layout";
 import { cn } from "@/lib/utils";
 
-import { fmt, NumberField } from "../../fields";
+import { fmt, NumberField } from "@/components/planning/fields";
 
 type ListKey = "outdoor" | "supply" | "extract" | "exhaust";
 const lists: ListKey[] = ["outdoor", "supply", "extract", "exhaust"];
