@@ -1509,7 +1509,7 @@
     "curve": "Courbe",
     "length": "Longueur m",
     "count": "Nombre",
-    "bends": "Coudes 90°",
+    "bends": "Coudes par conduit (nombre par angle)",
     "zeta": "ζ supplémentaire",
     "diameter": "Diamètre mm",
     "material": "Matériau",
@@ -1565,7 +1565,9 @@
     "partCase": "Boîtier {name}",
     "partCover": "Recouvrement {name}",
     "partCaseNone": "sans supplément",
-    "partTotal": "Δp boîtier + recouvrement"
+    "partTotal": "Δp boîtier + recouvrement",
+    "bendReference": "pas de pièce dans le système – ζ de référence {zeta}, position R dans le descriptif",
+    "bendsDp": "dont coudes"
   },
   "kwlDevice": {
     "attachments": "Accessoires de l’appareil",

@@ -9,7 +9,20 @@
 
 import { type DeviceOptions, deviceArticles } from "./attachments";
 import { maxVelocity } from "./calc";
-import { coverCurve, curveGroup, curveValue, findProduct, measuredCoverPrefix, type Product, productCurve } from "./products";
+import {
+  bendAngles,
+  type BendCounts,
+  bendFor,
+  bendZeta,
+  coverCurve,
+  curveGroup,
+  curveValue,
+  findProduct,
+  measuredCoverPrefix,
+  noBends,
+  type Product,
+  productCurve,
+} from "./products";
 import { airDensity, ductMaterials, type DuctMaterial, frictionFactor } from "./pressure";
 
 export type NodeType = "duct" | "bend" | "tee" | "distributor" | "component" | "terminal";
@@ -29,10 +42,10 @@ export type NetNode = {
   cover: string | null;
   /** Curve of a separate cover product (e.g. valve setting). */
   coverCurve: string | null;
-  /** Ducts: length [m], parallel ducts, bends, custom geometry when no product is chosen. */
+  /** Ducts: length [m], parallel ducts, bends per angle (per duct), custom geometry when no product is chosen. */
   length: number | null;
   count: number;
-  bends: number | null;
+  bendCounts: BendCounts;
   zeta: number | null;
   diameter: number | null;
   width: number | null;
@@ -84,6 +97,8 @@ export type NodeResult = {
    * Auslass (manual allowance, the datasheets give no value of the case alone) plus the cover.
    */
   parts?: TerminalPart[];
+  /** Ducts: pressure drop of the bends (included in dp). */
+  bendsDp?: number;
 };
 
 export type TerminalPart = { role: "combined" | "case" | "cover"; label: string; dp: number | null; source: NodeResult["source"] };
@@ -143,6 +158,19 @@ function terminalResult(node: NetNode, flow: number, side: "supply" | "extract",
   return { ...empty, dp: (coverDp ?? 0) + (caseDp ?? 0), source, parts };
 }
 
+/** Pressure drop of the bends of one duct at the flow per duct. */
+export function ductBendsDp(node: NetNode, duct: Product | null, q: number, dynamic: number): number {
+  let dp = 0;
+  for (const angle of bendAngles) {
+    const n = node.bendCounts[angle];
+    if (!n) continue;
+    const fitting = bendFor(duct, angle);
+    const curve = fitting?.curves[0];
+    dp += n * (curve ? (curveValue(curve.points, q) ?? 0) : (fitting?.zeta ?? bendZeta[angle]) * dynamic);
+  }
+  return dp;
+}
+
 export function nodeResult(node: NetNode, flow: number, side: "supply" | "extract"): Omit<NodeResult, "cumulative"> {
   const product = findProduct(node.product);
   const empty = { id: node.id, flow, velocity: null, r: null, velocityLimit: null };
@@ -154,7 +182,9 @@ export function nodeResult(node: NetNode, flow: number, side: "supply" | "extrac
     const v = geometry ? q / 3600 / geometry.area : null;
     const dynamic = v !== null ? (airDensity * v * v) / 2 : 0;
     // Bend: loss coefficient of the fitting (e.g. Meier Tobler ζ reference value), else 0.3 per 90° bend.
-    const zeta = (node.type === "bend" ? (product?.zeta ?? 0.3) : (node.bends ?? 0) * 0.3) + (node.zeta ?? 0);
+    const zeta = (node.type === "bend" ? (product?.zeta ?? 0.3) : 0) + (node.zeta ?? 0);
+    // Bends of the duct: fitting of the duct system (curve per piece or ζ), else ζ reference value by angle.
+    const bendsDp = node.type === "duct" ? ductBendsDp(node, product ?? null, q, dynamic) : 0;
     // Manufacturer friction curve (Pa/m over flow per duct) has priority over the calculation.
     const curve = productCurve(product, node.curve, side);
     let r: number | null = null;
@@ -174,7 +204,15 @@ export function nodeResult(node: NetNode, flow: number, side: "supply" | "extrac
       source = "calculated";
     }
     const length = node.type === "duct" ? (node.length ?? 0) : 0;
-    return { ...empty, dp: (r ?? 0) * length + zeta * dynamic, velocity: v, r, velocityLimit: v !== null ? maxVelocity(q) : null, source };
+    return {
+      ...empty,
+      dp: (r ?? 0) * length + zeta * dynamic + bendsDp,
+      velocity: v,
+      r,
+      velocityLimit: v !== null ? maxVelocity(q) : null,
+      source,
+      ...(bendsDp > 0 ? { bendsDp } : {}),
+    };
   }
 
   if (node.type === "terminal" && node.cover) return terminalResult(node, flow, side, empty);
@@ -353,6 +391,17 @@ export function systemQuantities(data: SystemData): Quantity[] {
         { product: n.product, manufacturer: product?.manufacturer ?? null, label: product?.name ?? `${n.label} ${n.diameter ? `ø ${n.diameter}` : `${n.width}×${n.height}`}`, unit: "m", articles, piece: product?.lvPiece },
         (n.length ?? 0) * Math.max(1, n.count),
       );
+      for (const angle of bendAngles) {
+        const pieces = n.bendCounts[angle] * Math.max(1, n.count);
+        if (!pieces) continue;
+        const fitting = bendFor(product, angle);
+        if (fitting) {
+          add(`bend|${fitting.key}`, { product: fitting.key, manufacturer: fitting.manufacturer, label: fitting.name, unit: "Stk", articles: fitting.articles[0] ? [fitting.articles[0].number] : [] }, pieces);
+        } else {
+          const size = product?.name ?? (n.diameter ? `ø ${n.diameter}` : `${n.width}×${n.height}`);
+          add(`bend|${angle}|${n.product ?? size}`, { product: null, manufacturer: product?.manufacturer ?? null, label: `Bogen ${angle}° – ${size}`, unit: "Stk", articles: [] }, pieces);
+        }
+      }
     } else if ((n.type !== "tee" || n.product) && !(n.type === "terminal" && !n.product && n.cover)) {
       add(n.product ?? `${n.type}-${n.label}`, { product: n.product, manufacturer: product?.manufacturer ?? null, label, unit: "Stk", articles }, Math.max(1, n.count));
     }
@@ -390,7 +439,7 @@ export const newNode = (type: NodeType, patch: Partial<NetNode> = {}): NetNode =
   coverCurve: null,
   length: type === "duct" ? 1 : null,
   count: 1,
-  bends: null,
+  bendCounts: noBends(),
   zeta: null,
   diameter: null,
   width: null,

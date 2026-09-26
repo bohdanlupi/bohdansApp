@@ -236,6 +236,10 @@ of the combination (not above the device limit), stage table hidden, no power da
 EPP adapter kit. Device + attachments go into the LV with the quantities.
 Dwellings served by a system take its external pressures. Quantities → LV group (IGH Zehnder / Meier Tobler catalogue positions by
 primary article number, else R-positions naming the article; grille/valve of the chosen curve as its own line).
+Duct bends: node.bendCounts per angle 15/30/45/60/90 (per duct; old «bends» = 90°). bendFor() picks the fitting of
+the duct system and size (Meier Tobler spiro bend, segment bend from DN 224; ComfoPipe Compact/Plus 45°/90°;
+ComfoTube Flow / flat 51 / Therm 90°): its curve per piece or ζ; else ζ reference 0.06…0.3 and an R-position in the LV.
+Bends go into the LV × parallel ducts.
 Terminals = Auslass (ComfoCase, node.product) + cover (node.cover: grille / disc valve product, or «case:<name>»
 for a combination measured in the case datasheet). Δp: measured combination if chosen, else cover curve (default =
 most open setting) + manual Auslass allowance (dpRef/qRef) – the datasheets give no Δp of the case alone. Old

@@ -1509,7 +1509,7 @@
     "curve": "Curva",
     "length": "Lunghezza m",
     "count": "Numero",
-    "bends": "Curve 90°",
+    "bends": "Curve per condotta (numero per angolo)",
     "zeta": "ζ aggiuntivo",
     "diameter": "Diametro mm",
     "material": "Materiale",
@@ -1565,7 +1565,9 @@
     "partCase": "Cassetta {name}",
     "partCover": "Copertura {name}",
     "partCaseNone": "nessun supplemento",
-    "partTotal": "Δp cassetta + copertura"
+    "partTotal": "Δp cassetta + copertura",
+    "bendReference": "nessun pezzo nel sistema – ζ di riferimento {zeta}, posizione R nell’elenco",
+    "bendsDp": "di cui curve"
   },
   "kwlDevice": {
     "attachments": "Accessori dell’apparecchio",

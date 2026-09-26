@@ -3,7 +3,7 @@
 
 import { type NetNode, newNode, type NodeType, type RoomFlow, type SystemData } from "./network";
 import type { Network, Segment } from "./pressure";
-import { curveGroup, measuredCoverPrefix, type Product, productCurve, products, type ProductKind } from "./products";
+import { curveGroup, measuredCoverPrefix, noBends, type Product, productCurve, products, type ProductKind } from "./products";
 
 /** First Zehnder product of a kind whose name matches – null when the data has no such product. */
 function pick(kind: ProductKind, ...patterns: RegExp[]): Product | null {
@@ -50,7 +50,7 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
   const outerGrille = pickOnly("grille", /Wetterschutz|Aussenluft|Fortluft/i);
 
   const duct = (product: Product | null, label: string, length: number, bends: number, patch: Partial<NetNode> = {}) =>
-    newNode("duct", { product: product?.key ?? null, diameter: product ? null : 160, label, length, bends, ...patch });
+    newNode("duct", { product: product?.key ?? null, diameter: product ? null : 160, label, length, bendCounts: { ...noBends(), 90: bends }, ...patch });
   const component = (type: NodeType, product: Product | null, label: string, patch: Partial<NetNode> = {}) =>
     newNode(type, { product: product?.key ?? null, label, ...patch });
   const tubes = (flow: number) => (flow < 38 ? 1 : flow <= 60 ? 2 : Math.ceil(flow / 30));
@@ -97,7 +97,7 @@ export function starToSystem(network: Network, calcId: string, base: SystemData)
           material: s.material,
           length: s.length,
           count: s.count,
-          bends: s.bends,
+          bendCounts: { ...noBends(), 90: Math.round(s.bends ?? 0) },
           zeta: s.zeta,
         })
       : newNode("component", { label: s.name, dpRef: s.dpRef, qRef: s.qRef });

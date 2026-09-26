@@ -3,13 +3,15 @@ import { z } from "zod";
 import type { NetNode, SystemData } from "./network";
 import { deviceOptionsSchema, normalizeOptions } from "./attachments";
 import { ductMaterials, type DuctMaterial } from "./pressure";
-import { currentProductKey, datasheetDevice, findProduct } from "./products";
+import { currentProductKey, datasheetDevice, findProduct, noBends } from "./products";
 
 // Data of a ventilation system (ventilation_systems.data). Parsed leniently: invalid nodes are dropped one by one.
 
 const num = (max: number) => z.number().finite().min(0).max(max).nullable().catch(null);
 const text = (max: number) => z.string().max(max).catch("");
 const id = z.string().min(1).max(40);
+
+const count = z.number().int().min(0).max(100).catch(0);
 
 const nodeFields = z.object({
   id,
@@ -21,7 +23,12 @@ const nodeFields = z.object({
   coverCurve: z.string().max(120).nullable().catch(null),
   length: num(1000),
   count: z.number().int().min(1).max(50).catch(1),
+  /** Legacy: number of 90° bends (before the counts per angle). */
   bends: num(100),
+  bendCounts: z
+    .object({ 15: count, 30: count, 45: count, 60: count, 90: count })
+    .nullable()
+    .catch(null),
   zeta: num(1000),
   diameter: num(3000),
   width: num(5000),
@@ -52,7 +59,9 @@ function parseNodes(raw: unknown, depth: number, budget: { left: number }): NetN
     if (!parsed.success) continue;
     budget.left--;
     const children = parseNodes((item as { children?: unknown }).children, depth + 1, budget);
-    out.push({ ...moveCover(parsed.data), children });
+    const { bends, bendCounts, ...fields } = parsed.data;
+    const counts = bendCounts ?? { ...noBends(), 90: Math.round(bends ?? 0) };
+    out.push({ ...moveCover({ ...fields, bendCounts: counts }), children });
   }
   return out;
 }

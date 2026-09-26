@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { findNode, mapTree, type NetNode, newNode, type NodeResult, type NodeType, type RoomFlow, type SystemData, type SystemResult } from "@/lib/kwl/network";
 import {
+  bendAngles,
+  bendFor,
+  bendZeta,
   coverCurve,
   coverProducts,
   curveGroup,
@@ -432,7 +435,6 @@ function NodePanel({
               className="h-8 rounded-lg"
             />
           </div>
-          {node.type === "duct" && numberField("bends", t("bends"), 0)}
           {numberField("zeta", t("zeta"), 2)}
           {!product && (
             <>
@@ -453,6 +455,8 @@ function NodePanel({
           )}
         </div>
       )}
+
+      {node.type === "duct" && <BendFields node={node} duct={product} editable={editable} onPatch={onPatch} />}
 
       {node.type !== "duct" && node.type !== "bend" && node.type !== "terminal" && !product && (
         <div className="grid grid-cols-2 gap-2">
@@ -506,6 +510,12 @@ function NodePanel({
             <>
               <dt className="text-muted-foreground">R</dt>
               <dd className="text-right tabular-nums">{fmt(result.r, 2)} Pa/m</dd>
+            </>
+          )}
+          {result.bendsDp != null && (
+            <>
+              <dt className="text-muted-foreground">{t("bendsDp")}</dt>
+              <dd className="text-right tabular-nums">{fmt(result.bendsDp, 1)} Pa</dd>
             </>
           )}
           {result.parts?.map((p, i) => (
@@ -699,6 +709,45 @@ function TerminalFields({
           {number("dpRef", t("dpRef"), 1)}
           {number("qRef", t("qRef"), 0, result ? fmt(result.flow) : undefined)}
         </div>
+      )}
+    </div>
+  );
+}
+
+/** Bends of a duct: number per angle (per duct); the fitting of the duct system is used for Δp and the LV. */
+function BendFields({ node, duct, editable, onPatch }: { node: NetNode; duct: Product | null; editable: boolean; onPatch: (patch: Partial<NetNode>) => void }) {
+  const t = useTranslations("kwlSystem");
+  const used = bendAngles.filter((a) => node.bendCounts[a] > 0);
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs">{t("bends")}</Label>
+      <div className="grid grid-cols-5 gap-1.5">
+        {bendAngles.map((angle) => (
+          <div key={angle} className="space-y-0.5">
+            <span className="block text-center text-[11px] text-muted-foreground">{angle}°</span>
+            <NumberField
+              value={node.bendCounts[angle] || null}
+              decimals={0}
+              label={`${t("bends")} ${angle}°`}
+              placeholder="0"
+              disabled={!editable}
+              onChange={(v) => onPatch({ bendCounts: { ...node.bendCounts, [angle]: Math.min(100, Math.max(0, Math.round(v ?? 0))) } })}
+              className="h-8 rounded-lg px-1.5 text-center"
+            />
+          </div>
+        ))}
+      </div>
+      {used.length > 0 && (
+        <ul className="space-y-0.5 text-xs text-muted-foreground">
+          {used.map((angle) => {
+            const fitting = bendFor(duct, angle);
+            return (
+              <li key={angle}>
+                {node.bendCounts[angle]} × {angle}°: {fitting ? fitting.name : t("bendReference", { zeta: fmt(bendZeta[angle], 2) })}
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );

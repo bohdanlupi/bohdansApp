@@ -1509,7 +1509,7 @@
     "curve": "Kennlinie",
     "length": "Länge m",
     "count": "Anzahl",
-    "bends": "Bögen 90°",
+    "bends": "Bögen je Leitung (Anzahl je Winkel)",
     "zeta": "Zusätzl. ζ",
     "diameter": "Durchmesser mm",
     "material": "Material",
@@ -1565,7 +1565,9 @@
     "partCase": "Auslass {name}",
     "partCover": "Abdeckung {name}",
     "partCaseNone": "kein Zuschlag",
-    "partTotal": "Δp Auslass + Abdeckung"
+    "partTotal": "Δp Auslass + Abdeckung",
+    "bendReference": "kein Formstück im System – ζ-Richtwert {zeta}, R-Position im LV",
+    "bendsDp": "davon Bögen"
   },
   "kwlDevice": {
     "attachments": "Zubehör zum Gerät",

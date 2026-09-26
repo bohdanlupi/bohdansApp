@@ -78,6 +78,39 @@ export function currentProductKey(key: string | null): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// Bends of a duct
+// ---------------------------------------------------------------------------
+
+export const bendAngles = [15, 30, 45, 60, 90] as const;
+export type BendAngle = (typeof bendAngles)[number];
+export type BendCounts = Record<BendAngle, number>;
+export const noBends = (): BendCounts => ({ 15: 0, 30: 0, 45: 0, 60: 0, 90: 0 });
+
+/** ζ reference values of round bends (R ≈ 1·d) by angle – used when the duct system has no bend data. */
+export const bendZeta: Record<BendAngle, number> = { 15: 0.06, 30: 0.12, 45: 0.18, 60: 0.24, 90: 0.3 };
+
+/**
+ * Bend fitting of the duct's own system for an angle: Meier Tobler spiro bend (segment bend from DN 224), Zehnder
+ * ComfoPipe / ComfoTube bends of the same family and size. Null when the system has none for that angle.
+ */
+export function bendFor(duct: Product | null, angle: BendAngle): Product | null {
+  if (!duct) return null;
+  if (duct.manufacturer === "Meier Tobler") {
+    const d = duct.inner?.diameter;
+    return findProduct(`meiertobler-spirobogen-${angle}-dn-${d}`) ?? findProduct(`meiertobler-segmentbogen-${angle}-dn-${d}`);
+  }
+  const families = [duct.family, duct.family?.replace(/^ComfoTube/, "ComfoFit")];
+  const size = /DN ?(\d+)/.exec(duct.name)?.[1];
+  const angleOf = (p: Product) => Number(/(\d+)°/.exec(p.name)?.[1] ?? 90);
+  const sizeOk = (p: Product) => !size || new RegExp(`(DN ?${size}\\b|Flow ${size}\\b|\\s${size}$)`).test(p.name);
+  const candidates = products.filter(
+    (p) => p.kind === "fitting" && p.fitting === "bend" && families.includes(p.family) && !/übergang|flexelement/i.test(p.name) && angleOf(p) === angle && sizeOk(p),
+  );
+  // Flat ducts: horizontal bend first.
+  return candidates.sort((a, b) => Number(/vertikal|\bV\b/.test(a.name)) - Number(/vertikal|\bV\b/.test(b.name)))[0] ?? null;
+}
+
+// ---------------------------------------------------------------------------
 // Terminals: Auslass (ComfoCase) + cover (grille / disc valve)
 // ---------------------------------------------------------------------------
 
