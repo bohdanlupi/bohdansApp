@@ -1019,7 +1019,7 @@
     "navLabel": "Progettazione VMC",
     "overview": "Panoramica e criteri di dimensionamento",
     "phases": "Fasi SIA 108",
-    "calculations": "Calcoli",
+    "calculations": "Impianti",
     "dwellings": {
       "title": "Dimensionamento degli appartamenti",
       "description": "Tutti i calcoli degli appartamenti con le verifiche della SIA 382/5.",
@@ -1427,10 +1427,10 @@
       "spi": "SPI misurato",
       "hint": "L_H,tot = L_Aeq + K1 + K2 + K3 (allegato C, metodo semplice) con le correzioni della fase 32. Le portate minime secondo le tabelle 2 e 3 devono essere rispettate."
     },
-    "dwellingsNav": "Appartamenti (portate, apparecchio)",
+    "dwellingsNav": "Concetti",
     "pdf": "Dossier (PDF)",
     "pdfPhase": "Lista di controllo (PDF)",
-    "systemsNav": "Impianti (rete, schema)"
+    "systemsNav": "Dimensionamento"
   },
   "kwlSystem": {
     "title": "Impianti di ventilazione",

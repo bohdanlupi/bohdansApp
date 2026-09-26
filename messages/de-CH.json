@@ -1019,7 +1019,7 @@
     "navLabel": "KWL-Planung",
     "overview": "Übersicht und Auslegungskriterien",
     "phases": "Phasen SIA 108",
-    "calculations": "Berechnungen",
+    "calculations": "Anlagen",
     "dwellings": {
       "title": "Bemessung der Wohnungen",
       "description": "Alle Wohnungsberechnungen mit den Nachweisen der SIA 382/5.",
@@ -1427,10 +1427,10 @@
       "spi": "SPI gemessen",
       "hint": "L_H,tot = L_Aeq + K1 + K2 + K3 (Anhang C, einfache Messmethode) mit den Korrekturen aus Phase 32. Minimale Volumenströme nach Tabellen 2 und 3 müssen eingehalten sein."
     },
-    "dwellingsNav": "Wohnungen (Luftmengen, Gerät)",
+    "dwellingsNav": "Konzepte",
     "pdf": "Dossier (PDF)",
     "pdfPhase": "Checkliste (PDF)",
-    "systemsNav": "Lüftungsanlagen (Netz, Schema)"
+    "systemsNav": "Dimensionierung"
   },
   "kwlSystem": {
     "title": "Lüftungsanlagen",

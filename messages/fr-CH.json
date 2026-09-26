@@ -1019,7 +1019,7 @@
     "navLabel": "Planification VMC",
     "overview": "Aperçu et critères de dimensionnement",
     "phases": "Phases SIA 108",
-    "calculations": "Calculs",
+    "calculations": "Installations",
     "dwellings": {
       "title": "Dimensionnement des logements",
       "description": "Tous les calculs de logements avec les justifications de la SIA 382/5.",
@@ -1427,10 +1427,10 @@
       "spi": "SPI mesuré",
       "hint": "L_H,tot = L_Aeq + K1 + K2 + K3 (annexe C, méthode simple) avec les corrections de la phase 32. Les débits minimaux selon tableaux 2 et 3 doivent être respectés."
     },
-    "dwellingsNav": "Logements (débits, appareil)",
+    "dwellingsNav": "Concepts",
     "pdf": "Dossier (PDF)",
     "pdfPhase": "Liste de contrôle (PDF)",
-    "systemsNav": "Installations (réseau, schéma)"
+    "systemsNav": "Dimensionnement"
   },
   "kwlSystem": {
     "title": "Installations de ventilation",
