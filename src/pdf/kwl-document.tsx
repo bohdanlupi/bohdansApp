@@ -138,8 +138,8 @@ export function KwlDocument({
             <KeyValues
               rows={[
                 [t("device.device"), device.name],
-                [t("device.supplyDrop"), `${n(data.device.supplyDrop)} Pa`],
-                [t("device.extractDrop"), `${n(data.device.extractDrop)} Pa`],
+                [t("device.supplyDrop"), `${n(result.drops.supply)} Pa${result.drops.system ? ` (${result.drops.system.name})` : ""}`],
+                [t("device.extractDrop"), `${n(result.drops.extract)} Pa${result.drops.system ? ` (${result.drops.system.name})` : ""}`],
                 [t("device.nominalStage"), `${supply?.nominalStage?.stage ?? "–"} / ${extract?.nominalStage?.stage ?? "–"}`],
                 [t("summary.party"), `${n(partyFlow)} m³/h`],
                 [t("device.spi"), spi === null ? t("device.spiUnknown") : `${formatNumber(spi, 2)} ${t("device.spiUnit")}`],

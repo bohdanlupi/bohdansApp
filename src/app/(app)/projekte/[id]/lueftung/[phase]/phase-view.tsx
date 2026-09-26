@@ -6,7 +6,7 @@ import { useMemo } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { evaluateKwl } from "@/lib/kwl/evaluate";
+import { evaluateKwl, type SystemDrops } from "@/lib/kwl/evaluate";
 import { findPhase, type WidgetKey } from "@/lib/kwl/phases";
 import type { PlanData } from "@/lib/kwl/plan-schema";
 import type { KwlData } from "@/lib/kwl/schema";
@@ -58,7 +58,7 @@ export function PhaseView({
   code: string;
   projectId: string;
   initial: PlanData;
-  calcs: { id: string; name: string; data: KwlData }[];
+  calcs: { id: string; name: string; data: KwlData; system: SystemDrops | null }[];
   lvs: WidgetProps["lvs"];
   language: AppLanguage;
   editable: boolean;
@@ -66,7 +66,7 @@ export function PhaseView({
   const t = useTranslations("kwlPlan");
   const phase = findPhase(code)!;
   const { plan, update, status } = usePlan(projectId, initial, editable);
-  const evaluated = useMemo(() => calcs.map((c) => ({ ...c, result: evaluateKwl(c.data) })), [calcs]);
+  const evaluated = useMemo(() => calcs.map((c) => ({ ...c, result: evaluateKwl(c.data, c.system) })), [calcs]);
   const props: WidgetProps = { plan, update, projectId, calcs: evaluated, lvs, language, editable };
 
   return (

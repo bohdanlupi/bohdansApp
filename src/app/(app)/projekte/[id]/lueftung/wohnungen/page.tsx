@@ -7,13 +7,11 @@ import { EmptyState } from "@/components/page-header";
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { requireProfile } from "@/lib/auth";
 import { spiLimit } from "@/lib/kwl/calc";
-import { evaluateKwl } from "@/lib/kwl/evaluate";
-import { parseKwlData } from "@/lib/kwl/schema";
 import { formatNumber } from "@/lib/number-input";
-import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
 import { loadProject } from "../../load-project";
+import { loadCalcs } from "../load-plan";
 import { NewKwlDialog } from "./kwl-form";
 
 export async function generateMetadata({ params }: PageProps<"/projekte/[id]/lueftung/wohnungen">): Promise<Metadata> {
@@ -27,9 +25,7 @@ export default async function KwlListPage({ params }: PageProps<"/projekte/[id]/
   const profile = await requireProfile();
   const t = await getTranslations("kwl");
 
-  const supabase = await createClient();
-  const { data } = await supabase.from("ventilation_calcs").select("*").eq("project_id", id).order("sort").order("created_at");
-  const calcs = (data ?? []).map((calc) => ({ calc, result: evaluateKwl(parseKwlData(calc.data)) }));
+  const calcs = (await loadCalcs(id)).map((c) => ({ calc: c, result: c.result }));
   const total = (pick: (r: (typeof calcs)[number]["result"]) => number) => calcs.reduce((s, c) => s + pick(c.result), 0);
   const num = (value: number | null | undefined, decimals = 0) => (value ? formatNumber(value, decimals) : "");
 

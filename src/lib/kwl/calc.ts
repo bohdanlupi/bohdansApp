@@ -30,6 +30,8 @@ export type KwlRoom = {
   number: string;
   name: string;
   type: RoomTypeKey | null;
+  /** Storey, e.g. UG, EG, OG, DG. */
+  floor: string;
   area: number | null;
   /** Nominal air flows chosen by the planner ("eingesetzt"). */
   supply: number | null;

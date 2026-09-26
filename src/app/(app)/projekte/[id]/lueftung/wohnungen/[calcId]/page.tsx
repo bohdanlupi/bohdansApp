@@ -9,7 +9,7 @@ import { requireProfile } from "@/lib/auth";
 import { parseKwlData } from "@/lib/kwl/schema";
 import { createClient } from "@/lib/supabase/server";
 
-import { loadPlan } from "../../load-plan";
+import { loadCalcs, loadPlan } from "../../load-plan";
 import { KwlEditor } from "./kwl-editor";
 
 const loadCalc = cache(async (projectId: string, calcId: string) => {
@@ -32,6 +32,7 @@ export default async function KwlCalcPage({ params }: PageProps<"/projekte/[id]/
   const calc = await loadCalc(id, calcId);
   if (!calc) notFound();
   const plan = await loadPlan(id);
+  const system = (await loadCalcs(id)).find((c) => c.id === calc.id)?.system ?? null;
   const t = await getTranslations("kwl");
 
   return (
@@ -47,6 +48,7 @@ export default async function KwlCalcPage({ params }: PageProps<"/projekte/[id]/
         initialName={calc.name}
         initialData={parseKwlData(calc.data)}
         planParams={plan.params}
+        system={system}
         editable={profile.role !== "viewer"}
       />
     </div>

@@ -4,7 +4,9 @@ import { createTranslator } from "next-intl";
 import { languageToLocale } from "@/i18n/config";
 import { getCurrentProfile } from "@/lib/auth";
 import { evaluateKwl } from "@/lib/kwl/evaluate";
+import { systemDropsByCalc } from "@/lib/kwl/network";
 import { parseKwlData } from "@/lib/kwl/schema";
+import { parseSystemData } from "@/lib/kwl/system-schema";
 import { createClient } from "@/lib/supabase/server";
 import { KwlDocument, type KwlTranslate } from "@/pdf/kwl-document";
 import { pdfLabels } from "@/pdf/labels";
@@ -33,6 +35,14 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const t = createTranslator({ locale, messages, namespace: "kwl" }) as unknown as KwlTranslate;
   const labels = pdfLabels(project.language);
   const data = parseKwlData(calc.data);
+  const [{ data: systemRows }, { data: calcRows }] = await Promise.all([
+    supabase.from("ventilation_systems").select("id, name, data").eq("project_id", calc.project_id),
+    supabase.from("ventilation_calcs").select("id, name, data").eq("project_id", calc.project_id),
+  ]);
+  const drops = systemDropsByCalc(
+    (systemRows ?? []).map((s) => ({ id: s.id, name: s.name, data: parseSystemData(s.data) })),
+    (calcRows ?? []).map((c) => ({ id: c.id, name: c.name, data: parseKwlData(c.data) })),
+  ).get(calc.id);
 
   const pdf = await renderToBuffer(
     <KwlDocument
@@ -45,7 +55,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
       project={project}
       name={calc.name}
       data={data}
-      result={evaluateKwl(data)}
+      result={evaluateKwl(data, drops ?? null)}
     />,
   );
 

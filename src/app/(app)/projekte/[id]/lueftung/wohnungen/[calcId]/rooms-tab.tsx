@@ -76,11 +76,11 @@ export function RoomsTab({
     onChange(next);
   };
   const add = () =>
-    onChange([...rooms, { id: newId(), number: nextNumber(rooms), name: "", type: null, area: null, supply: null, extract: null }]);
+    onChange([...rooms, { id: newId(), number: nextNumber(rooms), name: "", type: null, floor: rooms.at(-1)?.floor ?? "EG", area: null, supply: null, extract: null }]);
   const addTypical = () => {
     const list: KwlRoom[] = [...rooms];
     for (const room of typicalRooms) {
-      list.push(roomWithType({ id: newId(), number: nextNumber(list), name: t(`rooms.typical.${room.key}`), type: null, area: room.area, supply: null, extract: null }, room.type));
+      list.push(roomWithType({ id: newId(), number: nextNumber(list), name: t(`rooms.typical.${room.key}`), type: null, floor: "EG", area: room.area, supply: null, extract: null }, room.type));
     }
     onChange(list);
   };
@@ -98,6 +98,7 @@ export function RoomsTab({
           <thead className="border-b bg-muted/40 text-xs text-muted-foreground">
             <tr>
               <th rowSpan={2} className="w-20 py-2 pl-3 text-left font-medium">{t("rooms.number")}</th>
+              <th rowSpan={2} className="w-16 px-2 text-left font-medium">{t("rooms.floor")}</th>
               <th rowSpan={2} className="px-2 text-left font-medium">{t("rooms.name")}</th>
               <th rowSpan={2} className="w-52 px-2 text-left font-medium">{t("rooms.type")}</th>
               <th rowSpan={2} className="w-20 px-2 text-right font-medium">{t("rooms.area")}</th>
@@ -114,7 +115,7 @@ export function RoomsTab({
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={13} className="px-6 py-10 text-center text-muted-foreground">
+                <td colSpan={14} className="px-6 py-10 text-center text-muted-foreground">
                   {t("rooms.empty")}
                 </td>
               </tr>
@@ -127,6 +128,9 @@ export function RoomsTab({
                 <tr key={room.id} className="border-b align-top last:border-0">
                   <td className="py-1 pl-3">
                     <TextCell value={room.number} maxLength={20} label={t("rooms.number")} editable={editable} onChange={(number) => update(index, { ...room, number })} />
+                  </td>
+                  <td className="px-1 py-1">
+                    <TextCell value={room.floor} maxLength={20} label={t("rooms.floor")} editable={editable} onChange={(floor) => update(index, { ...room, floor })} />
                   </td>
                   <td className="px-1 py-1">
                     <TextCell value={room.name} maxLength={120} label={t("rooms.name")} editable={editable} onChange={(name) => update(index, { ...room, name })} />
@@ -191,7 +195,7 @@ export function RoomsTab({
           </tbody>
           <tfoot className="border-t-2 font-semibold">
             <tr>
-              <td colSpan={3} className="py-2 pl-3">{t("rooms.total")}</td>
+              <td colSpan={4} className="py-2 pl-3">{t("rooms.total")}</td>
               <td className="px-2 text-right tabular-nums">{fmt(summary.area, 1)}</td>
               <td className="border-l px-2 text-right tabular-nums">{fmt(summary.recommendedSupply)}</td>
               <td className="px-2 text-right tabular-nums">{fmt(summary.minSupply)}</td>

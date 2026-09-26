@@ -10,7 +10,7 @@ import type { FormMessageKey } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { evaluateKwl } from "@/lib/kwl/evaluate";
+import { evaluateKwl, type SystemDrops } from "@/lib/kwl/evaluate";
 import type { PlanParams } from "@/lib/kwl/plan-schema";
 import { transferPressureLimit } from "@/lib/kwl/sia3825";
 import type { KwlData } from "@/lib/kwl/schema";
@@ -28,6 +28,7 @@ export function KwlEditor({
   initialName,
   initialData,
   planParams,
+  system,
   editable,
 }: {
   id: string;
@@ -35,6 +36,7 @@ export function KwlEditor({
   initialName: string;
   initialData: KwlData;
   planParams: PlanParams;
+  system: SystemDrops | null;
   editable: boolean;
 }) {
   const t = useTranslations("kwl");
@@ -44,7 +46,7 @@ export function KwlEditor({
   const [saved, setSaved] = useState({ name: initialName, data: initialData });
   const [pending, startTransition] = useTransition();
   const dirty = name !== saved.name || data !== saved.data;
-  const result = useMemo(() => evaluateKwl(data), [data]);
+  const result = useMemo(() => evaluateKwl(data, system), [data, system]);
   const update = <K extends keyof KwlData>(key: K, value: KwlData[K]) => setData((d) => ({ ...d, [key]: value }));
 
   useEffect(() => {
@@ -152,10 +154,13 @@ export function KwlEditor({
           <DeviceTab
             device={data.device}
             result={result.deviceResult}
+            datasheet={result.datasheet}
             supplyFlow={result.summary.supply}
             extractFlow={result.summary.extract}
             minimumFlow={result.summary.minSupply}
             planParams={planParams}
+            drops={result.drops}
+            projectId={projectId}
             editable={editable}
             onChange={(device) => update("device", device)}
           />

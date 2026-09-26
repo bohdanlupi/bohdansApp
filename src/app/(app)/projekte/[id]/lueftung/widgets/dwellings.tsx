@@ -22,7 +22,8 @@ export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
   const firstMonths = airChangeFlow(area, data.height, newBuildingAirChange);
   // Normal ventilation per room with supply at least the base ventilation of that room (5.2.3.3).
   const supplyRoomsBelowBase = result.rows.filter((r) => (r.supply ?? 0) > 0 && (r.supply ?? 0) < (r.minSupply ?? 0)).length;
-  const drop = data.device.supplyDrop !== null || data.device.extractDrop !== null ? (data.device.supplyDrop ?? 0) + (data.device.extractDrop ?? 0) : null;
+  const drops = result.drops;
+  const drop = drops.supply !== null || drops.extract !== null ? (drops.supply ?? 0) + (drops.extract ?? 0) : null;
   const pressure = externalPressureCheck(params.system, params.operation === "demand", drop);
   const tooSmall =
     result.device && ((result.deviceResult.supply && !result.deviceResult.supply.nominalStage) || (result.deviceResult.extract && !result.deviceResult.extract.nominalStage));

@@ -58,6 +58,7 @@ export function PlanNav({
       )}
       <p className="mt-3 mb-1 px-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{t("calculations")}</p>
       {link(`${base}/wohnungen`, t("dwellingsNav"), pathname.startsWith(`${base}/wohnungen`))}
+      {link(`${base}/anlagen`, t("systemsNav"), pathname.startsWith(`${base}/anlagen`))}
     </nav>
   );
 }

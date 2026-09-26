@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { NativeSelect } from "@/components/form";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { type DeviceResult, spiLimit, spiTarget } from "@/lib/kwl/calc";
 import { findDevice, kwlDevices } from "@/lib/kwl/devices";
+import type { DeviceCheck } from "@/lib/kwl/network-device";
 import type { PlanParams } from "@/lib/kwl/plan-schema";
 import type { KwlData } from "@/lib/kwl/schema";
 import { externalPressureCheck } from "@/lib/kwl/sia3825";
@@ -25,19 +27,26 @@ const manufacturers = [...new Set(kwlDevices.map((d) => d.name.split(",")[0]))];
 export function DeviceTab({
   device: input,
   result,
+  datasheet,
   supplyFlow,
   extractFlow,
   minimumFlow,
   planParams,
+  drops,
+  projectId,
   editable,
   onChange,
 }: {
   device: KwlData["device"];
   result: DeviceResult;
+  datasheet: DeviceCheck | null;
   supplyFlow: number;
   extractFlow: number;
   minimumFlow: number;
   planParams: PlanParams;
+  /** Effective external pressure drops (manual or from the duct network). */
+  drops: { supply: number | null; extract: number | null; source: "manual" | "system"; system: { systemId: string; name: string } | null };
+  projectId: string;
   editable: boolean;
   onChange: (device: KwlData["device"]) => void;
 }) {
@@ -47,7 +56,8 @@ export function DeviceTab({
   const tooSmall = device && ((supply && !supply.nominalStage) || (extract && !extract.nominalStage));
   const lowestFlow = (side: typeof supply) => side?.points.filter((p) => p.flow > 0).at(-1)?.flow ?? null;
   const lowest = Math.max(lowestFlow(supply) ?? 0, lowestFlow(extract) ?? 0);
-  const totalDrop = input.supplyDrop !== null || input.extractDrop !== null ? (input.supplyDrop ?? 0) + (input.extractDrop ?? 0) : null;
+  const fromNetwork = drops.source === "system";
+  const totalDrop = drops.supply !== null || drops.extract !== null ? (drops.supply ?? 0) + (drops.extract ?? 0) : null;
   const pressure = externalPressureCheck(planParams.system, planParams.operation === "demand", totalDrop);
   const spiTone = spi === null ? undefined : spi < spiTarget ? "ok" : spi < spiLimit ? "warn" : "bad";
 
@@ -93,14 +103,22 @@ export function DeviceTab({
           </div>
           <div className="space-y-2">
             <Label htmlFor="kwl-supply-drop">{t("device.supplyDrop")}</Label>
-            <NumberField id="kwl-supply-drop" value={input.supplyDrop} decimals={0} label={t("device.supplyDrop")} disabled={!editable} onChange={(supplyDrop) => onChange({ ...input, supplyDrop })} className="h-8 max-w-40 rounded-lg" />
+            <NumberField id="kwl-supply-drop" value={fromNetwork ? drops.supply : input.supplyDrop} decimals={0} label={t("device.supplyDrop")} disabled={!editable || fromNetwork} onChange={(supplyDrop) => onChange({ ...input, supplyDrop })} className="h-8 max-w-40 rounded-lg" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="kwl-extract-drop">{t("device.extractDrop")}</Label>
-            <NumberField id="kwl-extract-drop" value={input.extractDrop} decimals={0} label={t("device.extractDrop")} disabled={!editable} onChange={(extractDrop) => onChange({ ...input, extractDrop })} className="h-8 max-w-40 rounded-lg" />
+            <NumberField id="kwl-extract-drop" value={fromNetwork ? drops.extract : input.extractDrop} decimals={0} label={t("device.extractDrop")} disabled={!editable || fromNetwork} onChange={(extractDrop) => onChange({ ...input, extractDrop })} className="h-8 max-w-40 rounded-lg" />
           </div>
         </div>
-        {editable && (
+        {fromNetwork && drops.system && (
+          <Notice tone="info">
+            {t("device.fromSystem", { name: drops.system.name })}{" "}
+            <Link href={`/projekte/${projectId}/lueftung/anlagen/${drops.system.systemId}`} className="underline">
+              {t("device.openSystem")}
+            </Link>
+          </Notice>
+        )}
+        {editable && !fromNetwork && (
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-muted-foreground">{t("device.presets")}</span>
             {pressurePresets.map((p) => (
@@ -145,6 +163,34 @@ export function DeviceTab({
             />
           </div>
           {result.spiFromInput && <p className="text-xs text-muted-foreground">{t("device.spiFromInput")}</p>}
+          {datasheet?.source === "datasheet" && (
+            <div className="space-y-2 rounded-xl border p-3">
+              <div>
+                <h3 className="text-sm font-semibold">{t("device.datasheet.title", { name: datasheet.name ?? "" })}</h3>
+                <p className="text-xs text-muted-foreground">{t("device.datasheet.hint")}</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {(["supply", "extract"] as const).map((side) => (
+                  <Result
+                    key={side}
+                    label={t(`device.datasheet.${side}`)}
+                    value={fmt(datasheet[side].maxPressure, 0)}
+                    unit="Pa"
+                    tone={datasheet[side].ok === null ? undefined : datasheet[side].ok ? "ok" : "bad"}
+                    hint={t("device.datasheet.sideHint", { flow: fmt(datasheet[side].flow), dp: fmt(datasheet[side].dp, 0) })}
+                  />
+                ))}
+                <Result label={t("device.datasheet.power")} value={fmt(datasheet.powerW, 0)} unit="W" />
+                <Result
+                  label={t("device.spi")}
+                  value={fmt(datasheet.spi, 2)}
+                  unit={t("device.spiUnit")}
+                  tone={datasheet.spiStatus === null ? undefined : datasheet.spiStatus === "target" ? "ok" : datasheet.spiStatus === "limit" ? "warn" : "bad"}
+                />
+              </div>
+              {(datasheet.supply.ok === false || datasheet.extract.ok === false) && <Notice>{t("device.datasheet.tooSmall")}</Notice>}
+            </div>
+          )}
           {tooSmall && <Notice>{t("device.tooSmall")}</Notice>}
           {lowest > minimumFlow && <Notice>{t("device.minimumNotReached", { lowest: fmt(lowest), minimum: fmt(minimumFlow) })}</Notice>}
           {(!supplyFlow || !extractFlow) && <Notice>{t("device.noFlows")}</Notice>}
@@ -191,7 +237,7 @@ export function DeviceTab({
                 key={key}
                 device={device}
                 side={key === "supply" ? supply : extract}
-                title={t(`device.chart.${key}`, { flow: fmt(key === "supply" ? supplyFlow : extractFlow), drop: fmt(key === "supply" ? input.supplyDrop : input.extractDrop) })}
+                title={t(`device.chart.${key}`, { flow: fmt(key === "supply" ? supplyFlow : extractFlow), drop: fmt(key === "supply" ? drops.supply : drops.extract) })}
                 flowLabel={t("device.chart.flow")}
                 pressureLabel={t("device.chart.pressure")}
                 systemLabel={t("device.chart.system")}

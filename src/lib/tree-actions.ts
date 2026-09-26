@@ -333,6 +333,15 @@ export async function copyTreeNodes(
   return { id: newId.get(roots[0].id) };
 }
 
+/** Re-numbers an LV after rows were inserted directly (e.g. quantities from a ventilation system). */
+export async function renumberLv(lvId: string): Promise<Result> {
+  await assertRole("admin", "planer");
+  if (!z.uuid().safeParse(lvId).success) return { error: "invalidInput" };
+  await saveLayout({ type: "lv", id: lvId }, await loadNodes({ type: "lv", id: lvId }));
+  revalidate({ type: "lv", id: lvId });
+  return {};
+}
+
 /** Copies catalogue nodes (groups with their whole subtree) into an LV. */
 export async function insertFromCatalog(
   lvId: string,

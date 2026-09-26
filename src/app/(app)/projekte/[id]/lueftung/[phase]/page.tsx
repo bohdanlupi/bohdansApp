@@ -40,7 +40,7 @@ export default async function PhasePage({ params }: PageProps<"/projekte/[id]/lu
       code={phase.code}
       projectId={id}
       initial={plan}
-      calcs={calcs.map(({ id, name, data }) => ({ id, name, data }))}
+      calcs={calcs.map(({ id, name, data, system }) => ({ id, name, data, system }))}
       lvs={lvs}
       language={language}
       editable={profile.role !== "viewer"}
