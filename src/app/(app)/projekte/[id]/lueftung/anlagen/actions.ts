@@ -74,14 +74,24 @@ const makeLabel: Record<AppLanguage, { make: string; number: string }> = {
   it: { make: "Fabbricante", number: "N. art." },
 };
 
+const targetsSchema = z.record(z.string().max(300), z.uuid().nullable());
+
 /**
- * Inserts the quantities of a system into an LV: a group with one position per product. Products with an article
- * in the Zehnder IGH catalogue become catalogue positions (text, unit, price); the rest become R-positions.
+ * Inserts the quantities of a system into an LV, one position per product, each line into the chapter chosen for
+ * it (`targets`: quantity key → LV group); lines without a chapter go into a new group `groupTitle`. Products
+ * with an article in the IGH catalogues of Zehnder / Meier Tobler become catalogue positions (text, unit, price);
+ * the rest become R-positions.
  */
-export async function insertSystemQuantities(systemId: string, projectId: string, lvId: string, groupTitle: string): Promise<{ error?: string; count?: number }> {
+export async function insertSystemQuantities(
+  systemId: string,
+  projectId: string,
+  lvId: string,
+  groupTitle: string,
+  targets: Record<string, string | null> = {},
+): Promise<{ error?: string; count?: number }> {
   await assertRole("admin", "planer");
-  const title = nameSchema.safeParse(groupTitle);
-  if (!ids(systemId, projectId, lvId) || !title.success) return { error: "invalidInput" };
+  const parsedTargets = targetsSchema.safeParse(targets);
+  if (!ids(systemId, projectId, lvId) || !parsedTargets.success) return { error: "invalidInput" };
 
   const supabase = await createClient();
   const [{ data: system }, { data: lv }] = await Promise.all([
@@ -92,6 +102,20 @@ export async function insertSystemQuantities(systemId: string, projectId: string
 
   const quantities = systemQuantities(parseSystemData(system.data)).filter((q) => q.quantity > 0);
   if (!quantities.length) return { error: "invalidInput" };
+
+  // Chapters must be groups of this LV; lines without one need the title of the new group.
+  const chosen = [...new Set(Object.values(parsedTargets.data).filter((v): v is string => !!v))];
+  const { data: groups } = chosen.length
+    ? await supabase.from("lv_nodes").select("id").eq("lv_id", lvId).eq("kind", "group").in("id", chosen)
+    : { data: [] as { id: string }[] };
+  const valid = new Set((groups ?? []).map((g) => g.id));
+  const chapterOf = (key: string) => {
+    const id = parsedTargets.data[key];
+    return id && valid.has(id) ? id : null;
+  };
+  const needsGroup = quantities.some((q) => !chapterOf(q.key));
+  const title = nameSchema.safeParse(groupTitle);
+  if (needsGroup && !title.success) return { error: "invalidInput" };
 
   // Catalogue positions by article number (IGH catalogues of Zehnder and Meier Tobler).
   const articles = [...new Set(quantities.flatMap((q) => q.articles.map(normalizeArticle)))];
@@ -110,11 +134,13 @@ export async function insertSystemQuantities(systemId: string, projectId: string
 
   const language = lv.language as AppLanguage;
   const groupId = crypto.randomUUID();
-  const rows: Record<string, unknown>[] = [
-    { id: groupId, lv_id: lvId, parent_id: null, kind: "group", short_text: { [language]: title.data }, long_text: {}, sort: 1_000_000 },
-  ];
+  const rows: Record<string, unknown>[] = needsGroup
+    ? [{ id: groupId, lv_id: lvId, parent_id: null, kind: "group", short_text: { [language]: title.data }, long_text: {}, sort: 1_000_000 }]
+    : [];
+  // Appended at the end of each chapter (renumbering sorts by `sort` within the parent).
   let sort = 1_000_001;
   for (const q of quantities) {
+    const parentId = chapterOf(q.key) ?? groupId;
     const entry = q.articles[0] ? byArticle.get(normalizeArticle(q.articles[0])) : undefined;
     if (entry) {
       const longText = { ...(entry.long_text as Record<string, string>) };
@@ -127,7 +153,7 @@ export async function insertSystemQuantities(systemId: string, projectId: string
       rows.push({
         id: crypto.randomUUID(),
         lv_id: lvId,
-        parent_id: groupId,
+        parent_id: parentId,
         kind: "position",
         short_text: entry.short_text,
         long_text: longText,
@@ -141,7 +167,7 @@ export async function insertSystemQuantities(systemId: string, projectId: string
       rows.push({
         id: crypto.randomUUID(),
         lv_id: lvId,
-        parent_id: groupId,
+        parent_id: parentId,
         kind: "r_position",
         short_text: { [language]: q.label },
         long_text: q.articles[0] ? { [language]: `${makeLabel[language].make}: ${q.manufacturer ?? ""}, ${makeLabel[language].number} ${q.articles[0]}` } : {},
@@ -156,5 +182,5 @@ export async function insertSystemQuantities(systemId: string, projectId: string
   if (error) return { error: "saveFailed" };
   await renumberLv(lvId);
   revalidatePath(`/projekte/${projectId}/lv/${lvId}`, "layout");
-  return { count: rows.length - 1 };
+  return { count: rows.length - (needsGroup ? 1 : 0) };
 }

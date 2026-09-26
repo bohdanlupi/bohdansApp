@@ -80,7 +80,8 @@
     "userCreated": "Benutzer wurde angelegt. Teilen Sie das Startpasswort persönlich mit.",
     "createUserFailed": "Der Benutzer konnte nicht angelegt werden.",
     "catalogReadOnly": "Lieferantenkataloge können nicht bearbeitet werden. Sie werden durch einen neuen Import aktualisiert.",
-    "tooManyEntries": "Die Auswahl ist zu gross (höchstens 5000 Einträge). Bitte kleinere Gruppen wählen."
+    "tooManyEntries": "Die Auswahl ist zu gross (höchstens 5000 Einträge). Bitte kleinere Gruppen wählen.",
+    "structureExists": "Das LV enthält bereits eine Kapitelstruktur 244."
   },
   "projects": {
     "title": "Projekte",
@@ -1534,7 +1535,7 @@
       "none": "keine"
     },
     "quantities": "Mengen",
-    "quantitiesHint": "Leitungen in Metern (Spirorohre in Stück à 3 m), übrige Elemente in Stück, zusammengefasst je Produkt. Mit Artikelnummer werden die Artikel aus den IGH-Katalogen von Zehnder und Meier Tobler übernommen, sonst R-Positionen.",
+    "quantitiesHint": "Leitungen in Metern (Spirorohre in Stück à 3 m), übrige Elemente in Stück, zusammengefasst je Produkt. Mit Artikelnummer werden die Artikel aus den IGH-Katalogen von Zehnder und Meier Tobler übernommen, sonst R-Positionen. Je Zeile das Kapitel im LV wählen – mit der Struktur Lüftung (BKP 244) sind die Kapitel vorbelegt.",
     "noQuantities": "Noch keine Mengen.",
     "article": "Art.-Nr.",
     "quantity": "Menge",
@@ -1589,7 +1590,11 @@
     "pdfPieces": "Stk",
     "pdfParallel": "parallel",
     "pdfBends": "Bögen",
-    "pdfNotes": "Bemerkungen"
+    "pdfNotes": "Bemerkungen",
+    "chapter": "Kapitel im LV",
+    "newGroupOption": "– neue Gruppe –",
+    "noStructure": "Dieses LV hat noch keine Kapitelstruktur Lüftung (BKP 244). Im LV mit «Struktur Lüftung» anlegen, dann werden die Positionen automatisch den Kapiteln zugeordnet.",
+    "toLv": "Zum LV"
   },
   "kwlDevice": {
     "attachments": "Zubehör zum Gerät",
@@ -1610,5 +1615,27 @@
     "fondSide": "ComfoFond-L Q Ausführung",
     "fondLeft": "Zuluft links",
     "fondRight": "Zuluft rechts"
+  },
+  "lvStructure": {
+    "button": "Struktur Lüftung",
+    "title": "Kapitelstruktur Lüftung (BKP 244) anlegen",
+    "description": "Legt die Kapitel nach der LUPI-Vorlage mit Nummern und Namen am Ende des Leistungsverzeichnisses an. Die Mengen aus der Dimensionierung können danach direkt in diese Kapitel übernommen werden.",
+    "levels": {
+      "1": "1 Ebene",
+      "2": "2 Ebenen",
+      "3": "3 Ebenen"
+    },
+    "levelsHint": {
+      "1": "244 › Kapitel 0–6 (eine Anlage)",
+      "2": "244 › je Anlage LA01 … › Kapitel 0–6",
+      "3": "244 › Lose › Anlagen › Kapitel 0–6"
+    },
+    "systemsHint": "Anlagen aus der Dimensionierung (Namen anpassbar):",
+    "noSystems": "Im Projekt gibt es noch keine Lüftungsanlagen – Anlagen hier benennen:",
+    "addSystem": "+ Anlage",
+    "defaultSystem": "Anlage {n}",
+    "los": "Los {n}",
+    "create": "Kapitel anlegen",
+    "created": "{count} Kapitel angelegt."
   }
 }

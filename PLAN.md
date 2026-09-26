@@ -241,6 +241,12 @@ Duct bends: node.bendCounts per angle 15/30/45/60/90 (per duct; old «bends» = 
 the duct system and size (Meier Tobler spiro bend, segment bend from DN 224; ComfoPipe Compact/Plus 45°/90°;
 ComfoTube Flow / flat 51 / Therm 90°): its curve per piece or ζ; else ζ reference 0.06…0.3 and an R-position in the LV.
 Bends go into the LV × parallel ducts.
+LV structure «Lüftung» (template Berechnungsvorlagen/Lüftung KWL/Vorlage Leistungsverzeichniss Struktur Lüftung.xlsx):
+LV toolbar button «Struktur Lüftung» (src/lib/lv-ventilation-structure.ts, createVentilationStructure) creates BKP 244 with
+chapters 0 Geräte … 6 Dämmung in 1 / 2 (LA01 - <Anlage>) / 3 (Los › Anlage) levels as groups with custom_number, texts
+in the LV language; refused if a top-level 244 exists. Quantities carry a key and a default chapter (0 devices, 1
+ducts / fittings, 2 distributors / silencers / filters / dampers, 4 terminals / grilles); the quantities panel preselects
+the chapters below «LAxx - <system name>» (or 244 with one level) and inserts each line into its chosen chapter.
 Terminals = Auslass (ComfoCase, node.product) + cover (node.cover: grille / disc valve product, or «case:<name>»
 for a combination measured in the case datasheet). Δp: measured combination if chosen, else cover curve (default =
 most open setting) + manual Auslass allowance (dpRef/qRef) – the datasheets give no Δp of the case alone. Old

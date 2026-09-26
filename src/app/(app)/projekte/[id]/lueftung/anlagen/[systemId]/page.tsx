@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { requireProfile } from "@/lib/auth";
+import { type I18nText, pickText } from "@/lib/i18n-text";
 import { createClient } from "@/lib/supabase/server";
 
 import { loadCalcs, loadPlan, loadSystems } from "../../load-plan";
@@ -26,7 +27,18 @@ export default async function SystemPage({ params }: PageProps<"/projekte/[id]/l
   const t = await getTranslations("kwlSystem");
 
   const supabase = await createClient();
-  const { data: lvs } = await supabase.from("lvs").select("id, number, title").eq("project_id", id).order("number");
+  const { data: lvRows } = await supabase.from("lvs").select("id, number, title, language").eq("project_id", id).order("number");
+  const { data: groupRows } = lvRows?.length
+    ? await supabase.from("lv_nodes").select("id, lv_id, parent_id, number, short_text, sort").in("lv_id", lvRows.map((l) => l.id)).eq("kind", "group").order("sort")
+    : { data: [] };
+  const lvs = (lvRows ?? []).map((lv) => ({
+    id: lv.id,
+    number: lv.number,
+    title: lv.title,
+    groups: (groupRows ?? [])
+      .filter((g) => g.lv_id === lv.id)
+      .map((g) => ({ id: g.id, parentId: g.parent_id, number: g.number, text: pickText(g.short_text as I18nText, lv.language).value })),
+  }));
 
   return (
     <div className="space-y-4">
@@ -41,7 +53,7 @@ export default async function SystemPage({ params }: PageProps<"/projekte/[id]/l
         initialName={system.name}
         initialData={system.data}
         calcs={calcs.map((c) => ({ id: c.id, name: c.name, data: c.data }))}
-        lvs={lvs ?? []}
+        lvs={lvs}
         planParams={plan.params}
         editable={profile.role !== "viewer"}
       />

@@ -82,6 +82,7 @@ export function TreeEditor({
   editable,
   catalogs = [],
   costOptions = [],
+  toolbarExtra,
 }: {
   scope: TreeScope;
   nodes: EditorNode[];
@@ -93,6 +94,8 @@ export function TreeEditor({
   catalogs?: { id: string; name: string }[];
   /** LV only: cost codes for assigning positions or groups to another code than the LV. */
   costOptions?: CostItemOption[];
+  /** Further toolbar buttons (e.g. LV structure templates). */
+  toolbarExtra?: React.ReactNode;
 }) {
   const t = useTranslations("tree");
   const tForms = useTranslations("forms");
@@ -110,6 +113,8 @@ export function TreeEditor({
 
   const rows = useMemo(() => flatten(nodes), [nodes]);
   const children = useMemo(() => childrenMap(nodes), [nodes]);
+  // Number column as wide as the longest number (long custom numbers such as 244.01.4.101), at least 10 characters.
+  const numberWidth = useMemo(() => `${Math.max(10, ...nodes.map((n) => (n.number?.length ?? 0) + (n.kind === "r_position" ? 2 : 0))) + 1}ch`, [nodes]);
   const totals = useMemo(() => groupTotals(nodes), [nodes]);
   const measuredIds = useMemo(() => new Set(measurements.map((m) => m.lv_node_id)), [measurements]);
   const selected = nodes.find((n) => n.id === selectedId) ?? null;
@@ -252,6 +257,7 @@ export function TreeEditor({
             {toolbarButton(<FilePlus2 />, isLv ? t("addRPosition") : t("addPosition"), () => add(isLv ? "r_position" : "position"))}
             {toolbarButton(<Pilcrow />, t("addText"), () => add("text"))}
             {isLv && toolbarButton(<BookOpen />, t("fromCatalog"), () => setPickerOpen(true))}
+            {toolbarExtra}
             <div className="ml-auto flex flex-wrap gap-1.5">
               {toolbarButton(<Copy />, t("copy"), () => copy(false), !selectedIds.length)}
               {toolbarButton(<Scissors />, t("cut"), () => copy(true), !selectedIds.length)}
@@ -379,7 +385,7 @@ export function TreeEditor({
                   >
                     {isCollapsed ? <ChevronRight className="size-4" /> : <ChevronDown className="size-4" />}
                   </button>
-                  <span className="w-20 shrink-0 font-mono text-xs tabular-nums">
+                  <span className="shrink-0 font-mono text-xs tabular-nums" style={{ width: numberWidth }}>
                     {node.kind === "r_position" && <span className="mr-0.5 text-brand">R</span>}
                     {node.number}
                   </span>

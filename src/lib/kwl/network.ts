@@ -324,7 +324,18 @@ export type SystemResult = ReturnType<typeof evaluateSystem>;
 // Quantities (for the LV)
 // ---------------------------------------------------------------------------
 
+/**
+ * Chapters of the LV structure «Lüftung» (template Vorlage Leistungsverzeichniss Struktur Lüftung): the last digit of
+ * the chapter number – 0 Geräte, 1 Rohre/Kanäle, 2 Armaturen, 3 Regulierung, 4 Auslassgitter / Tellerventile,
+ * 5 Transport & Montage, 6 Dämmung.
+ */
+export const lvChapterCount = 7;
+
 export type Quantity = {
+  /** Stable key of the line (product / fitting / custom element). */
+  key: string;
+  /** Default chapter of the LV structure (0–6, see lvChapterCount). */
+  chapter: number;
   product: string | null;
   manufacturer: string | null;
   label: string;
@@ -360,13 +371,25 @@ function curveArticle(product: Product, curveLabel: string | undefined): Product
 
 export function systemQuantities(data: SystemData): Quantity[] {
   const map = new Map<string, Quantity>();
-  const add = (key: string, q: Omit<Quantity, "quantity">, amount: number) => {
+  const add = (key: string, q: Omit<Quantity, "quantity" | "key">, amount: number) => {
     const current = map.get(key);
     if (current) current.quantity += amount;
-    else map.set(key, { ...q, quantity: amount });
+    else map.set(key, { ...q, key, quantity: amount });
   };
-  const walk = (side: "supply" | "extract") => (n: NetNode) => {
+  // Chapter of an element: devices 0, ducts / fittings 1, distributors / silencers / filters / dampers 2,
+  // terminals and grilles 4 (a component without product in the outdoor / exhaust air: the weather grille).
+  const chapterOf = (n: NetNode, product: Product | null, outer: boolean) => {
+    if (n.type === "terminal") return 4;
+    const kind = product?.kind;
+    if (kind === "device" || kind === "extension") return 0;
+    if (n.type === "distributor" || kind === "distributor" || kind === "silencer" || kind === "filter" || kind === "valve") return 2;
+    if (kind === "grille" || kind === "terminal" || kind === "transfer") return 4;
+    if (!product && n.type === "component") return outer ? 4 : 2;
+    return 1;
+  };
+  const walk = (side: "supply" | "extract", outer: boolean) => (n: NetNode) => {
     const product = findProduct(n.product);
+    const chapter = chapterOf(n, product, outer);
     // Only the product's own (first) article: the others are accessories and variants.
     const articles = product?.articles[0] ? [product.articles[0].number] : [];
     const label = product?.name ?? n.label;
@@ -377,18 +400,18 @@ export function systemQuantities(data: SystemData): Quantity[] {
     if (coverProduct) {
       add(
         `cover|${coverProduct.key}`,
-        { product: coverProduct.key, manufacturer: coverProduct.manufacturer, label: coverProduct.name, unit: "Stk", articles: coverProduct.articles[0] ? [coverProduct.articles[0].number] : [] },
+        { chapter: 4, product: coverProduct.key, manufacturer: coverProduct.manufacturer, label: coverProduct.name, unit: "Stk", articles: coverProduct.articles[0] ? [coverProduct.articles[0].number] : [] },
         Math.max(1, n.count),
       );
     }
     if (accessory) {
-      add(`${n.product}|${accessory.number}`, { product: n.product, manufacturer: product?.manufacturer ?? null, label: accessory.text, unit: "Stk", articles: [accessory.number] }, Math.max(1, n.count));
+      add(`${n.product}|${accessory.number}`, { chapter: 4, product: n.product, manufacturer: product?.manufacturer ?? null, label: accessory.text, unit: "Stk", articles: [accessory.number] }, Math.max(1, n.count));
     }
     if (n.type === "duct") {
       const key = n.product ?? `custom-${n.diameter ?? `${n.width}x${n.height}`}-${n.material}`;
       add(
         key,
-        { product: n.product, manufacturer: product?.manufacturer ?? null, label: product?.name ?? `${n.label} ${n.diameter ? `ø ${n.diameter}` : `${n.width}×${n.height}`}`, unit: "m", articles, piece: product?.lvPiece },
+        { chapter: 1, product: n.product, manufacturer: product?.manufacturer ?? null, label: product?.name ?? `${n.label} ${n.diameter ? `ø ${n.diameter}` : `${n.width}×${n.height}`}`, unit: "m", articles, piece: product?.lvPiece },
         (n.length ?? 0) * Math.max(1, n.count),
       );
       for (const angle of bendAngles) {
@@ -396,26 +419,28 @@ export function systemQuantities(data: SystemData): Quantity[] {
         if (!pieces) continue;
         const fitting = bendFor(product, angle);
         if (fitting) {
-          add(`bend|${fitting.key}`, { product: fitting.key, manufacturer: fitting.manufacturer, label: fitting.name, unit: "Stk", articles: fitting.articles[0] ? [fitting.articles[0].number] : [] }, pieces);
+          add(`bend|${fitting.key}`, { chapter: 1, product: fitting.key, manufacturer: fitting.manufacturer, label: fitting.name, unit: "Stk", articles: fitting.articles[0] ? [fitting.articles[0].number] : [] }, pieces);
         } else {
           const size = product?.name ?? (n.diameter ? `ø ${n.diameter}` : `${n.width}×${n.height}`);
-          add(`bend|${angle}|${n.product ?? size}`, { product: null, manufacturer: product?.manufacturer ?? null, label: `Bogen ${angle}° – ${size}`, unit: "Stk", articles: [] }, pieces);
+          add(`bend|${angle}|${n.product ?? size}`, { chapter: 1, product: null, manufacturer: product?.manufacturer ?? null, label: `Bogen ${angle}° – ${size}`, unit: "Stk", articles: [] }, pieces);
         }
       }
     } else if ((n.type !== "tee" || n.product) && !(n.type === "terminal" && !n.product && n.cover)) {
-      add(n.product ?? `${n.type}-${n.label}`, { product: n.product, manufacturer: product?.manufacturer ?? null, label, unit: "Stk", articles }, Math.max(1, n.count));
+      add(n.product ?? `${n.type}-${n.label}`, { chapter, product: n.product, manufacturer: product?.manufacturer ?? null, label, unit: "Stk", articles }, Math.max(1, n.count));
     }
-    n.children.forEach(walk(side));
+    n.children.forEach(walk(side, outer));
   };
   // Device with its attachments (one piece each).
   const device = findProduct(data.device);
   if (device) {
     for (const d of deviceArticles(device.key, device.name, device.articles, data.deviceOptions)) {
-      add(`device|${d.article?.number ?? d.label}`, { product: device.key, manufacturer: device.manufacturer, label: d.label, unit: "Stk", articles: d.article ? [d.article.number] : [] }, 1);
+      add(`device|${d.article?.number ?? d.label}`, { chapter: 0, product: device.key, manufacturer: device.manufacturer, label: d.label, unit: "Stk", articles: d.article ? [d.article.number] : [] }, 1);
     }
   }
-  [...data.outdoor, ...data.supply].forEach(walk("supply"));
-  [...data.extract, ...data.exhaust].forEach(walk("extract"));
+  data.outdoor.forEach(walk("supply", true));
+  data.supply.forEach(walk("supply", false));
+  data.extract.forEach(walk("extract", false));
+  data.exhaust.forEach(walk("extract", true));
   return [...map.values()].map((q) =>
     q.piece
       ? { ...q, unit: "Stk" as const, quantity: Math.ceil(q.quantity / q.piece - 1e-9) }

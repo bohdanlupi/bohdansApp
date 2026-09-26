@@ -80,7 +80,8 @@
     "userCreated": "L'utente è stato creato. Comunichi la password iniziale personalmente.",
     "createUserFailed": "Non è stato possibile creare l'utente.",
     "catalogReadOnly": "I cataloghi dei fornitori non possono essere modificati. Vengono aggiornati con una nuova importazione.",
-    "tooManyEntries": "La selezione è troppo grande (al massimo 5000 voci). Selezioni gruppi più piccoli."
+    "tooManyEntries": "La selezione è troppo grande (al massimo 5000 voci). Selezioni gruppi più piccoli.",
+    "structureExists": "L’elenco contiene già una struttura 244."
   },
   "projects": {
     "title": "Progetti",
@@ -1534,7 +1535,7 @@
       "none": "nessuna"
     },
     "quantities": "Quantità",
-    "quantitiesHint": "Condotte in metri (tubi spiralati in pezzi da 3 m), altri elementi in pezzi, raggruppati per prodotto. Con un numero d’articolo vengono ripresi gli articoli dei cataloghi IGH di Zehnder e Meier Tobler, altrimenti posizioni R.",
+    "quantitiesHint": "Condotte in metri (tubi spiralati in pezzi da 3 m), altri elementi in pezzi, raggruppati per prodotto. Con un numero d’articolo vengono ripresi gli articoli dei cataloghi IGH di Zehnder e Meier Tobler, altrimenti posizioni R. Scegliere il capitolo dell’elenco per riga – con la struttura ventilazione (CCC 244) i capitoli sono preselezionati.",
     "noQuantities": "Ancora nessuna quantità.",
     "article": "N. art.",
     "quantity": "Quantità",
@@ -1589,7 +1590,11 @@
     "pdfPieces": "pz",
     "pdfParallel": "in parallelo",
     "pdfBends": "Curve",
-    "pdfNotes": "Osservazioni"
+    "pdfNotes": "Osservazioni",
+    "chapter": "Capitolo nell’elenco",
+    "newGroupOption": "– nuovo gruppo –",
+    "noStructure": "Questo elenco non ha ancora una struttura ventilazione (CCC 244). Crearla nell’elenco con «Struttura ventilazione»; le posizioni verranno poi assegnate automaticamente ai capitoli.",
+    "toLv": "All’elenco"
   },
   "kwlDevice": {
     "attachments": "Accessori dell’apparecchio",
@@ -1610,5 +1615,27 @@
     "fondSide": "Esecuzione ComfoFond-L Q",
     "fondLeft": "aria immessa a sinistra",
     "fondRight": "aria immessa a destra"
+  },
+  "lvStructure": {
+    "button": "Struttura ventilazione",
+    "title": "Creare la struttura dei capitoli ventilazione (CCC 244)",
+    "description": "Crea i capitoli secondo il modello LUPI con numeri e nomi alla fine dell’elenco prestazioni. Le quantità del dimensionamento possono poi essere riprese direttamente in questi capitoli.",
+    "levels": {
+      "1": "1 livello",
+      "2": "2 livelli",
+      "3": "3 livelli"
+    },
+    "levelsHint": {
+      "1": "244 › capitoli 0–6 (un impianto)",
+      "2": "244 › per impianto LA01 … › capitoli 0–6",
+      "3": "244 › lotti › impianti › capitoli 0–6"
+    },
+    "systemsHint": "Impianti del dimensionamento (nomi modificabili):",
+    "noSystems": "Il progetto non contiene ancora impianti – nominare gli impianti qui:",
+    "addSystem": "+ impianto",
+    "defaultSystem": "Impianto {n}",
+    "los": "Lotto {n}",
+    "create": "Creare i capitoli",
+    "created": "{count} capitoli creati."
   }
 }

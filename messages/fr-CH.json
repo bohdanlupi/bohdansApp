@@ -80,7 +80,8 @@
     "userCreated": "L'utilisateur a été créé. Communiquez le mot de passe initial personnellement.",
     "createUserFailed": "L'utilisateur n'a pas pu être créé.",
     "catalogReadOnly": "Les catalogues fournisseurs ne peuvent pas être modifiés. Ils sont mis à jour par une nouvelle importation.",
-    "tooManyEntries": "La sélection est trop grande (5000 entrées au maximum). Veuillez choisir des groupes plus petits."
+    "tooManyEntries": "La sélection est trop grande (5000 entrées au maximum). Veuillez choisir des groupes plus petits.",
+    "structureExists": "Le descriptif contient déjà une structure 244."
   },
   "projects": {
     "title": "Projets",
@@ -1534,7 +1535,7 @@
       "none": "aucune"
     },
     "quantities": "Quantités",
-    "quantitiesHint": "Conduits en mètres (tubes spiralés en pièces de 3 m), autres éléments en pièces, regroupés par produit. Avec un numéro d’article, les articles des catalogues IGH de Zehnder et Meier Tobler sont repris, sinon des positions R.",
+    "quantitiesHint": "Conduits en mètres (tubes spiralés en pièces de 3 m), autres éléments en pièces, regroupés par produit. Avec un numéro d’article, les articles des catalogues IGH de Zehnder et Meier Tobler sont repris, sinon des positions R. Choisir le chapitre du descriptif par ligne – avec la structure ventilation (CFC 244), les chapitres sont présélectionnés.",
     "noQuantities": "Pas encore de quantités.",
     "article": "N° d’art.",
     "quantity": "Quantité",
@@ -1589,7 +1590,11 @@
     "pdfPieces": "pce",
     "pdfParallel": "en parallèle",
     "pdfBends": "Coudes",
-    "pdfNotes": "Remarques"
+    "pdfNotes": "Remarques",
+    "chapter": "Chapitre du descriptif",
+    "newGroupOption": "– nouveau groupe –",
+    "noStructure": "Ce descriptif n’a pas encore de structure ventilation (CFC 244). La créer dans le descriptif avec « Structure ventilation » ; les positions seront alors attribuées automatiquement aux chapitres.",
+    "toLv": "Vers le descriptif"
   },
   "kwlDevice": {
     "attachments": "Accessoires de l’appareil",
@@ -1610,5 +1615,27 @@
     "fondSide": "Exécution ComfoFond-L Q",
     "fondLeft": "air fourni à gauche",
     "fondRight": "air fourni à droite"
+  },
+  "lvStructure": {
+    "button": "Structure ventilation",
+    "title": "Créer la structure de chapitres ventilation (CFC 244)",
+    "description": "Crée les chapitres selon le modèle LUPI avec numéros et noms à la fin du descriptif. Les quantités du dimensionnement peuvent ensuite être reprises directement dans ces chapitres.",
+    "levels": {
+      "1": "1 niveau",
+      "2": "2 niveaux",
+      "3": "3 niveaux"
+    },
+    "levelsHint": {
+      "1": "244 › chapitres 0–6 (une installation)",
+      "2": "244 › par installation LA01 … › chapitres 0–6",
+      "3": "244 › lots › installations › chapitres 0–6"
+    },
+    "systemsHint": "Installations du dimensionnement (noms modifiables) :",
+    "noSystems": "Le projet ne contient encore aucune installation – nommer les installations ici :",
+    "addSystem": "+ installation",
+    "defaultSystem": "Installation {n}",
+    "los": "Lot {n}",
+    "create": "Créer les chapitres",
+    "created": "{count} chapitres créés."
   }
 }
