@@ -67,8 +67,6 @@ export type RoomRow = KwlRoom & {
   recommendedExtract: number | null;
   minSupply: number | null;
   minExtract: number | null;
-  partySupply: number | null;
-  partyExtract: number | null;
 };
 
 export type AirFlowSummary = {
@@ -84,10 +82,9 @@ export type AirFlowSummary = {
 };
 
 /**
- * Per-room recommended, minimum (base ventilation) and party flows. Party flows are distributed in proportion
- * to the nominal flow of each room (like the workbook).
+ * Per-room recommended and minimum (base ventilation) flows.
  */
-export function airFlows(rooms: KwlRoom[], partyFlow: number | null, heightM = 2.5): { rows: RoomRow[]; summary: AirFlowSummary } {
+export function airFlows(rooms: KwlRoom[], heightM = 2.5): { rows: RoomRow[]; summary: AirFlowSummary } {
   const area = sum(rooms.map((r) => r.area));
   const supply = sum(rooms.map((r) => r.supply));
   const extract = sum(rooms.map((r) => r.extract));
@@ -104,8 +101,6 @@ export function airFlows(rooms: KwlRoom[], partyFlow: number | null, heightM = 2
       recommendedExtract: type ? (type.side === "extract" ? type.norm : 0) : null,
       minSupply: base.perRoom(room),
       minExtract: share(minTotal, room.extract, extract),
-      partySupply: share(partyFlow, room.supply, supply),
-      partyExtract: share(partyFlow, room.extract, extract),
     };
   });
 

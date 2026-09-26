@@ -76,7 +76,7 @@ export function OperationWidget(props: WidgetProps) {
               {props.calcs.map((c) => {
                 const nominal = Math.max(c.result.summary.supply, c.result.summary.extract);
                 const first = airChangeFlow(c.result.summary.area, c.data.height, newBuildingAirChange);
-                const reachable = Math.max(nominal, c.result.deviceResult.partyFlow ?? 0) >= first;
+                const reachable = nominal >= first;
                 const kwh = c.result.deviceResult.spi !== null ? fanEnergy(c.result.deviceResult.spi, nominal) : null;
                 return (
                   <tr key={c.id} className="border-b last:border-0">

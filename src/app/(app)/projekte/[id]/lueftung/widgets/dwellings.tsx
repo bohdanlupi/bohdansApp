@@ -14,9 +14,6 @@ import { fmt, Notice, Section } from "../fields";
 import type { WidgetCalc, WidgetProps } from "./types";
 
 /** All checks of one dwelling calculation against SIA 382/5. */
-/** Kennlinie of an operating point («stufenlos» for constant-volume control). */
-const curveOf = (p: { curve: string | null } | null | undefined, stepless: string) => (p ? (p.curve ?? stepless) : "–");
-
 export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
   const { data, result } = calc;
   const steps = fourSteps(data.rooms, params.operation === "demand");
@@ -29,8 +26,6 @@ export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
   const drop = drops.supply !== null || drops.extract !== null ? (drops.supply ?? 0) + (drops.extract ?? 0) : null;
   const pressure = externalPressureCheck(params.system, params.operation === "demand", drop);
   const tooSmall =
-    result.deviceResult.supply?.tooSmall ||
-    result.deviceResult.extract?.tooSmall ||
     result.datasheet?.supply.ok === false ||
     result.datasheet?.extract.ok === false;
   return {
@@ -42,7 +37,7 @@ export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
     baseOk: result.summary.supply >= result.summary.minSupply && supplyRoomsBelowBase === 0,
     supplyRoomsBelowBase,
     firstMonths,
-    firstMonthsOk: Math.max(result.summary.supply, result.deviceResult.partyFlow ?? 0) >= firstMonths,
+    firstMonthsOk: result.summary.supply >= firstMonths,
     drop,
     pressure,
     spi: result.deviceResult.spi,
@@ -190,12 +185,6 @@ export function TargetsWidget({ calcs }: WidgetProps) {
                     ))}
                 </tbody>
               </table>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {t("device", {
-                  supply: curveOf(calc.result.deviceResult.supply?.normal, t("stepless")),
-                  extract: curveOf(calc.result.deviceResult.extract?.normal, t("stepless")),
-                })}
-              </p>
             </div>
           </details>
         ))

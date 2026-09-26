@@ -146,7 +146,6 @@ export function KwlEditor({
             rooms={data.rooms}
             rows={result.rows}
             summary={result.summary}
-            partyFlow={result.deviceResult.partyFlow}
             height={data.height}
             demandControlled={planParams.operation === "demand"}
             editable={editable}
@@ -161,7 +160,6 @@ export function KwlEditor({
             datasheet={result.datasheet}
             supplyFlow={result.summary.supply}
             extractFlow={result.summary.extract}
-            minimumFlow={result.summary.minSupply}
             planParams={planParams}
             drops={result.drops}
             projectId={projectId}

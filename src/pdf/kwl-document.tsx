@@ -1,9 +1,7 @@
-import { Circle, Document, G, Line, Path, Rect, Svg, Text, View } from "@react-pdf/renderer";
+import { Document, Text, View } from "@react-pdf/renderer";
 
 import { hasOptions, optionsLabel } from "@/lib/kwl/attachments";
 import { findRoomType, spiLimit, spiTarget } from "@/lib/kwl/calc";
-import { chartTicks, curveColors, deviceChart, type DeviceChartData } from "@/lib/kwl/device-chart";
-import type { OperatingPoint } from "@/lib/kwl/device-operation";
 import type { KwlEvaluation } from "@/lib/kwl/evaluate";
 import type { KwlData } from "@/lib/kwl/schema";
 import { formatNumber } from "@/lib/number-input";
@@ -71,15 +69,15 @@ export function KwlDocument({
 }) {
   const t: KwlTranslate = (key, values) => winAnsi(translate(key, values));
   const { rows, summary, product, datasheet, deviceResult, oda, supplyFilter } = result;
-  const { supply, extract, spi, partyFlow } = deviceResult;
+  const { spi } = deviceResult;
   const full = variant === "full";
   const complete = result.drops.source === "system";
   const yesNo = (ok: boolean) => (ok ? t("yes") : t("no"));
   const title = full ? t("title") : t("report.flowsTitle");
 
-  // Rooms table: floor, number, name, type, area; per side recommended / minimum / used (and party in the full report).
-  const cols = full ? (["recommended", "minimum", "used", "party"] as const) : (["recommended", "minimum", "used"] as const);
-  const w = { floor: 36, number: 28, type: 28, area: 30, flow: full ? 32 : 38 };
+  // Rooms table: floor, number, name, type, area; per side recommended / minimum / used.
+  const cols = ["recommended", "minimum", "used"] as const;
+  const w = { floor: 36, number: 28, type: 28, area: 30, flow: 38 };
   const volume = summary.area * data.height;
   const airChange = volume > 0 ? summary.supply / volume : null;
   const hasFloors = rows.some((r) => r.floor);
@@ -101,8 +99,7 @@ export function KwlDocument({
       )}
     </View>
   );
-  const values = (row: { recommended: number | null; min: number | null; used: number | null; party: number | null }) =>
-    full ? [row.recommended, row.min, row.used, row.party] : [row.recommended, row.min, row.used];
+  const values = (row: { recommended: number | null; min: number | null; used: number | null }) => [row.recommended, row.min, row.used];
 
   return (
     <Document title={`${title} ${project.number} ${name}`} author={firm.name}>
@@ -153,8 +150,8 @@ export function KwlDocument({
                 <Text style={{ ...cell, width: w.type }}>{type?.code ?? ""}</Text>
                 <Text style={{ ...cell, width: w.area, textAlign: "right" }}>{n(row.area, 1)}</Text>
                 {[
-                  values({ recommended: row.recommendedSupply, min: row.minSupply, used: row.supply, party: row.partySupply }),
-                  values({ recommended: row.recommendedExtract, min: row.minExtract, used: row.extract, party: row.partyExtract }),
+                  values({ recommended: row.recommendedSupply, min: row.minSupply, used: row.supply }),
+                  values({ recommended: row.recommendedExtract, min: row.minExtract, used: row.extract }),
                 ].flatMap((list, s) =>
                   list.map((v, i) => (
                     <Text key={`${s}-${i}`} style={{ ...cell, width: w.flow, textAlign: "right", ...(i === 2 ? styles.bold : { color: colors.muted }) }}>
@@ -169,8 +166,8 @@ export function KwlDocument({
             <Text style={{ ...cell, flex: 1 }}>{t("rooms.total")}</Text>
             <Text style={{ ...cell, width: w.area, textAlign: "right" }}>{n(summary.area, 1)}</Text>
             {[
-              values({ recommended: summary.recommendedSupply, min: summary.minSupply, used: summary.supply, party: partyFlow }),
-              values({ recommended: summary.recommendedExtract, min: summary.minExtract, used: summary.extract, party: partyFlow }),
+              values({ recommended: summary.recommendedSupply, min: summary.minSupply, used: summary.supply }),
+              values({ recommended: summary.recommendedExtract, min: summary.minExtract, used: summary.extract }),
             ].flatMap((list, s) =>
               list.map((v, i) => (
                 <Text key={`${s}-${i}`} style={{ ...cell, width: w.flow, textAlign: "right" }}>
@@ -277,54 +274,6 @@ export function KwlDocument({
                 {(datasheet?.supply.ok === false || datasheet?.extract.ok === false) && (
                   <Text style={{ color: "#b91c1c", marginTop: 4 }}>{t("device.datasheet.tooSmall")}</Text>
                 )}
-                {(supply?.tooSmall || extract?.tooSmall) && <Text style={{ color: "#b91c1c", marginTop: 4 }}>{t("device.tooSmall")}</Text>}
-                {(supply?.k || extract?.k) && (
-                  <View wrap={false} style={{ marginTop: 8 }}>
-                    <SubHeading>{t("device.op.title")}</SubHeading>
-                    <Text style={{ fontSize: 7, color: colors.muted, marginBottom: 2 }}>
-                      {complete && result.drops.system ? t("device.op.sourceSystem", { name: result.drops.system.name }) : t("device.op.sourceManual")}
-                    </Text>
-                    <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, ...styles.bold, fontSize: 7 }}>
-                      <Text style={{ ...cell, flex: 1 }}>{t("device.op.point")}</Text>
-                      {(["supplyShort", "extractShort"] as const).flatMap((side) => [
-                        <Text key={`${side}c`} style={{ ...cell, width: 48 }}>{`${t(side)} ${t("device.op.curve")}`}</Text>,
-                        <Text key={`${side}q`} style={{ ...cell, width: 34, textAlign: "right" }}>m³/h</Text>,
-                        <Text key={`${side}p`} style={{ ...cell, width: 28, textAlign: "right" }}>Pa</Text>,
-                        <Text key={`${side}w`} style={{ ...cell, width: 26, textAlign: "right" }}>W</Text>,
-                      ])}
-                    </View>
-                    {(
-                      [
-                        ["normal", t("device.op.normal")],
-                        ["minimum", t("device.op.minimum")],
-                        ["party", t("device.op.party")],
-                      ] as const
-                    ).map(([key, label]) => (
-                      <View key={key} style={{ flexDirection: "row", fontSize: 7.5, borderBottomWidth: 0.5, borderBottomColor: colors.line, ...(key === "normal" ? styles.bold : {}) }}>
-                        <Text style={{ ...cell, flex: 1 }}>{label}</Text>
-                        {[supply, extract].flatMap((op, i) => {
-                          const p = op?.[key] ?? null;
-                          return [
-                            <Text key={`${i}c`} style={{ ...cell, width: 48 }}>{p ? (p.curve ?? t("device.op.stepless")) : "–"}</Text>,
-                            <Text key={`${i}q`} style={{ ...cell, width: 34, textAlign: "right" }}>{n(p?.flow)}</Text>,
-                            <Text key={`${i}p`} style={{ ...cell, width: 28, textAlign: "right" }}>{n(p?.pressure)}</Text>,
-                            <Text key={`${i}w`} style={{ ...cell, width: 26, textAlign: "right" }}>{n(p?.powerW)}</Text>,
-                          ];
-                        })}
-                      </View>
-                    ))}
-                    {partyFlow ? <Text style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>{t("device.op.partyCardHint", { flow: n(partyFlow) })}</Text> : null}
-                  </View>
-                )}
-                <View wrap={false} style={{ marginTop: 10 }}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                    {(["supply", "extract"] as const).map((key) => {
-                      const op = key === "supply" ? supply : extract;
-                      return op && product.device ? <PdfDeviceChart key={key} chart={deviceChart(op, product.device.measurements, complete)} title={t(`device.chart.${key}Pdf`)} /> : null;
-                    })}
-                  </View>
-                  <Text style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>{complete ? t("device.chart.pdfLegend") : t("device.chart.pdfLegendPending")}</Text>
-                </View>
               </>
             ) : (
               <Text>{t("device.choose")}</Text>
@@ -360,69 +309,6 @@ export function KeyValues({ rows }: { rows: [string, string][] }) {
           <Text style={{ flex: 1 }}>{value}</Text>
         </View>
       ))}
-    </View>
-  );
-}
-
-const CW = 240;
-const CH = 170;
-const pad = { left: 30, right: 6, top: 6, bottom: 20 };
-
-function PdfDeviceChart({ chart, title }: { chart: DeviceChartData; title: string }) {
-  const x = (v: number) => pad.left + (v / chart.xMax) * (CW - pad.left - pad.right);
-  const y = (p: number) => CH - pad.bottom - (p / chart.yMax) * (CH - pad.top - pad.bottom);
-  const path = (points: [number, number][]) => points.map(([v, p], i) => `${i ? "L" : "M"}${x(v).toFixed(1)} ${y(p).toFixed(1)}`).join(" ");
-  const key = (p: OperatingPoint | null, fill: string) => (p ? <Circle cx={x(p.flow)} cy={y(p.pressure)} r={2.8} fill={fill} /> : null);
-
-  return (
-    <View style={{ width: CW }}>
-      <Text style={{ fontSize: 8, ...styles.bold, marginBottom: 2 }}>{title}</Text>
-      <Svg width={CW} height={CH}>
-        {chartTicks(chart.yMax).map((tick) => (
-          <G key={`y${tick}`}>
-            <Line x1={pad.left} x2={CW - pad.right} y1={y(tick)} y2={y(tick)} stroke="#dddddd" strokeWidth={0.5} />
-            <Text x={pad.left - 3} y={y(tick) + 2} style={{ fontSize: 6 }} textAnchor="end" fill={colors.muted}>
-              {String(tick)}
-            </Text>
-          </G>
-        ))}
-        {chartTicks(chart.xMax).map((tick) => (
-          <G key={`x${tick}`}>
-            <Line x1={x(tick)} x2={x(tick)} y1={pad.top} y2={CH - pad.bottom} stroke="#dddddd" strokeWidth={0.5} />
-            <Text x={x(tick)} y={CH - pad.bottom + 8} style={{ fontSize: 6 }} textAnchor="middle" fill={colors.muted}>
-              {String(tick)}
-            </Text>
-          </G>
-        ))}
-        {chart.curves.map((c, i) =>
-          c.points.length > 1 ? (
-            <G key={c.label}>
-              <Path d={path(c.points)} fill="none" stroke={curveColors[i % curveColors.length]} strokeWidth={i === 0 ? 1.2 : 0.8} />
-              <Text x={x(c.points[0][0]) + 2} y={y(c.points[0][1]) - 1.5} style={{ fontSize: 4.5 }} fill={curveColors[i % curveColors.length]}>
-                {winAnsi(c.label)}
-              </Text>
-            </G>
-          ) : null,
-        )}
-        {chart.control === "constantFlow" && chart.limit.length > 1 && <Path d={path(chart.limit)} fill="none" stroke={colors.text} strokeWidth={1.3} />}
-        {chart.measurements.map((m, i) =>
-          m.qv <= chart.xMax && m.pst <= chart.yMax ? <Rect key={i} x={x(m.qv) - 1.4} y={y(m.pst) - 1.4} width={2.8} height={2.8} fill="#ffffff" stroke={colors.muted} strokeWidth={0.5} /> : null,
-        )}
-        {chart.nominalFlow > 0 && chart.nominalFlow <= chart.xMax && <Line x1={x(chart.nominalFlow)} x2={x(chart.nominalFlow)} y1={pad.top} y2={CH - pad.bottom} stroke={colors.muted} strokeWidth={0.6} strokeDasharray="1.5 2" />}
-        {chart.system && chart.system.length > 1 && <Path d={path(chart.system)} fill="none" stroke="#c0392b" strokeWidth={1} strokeDasharray="3 2" />}
-        {chart.stagePoints.map((p, i) => (
-          <Circle key={p.curve ?? i} cx={x(p.flow)} cy={y(p.pressure)} r={1.3} fill={curveColors[Math.max(0, chart.curves.findIndex((c) => c.label === p.curve)) % curveColors.length]} />
-        ))}
-        {key(chart.minimum, "#059669")}
-        {key(chart.normal, colors.brand)}
-        {key(chart.party, "#c0392b")}
-        <Text x={(pad.left + CW) / 2} y={CH - 2} style={{ fontSize: 6 }} textAnchor="middle" fill={colors.muted}>
-          m³/h
-        </Text>
-        <Text x={4} y={pad.top + 4} style={{ fontSize: 6 }} fill={colors.muted}>
-          Pa
-        </Text>
-      </Svg>
     </View>
   );
 }

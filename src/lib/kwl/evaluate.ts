@@ -1,6 +1,5 @@
 import { attachmentEffects, normalizeOptions } from "./attachments";
 import { airFlows, outdoorAirClass, type SettlementKey, supplyFilterMatrix, type TrafficKey } from "./calc";
-import { type DeviceResult, operateSide } from "./device-operation";
 import { checkDevice } from "./network-device";
 import { datasheetDevice } from "./products";
 import type { KwlData, KwlFilterInput } from "./schema";
@@ -14,8 +13,7 @@ export type SystemDrops = { supply: number | null; extract: number | null; syste
 
 /** All results of a KWL calculation. */
 export function evaluateKwl(data: KwlData, system: SystemDrops | null = null) {
-  // The party flow depends on the device, the device on the nominal flows: nominal flows first.
-  const base = airFlows(data.rooms, null, data.height);
+  const { rows, summary } = airFlows(data.rooms, data.height);
   // Zehnder datasheet device with its attachments.
   const product = datasheetDevice(data.device.id);
   const options = normalizeOptions(product?.key ?? null, data.device.options);
@@ -26,7 +24,7 @@ export function evaluateKwl(data: KwlData, system: SystemDrops | null = null) {
     system && (system.supply !== null || system.extract !== null)
       ? { supply: system.supply, extract: system.extract, source: "system" as const, system }
       : { supply: data.device.supplyDrop, extract: data.device.extractDrop, source: "manual" as const, system: null };
-  const fond = attachmentEffects(product?.key ?? null, options, base.summary.supply).fond;
+  const fond = attachmentEffects(product?.key ?? null, options, summary.supply).fond;
   const drops: {
     supply: number | null;
     extract: number | null;
@@ -43,20 +41,6 @@ export function evaluateKwl(data: KwlData, system: SystemDrops | null = null) {
     source: given.source,
     system: given.system,
   };
-  // Operating points on the datasheet Kennlinien: normal operation, minimum flow, party (largest possible flow).
-  const side = (s: "supply" | "extract") =>
-    operateSide({
-      deviceKey: product?.key ?? null,
-      options,
-      side: s,
-      nominalFlow: s === "supply" ? base.summary.supply : base.summary.extract,
-      minFlow: s === "supply" ? base.summary.minSupply : base.summary.minExtract,
-      dp: s === "supply" ? drops.supply : drops.extract,
-    });
-  const supplyOp = side("supply");
-  const extractOp = side("extract");
-  const partyFlow = supplyOp?.party && extractOp?.party ? Math.min(supplyOp.party.flow, extractOp.party.flow) : null;
-  const { rows, summary } = airFlows(data.rooms, partyFlow, data.height);
   const oda = effectiveOda(data.filter);
   // Datasheet check (maximum external pressure, power from the measurement table → SPI); a power entered by hand
   // overrides the SPI.
@@ -65,13 +49,7 @@ export function evaluateKwl(data: KwlData, system: SystemDrops | null = null) {
     : null;
   const largerFlow = Math.max(summary.supply, summary.extract);
   const spiFromInput = data.device.power !== null && data.device.power > 0 && largerFlow > 0;
-  const deviceResult: DeviceResult = {
-    supply: supplyOp,
-    extract: extractOp,
-    partyFlow,
-    spi: spiFromInput ? data.device.power! / largerFlow : (datasheet?.spi ?? null),
-    spiFromInput,
-  };
+  const deviceResult = { spi: spiFromInput ? data.device.power! / largerFlow : (datasheet?.spi ?? null), spiFromInput };
   return {
     product,
     options,

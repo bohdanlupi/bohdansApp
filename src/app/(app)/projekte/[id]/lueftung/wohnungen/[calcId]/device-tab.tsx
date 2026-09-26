@@ -8,15 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { normalizeOptions } from "@/lib/kwl/attachments";
 import { spiLimit, spiTarget } from "@/lib/kwl/calc";
-import { deviceChart } from "@/lib/kwl/device-chart";
-import type { DeviceResult, OperatingPoint, SideOperation } from "@/lib/kwl/device-operation";
 import type { DeviceCheck } from "@/lib/kwl/network-device";
 import type { PlanParams } from "@/lib/kwl/plan-schema";
 import { datasheetDevice, productsOfKind } from "@/lib/kwl/products";
 import type { KwlData } from "@/lib/kwl/schema";
 import { externalPressureCheck } from "@/lib/kwl/sia3825";
 
-import { DeviceChart } from "./fan-chart";
 import { AttachmentNotes, DeviceOptionsFields } from "../../device-options";
 import { fmt, Notice, NumberField, Result, Section } from "../../fields";
 
@@ -34,7 +31,6 @@ export function DeviceTab({
   datasheet,
   supplyFlow,
   extractFlow,
-  minimumFlow,
   planParams,
   drops,
   projectId,
@@ -42,11 +38,10 @@ export function DeviceTab({
   onChange,
 }: {
   device: KwlData["device"];
-  result: DeviceResult;
+  result: { spi: number | null; spiFromInput: boolean };
   datasheet: DeviceCheck | null;
   supplyFlow: number;
   extractFlow: number;
-  minimumFlow: number;
   planParams: PlanParams;
   /** Effective external pressure drops (manual or from the duct network). */
   drops: {
@@ -64,12 +59,7 @@ export function DeviceTab({
   const t = useTranslations("kwl");
   const tDevice = useTranslations("kwlDevice");
   const product = datasheetDevice(input.id);
-  const { supply, extract, spi } = result;
-  const tooSmall = !!(supply?.tooSmall || extract?.tooSmall);
-  // Stage devices: the lowest Kennlinie may deliver more than the minimum flow.
-  const lowestFlow = (side: SideOperation | null) => (side?.control === "stages" ? (side.stagePoints.at(-1)?.flow ?? null) : null);
-  const lowest = Math.max(lowestFlow(supply) ?? 0, lowestFlow(extract) ?? 0);
-  const curveName = (p: OperatingPoint | null | undefined) => (p ? (p.curve ?? t("device.op.stepless")) : "–");
+  const { spi } = result;
   const fromNetwork = drops.source === "system";
   const totalDrop = drops.supply !== null || drops.extract !== null ? (drops.supply ?? 0) + (drops.extract ?? 0) : null;
   const pressure = externalPressureCheck(planParams.system, planParams.operation === "demand", totalDrop);
@@ -157,19 +147,7 @@ export function DeviceTab({
         <Notice tone="info">{t("device.choose")}</Notice>
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Result
-              label={t("device.op.normalCard")}
-              value={supply?.normal || extract?.normal ? `${curveName(supply?.normal)} / ${curveName(extract?.normal)}` : "–"}
-              hint={t("device.op.normalCardHint")}
-              tone={tooSmall ? "bad" : undefined}
-            />
-            <Result
-              label={t("device.op.partyCard")}
-              value={supply?.party || extract?.party ? `${fmt(supply?.party?.flow)} / ${fmt(extract?.party?.flow)}` : "–"}
-              unit="m³/h"
-              hint={result.partyFlow ? t("device.op.partyCardHint", { flow: fmt(result.partyFlow) }) : t("device.op.noDrops")}
-            />
+          <div className="grid gap-3 sm:grid-cols-2">
             <Result
               label={t("device.spi")}
               value={fmt(spi, 2)}
@@ -214,130 +192,8 @@ export function DeviceTab({
               {(datasheet.supply.ok === false || datasheet.extract.ok === false) && <Notice>{t("device.datasheet.tooSmall")}</Notice>}
             </div>
           )}
-          {tooSmall && <Notice>{t("device.tooSmall")}</Notice>}
-          {lowest > minimumFlow && <Notice>{t("device.minimumNotReached", { lowest: fmt(lowest), minimum: fmt(minimumFlow) })}</Notice>}
           {(!supplyFlow || !extractFlow) && <Notice>{t("device.noFlows")}</Notice>}
 
-          {(supply?.k || extract?.k) && (
-            <section className="space-y-2">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="text-sm font-semibold">{t("device.op.title")}</h3>
-                <span className="text-xs text-muted-foreground">
-                  {fromNetwork && drops.system ? t("device.op.sourceSystem", { name: drops.system.name }) : t("device.op.sourceManual")}
-                </span>
-              </div>
-              <div className="overflow-x-auto rounded-xl border">
-                <table className="w-full min-w-[720px] text-sm">
-                  <thead className="border-b bg-muted/40 text-xs text-muted-foreground">
-                    <tr>
-                      <th className="py-2 pl-4 text-left font-medium">{t("device.op.point")}</th>
-                      {(["supply", "extract"] as const).map((side) => (
-                        <th key={side} colSpan={4} className="border-l px-2 text-left font-medium">
-                          {t(side)}
-                        </th>
-                      ))}
-                    </tr>
-                    <tr>
-                      <th />
-                      {(["supply", "extract"] as const).flatMap((side) => [
-                        <th key={`${side}c`} className="border-l px-2 text-left font-medium">{t("device.op.curve")}</th>,
-                        <th key={`${side}q`} className="px-2 text-right font-medium">m³/h</th>,
-                        <th key={`${side}p`} className="px-2 text-right font-medium">Pa</th>,
-                        <th key={`${side}w`} className="px-2 text-right font-medium">W</th>,
-                      ])}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(
-                      [
-                        ["normal", t("device.op.normal"), t("device.op.normalHint", { supply: fmt(supply?.nominalFlow), extract: fmt(extract?.nominalFlow) })],
-                        ["minimum", t("device.op.minimum"), t("device.op.minimumHint", { supply: fmt(supply?.minFlow), extract: fmt(extract?.minFlow) })],
-                        ["party", t("device.op.party"), t("device.op.partyHint")],
-                      ] as const
-                    ).map(([key, label, hint]) => (
-                      <tr key={key} className={`border-b last:border-0 ${key === "normal" ? "bg-brand/5 font-medium" : ""}`}>
-                        <td className="py-1.5 pl-4">
-                          {label}
-                          <span className="block text-xs font-normal text-muted-foreground">{hint}</span>
-                        </td>
-                        {[supply, extract].flatMap((op, i) => {
-                          const p = op?.[key] ?? null;
-                          return [
-                            <td key={`${i}c`} className="border-l px-2">{curveName(p)}</td>,
-                            <td key={`${i}q`} className={`px-2 text-right tabular-nums ${key === "normal" && op?.tooSmall ? "text-destructive" : ""}`}>{fmt(p?.flow)}</td>,
-                            <td key={`${i}p`} className="px-2 text-right tabular-nums">{fmt(p?.pressure)}</td>,
-                            <td key={`${i}w`} className="px-2 text-right tabular-nums">{fmt(p?.powerW)}</td>,
-                          ];
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {(supply?.control === "stages" || extract?.control === "stages") && (
-                <details className="text-sm">
-                  <summary className="cursor-pointer text-muted-foreground">{t("device.op.allCurves")}</summary>
-                  <table className="mt-1 w-full max-w-3xl text-sm">
-                    <thead className="text-xs text-muted-foreground">
-                      <tr className="border-b">
-                        <th className="py-1 text-left font-medium">{t("device.op.curve")}</th>
-                        <th className="px-2 text-right font-medium">{t("supplyShort")} m³/h</th>
-                        <th className="px-2 text-right font-medium">{t("supplyShort")} Pa</th>
-                        <th className="px-2 text-right font-medium">{t("extractShort")} m³/h</th>
-                        <th className="px-2 text-right font-medium">{t("extractShort")} Pa</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(supply?.curves ?? extract?.curves ?? []).map((c) => {
-                        const sp = supply?.stagePoints.find((p) => p.curve === c.label);
-                        const ep = extract?.stagePoints.find((p) => p.curve === c.label);
-                        const mark = [sp?.curve && sp === supply?.normal, ep?.curve && ep === extract?.normal].some(Boolean);
-                        return (
-                          <tr key={c.label} className={`border-b last:border-0 ${mark ? "font-medium" : ""}`}>
-                            <td className="py-1">{c.label}</td>
-                            <td className="px-2 text-right tabular-nums">{fmt(sp?.flow)}</td>
-                            <td className="px-2 text-right tabular-nums">{fmt(sp?.pressure)}</td>
-                            <td className="px-2 text-right tabular-nums">{fmt(ep?.flow)}</td>
-                            <td className="px-2 text-right tabular-nums">{fmt(ep?.pressure)}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </details>
-              )}
-            </section>
-          )}
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            {(["supply", "extract"] as const).map((key) => {
-              const op = key === "supply" ? supply : extract;
-              if (!op || !product.device) return null;
-              return (
-                <DeviceChart
-                  key={key}
-                  chart={deviceChart(op, product.device.measurements, fromNetwork)}
-                  title={t(`device.chart.${key}`, { flow: fmt(op.nominalFlow), drop: fmt(op.dp) })}
-                  labels={{
-                    flow: t("device.chart.flow"),
-                    pressure: t("device.chart.pressure"),
-                    limit: t("device.chart.maxCurve"),
-                    measurements: t("device.chart.measurements"),
-                    system: t("device.chart.system"),
-                    normal: t("device.op.normal"),
-                    minimum: t("device.op.minimum"),
-                    party: t("device.op.party"),
-                    normalShort: t("device.op.normalShort"),
-                    minimumShort: t("device.op.minimumShort"),
-                    partyShort: t("device.op.partyShort"),
-                    stagePoints: t("device.chart.stagePoints"),
-                    systemPending: t("device.chart.systemPending"),
-                  }}
-                />
-              );
-            })}
-          </div>
-          <p className="text-xs text-muted-foreground">{t("device.chart.hint")}</p>
         </>
       )}
     </div>

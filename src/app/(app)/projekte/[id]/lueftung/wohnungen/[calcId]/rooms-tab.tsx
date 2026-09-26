@@ -50,7 +50,6 @@ export function RoomsTab({
   rooms,
   rows,
   summary,
-  partyFlow,
   height,
   demandControlled,
   editable,
@@ -60,7 +59,6 @@ export function RoomsTab({
   rooms: KwlRoom[];
   rows: RoomRow[];
   summary: AirFlowSummary;
-  partyFlow: number | null;
   height: number;
   demandControlled: boolean;
   editable: boolean;
@@ -94,7 +92,7 @@ export function RoomsTab({
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-xl border">
-        <table className="w-full min-w-[1100px] text-sm">
+        <table className="w-full min-w-[960px] text-sm">
           <thead className="border-b bg-muted/40 text-xs text-muted-foreground">
             <tr>
               <th rowSpan={2} className="w-20 py-2 pl-3 text-left font-medium">{t("rooms.number")}</th>
@@ -102,8 +100,8 @@ export function RoomsTab({
               <th rowSpan={2} className="px-2 text-left font-medium">{t("rooms.name")}</th>
               <th rowSpan={2} className="w-52 px-2 text-left font-medium">{t("rooms.type")}</th>
               <th rowSpan={2} className="w-20 px-2 text-right font-medium">{t("rooms.area")}</th>
-              <th colSpan={4} className="border-l px-2 pt-2 text-center font-medium">{t("supply")} [m³/h]</th>
-              <th colSpan={4} className="border-l px-2 pt-2 text-center font-medium">{t("extract")} [m³/h]</th>
+              <th colSpan={3} className="border-l px-2 pt-2 text-center font-medium">{t("supply")} [m³/h]</th>
+              <th colSpan={3} className="border-l px-2 pt-2 text-center font-medium">{t("extract")} [m³/h]</th>
               <th rowSpan={2} className="w-20 pr-3" />
             </tr>
             <tr>
@@ -115,7 +113,7 @@ export function RoomsTab({
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={14} className="px-6 py-10 text-center text-muted-foreground">
+                <td colSpan={12} className="px-6 py-10 text-center text-muted-foreground">
                   {t("rooms.empty")}
                 </td>
               </tr>
@@ -167,13 +165,11 @@ export function RoomsTab({
                   <td className="px-1 py-1">
                     <NumberField value={room.supply} decimals={0} label={`${t("supply")} ${t("rooms.used")}`} disabled={!editable} onChange={(supply) => update(index, { ...room, supply })} className="font-medium" />
                   </td>
-                  <Computed value={row.partySupply} />
                   <Computed value={row.recommendedExtract} border />
                   <Computed value={row.minExtract} />
                   <td className="px-1 py-1">
                     <NumberField value={room.extract} decimals={0} label={`${t("extract")} ${t("rooms.used")}`} disabled={!editable} onChange={(extract) => update(index, { ...room, extract })} className="font-medium" />
                   </td>
-                  <Computed value={row.partyExtract} />
                   <td className="py-1 pr-2">
                     {editable && (
                       <div className="flex justify-end">
@@ -200,11 +196,9 @@ export function RoomsTab({
               <td className="border-l px-2 text-right tabular-nums">{fmt(summary.recommendedSupply)}</td>
               <td className="px-2 text-right tabular-nums">{fmt(summary.minSupply)}</td>
               <td className="px-2 text-right tabular-nums">{fmt(summary.supply)}</td>
-              <td className="px-2 text-right tabular-nums">{fmt(partyFlow)}</td>
               <td className="border-l px-2 text-right tabular-nums">{fmt(summary.recommendedExtract)}</td>
               <td className="px-2 text-right tabular-nums">{fmt(summary.minExtract)}</td>
               <td className="px-2 text-right tabular-nums">{fmt(summary.extract)}</td>
-              <td className="px-2 text-right tabular-nums">{fmt(partyFlow)}</td>
               <td />
             </tr>
           </tfoot>
@@ -224,7 +218,7 @@ export function RoomsTab({
         </div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-3">
         <Result label={t("summary.minimum")} value={fmt(summary.minSupply)} unit="m³/h" hint={t("summary.minimumHint")} />
         <Result
           label={t("summary.nominal")}
@@ -233,7 +227,6 @@ export function RoomsTab({
           hint={t("summary.nominalHint", { supply: fmt(summary.recommendedSupply), extract: fmt(summary.recommendedExtract) })}
           tone={summary.imbalance === 0 ? undefined : "warn"}
         />
-        <Result label={t("summary.party")} value={fmt(partyFlow)} unit="m³/h" hint={t("summary.partyHint")} />
         <Result label={t("summary.area")} value={fmt(summary.area, 1)} unit="m²" />
       </div>
 
@@ -262,7 +255,6 @@ function FlowHeads() {
       <th className="w-16 border-l px-2 pb-2 text-right font-normal">{t("recommended")}</th>
       <th className="w-16 px-2 pb-2 text-right font-normal">{t("minimum")}</th>
       <th className="w-20 px-2 pb-2 text-right font-medium">{t("used")}</th>
-      <th className="w-16 px-2 pb-2 text-right font-normal">{t("party")}</th>
     </>
   );
 }
