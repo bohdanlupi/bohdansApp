@@ -7,7 +7,7 @@ import { formatNumber } from "@/lib/number-input";
 
 /**
  * Prinzipschema with symbols after SIA 410 (3.2 terminals, 3.3 air treatment, 3.4 fans) and the colour code
- * of SIA 410/1 (3.4): outdoor air green, supply air violet, extract / exhaust air yellow.
+ * of the LUPI scheme: outdoor air green, supply air red, extract air amber, exhaust air blue.
  */
 export function SchemaView({
   layout,

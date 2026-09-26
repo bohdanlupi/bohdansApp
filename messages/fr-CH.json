@@ -1448,7 +1448,7 @@
       "roomDuct": "Conduit de pièce"
     },
     "schema": "Schéma de principe",
-    "schemaHint": "Symboles et couleurs selon SIA 410. Clique sur un élément pour le modifier. La branche déterminante de chaque côté est mise en évidence.",
+    "schemaHint": "Symboles selon SIA 410 ; couleurs : air extérieur vert, air fourni rouge, air repris jaune, air rejeté bleu. Clique sur un élément pour le modifier. La branche déterminante de chaque côté est mise en évidence.",
     "air": {
       "outdoor": "Air extérieur",
       "supply": "Air fourni",

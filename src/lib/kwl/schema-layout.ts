@@ -1,5 +1,5 @@
-// Layout of the Prinzipschema of a ventilation system (symbols after SIA 410, colours after SIA 410/1:
-// outdoor air green, supply air violet, extract / exhaust air yellow).
+// Layout of the Prinzipschema of a ventilation system (symbols after SIA 410; LUPI colours: outdoor air green,
+// supply air red, extract air amber, exhaust air blue).
 //
 //   [AUL terminal] ── outdoor chain ──┐          ┌── supply tree ──► terminals (rooms, by storey)
 //                                      [ device ]
@@ -10,10 +10,10 @@ import type { NetNode, RoomFlow, SystemData } from "./network";
 export type AirKind = "outdoor" | "supply" | "extract" | "exhaust";
 
 export const airColors: Record<AirKind, string> = {
-  outdoor: "#2e7d32",
-  supply: "#7b1fa2",
-  extract: "#b58900",
-  exhaust: "#b58900",
+  outdoor: "#00ff00", // rgb(0, 255, 0)
+  supply: "#ff0000", // rgb(255, 0, 0)
+  extract: "#ffc000", // rgb(255, 192, 0)
+  exhaust: "#0000ff", // rgb(0, 0, 255)
 };
 
 export type LayoutNode = { node: NetNode; air: AirKind; x: number; y: number; depth: number };

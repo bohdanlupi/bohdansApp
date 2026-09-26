@@ -1448,7 +1448,7 @@
       "roomDuct": "Raumleitung"
     },
     "schema": "Prinzipschema",
-    "schemaHint": "Symbole und Farben nach SIA 410. Element anklicken, um es zu bearbeiten. Der massgebende Strang je Seite ist hervorgehoben.",
+    "schemaHint": "Symbole nach SIA 410; Farben: Aussenluft grün, Zuluft rot, Abluft gelb, Fortluft blau. Element anklicken, um es zu bearbeiten. Der massgebende Strang je Seite ist hervorgehoben.",
     "air": {
       "outdoor": "Aussenluft",
       "supply": "Zuluft",

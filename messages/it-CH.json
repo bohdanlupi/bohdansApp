@@ -1448,7 +1448,7 @@
       "roomDuct": "Condotta del locale"
     },
     "schema": "Schema di principio",
-    "schemaHint": "Simboli e colori secondo SIA 410. Clicca un elemento per modificarlo. Il ramo determinante di ogni lato è evidenziato.",
+    "schemaHint": "Simboli secondo SIA 410; colori: aria esterna verde, aria immessa rossa, aria ripresa gialla, aria espulsa blu. Clicca un elemento per modificarlo. Il ramo determinante di ogni lato è evidenziato.",
     "air": {
       "outdoor": "Aria esterna",
       "supply": "Aria immessa",
