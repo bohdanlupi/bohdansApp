@@ -780,11 +780,18 @@
         "extract": "Abluftseite – {flow} m³/h bei {drop} Pa",
         "flow": "Volumenstrom [m³/h]",
         "pressure": "Druck [Pa]",
-        "system": "Anlagenkennlinie durch den Nennpunkt",
-        "hint": "Ventilatorkennlinien je Stufe (Stufe bei Nennbetrieb hervorgehoben). Die Betriebspunkte liegen auf der Anlagenkennlinie Δp = k · V².",
+        "system": "Anlagenkennlinie (Netzberechnung)",
+        "hint": "Die Anlage ist ausgelegt, wenn der Betriebspunkt unter der Linie der maximalen externen Pressung liegt. Die Anlagenkennlinie Δp = k · V² geht durch den Betriebspunkt aus der Netzberechnung.",
         "supplyPdf": "Zuluftseite",
         "extractPdf": "Abluftseite",
-        "pdfLegend": "Ventilatorkennlinien je Stufe, Anlagenkennlinie (rot gestrichelt) und Betriebspunkte. Blau: Stufe bei Nennbetrieb."
+        "pdfLegend": "Schwarz: max. externe Pressung (Datenblatt) mit Messpunkten; grau: Ventilatorstufen; rot gestrichelt: Anlagenkennlinie aus der Netzberechnung mit Betriebspunkt; senkrecht: Nennvolumenstrom.",
+        "maxCurve": "max. externe Pressung (Datenblatt)",
+        "measurements": "Messpunkte Datenblatt",
+        "stages": "Ventilatorstufen",
+        "operating": "Betriebspunkt",
+        "nominalFlow": "Nennvolumenstrom",
+        "systemPending": "Anlagenkennlinie folgt nach der Druckverlustberechnung (Lüftungsanlage unter Dimensionierung).",
+        "pdfLegendPending": "Schwarz: max. externe Pressung (Datenblatt) mit Messpunkten; grau: Ventilatorstufen; senkrecht: Nennvolumenstrom. Die Anlagenkennlinie folgt nach der Netzberechnung."
       },
       "pressure": {
         "target": "Externer Druckverlust {total} Pa: Zielwert ({target} Pa) nach SIA 382/5 Tabelle 7 eingehalten.",

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { normalizeOptions } from "@/lib/kwl/attachments";
 import { type DeviceResult, spiLimit, spiTarget } from "@/lib/kwl/calc";
+import { deviceChart } from "@/lib/kwl/device-chart";
 import { findDevice } from "@/lib/kwl/devices";
 import type { DeviceCheck } from "@/lib/kwl/network-device";
 import type { PlanParams } from "@/lib/kwl/plan-schema";
@@ -15,7 +16,7 @@ import { datasheetDevice, productsOfKind } from "@/lib/kwl/products";
 import type { KwlData } from "@/lib/kwl/schema";
 import { externalPressureCheck } from "@/lib/kwl/sia3825";
 
-import { FanChart } from "./fan-chart";
+import { DeviceChart } from "./fan-chart";
 import { AttachmentNotes, DeviceOptionsFields } from "../../device-options";
 import { fmt, Notice, NumberField, Result, Section } from "../../fields";
 
@@ -247,22 +248,42 @@ export function DeviceTab({
                 </table>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-2">
-                {(["supply", "extract"] as const).map((key) => (
-                  <FanChart
-                    key={key}
-                    device={device}
-                    side={key === "supply" ? supply : extract}
-                    title={t(`device.chart.${key}`, { flow: fmt(key === "supply" ? supplyFlow : extractFlow), drop: fmt(key === "supply" ? drops.supply : drops.extract) })}
-                    flowLabel={t("device.chart.flow")}
-                    pressureLabel={t("device.chart.pressure")}
-                    systemLabel={t("device.chart.system")}
-                  />
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">{t("device.chart.hint")}</p>
             </>
           )}
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            {(["supply", "extract"] as const).map((key) => {
+              const chart = deviceChart({
+                deviceKey: product.key,
+                options,
+                side: key,
+                flow: key === "supply" ? supplyFlow : extractFlow,
+                dp: key === "supply" ? drops.supply : drops.extract,
+                withSystem: fromNetwork,
+                stageDevice: device,
+                stageSide: key === "supply" ? supply : extract,
+              });
+              return chart ? (
+                <DeviceChart
+                  key={key}
+                  chart={chart}
+                  title={t(`device.chart.${key}`, { flow: fmt(key === "supply" ? supplyFlow : extractFlow), drop: fmt(key === "supply" ? drops.supply : drops.extract) })}
+                  labels={{
+                    flow: t("device.chart.flow"),
+                    pressure: t("device.chart.pressure"),
+                    maxCurve: t("device.chart.maxCurve"),
+                    measurements: t("device.chart.measurements"),
+                    stages: t("device.chart.stages"),
+                    system: t("device.chart.system"),
+                    operating: t("device.chart.operating"),
+                    nominalFlow: t("device.chart.nominalFlow"),
+                    systemPending: t("device.chart.systemPending"),
+                  }}
+                />
+              ) : null;
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">{t("device.chart.hint")}</p>
         </>
       )}
     </div>

@@ -1,8 +1,8 @@
-import { Circle, Document, G, Line, Path, Svg, Text, View } from "@react-pdf/renderer";
+import { Circle, Document, G, Line, Path, Rect, Svg, Text, View } from "@react-pdf/renderer";
 
 import { hasOptions, optionsLabel } from "@/lib/kwl/attachments";
-import { fanChart, findRoomType, type SideResult, spiLimit, spiTarget } from "@/lib/kwl/calc";
-import type { KwlDevice } from "@/lib/kwl/devices";
+import { findRoomType, spiLimit, spiTarget } from "@/lib/kwl/calc";
+import { chartTicks, deviceChart, type DeviceChartData } from "@/lib/kwl/device-chart";
 import type { KwlEvaluation } from "@/lib/kwl/evaluate";
 import type { KwlData } from "@/lib/kwl/schema";
 import { formatNumber } from "@/lib/number-input";
@@ -304,13 +304,26 @@ export function KwlDocument({
                         );
                       })}
                     </View>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
-                      <PdfFanChart device={device} side={supply} title={t("device.chart.supplyPdf")} />
-                      <PdfFanChart device={device} side={extract} title={t("device.chart.extractPdf")} />
-                    </View>
-                    <Text style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>{t("device.chart.pdfLegend")}</Text>
                   </View>
                 )}
+                <View wrap={false} style={{ marginTop: 10 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    {(["supply", "extract"] as const).map((key) => {
+                      const chart = deviceChart({
+                        deviceKey: product.key,
+                        options: result.options,
+                        side: key,
+                        flow: key === "supply" ? summary.supply : summary.extract,
+                        dp: key === "supply" ? result.drops.supply : result.drops.extract,
+                        withSystem: complete,
+                        stageDevice: device,
+                        stageSide: key === "supply" ? supply : extract,
+                      });
+                      return chart ? <PdfDeviceChart key={key} chart={chart} title={t(`device.chart.${key}Pdf`)} /> : null;
+                    })}
+                  </View>
+                  <Text style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>{complete ? t("device.chart.pdfLegend") : t("device.chart.pdfLegendPending")}</Text>
+                </View>
               </>
             ) : (
               <Text>{t("device.choose")}</Text>
@@ -354,20 +367,16 @@ const CW = 240;
 const CH = 170;
 const pad = { left: 30, right: 6, top: 6, bottom: 20 };
 
-function PdfFanChart({ device, side, title }: { device: KwlDevice; side: SideResult | null; title: string }) {
-  const { curves, system } = fanChart(device, side, 36);
-  const x = (v: number) => pad.left + (v / device.xMax) * (CW - pad.left - pad.right);
-  const y = (p: number) => CH - pad.bottom - (p / device.yMax) * (CH - pad.top - pad.bottom);
+function PdfDeviceChart({ chart, title }: { chart: DeviceChartData; title: string }) {
+  const x = (v: number) => pad.left + (v / chart.xMax) * (CW - pad.left - pad.right);
+  const y = (p: number) => CH - pad.bottom - (p / chart.yMax) * (CH - pad.top - pad.bottom);
   const path = (points: [number, number][]) => points.map(([v, p], i) => `${i ? "L" : "M"}${x(v).toFixed(1)} ${y(p).toFixed(1)}`).join(" ");
-  const nominal = side?.nominalStage?.stage;
-  const xTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(device.xMax * f));
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(device.yMax * f));
 
   return (
     <View style={{ width: CW }}>
       <Text style={{ fontSize: 8, ...styles.bold, marginBottom: 2 }}>{title}</Text>
       <Svg width={CW} height={CH}>
-        {yTicks.map((tick) => (
+        {chartTicks(chart.yMax).map((tick) => (
           <G key={`y${tick}`}>
             <Line x1={pad.left} x2={CW - pad.right} y1={y(tick)} y2={y(tick)} stroke="#dddddd" strokeWidth={0.5} />
             <Text x={pad.left - 3} y={y(tick) + 2} style={{ fontSize: 6 }} textAnchor="end" fill={colors.muted}>
@@ -375,7 +384,7 @@ function PdfFanChart({ device, side, title }: { device: KwlDevice; side: SideRes
             </Text>
           </G>
         ))}
-        {xTicks.map((tick) => (
+        {chartTicks(chart.xMax).map((tick) => (
           <G key={`x${tick}`}>
             <Line x1={x(tick)} x2={x(tick)} y1={pad.top} y2={CH - pad.bottom} stroke="#dddddd" strokeWidth={0.5} />
             <Text x={x(tick)} y={CH - pad.bottom + 8} style={{ fontSize: 6 }} textAnchor="middle" fill={colors.muted}>
@@ -383,17 +392,21 @@ function PdfFanChart({ device, side, title }: { device: KwlDevice; side: SideRes
             </Text>
           </G>
         ))}
-        {curves.map((c) =>
-          c.points.length > 1 ? (
-            <Path key={c.stage} d={path(c.points)} fill="none" stroke={c.stage === nominal ? colors.brand : "#9a9a9a"} strokeWidth={c.stage === nominal ? 1.4 : 0.7} />
+        {chart.stages.map((st) =>
+          st.points.length > 1 ? (
+            <Path key={st.stage} d={path(st.points)} fill="none" stroke={st.stage === chart.nominalStage && chart.system ? colors.brand : "#b5b5b5"} strokeWidth={st.stage === chart.nominalStage && chart.system ? 1.2 : 0.6} />
           ) : null,
         )}
-        {system.length > 1 && <Path d={path(system)} fill="none" stroke="#c0392b" strokeWidth={1} strokeDasharray="3 2" />}
-        {side?.points.map((p) =>
-          p.flow > 0 && p.flow <= device.xMax && p.pressure <= device.yMax ? (
-            <Circle key={p.stage} cx={x(p.flow)} cy={y(p.pressure)} r={p.stage === nominal ? 2.4 : 1.4} fill={p.stage === nominal ? colors.brand : colors.text} />
-          ) : null,
+        {chart.maxCurve.length > 1 && <Path d={path(chart.maxCurve)} fill="none" stroke={colors.text} strokeWidth={1.4} />}
+        {chart.measurements.map((m, i) =>
+          m.qv <= chart.xMax && m.pst <= chart.yMax ? <Rect key={i} x={x(m.qv) - 1.6} y={y(m.pst) - 1.6} width={3.2} height={3.2} fill="#ffffff" stroke={colors.text} strokeWidth={0.6} /> : null,
         )}
+        {chart.flow > 0 && chart.flow <= chart.xMax && <Line x1={x(chart.flow)} x2={x(chart.flow)} y1={pad.top} y2={CH - pad.bottom} stroke={colors.muted} strokeWidth={0.6} strokeDasharray="1.5 2" />}
+        {chart.system && chart.system.length > 1 && <Path d={path(chart.system)} fill="none" stroke="#c0392b" strokeWidth={1} strokeDasharray="3 2" />}
+        {chart.stagePoints.map((p) => (
+          <Circle key={p.stage} cx={x(p.flow)} cy={y(p.pressure)} r={p.stage === chart.nominalStage ? 2 : 1.2} fill={p.stage === chart.nominalStage ? colors.brand : colors.text} />
+        ))}
+        {chart.operating && <Circle cx={x(chart.operating.flow)} cy={y(chart.operating.pressure)} r={2.6} fill="#c0392b" />}
         <Text x={(pad.left + CW) / 2} y={CH - 2} style={{ fontSize: 6 }} textAnchor="middle" fill={colors.muted}>
           m³/h
         </Text>

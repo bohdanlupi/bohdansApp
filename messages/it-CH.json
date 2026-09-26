@@ -780,11 +780,18 @@
         "extract": "Lato ripresa – {flow} m³/h a {drop} Pa",
         "flow": "Portata [m³/h]",
         "pressure": "Pressione [Pa]",
-        "system": "Curva dell’impianto passante per il punto nominale",
-        "hint": "Curve del ventilatore per livello (livello in esercizio nominale evidenziato). I punti di funzionamento si trovano sulla curva dell’impianto Δp = k · V².",
+        "system": "curva dell’impianto (calcolo della rete)",
+        "hint": "L’impianto è dimensionato se il punto di funzionamento si trova sotto la linea della pressione esterna massima. La curva dell’impianto Δp = k · V² passa per il punto di funzionamento del calcolo della rete.",
         "supplyPdf": "Lato immissione",
         "extractPdf": "Lato ripresa",
-        "pdfLegend": "Curve del ventilatore per livello, curva dell’impianto (tratteggio rosso) e punti di funzionamento. Blu: livello in esercizio nominale."
+        "pdfLegend": "Nero: pressione esterna max. (scheda tecnica) con punti di misura; grigio: livelli del ventilatore; rosso tratteggiato: curva dell’impianto dal calcolo della rete con punto di funzionamento; verticale: portata nominale.",
+        "maxCurve": "pressione esterna max. (scheda tecnica)",
+        "measurements": "punti di misura scheda tecnica",
+        "stages": "livelli del ventilatore",
+        "operating": "punto di funzionamento",
+        "nominalFlow": "portata nominale",
+        "systemPending": "La curva dell’impianto segue dopo il calcolo delle perdite di carico (impianto sotto Dimensionamento).",
+        "pdfLegendPending": "Nero: pressione esterna max. (scheda tecnica) con punti di misura; grigio: livelli del ventilatore; verticale: portata nominale. La curva dell’impianto segue dopo il calcolo della rete."
       },
       "pressure": {
         "target": "Perdita di carico esterna {total} Pa: valore obiettivo ({target} Pa) secondo SIA 382/5 tabella 7 rispettato.",

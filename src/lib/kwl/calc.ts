@@ -212,33 +212,6 @@ export function analyseDevice(
   return { supply, extract, partyFlow, spi: values.length ? Math.max(...values) : null, spiFromInput: false };
 }
 
-/** Polylines for the fan diagram (in data coordinates). */
-export function fanChart(device: KwlDevice, side: SideResult | null, samples = 48) {
-  const clip = (points: [number, number][]) => points.filter(([, p]) => p >= 0 && p <= device.yMax * 1.02);
-  const curves = device.stages.map((stage) => {
-    const points: [number, number][] = [];
-    for (let i = 0; i <= samples; i++) {
-      const flow = (device.xMax * i) / samples;
-      const p = fanPressure(stage, flow);
-      points.push([flow, p]);
-      if (p < 0) break;
-    }
-    return { stage: stage.stage, points: clip(points.map(([v, p]) => [v, Math.max(p, 0)])) };
-  });
-  const system: [number, number][] = [];
-  if (side) {
-    for (let i = 0; i <= samples; i++) {
-      const flow = (device.xMax * i) / samples;
-      const p = side.k * flow * flow;
-      if (p > device.yMax) {
-        system.push([Math.sqrt(device.yMax / side.k), device.yMax]);
-        break;
-      }
-      system.push([flow, p]);
-    }
-  }
-  return { curves, system };
-}
 
 // ---------------------------------------------------------------------------
 // Filters (SIA 382/1:2014, Tabellen 4 + 8; ISO 16890)

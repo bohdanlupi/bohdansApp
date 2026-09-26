@@ -780,11 +780,18 @@
         "extract": "Côté air repris – {flow} m³/h à {drop} Pa",
         "flow": "Débit [m³/h]",
         "pressure": "Pression [Pa]",
-        "system": "Courbe du réseau passant par le point nominal",
-        "hint": "Courbes du ventilateur par niveau (niveau en service nominal mis en évidence). Les points de fonctionnement se trouvent sur la courbe du réseau Δp = k · V².",
+        "system": "courbe du réseau (calcul du réseau)",
+        "hint": "L’installation est dimensionnée si le point de fonctionnement se trouve sous la ligne de pression externe maximale. La courbe du réseau Δp = k · V² passe par le point de fonctionnement du calcul du réseau.",
         "supplyPdf": "Côté air neuf",
         "extractPdf": "Côté air repris",
-        "pdfLegend": "Courbes du ventilateur par niveau, courbe du réseau (tirets rouges) et points de fonctionnement. Bleu : niveau en service nominal."
+        "pdfLegend": "Noir : pression externe max. (fiche technique) avec points de mesure ; gris : niveaux du ventilateur ; rouge pointillé : courbe du réseau issue du calcul avec point de fonctionnement ; vertical : débit nominal.",
+        "maxCurve": "pression externe max. (fiche technique)",
+        "measurements": "points de mesure fiche technique",
+        "stages": "niveaux du ventilateur",
+        "operating": "point de fonctionnement",
+        "nominalFlow": "débit nominal",
+        "systemPending": "La courbe du réseau suit après le calcul des pertes de charge (installation sous Dimensionnement).",
+        "pdfLegendPending": "Noir : pression externe max. (fiche technique) avec points de mesure ; gris : niveaux du ventilateur ; vertical : débit nominal. La courbe du réseau suit après le calcul du réseau."
       },
       "pressure": {
         "target": "Perte de charge externe {total} Pa : valeur cible ({target} Pa) selon SIA 382/5 tableau 7 respectée.",
