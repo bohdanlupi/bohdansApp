@@ -781,17 +781,18 @@
         "flow": "Portata [m³/h]",
         "pressure": "Pressione [Pa]",
         "system": "curva dell’impianto (calcolo della rete)",
-        "hint": "L’impianto è dimensionato se il punto di funzionamento si trova sotto la linea della pressione esterna massima. La curva dell’impianto Δp = k · V² passa per il punto di funzionamento del calcolo della rete.",
+        "hint": "Curve della scheda tecnica Zehnder: ComfoAir SL per velocità o livello; ComfoAir Q e Flex regolano la portata in continuo fino al limite di pressione. La curva dell’impianto Δp = k · V² passa per il punto di funzionamento del calcolo della rete.",
         "supplyPdf": "Lato immissione",
         "extractPdf": "Lato ripresa",
-        "pdfLegend": "Nero: pressione esterna max. (scheda tecnica) con punti di misura; grigio: livelli del ventilatore; rosso tratteggiato: curva dell’impianto dal calcolo della rete con punto di funzionamento; verticale: portata nominale.",
-        "maxCurve": "pressione esterna max. (scheda tecnica)",
+        "pdfLegend": "A colori: curve della scheda tecnica Zehnder (SL per livello / velocità); nero: limite di pressione (ComfoAir Q / Flex, continuo); rosso tratteggiato: curva dell’impianto dal calcolo della rete. Punti: blu funzionamento normale, verde portata minima, rosso party.",
+        "maxCurve": "limite di pressione (scheda tecnica, regolazione a portata costante)",
         "measurements": "punti di misura scheda tecnica",
         "stages": "livelli del ventilatore",
         "operating": "punto di funzionamento",
         "nominalFlow": "portata nominale",
         "systemPending": "La curva dell’impianto segue dopo il calcolo delle perdite di carico (impianto sotto Dimensionamento).",
-        "pdfLegendPending": "Nero: pressione esterna max. (scheda tecnica) con punti di misura; grigio: livelli del ventilatore; verticale: portata nominale. La curva dell’impianto segue dopo il calcolo della rete."
+        "pdfLegendPending": "A colori: curve della scheda tecnica Zehnder (SL per livello / velocità); nero: limite di pressione (ComfoAir Q / Flex, continuo); verticale: portata nominale. La curva dell’impianto segue dopo il calcolo della rete.",
+        "stagePoints": "punti di funzionamento delle curve"
       },
       "pressure": {
         "target": "Perdita di carico esterna {total} Pa: valore obiettivo ({target} Pa) secondo SIA 382/5 tabella 7 rispettato.",
@@ -814,7 +815,30 @@
       "fondFilterPdf": "con filtro",
       "inclFondPdf": "incl. ComfoFond-L Q {dp} Pa",
       "fondLeftPdf": "aria immessa a sinistra",
-      "fondRightPdf": "aria immessa a destra"
+      "fondRightPdf": "aria immessa a destra",
+      "op": {
+        "title": "Punti di funzionamento (intersezioni delle curve con la curva dell’impianto)",
+        "sourceSystem": "Curva dell’impianto dal calcolo «{name}»",
+        "sourceManual": "provvisorio con le perdite di carico inserite a mano",
+        "point": "Punto di funzionamento",
+        "curve": "Curva",
+        "stepless": "continuo",
+        "normal": "Funzionamento normale",
+        "normalHint": "portata impiegata IMM {supply} / RIP {extract} m³/h",
+        "minimum": "Portata minima",
+        "minimumHint": "somma dei valori minimi IMM {supply} / RIP {extract} m³/h",
+        "party": "Party (portata max.)",
+        "partyHint": "portata massima alla perdita di carico esterna",
+        "allCurves": "Tutte le curve",
+        "normalCard": "Curva funzionamento normale IMM / RIP",
+        "normalCardHint": "Curva il cui punto di funzionamento è più vicino alla portata impiegata (ComfoAir Q / Flex: continuo).",
+        "partyCard": "Portata party IMM / RIP",
+        "partyCardHint": "Portata massima alla perdita di carico esterna; distribuita nei locali: {flow} m³/h (lato minore).",
+        "noDrops": "Inserire o calcolare le perdite di carico.",
+        "normalShort": "Normale",
+        "minimumShort": "Min.",
+        "partyShort": "Party"
+      }
     },
     "filter": {
       "traffic": {
@@ -1263,7 +1287,8 @@
       "supply": "AIM nominale",
       "extractMin": "ARI min.",
       "extract": "ARI nominale",
-      "device": "Livello dell’apparecchio in esercizio nominale: immissione {supply}, ripresa {extract}"
+      "device": "Curva in funzionamento normale: immissione {supply}, ripresa {extract}",
+      "stepless": "continuo"
     },
     "co2": {
       "title": "Controllo CO₂",

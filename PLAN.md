@@ -224,8 +224,12 @@ insulated silencers; no manufacturer Δp data: pipes Darcy–Weisbach steel, fit
 two manufacturers (2026-09-26, user decision); dropdowns grouped «manufacturer · family», fittings filtered by role
 (bend / tee / other). Product keys are referenced by saved networks, keep them stable (currentProductKey maps old
 generic «spiro-D» → Meier Tobler). Devices: only the 7 Zehnder datasheet units (no workbook devices, no Hoval/Helios);
-devices.ts keeps the workbook fan stage curves only for Q350/Q450/Q600/SL 220/SL 330 (stage selection, fan chart);
-old device ids (…-st) are mapped, unknown ones dropped. Device check from the datasheet (max. external pressure
+old device ids (…-st) are mapped, unknown ones dropped. Operating points (src/lib/kwl/device-operation.ts) come only
+from the Zehnder datasheets (devices.ts / workbook stage curves removed): fan Kennlinien SL 220 (speeds) / SL 330
+(steps), constant-volume control for ComfoAir Q / Flex (pressure limit line), ComfoClime: combination curve. Per
+side: Normalbetrieb = Kennlinie closest to the nominal flow, Minimum = closest to the sum of minimum flows, Party =
+largest flow at the external pressure (top Kennlinie / limit × Anlagenkennlinie, ≤ device max. flow); party for
+the rooms = smaller side. Diagram like the workbook («Kennlinien Zuluft / Abluft», device-chart.ts). Device check from the datasheet (max. external pressure
 line; power by least-squares fit SPI = a + b·p + c·q of the measurement table, ≤ 5 % on the table points); its SPI
 has priority over the stage power table in the dwelling too.
 Device attachments (src/lib/kwl/attachments.ts, data zehnderAttachments in zehnder-data.ts), stored as

@@ -64,7 +64,7 @@ export default async function KwlListPage({ params }: PageProps<"/projekte/[id]/
                   <TableCell className="text-right tabular-nums">{num(result.summary.area, 1)}</TableCell>
                   <TableCell className="text-right tabular-nums">{num(result.summary.supply)}</TableCell>
                   <TableCell className="text-right tabular-nums">{num(result.summary.extract)}</TableCell>
-                  <TableCell>{result.device?.name}</TableCell>
+                  <TableCell>{result.product?.name}</TableCell>
                   <TableCell
                     className={cn(
                       "pr-4 text-right tabular-nums",

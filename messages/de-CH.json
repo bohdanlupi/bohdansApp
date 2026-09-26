@@ -781,17 +781,18 @@
         "flow": "Volumenstrom [m³/h]",
         "pressure": "Druck [Pa]",
         "system": "Anlagenkennlinie (Netzberechnung)",
-        "hint": "Die Anlage ist ausgelegt, wenn der Betriebspunkt unter der Linie der maximalen externen Pressung liegt. Die Anlagenkennlinie Δp = k · V² geht durch den Betriebspunkt aus der Netzberechnung.",
+        "hint": "Kennlinien aus dem Zehnder-Datenblatt: ComfoAir SL je Drehzahl bzw. Stufe; ComfoAir Q und Flex regeln den Volumenstrom stufenlos bis zur Druckgrenze. Die Anlagenkennlinie Δp = k · V² geht durch den Betriebspunkt der Netzberechnung.",
         "supplyPdf": "Zuluftseite",
         "extractPdf": "Abluftseite",
-        "pdfLegend": "Schwarz: max. externe Pressung (Datenblatt) mit Messpunkten; grau: Ventilatorstufen; rot gestrichelt: Anlagenkennlinie aus der Netzberechnung mit Betriebspunkt; senkrecht: Nennvolumenstrom.",
-        "maxCurve": "max. externe Pressung (Datenblatt)",
+        "pdfLegend": "Farbig: Kennlinien Zehnder-Datenblatt (SL je Stufe / Drehzahl); schwarz: Druckgrenze (ComfoAir Q / Flex, stufenlos); rot gestrichelt: Anlagenkennlinie aus der Netzberechnung. Punkte: blau Normalbetrieb, grün minimale Luftmenge, rot Party.",
+        "maxCurve": "Druckgrenze (Datenblatt, Konstant-Volumenstrom-Regelung)",
         "measurements": "Messpunkte Datenblatt",
         "stages": "Ventilatorstufen",
         "operating": "Betriebspunkt",
         "nominalFlow": "Nennvolumenstrom",
         "systemPending": "Anlagenkennlinie folgt nach der Druckverlustberechnung (Lüftungsanlage unter Dimensionierung).",
-        "pdfLegendPending": "Schwarz: max. externe Pressung (Datenblatt) mit Messpunkten; grau: Ventilatorstufen; senkrecht: Nennvolumenstrom. Die Anlagenkennlinie folgt nach der Netzberechnung."
+        "pdfLegendPending": "Farbig: Kennlinien Zehnder-Datenblatt (SL je Stufe / Drehzahl); schwarz: Druckgrenze (ComfoAir Q / Flex, stufenlos); senkrecht: Nennvolumenstrom. Die Anlagenkennlinie folgt nach der Netzberechnung.",
+        "stagePoints": "Betriebspunkte der Kennlinien"
       },
       "pressure": {
         "target": "Externer Druckverlust {total} Pa: Zielwert ({target} Pa) nach SIA 382/5 Tabelle 7 eingehalten.",
@@ -814,7 +815,30 @@
       "fondFilterPdf": "mit Filter",
       "inclFondPdf": "inkl. ComfoFond-L Q {dp} Pa",
       "fondLeftPdf": "Zuluft links",
-      "fondRightPdf": "Zuluft rechts"
+      "fondRightPdf": "Zuluft rechts",
+      "op": {
+        "title": "Betriebspunkte (Kreuzungen der Kennlinien mit der Anlagenkennlinie)",
+        "sourceSystem": "Anlagenkennlinie aus der Netzberechnung «{name}»",
+        "sourceManual": "vorläufig mit den von Hand eingegebenen Druckverlusten",
+        "point": "Betriebspunkt",
+        "curve": "Kennlinie",
+        "stepless": "stufenlos",
+        "normal": "Normalbetrieb",
+        "normalHint": "eingesetzte Luftmenge ZUL {supply} / ABL {extract} m³/h",
+        "minimum": "Minimale Luftmenge",
+        "minimumHint": "Summe der Minimalwerte ZUL {supply} / ABL {extract} m³/h",
+        "party": "Party (max. Volumenstrom)",
+        "partyHint": "grösster Volumenstrom beim externen Druckverlust",
+        "allCurves": "Alle Kennlinien",
+        "normalCard": "Kennlinie Normalbetrieb ZUL / ABL",
+        "normalCardHint": "Kennlinie, deren Betriebspunkt der eingesetzten Luftmenge am nächsten liegt (ComfoAir Q / Flex: stufenlos).",
+        "partyCard": "Partyluftmenge ZUL / ABL",
+        "partyCardHint": "Grösster Volumenstrom beim externen Druckverlust; in den Räumen verteilt: {flow} m³/h (kleinere Seite).",
+        "noDrops": "Druckverluste eingeben oder berechnen.",
+        "normalShort": "Normal",
+        "minimumShort": "Min.",
+        "partyShort": "Party"
+      }
     },
     "filter": {
       "traffic": {
@@ -1263,7 +1287,8 @@
       "supply": "ZUL Soll",
       "extractMin": "ABL min.",
       "extract": "ABL Soll",
-      "device": "Gerätestufe bei Nennbetrieb: Zuluft {supply}, Abluft {extract}"
+      "device": "Kennlinie Normalbetrieb: Zuluft {supply}, Abluft {extract}",
+      "stepless": "stufenlos"
     },
     "co2": {
       "title": "CO₂-Kontrolle",

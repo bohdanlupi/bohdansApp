@@ -3,7 +3,6 @@
 // workbook conflicts with SIA 382/5:2021 or the EnDK aid EN-105 (2018).
 // Air flows in m³/h, pressures in Pa, areas in m², lengths in mm unless noted.
 
-import type { FanStage, KwlDevice } from "./devices";
 
 // ---------------------------------------------------------------------------
 // Room types and design air flows (SIA 382/5, Tabellen 2 + 3)
@@ -126,91 +125,13 @@ export function airFlows(rooms: KwlRoom[], partyFlow: number | null, heightM = 2
 }
 
 // ---------------------------------------------------------------------------
-// Device: operating points on the fan curves, stage for the nominal flow, SPI
+// Device: SPI limits (operating points: device-operation.ts, Zehnder datasheets)
 // ---------------------------------------------------------------------------
-
-export const fanPressure = (stage: FanStage, flow: number) => stage.a * flow * flow + stage.b * flow + stage.c;
-
-/** Pressure of the system curve p = k·V², through the nominal point (flow, pressure drop). */
-export const systemCoefficient = (nominalFlow: number, pressureDrop: number) => pressureDrop / (nominalFlow * nominalFlow);
-
-/** Intersection of system curve k·V² and fan curve a·V² + b·V + c (the positive root), or 0. */
-export function operatingFlow(stage: FanStage, k: number): number {
-  const A = k - stage.a;
-  if (stage.c <= 0) return 0;
-  if (Math.abs(A) < 1e-12) return stage.b < 0 ? stage.c / -stage.b : 0;
-  const disc = stage.b * stage.b + 4 * A * stage.c;
-  if (disc < 0) return 0;
-  const root = (stage.b + Math.sqrt(disc)) / (2 * A);
-  return root > 0 ? root : 0;
-}
-
-export type OperatingPoint = { stage: number; flow: number; pressure: number; power: number | null };
-
-export type SideResult = {
-  nominalFlow: number;
-  pressureDrop: number;
-  k: number;
-  /** Highest stage first. */
-  points: OperatingPoint[];
-  /** Lowest stage whose operating point reaches the nominal flow; null when the device is too small. */
-  nominalStage: OperatingPoint | null;
-  /** Operating point of the highest stage (party / intensive ventilation). */
-  maxPoint: OperatingPoint;
-  /** Power at the nominal stage divided by the nominal flow [W per m³/h]. */
-  spi: number | null;
-};
-
-export function analyseSide(device: KwlDevice, nominalFlow: number, pressureDrop: number): SideResult | null {
-  if (!(nominalFlow > 0) || !(pressureDrop > 0)) return null;
-  const k = systemCoefficient(nominalFlow, pressureDrop);
-  const points = device.stages.map((stage) => {
-    const flow = operatingFlow(stage, k);
-    return { stage: stage.stage, flow, pressure: k * flow * flow, power: stage.power };
-  });
-  // The workbook takes the first stage (from the lowest) whose operating flow is above the nominal flow.
-  const nominalStage = [...points].reverse().find((p) => p.flow > nominalFlow) ?? null;
-  const spi = nominalStage?.power != null ? nominalStage.power / nominalFlow : null;
-  return { nominalFlow, pressureDrop, k, points, nominalStage, maxPoint: points[0], spi };
-}
 
 /** SIA 382/1 Absatz 5.7.5.1 – specific power of dwelling ventilation units [W per m³/h]. */
 export const spiLimit = 0.35;
 export const spiTarget = 0.28;
 
-export type DeviceResult = {
-  supply: SideResult | null;
-  extract: SideResult | null;
-  /** Party flow per side = min of both highest-stage operating points. */
-  partyFlow: number | null;
-  spi: number | null;
-  /** SPI comes from the power entered by hand rather than the device's stage data. */
-  spiFromInput: boolean;
-};
-
-/**
- * Both sides of a device. `powerInput` (W at nominal operation) overrides the stage power table;
- * then SPI = power / larger nominal flow.
- */
-export function analyseDevice(
-  device: KwlDevice | null,
-  supplyFlow: number,
-  extractFlow: number,
-  supplyDrop: number | null,
-  extractDrop: number | null,
-  powerInput: number | null,
-): DeviceResult {
-  const supply = device ? analyseSide(device, supplyFlow, supplyDrop ?? 0) : null;
-  const extract = device ? analyseSide(device, extractFlow, extractDrop ?? 0) : null;
-  const partyFlow = supply && extract ? Math.min(supply.maxPoint.flow, extract.maxPoint.flow) : null;
-  const largerFlow = Math.max(supplyFlow, extractFlow);
-
-  if (powerInput !== null && powerInput > 0 && largerFlow > 0) {
-    return { supply, extract, partyFlow, spi: powerInput / largerFlow, spiFromInput: true };
-  }
-  const values = [supply?.spi, extract?.spi].filter((v): v is number => v != null);
-  return { supply, extract, partyFlow, spi: values.length ? Math.max(...values) : null, spiFromInput: false };
-}
 
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
-import { airFlows, analyseDevice, outdoorAirClass, type SettlementKey, supplyFilterMatrix, type TrafficKey } from "./calc";
-import { findDevice } from "./devices";
 import { attachmentEffects, normalizeOptions } from "./attachments";
+import { airFlows, outdoorAirClass, type SettlementKey, supplyFilterMatrix, type TrafficKey } from "./calc";
+import { type DeviceResult, operateSide } from "./device-operation";
 import { checkDevice } from "./network-device";
 import { datasheetDevice } from "./products";
 import type { KwlData, KwlFilterInput } from "./schema";
@@ -16,11 +16,9 @@ export type SystemDrops = { supply: number | null; extract: number | null; syste
 export function evaluateKwl(data: KwlData, system: SystemDrops | null = null) {
   // The party flow depends on the device, the device on the nominal flows: nominal flows first.
   const base = airFlows(data.rooms, null, data.height);
-  // Zehnder datasheet device; its fan stage curves (if any) for the stage selection.
+  // Zehnder datasheet device with its attachments.
   const product = datasheetDevice(data.device.id);
   const options = normalizeOptions(product?.key ?? null, data.device.options);
-  // Stage curves are for the device alone: not with ComfoClime (other fans curve of the combination).
-  const device = options.clime ? null : findDevice(product?.key);
   // External pressure drops: from the ventilation system (duct network, critical paths) when one serves this
   // dwelling, else the values entered by hand.
   // ComfoFond-L Q in the outdoor air adds its pressure drop on the supply side (supply = total incl. ComfoFond).
@@ -45,22 +43,41 @@ export function evaluateKwl(data: KwlData, system: SystemDrops | null = null) {
     source: given.source,
     system: given.system,
   };
-  const stageResult = analyseDevice(device, base.summary.supply, base.summary.extract, drops.supply, drops.extract, data.device.power);
-  const { rows, summary } = airFlows(data.rooms, stageResult.partyFlow, data.height);
+  // Operating points on the datasheet Kennlinien: normal operation, minimum flow, party (largest possible flow).
+  const side = (s: "supply" | "extract") =>
+    operateSide({
+      deviceKey: product?.key ?? null,
+      options,
+      side: s,
+      nominalFlow: s === "supply" ? base.summary.supply : base.summary.extract,
+      minFlow: s === "supply" ? base.summary.minSupply : base.summary.minExtract,
+      dp: s === "supply" ? drops.supply : drops.extract,
+    });
+  const supplyOp = side("supply");
+  const extractOp = side("extract");
+  const partyFlow = supplyOp?.party && extractOp?.party ? Math.min(supplyOp.party.flow, extractOp.party.flow) : null;
+  const { rows, summary } = airFlows(data.rooms, partyFlow, data.height);
   const oda = effectiveOda(data.filter);
-  // Datasheet check (maximum external pressure, power from the measurement table): its SPI has priority over the
-  // stage power table; a power entered by hand overrides both.
+  // Datasheet check (maximum external pressure, power from the measurement table → SPI); a power entered by hand
+  // overrides the SPI.
   const datasheet = product
     ? checkDevice(product.key, { flow: summary.supply, dp: drops.given.supply ?? 0 }, { flow: summary.extract, dp: drops.extract ?? 0 }, options)
     : null;
-  const deviceResult = !stageResult.spiFromInput && datasheet?.spi != null ? { ...stageResult, spi: datasheet.spi } : stageResult;
+  const largerFlow = Math.max(summary.supply, summary.extract);
+  const spiFromInput = data.device.power !== null && data.device.power > 0 && largerFlow > 0;
+  const deviceResult: DeviceResult = {
+    supply: supplyOp,
+    extract: extractOp,
+    partyFlow,
+    spi: spiFromInput ? data.device.power! / largerFlow : (datasheet?.spi ?? null),
+    spiFromInput,
+  };
   return {
     product,
     options,
     datasheet,
     rows,
     summary,
-    device,
     deviceResult,
     drops,
     oda,

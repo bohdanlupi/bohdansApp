@@ -61,6 +61,10 @@ export type Product = {
     maxExternalCurve: [number, number][];
     maxFlow?: number;
     nominalFlow?: number;
+    /** «stages»: fan Kennlinien per stage / speed (SL); «constantFlow»: flow set freely below the pressure limit (Q, Flex). */
+    control?: "stages" | "constantFlow";
+    /** Fan Kennlinien of the datasheet diagram (external pressure over flow), highest first. */
+    fanCurves?: { label: string; points: [number, number][] }[];
   };
 };
 

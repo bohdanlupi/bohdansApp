@@ -14,6 +14,9 @@ import { fmt, Notice, Section } from "../fields";
 import type { WidgetCalc, WidgetProps } from "./types";
 
 /** All checks of one dwelling calculation against SIA 382/5. */
+/** Kennlinie of an operating point («stufenlos» for constant-volume control). */
+const curveOf = (p: { curve: string | null } | null | undefined, stepless: string) => (p ? (p.curve ?? stepless) : "–");
+
 export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
   const { data, result } = calc;
   const steps = fourSteps(data.rooms, params.operation === "demand");
@@ -26,7 +29,8 @@ export function dwellingChecks(calc: WidgetCalc, params: PlanParams) {
   const drop = drops.supply !== null || drops.extract !== null ? (drops.supply ?? 0) + (drops.extract ?? 0) : null;
   const pressure = externalPressureCheck(params.system, params.operation === "demand", drop);
   const tooSmall =
-    (result.device && ((result.deviceResult.supply && !result.deviceResult.supply.nominalStage) || (result.deviceResult.extract && !result.deviceResult.extract.nominalStage))) ||
+    result.deviceResult.supply?.tooSmall ||
+    result.deviceResult.extract?.tooSmall ||
     result.datasheet?.supply.ok === false ||
     result.datasheet?.extract.ok === false;
   return {
@@ -124,7 +128,7 @@ export function DwellingsWidget({ calcs, plan, projectId }: WidgetProps) {
                     <td className="px-2">
                       <Mark ok={c.spiOk} label={c.spi === null ? undefined : fmt(c.spi, 2)} />
                     </td>
-                    <td className={cn("px-2", c.tooSmall && "text-destructive")}>{calc.result.device?.name ?? "–"}</td>
+                    <td className={cn("px-2", c.tooSmall && "text-destructive")}>{calc.result.product?.name ?? "–"}</td>
                   </tr>
                 );
               })}
@@ -153,7 +157,7 @@ export function TargetsWidget({ calcs }: WidgetProps) {
               {calc.name}{" "}
               <span className="text-sm font-normal text-muted-foreground">
                 ({fmt(calc.result.summary.supply)} / {fmt(calc.result.summary.extract)} m³/h
-                {calc.result.device ? ` · ${calc.result.device.name}` : ""})
+                {calc.result.product ? ` · ${calc.result.product.name}` : ""})
               </span>
             </summary>
             <div className="overflow-x-auto px-3 pb-3">
@@ -188,8 +192,8 @@ export function TargetsWidget({ calcs }: WidgetProps) {
               </table>
               <p className="mt-2 text-xs text-muted-foreground">
                 {t("device", {
-                  supply: calc.result.deviceResult.supply?.nominalStage?.stage ?? "–",
-                  extract: calc.result.deviceResult.extract?.nominalStage?.stage ?? "–",
+                  supply: curveOf(calc.result.deviceResult.supply?.normal, t("stepless")),
+                  extract: curveOf(calc.result.deviceResult.extract?.normal, t("stepless")),
                 })}
               </p>
             </div>

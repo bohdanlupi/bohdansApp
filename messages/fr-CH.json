@@ -781,17 +781,18 @@
         "flow": "Débit [m³/h]",
         "pressure": "Pression [Pa]",
         "system": "courbe du réseau (calcul du réseau)",
-        "hint": "L’installation est dimensionnée si le point de fonctionnement se trouve sous la ligne de pression externe maximale. La courbe du réseau Δp = k · V² passe par le point de fonctionnement du calcul du réseau.",
+        "hint": "Courbes de la fiche technique Zehnder : ComfoAir SL par vitesse ou niveau ; ComfoAir Q et Flex règlent le débit en continu jusqu’à la limite de pression. La courbe du réseau Δp = k · V² passe par le point de fonctionnement du calcul du réseau.",
         "supplyPdf": "Côté air neuf",
         "extractPdf": "Côté air repris",
-        "pdfLegend": "Noir : pression externe max. (fiche technique) avec points de mesure ; gris : niveaux du ventilateur ; rouge pointillé : courbe du réseau issue du calcul avec point de fonctionnement ; vertical : débit nominal.",
-        "maxCurve": "pression externe max. (fiche technique)",
+        "pdfLegend": "En couleur : courbes de la fiche technique Zehnder (SL par niveau / vitesse) ; noir : limite de pression (ComfoAir Q / Flex, en continu) ; rouge pointillé : courbe du réseau issue du calcul. Points : bleu fonctionnement normal, vert débit minimal, rouge party.",
+        "maxCurve": "limite de pression (fiche technique, régulation à débit constant)",
         "measurements": "points de mesure fiche technique",
         "stages": "niveaux du ventilateur",
         "operating": "point de fonctionnement",
         "nominalFlow": "débit nominal",
         "systemPending": "La courbe du réseau suit après le calcul des pertes de charge (installation sous Dimensionnement).",
-        "pdfLegendPending": "Noir : pression externe max. (fiche technique) avec points de mesure ; gris : niveaux du ventilateur ; vertical : débit nominal. La courbe du réseau suit après le calcul du réseau."
+        "pdfLegendPending": "En couleur : courbes de la fiche technique Zehnder (SL par niveau / vitesse) ; noir : limite de pression (ComfoAir Q / Flex, en continu) ; vertical : débit nominal. La courbe du réseau suit après le calcul du réseau.",
+        "stagePoints": "points de fonctionnement des courbes"
       },
       "pressure": {
         "target": "Perte de charge externe {total} Pa : valeur cible ({target} Pa) selon SIA 382/5 tableau 7 respectée.",
@@ -814,7 +815,30 @@
       "fondFilterPdf": "avec filtre",
       "inclFondPdf": "y c. ComfoFond-L Q {dp} Pa",
       "fondLeftPdf": "air fourni à gauche",
-      "fondRightPdf": "air fourni à droite"
+      "fondRightPdf": "air fourni à droite",
+      "op": {
+        "title": "Points de fonctionnement (intersections des courbes avec la courbe du réseau)",
+        "sourceSystem": "Courbe du réseau issue du calcul « {name} »",
+        "sourceManual": "provisoire avec les pertes de charge saisies à la main",
+        "point": "Point de fonctionnement",
+        "curve": "Courbe",
+        "stepless": "en continu",
+        "normal": "Fonctionnement normal",
+        "normalHint": "débit utilisé AFO {supply} / ARE {extract} m³/h",
+        "minimum": "Débit minimal",
+        "minimumHint": "somme des valeurs minimales AFO {supply} / ARE {extract} m³/h",
+        "party": "Party (débit max.)",
+        "partyHint": "débit maximal à la perte de charge externe",
+        "allCurves": "Toutes les courbes",
+        "normalCard": "Courbe fonctionnement normal AFO / ARE",
+        "normalCardHint": "Courbe dont le point de fonctionnement est le plus proche du débit utilisé (ComfoAir Q / Flex : en continu).",
+        "partyCard": "Débit party AFO / ARE",
+        "partyCardHint": "Débit maximal à la perte de charge externe ; réparti dans les pièces : {flow} m³/h (côté le plus faible).",
+        "noDrops": "Saisir ou calculer les pertes de charge.",
+        "normalShort": "Normal",
+        "minimumShort": "Min.",
+        "partyShort": "Party"
+      }
     },
     "filter": {
       "traffic": {
@@ -1263,7 +1287,8 @@
       "supply": "AIN consigne",
       "extractMin": "ARE min.",
       "extract": "ARE consigne",
-      "device": "Niveau de l’appareil en service nominal : air neuf {supply}, air repris {extract}"
+      "device": "Courbe en fonctionnement normal : air fourni {supply}, air repris {extract}",
+      "stepless": "en continu"
     },
     "co2": {
       "title": "Contrôle du CO₂",

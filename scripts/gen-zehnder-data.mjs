@@ -102,6 +102,28 @@ function inner(v) {
   return undefined;
 }
 
+/**
+ * Fan Kennlinien of the datasheet diagram, highest first. SL 220: speed lines (the max. line is the 100 % curve),
+ * SL 330: steps (the max. line is step 9). Units with constant-volume control (ComfoAir Q, Flex) have no stage
+ * curves: their max. line is the pressure limit of the control.
+ */
+function fanCurvesOf(v, maxCurve) {
+  if (Array.isArray(v.fanSpeedLines) && v.fanSpeedLines.length) {
+    return {
+      control: "stages",
+      fanCurves: [{ label: "100 %", points: maxCurve }, ...v.fanSpeedLines.map((l) => ({ label: `${l.speedPct} %`, points: points(l.points) }))],
+    };
+  }
+  if (Array.isArray(v.fanStepLines) && v.fanStepLines.length) {
+    const top = Math.max(...v.fanStepLines.map((l) => l.step)) + 1;
+    return {
+      control: "stages",
+      fanCurves: [{ label: `Stufe ${top}`, points: maxCurve }, ...v.fanStepLines.map((l) => ({ label: `Stufe ${l.step}`, points: points(l.points) }))],
+    };
+  }
+  return { control: "constantFlow", fanCurves: [] };
+}
+
 // Ventilation units (measurement table + max. external pressure line) and extensions with a pressure drop.
 function addDevices(json) {
   if (!json) return;
@@ -127,7 +149,13 @@ function addDevices(json) {
           curves: [],
           articles: arts(v.articles),
           source: { file: p.file, page: num(v.pages?.data) ?? num(p.page) ?? undefined },
-          device: { measurements, maxExternalCurve: maxCurve, maxFlow: num(v.maxFlow) ?? undefined, nominalFlow: num(v.nominalFlow?.qv) ?? undefined },
+          device: {
+            measurements,
+            maxExternalCurve: maxCurve,
+            maxFlow: num(v.maxFlow) ?? undefined,
+            nominalFlow: num(v.nominalFlow?.qv) ?? undefined,
+            ...fanCurvesOf(v, maxCurve),
+          },
         });
       } else if (v.pressureDrop && !/ComfoFond/.test(p.product)) {
         // (ComfoFond-L Q is modelled as a device attachment, see attachments() below.)

@@ -2,7 +2,8 @@ import { Circle, Document, G, Line, Path, Rect, Svg, Text, View } from "@react-p
 
 import { hasOptions, optionsLabel } from "@/lib/kwl/attachments";
 import { findRoomType, spiLimit, spiTarget } from "@/lib/kwl/calc";
-import { chartTicks, deviceChart, type DeviceChartData } from "@/lib/kwl/device-chart";
+import { chartTicks, curveColors, deviceChart, type DeviceChartData } from "@/lib/kwl/device-chart";
+import type { OperatingPoint } from "@/lib/kwl/device-operation";
 import type { KwlEvaluation } from "@/lib/kwl/evaluate";
 import type { KwlData } from "@/lib/kwl/schema";
 import { formatNumber } from "@/lib/number-input";
@@ -69,7 +70,7 @@ export function KwlDocument({
   pressure: PressureCheck;
 }) {
   const t: KwlTranslate = (key, values) => winAnsi(translate(key, values));
-  const { rows, summary, device, product, datasheet, deviceResult, oda, supplyFilter } = result;
+  const { rows, summary, product, datasheet, deviceResult, oda, supplyFilter } = result;
   const { supply, extract, spi, partyFlow } = deviceResult;
   const full = variant === "full";
   const complete = result.drops.source === "system";
@@ -263,8 +264,6 @@ export function KwlDocument({
                             [t("device.datasheet.power"), `${n(datasheet.powerW)} W`],
                           ] as [string, string][])
                         : []),
-                      ...(device ? ([[t("device.nominalStage"), `${supply?.nominalStage?.stage ?? "–"} / ${extract?.nominalStage?.stage ?? "–"}`]] as [string, string][]) : []),
-                      ...(partyFlow ? ([[t("summary.party"), `${n(partyFlow)} m³/h`]] as [string, string][]) : []),
                       [t("device.spi"), spi === null ? t("device.spiUnknown") : `${formatNumber(spi, 2)} ${t("device.spiUnit")}`],
                       ...(spi === null
                         ? []
@@ -278,48 +277,50 @@ export function KwlDocument({
                 {(datasheet?.supply.ok === false || datasheet?.extract.ok === false) && (
                   <Text style={{ color: "#b91c1c", marginTop: 4 }}>{t("device.datasheet.tooSmall")}</Text>
                 )}
-                {((supply && !supply.nominalStage) || (extract && !extract.nominalStage)) && <Text style={{ color: "#b91c1c", marginTop: 4 }}>{t("device.tooSmall")}</Text>}
-                {device && (
-                  <View wrap={false}>
-                    <View style={{ marginTop: 8 }}>
-                      <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, ...styles.bold, fontSize: 7.5 }}>
-                        <Text style={{ ...cell, width: 60 }}>{t("device.stage")}</Text>
-                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("supplyShort")} m³/h</Text>
-                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("supplyShort")} Pa</Text>
-                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("extractShort")} m³/h</Text>
-                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("extractShort")} Pa</Text>
-                        <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{t("device.stagePower")}</Text>
-                      </View>
-                      {device.stages.map((stage, i) => {
-                        const nominal = stage.stage === supply?.nominalStage?.stage || stage.stage === extract?.nominalStage?.stage;
-                        return (
-                          <View key={stage.stage} style={{ flexDirection: "row", fontSize: 7.5, borderBottomWidth: 0.5, borderBottomColor: colors.line, ...(nominal ? styles.bold : {}) }}>
-                            <Text style={{ ...cell, width: 60 }}>{t("device.stageN", { stage: stage.stage })}</Text>
-                            <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(supply?.points[i].flow)}</Text>
-                            <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(supply?.points[i].pressure)}</Text>
-                            <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(extract?.points[i].flow)}</Text>
-                            <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{n(extract?.points[i].pressure)}</Text>
-                            <Text style={{ ...cell, flex: 1, textAlign: "right" }}>{stage.power ?? ""}</Text>
-                          </View>
-                        );
-                      })}
+                {(supply?.tooSmall || extract?.tooSmall) && <Text style={{ color: "#b91c1c", marginTop: 4 }}>{t("device.tooSmall")}</Text>}
+                {(supply?.k || extract?.k) && (
+                  <View wrap={false} style={{ marginTop: 8 }}>
+                    <SubHeading>{t("device.op.title")}</SubHeading>
+                    <Text style={{ fontSize: 7, color: colors.muted, marginBottom: 2 }}>
+                      {complete && result.drops.system ? t("device.op.sourceSystem", { name: result.drops.system.name }) : t("device.op.sourceManual")}
+                    </Text>
+                    <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, ...styles.bold, fontSize: 7 }}>
+                      <Text style={{ ...cell, flex: 1 }}>{t("device.op.point")}</Text>
+                      {(["supplyShort", "extractShort"] as const).flatMap((side) => [
+                        <Text key={`${side}c`} style={{ ...cell, width: 48 }}>{`${t(side)} ${t("device.op.curve")}`}</Text>,
+                        <Text key={`${side}q`} style={{ ...cell, width: 34, textAlign: "right" }}>m³/h</Text>,
+                        <Text key={`${side}p`} style={{ ...cell, width: 28, textAlign: "right" }}>Pa</Text>,
+                        <Text key={`${side}w`} style={{ ...cell, width: 26, textAlign: "right" }}>W</Text>,
+                      ])}
                     </View>
+                    {(
+                      [
+                        ["normal", t("device.op.normal")],
+                        ["minimum", t("device.op.minimum")],
+                        ["party", t("device.op.party")],
+                      ] as const
+                    ).map(([key, label]) => (
+                      <View key={key} style={{ flexDirection: "row", fontSize: 7.5, borderBottomWidth: 0.5, borderBottomColor: colors.line, ...(key === "normal" ? styles.bold : {}) }}>
+                        <Text style={{ ...cell, flex: 1 }}>{label}</Text>
+                        {[supply, extract].flatMap((op, i) => {
+                          const p = op?.[key] ?? null;
+                          return [
+                            <Text key={`${i}c`} style={{ ...cell, width: 48 }}>{p ? (p.curve ?? t("device.op.stepless")) : "–"}</Text>,
+                            <Text key={`${i}q`} style={{ ...cell, width: 34, textAlign: "right" }}>{n(p?.flow)}</Text>,
+                            <Text key={`${i}p`} style={{ ...cell, width: 28, textAlign: "right" }}>{n(p?.pressure)}</Text>,
+                            <Text key={`${i}w`} style={{ ...cell, width: 26, textAlign: "right" }}>{n(p?.powerW)}</Text>,
+                          ];
+                        })}
+                      </View>
+                    ))}
+                    {partyFlow ? <Text style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>{t("device.op.partyCardHint", { flow: n(partyFlow) })}</Text> : null}
                   </View>
                 )}
                 <View wrap={false} style={{ marginTop: 10 }}>
                   <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     {(["supply", "extract"] as const).map((key) => {
-                      const chart = deviceChart({
-                        deviceKey: product.key,
-                        options: result.options,
-                        side: key,
-                        flow: key === "supply" ? summary.supply : summary.extract,
-                        dp: key === "supply" ? result.drops.supply : result.drops.extract,
-                        withSystem: complete,
-                        stageDevice: device,
-                        stageSide: key === "supply" ? supply : extract,
-                      });
-                      return chart ? <PdfDeviceChart key={key} chart={chart} title={t(`device.chart.${key}Pdf`)} /> : null;
+                      const op = key === "supply" ? supply : extract;
+                      return op && product.device ? <PdfDeviceChart key={key} chart={deviceChart(op, product.device.measurements, complete)} title={t(`device.chart.${key}Pdf`)} /> : null;
                     })}
                   </View>
                   <Text style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>{complete ? t("device.chart.pdfLegend") : t("device.chart.pdfLegendPending")}</Text>
@@ -371,6 +372,7 @@ function PdfDeviceChart({ chart, title }: { chart: DeviceChartData; title: strin
   const x = (v: number) => pad.left + (v / chart.xMax) * (CW - pad.left - pad.right);
   const y = (p: number) => CH - pad.bottom - (p / chart.yMax) * (CH - pad.top - pad.bottom);
   const path = (points: [number, number][]) => points.map(([v, p], i) => `${i ? "L" : "M"}${x(v).toFixed(1)} ${y(p).toFixed(1)}`).join(" ");
+  const key = (p: OperatingPoint | null, fill: string) => (p ? <Circle cx={x(p.flow)} cy={y(p.pressure)} r={2.8} fill={fill} /> : null);
 
   return (
     <View style={{ width: CW }}>
@@ -392,21 +394,28 @@ function PdfDeviceChart({ chart, title }: { chart: DeviceChartData; title: strin
             </Text>
           </G>
         ))}
-        {chart.stages.map((st) =>
-          st.points.length > 1 ? (
-            <Path key={st.stage} d={path(st.points)} fill="none" stroke={st.stage === chart.nominalStage && chart.system ? colors.brand : "#b5b5b5"} strokeWidth={st.stage === chart.nominalStage && chart.system ? 1.2 : 0.6} />
+        {chart.curves.map((c, i) =>
+          c.points.length > 1 ? (
+            <G key={c.label}>
+              <Path d={path(c.points)} fill="none" stroke={curveColors[i % curveColors.length]} strokeWidth={i === 0 ? 1.2 : 0.8} />
+              <Text x={x(c.points[0][0]) + 2} y={y(c.points[0][1]) - 1.5} style={{ fontSize: 4.5 }} fill={curveColors[i % curveColors.length]}>
+                {winAnsi(c.label)}
+              </Text>
+            </G>
           ) : null,
         )}
-        {chart.maxCurve.length > 1 && <Path d={path(chart.maxCurve)} fill="none" stroke={colors.text} strokeWidth={1.4} />}
+        {chart.control === "constantFlow" && chart.limit.length > 1 && <Path d={path(chart.limit)} fill="none" stroke={colors.text} strokeWidth={1.3} />}
         {chart.measurements.map((m, i) =>
-          m.qv <= chart.xMax && m.pst <= chart.yMax ? <Rect key={i} x={x(m.qv) - 1.6} y={y(m.pst) - 1.6} width={3.2} height={3.2} fill="#ffffff" stroke={colors.text} strokeWidth={0.6} /> : null,
+          m.qv <= chart.xMax && m.pst <= chart.yMax ? <Rect key={i} x={x(m.qv) - 1.4} y={y(m.pst) - 1.4} width={2.8} height={2.8} fill="#ffffff" stroke={colors.muted} strokeWidth={0.5} /> : null,
         )}
-        {chart.flow > 0 && chart.flow <= chart.xMax && <Line x1={x(chart.flow)} x2={x(chart.flow)} y1={pad.top} y2={CH - pad.bottom} stroke={colors.muted} strokeWidth={0.6} strokeDasharray="1.5 2" />}
+        {chart.nominalFlow > 0 && chart.nominalFlow <= chart.xMax && <Line x1={x(chart.nominalFlow)} x2={x(chart.nominalFlow)} y1={pad.top} y2={CH - pad.bottom} stroke={colors.muted} strokeWidth={0.6} strokeDasharray="1.5 2" />}
         {chart.system && chart.system.length > 1 && <Path d={path(chart.system)} fill="none" stroke="#c0392b" strokeWidth={1} strokeDasharray="3 2" />}
-        {chart.stagePoints.map((p) => (
-          <Circle key={p.stage} cx={x(p.flow)} cy={y(p.pressure)} r={p.stage === chart.nominalStage ? 2 : 1.2} fill={p.stage === chart.nominalStage ? colors.brand : colors.text} />
+        {chart.stagePoints.map((p, i) => (
+          <Circle key={p.curve ?? i} cx={x(p.flow)} cy={y(p.pressure)} r={1.3} fill={curveColors[Math.max(0, chart.curves.findIndex((c) => c.label === p.curve)) % curveColors.length]} />
         ))}
-        {chart.operating && <Circle cx={x(chart.operating.flow)} cy={y(chart.operating.pressure)} r={2.6} fill="#c0392b" />}
+        {key(chart.minimum, "#059669")}
+        {key(chart.normal, colors.brand)}
+        {key(chart.party, "#c0392b")}
         <Text x={(pad.left + CW) / 2} y={CH - 2} style={{ fontSize: 6 }} textAnchor="middle" fill={colors.muted}>
           m³/h
         </Text>
