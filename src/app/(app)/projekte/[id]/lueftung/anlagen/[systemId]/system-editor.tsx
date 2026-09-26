@@ -70,6 +70,8 @@ export function SystemEditor({
     [data.device, data.deviceOptions, result],
   );
   const roomLabel = (n: NetNode) => rooms.find((r) => r.calcId === n.calcId && r.roomId === n.roomId)?.name ?? (n.label || t("unassigned"));
+  const schemaOptions = normalizeOptions(data.device, data.deviceOptions);
+  const schemaAttachments = { fond: schemaOptions.fond !== "none", clime: schemaOptions.clime !== null };
   const layout = useMemo(() => layoutSystem(data, rooms, roomLabel), [data, rooms]); // eslint-disable-line react-hooks/exhaustive-deps
   const highlight = useMemo(() => {
     const ids = new Set<string>();
@@ -270,6 +272,7 @@ export function SystemEditor({
                       fondLeft: tDevice("fondLeft"),
                       fondRight: tDevice("fondRight"),
                     }),
+                    attachments: schemaAttachments,
                     outdoor: t("air.outdoor"),
                     supply: t("air.supply"),
                     extract: t("air.extract"),

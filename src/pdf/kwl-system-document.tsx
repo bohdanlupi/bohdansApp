@@ -5,7 +5,8 @@ import { spiLimit, spiTarget } from "@/lib/kwl/calc";
 import type { NetNode, Quantity, RoomFlow, SystemData, SystemResult, systemChecks } from "@/lib/kwl/network";
 import type { DeviceCheck } from "@/lib/kwl/network-device";
 import { bendAngles, findProduct, measuredCoverPrefix } from "@/lib/kwl/products";
-import { type AirKind, airColors, type SchemaLayout } from "@/lib/kwl/schema-layout";
+import { airColors, type SchemaLayout } from "@/lib/kwl/schema-layout";
+import { deviceSymbols, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import { formatNumber } from "@/lib/number-input";
 import type { FirmSettings } from "@/lib/supabase/types";
 
@@ -191,6 +192,7 @@ export function KwlSystemDocument({
           labels={{
             device: product?.name ?? s("device"),
             deviceLines: attachmentList,
+            attachments: { fond: data.deviceOptions.fond !== "none", clime: data.deviceOptions.clime !== null },
             outdoor: s("air.outdoor"),
             supply: s("air.supply"),
             extract: s("air.extract"),
@@ -306,7 +308,7 @@ function ElementTable({
 }
 
 // ---------------------------------------------------------------------------
-// Prinzipschema (same layout and symbols as the editor, drawn with react-pdf primitives)
+// Prinzipschema (same layout and SIA 410 symbols as the editor, drawn with react-pdf primitives)
 // ---------------------------------------------------------------------------
 
 const PAGE_W = 742; // A4 landscape minus margins
@@ -314,16 +316,53 @@ const PAGE_H = 390;
 const ink = "#111111";
 const muted = "#666666";
 
+const pdfPaint = (p: Paint | undefined) => (p === undefined ? undefined : p === "ink" ? ink : p === "bg" ? "#ffffff" : p === "muted" ? muted : p);
+
+function PdfPrims({ prims }: { prims: Prim[] }) {
+  return (
+    <G>
+      {prims.map((p, i) => {
+        switch (p.t) {
+          case "rect":
+            return <Rect key={i} x={p.x} y={p.y} width={p.w} height={p.h} rx={p.rx} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
+          case "line":
+            return <Line key={i} x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} strokeDasharray={p.dash} />;
+          case "circle":
+            return <Circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
+          case "path":
+            return <Path key={i} d={p.d} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
+          case "polygon":
+            return <Polygon key={i} points={p.points} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
+          case "text":
+            return (
+              <Text key={i} x={p.x} y={p.y} textAnchor={p.anchor ?? "start"} fill={pdfPaint(p.fill)} style={{ fontSize: p.size, fontFamily: p.bold ? "Helvetica-Bold" : "Helvetica" }}>
+                {winAnsi(p.text)}
+              </Text>
+            );
+        }
+      })}
+    </G>
+  );
+}
+
 function PdfSchema({
   layout,
   labels,
   info,
 }: {
   layout: SchemaLayout;
-  labels: { device: string; deviceLines: string[]; outdoor: string; supply: string; extract: string; exhaust: string };
+  labels: {
+    device: string;
+    deviceLines: string[];
+    attachments: { fond: boolean; clime: boolean };
+    outdoor: string;
+    supply: string;
+    extract: string;
+    exhaust: string;
+  };
   info: (node: NetNode) => string;
 }) {
-  const { width, height, device } = layout;
+  const { width, height, device, airY } = layout;
   const scale = Math.min(PAGE_W / width, PAGE_H / height, 1.4);
   const text = (x: number, y: number, value: string, size: number, opts: { anchor?: "start" | "middle" | "end"; fill?: string; bold?: boolean } = {}) => (
     <Text x={x} y={y} textAnchor={opts.anchor ?? "start"} fill={opts.fill ?? ink} style={{ fontSize: size, fontFamily: opts.bold ? "Helvetica-Bold" : "Helvetica" }}>
@@ -346,119 +385,33 @@ function PdfSchema({
         return <Path key={i} d={d} fill="none" stroke={airColors[e.air]} strokeWidth={1.8} />;
       })}
 
-      <Rect x={device.x} y={device.y} width={device.w} height={device.h} rx={4} fill="#ffffff" stroke={ink} strokeWidth={1.5} />
-      {text(device.x + device.w / 2, device.y + 14, labels.device, 10, { anchor: "middle", bold: true })}
-      {labels.deviceLines.map((line, i) => (
-        <G key={line}>{text(device.x + device.w / 2, device.y + device.h + 12 + i * 11, `+ ${line}`, 8.5, { anchor: "middle", fill: muted })}</G>
-      ))}
-      <G>
-        <Rect x={device.x + device.w / 2 - 18} y={device.y + device.h / 2 - 18} width={36} height={36} fill="none" stroke={ink} strokeWidth={1.3} />
-        <Line x1={device.x + device.w / 2 - 18} y1={device.y + device.h / 2 - 18} x2={device.x + device.w / 2 + 18} y2={device.y + device.h / 2 + 18} stroke={ink} strokeWidth={1.3} />
-        <Line x1={device.x + device.w / 2 + 18} y1={device.y + device.h / 2 - 18} x2={device.x + device.w / 2 - 18} y2={device.y + device.h / 2 + 18} stroke={ink} strokeWidth={1.3} />
-      </G>
-      {[device.y + 34, device.y + device.h - 34].map((y, i) => {
-        const cx = device.x + device.w - 22;
+      <PdfPrims prims={deviceSymbols(layout, labels.device, labels.deviceLines, labels.attachments)} />
+      {text(device.x - 6, airY.supply + 28, labels.outdoor, 9.5, { anchor: "end", fill: airColors.outdoor, bold: true })}
+      {text(device.x - 6, airY.extract + 28, labels.exhaust, 9.5, { anchor: "end", fill: airColors.exhaust, bold: true })}
+      {text(device.x + device.w + 6, airY.supply + 28, labels.supply, 9.5, { fill: airColors.supply, bold: true })}
+      {text(device.x + device.w + 6, airY.extract + 28, labels.extract, 9.5, { fill: airColors.extract, bold: true })}
+
+      {layout.nodes.map(({ node, air, x, y }) => {
+        const { prims, top } = nodeSymbol(node, air, x, y);
         return (
-          <G key={i}>
-            <Circle cx={cx} cy={y} r={10} fill="#ffffff" stroke={ink} strokeWidth={1.3} />
-            <Polygon points={i === 0 ? `${cx - 5},${y - 6} ${cx + 7},${y} ${cx - 5},${y + 6}` : `${cx + 5},${y - 6} ${cx - 7},${y} ${cx + 5},${y + 6}`} fill="none" stroke={ink} strokeWidth={1.1} />
+          <G key={node.id}>
+            <PdfPrims prims={prims} />
+            {node.type !== "terminal" && text(x, y - top - 5, info(node), 8, { anchor: "middle", fill: muted })}
           </G>
         );
       })}
-      {text(device.x - 4, layout.airY.supply + 14, labels.outdoor, 9.5, { anchor: "end", fill: airColors.outdoor, bold: true })}
-      {text(device.x - 4, layout.airY.extract + 14, labels.exhaust, 9.5, { anchor: "end", fill: airColors.exhaust, bold: true })}
-      {text(device.x + device.w + 4, layout.airY.supply + 14, labels.supply, 9.5, { fill: airColors.supply, bold: true })}
-      {text(device.x + device.w + 4, layout.airY.extract + 14, labels.extract, 9.5, { fill: airColors.extract, bold: true })}
-
-      {layout.nodes.map(({ node, air, x, y }) => (
-        <G key={node.id}>
-          <PdfSymbol node={node} air={air} x={x} y={y} />
-          {node.type !== "terminal" && text(x, y - 12, info(node), 8, { anchor: "middle", fill: muted })}
-        </G>
-      ))}
 
       {layout.labels.map((l) => {
         const node = layout.nodes.find((x) => x.node.id === l.nodeId)?.node;
-        const parts = node ? terminalParts(node) : "";
+        const parts = node ? terminalParts(node, measuredCoverPrefix) : "";
         const r = node ? info(node) : "";
         return (
           <G key={l.nodeId}>
-            {text(l.x, l.y + 4, l.text, 10)}
-            {text(l.x, l.y + 15, [parts, r].filter(Boolean).join(" · "), 7.5, { fill: muted })}
+            {text(l.x, l.y + 1, l.text, 10)}
+            {text(l.x, l.y + 13, [parts, r].filter(Boolean).join(" · "), 7.5, { fill: muted })}
           </G>
         );
       })}
     </Svg>
   );
-}
-
-function PdfSymbol({ node, air, x, y }: { node: NetNode; air: AirKind; x: number; y: number }) {
-  const color = airColors[air];
-  const kind = findProduct(node.product)?.kind;
-  const box = (w: number, h: number, extra?: React.ReactNode) => (
-    <G>
-      <Rect x={x - w / 2} y={y - h / 2} width={w} height={h} fill="#ffffff" stroke={ink} strokeWidth={1.2} />
-      {extra}
-    </G>
-  );
-  const hatch = (w: number, h: number) => (
-    <G>
-      {Array.from({ length: Math.floor((h - w) / 7) + 1 }, (_, i) => (
-        <Line key={i} x1={x - w / 2} y1={y - h / 2 + i * 7} x2={x + w / 2} y2={y - h / 2 + i * 7 + w} stroke={ink} strokeWidth={0.6} />
-      ))}
-    </G>
-  );
-
-  switch (node.type) {
-    case "duct":
-      return <Line x1={x - 3} y1={y - 5} x2={x + 3} y2={y + 5} stroke={color} strokeWidth={1.5} />;
-    case "bend":
-      return <Path d={`M${x - 6},${y} A6,6 0 0 1 ${x},${y - 6}`} fill="none" stroke={color} strokeWidth={2} />;
-    case "tee":
-      return <Circle cx={x} cy={y} r={3.5} fill={color} />;
-    case "distributor":
-      return box(
-        16,
-        30,
-        [0, 1, 2, 3].map((i) => <Line key={i} x1={x - 8} x2={x + 8} y1={y - 9 + i * 6} y2={y - 9 + i * 6} stroke={ink} strokeWidth={0.8} />),
-      );
-    case "terminal": {
-      const out = air === "supply";
-      const tip = out ? x + 16 : x + 1;
-      const dir = out ? 1 : -1;
-      return (
-        <G>
-          <Line x1={x - 2} x2={x - 2} y1={y - 8} y2={y + 8} stroke={ink} strokeWidth={2} />
-          <Line x1={out ? x : x + 16} y1={y} x2={tip - dir * 5} y2={y} stroke={color} strokeWidth={1.6} />
-          <Polygon points={`${tip},${y} ${tip - dir * 6},${y - 4} ${tip - dir * 6},${y + 4}`} fill={color} />
-        </G>
-      );
-    }
-    default: {
-      if (kind === "silencer")
-        return box(
-          14,
-          28,
-          [1, 2].map((i) => <Line key={i} x1={x - 7} x2={x + 7} y1={y - 14 + i * 9.33} y2={y - 14 + i * 9.33} stroke={ink} strokeWidth={0.8} />),
-        );
-      if (kind === "filter") return box(12, 28, <Path d={`M${x - 6},${y - 14} L${x + 6},${y} L${x - 6},${y + 14}`} fill="none" stroke={ink} strokeWidth={0.9} />);
-      if (kind === "valve" || kind === "terminal") return box(22, 10, <Circle cx={x} cy={y} r={2} fill={ink} />);
-      if (air === "outdoor" || air === "exhaust") return box(12, 28, hatch(12, 28));
-      return box(16, 16);
-    }
-  }
-}
-
-/** Short «Auslass + cover» text, as in the editor. */
-function terminalParts(node: NetNode): string {
-  if (node.type !== "terminal") return "";
-  const casing = findProduct(node.product);
-  const short = (name: string) =>
-    name
-      .replace(/^Comfo(Case|Grid|Valve)\s+/, "")
-      .replace(/\s+für ComfoCase .*$/, "")
-      .replace(/\s*\(.*\)$/, "");
-  const caseName = casing ? short(casing.family ?? casing.name) : "";
-  const cover = node.cover?.startsWith(measuredCoverPrefix) ? node.cover.slice(measuredCoverPrefix.length) : (findProduct(node.cover)?.name ?? "");
-  return [caseName, cover && short(cover)].filter(Boolean).join(" + ");
 }

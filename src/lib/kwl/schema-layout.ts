@@ -32,8 +32,11 @@ export type SchemaLayout = {
   floors: { air: AirKind; floor: string; y0: number; y1: number }[];
 };
 
-const DX = 92;
-const DY = 34;
+// Spacing so that the labels above the symbols («150 m³/h · 8.8 Pa») and the room labels never overlap.
+const DX = 112;
+const DY = 46;
+/** Gap between the unit and the first element on each side (room for the ComfoFond / ComfoClime coils). */
+const GAP = 70;
 const floorOrder = (floor: string) => {
   const f = floor.trim().toUpperCase();
   const known = ["DG", "OG3", "3.OG", "OG2", "2.OG", "OG", "1.OG", "OG1", "EG", "UG", "KG", "UG2"];
@@ -60,10 +63,10 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
   const labels: LayoutLeafLabel[] = [];
   const floors: SchemaLayout["floors"] = [];
 
-  const chainWidth = Math.max(data.outdoor.length, data.exhaust.length, 1) * DX + 60;
+  const chainWidth = Math.max(data.outdoor.length, data.exhaust.length, 1) * DX + GAP;
   const deviceX = chainWidth;
   const deviceW = 110;
-  const treeX0 = deviceX + deviceW + 40;
+  const treeX0 = deviceX + deviceW + GAP;
 
   // Trees: tidy layout, x by depth, y by leaf order.
   const placeTree = (roots: NetNode[], air: AirKind, top: number) => {
@@ -102,7 +105,7 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
     return { rootYs, height: Math.max(leaf, 1) * DY };
   };
 
-  const supplyTop = 40;
+  const supplyTop = 48;
   const supply = placeTree(data.supply, "supply", supplyTop);
   const extractTop = supplyTop + supply.height + 50;
   const extract = placeTree(data.extract, "extract", extractTop);
@@ -127,7 +130,7 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
   const placeChain = (chain: NetNode[], air: AirKind, y: number) => {
     let prevX = deviceX;
     chain.forEach((n, i) => {
-      const x = deviceX - 40 - i * DX;
+      const x = deviceX - GAP - i * DX;
       edges.push({ from: { x: prevX, y }, to: { x, y }, air, nodeId: n.id });
       nodes.push({ node: n, air, x, y, depth: i });
       prevX = x;
@@ -137,7 +140,8 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
   placeChain(data.exhaust, "exhaust", extractY);
 
   const maxDepth = Math.max(0, ...nodes.filter((n) => n.air === "supply" || n.air === "extract").map((n) => n.depth));
-  const width = treeX0 + (maxDepth + 1) * DX + 200;
-  const height = extractTop + extract.height + 50; // room below the device for the attachment labels
+  // Right of the last terminals: room name and «Auslass + cover · flow · Δp», then the storey bands.
+  const width = treeX0 + maxDepth * DX + 34 + 250 + 70;
+  const height = extractTop + extract.height + 60; // room below the device for the attachment labels
   return { width, height, device: { x: deviceX, y: deviceY, w: deviceW, h: Math.max(deviceH, 80) }, airY: { supply: supplyY, extract: extractY }, nodes, edges, labels, floors };
 }
