@@ -990,6 +990,27 @@
       "baseLow": "Dans ces pièces, l’air neuf retenu est inférieur à la ventilation de base de 0.1 h⁻¹ : {rooms}.",
       "apply": "Répartir selon SIA 382/5 (étapes 3 + 4)",
       "applyHint": "Règle air neuf et repris sur la valeur déterminante : air neuf réparti également sur les chambres, air repris selon les valeurs du tableau 3. Convenir ensuite des valeurs plus élevées (p. ex. LUPI) avec le maître d’ouvrage."
+    },
+    "pdfFlows": "PDF débits & filtres",
+    "pdfFull": "PDF complet",
+    "pdfFullHint": "Les pertes de charge sont encore saisies à la main – le calcul du réseau de l’installation manque.",
+    "report": {
+      "flowsTitle": "Débits d’air et classes de filtres",
+      "flowsNote": "Version provisoire : débits selon SIA 382/5 et classes de filtres. Le calcul des pertes de charge et le choix de l’appareil suivent.",
+      "manualDropsNote": "Les pertes de charge externes sont saisies à la main ; le calcul du réseau de l’installation est encore en attente.",
+      "area": "Surface de référence énergétique",
+      "volume": "Volume d’air",
+      "supply": "Air fourni",
+      "extract": "Air repris",
+      "airChange": "Renouvellement d’air",
+      "base": "Aération de base",
+      "pressureTitle": "Pertes de charge externes",
+      "pressureSource": "Base",
+      "fromSystem": "Calcul du réseau de l’installation « {name} »",
+      "manual": "saisies à la main",
+      "table7": "SIA 382/5 tableau 7",
+      "deviceCheck": "Contrôle de l’appareil",
+      "typeShort": "Type"
     }
   },
   "kwlPlan": {
@@ -1567,7 +1588,31 @@
     "partCaseNone": "sans supplément",
     "partTotal": "Δp boîtier + recouvrement",
     "bendReference": "pas de pièce dans le système – ζ de référence {zeta}, position R dans le descriptif",
-    "bendsDp": "dont coudes"
+    "bendsDp": "dont coudes",
+    "pdf": "PDF",
+    "pdfTitle": "Installation de ventilation",
+    "pdfSystem": "Installation",
+    "pdfTable7": "SIA 382/5 tableau 7",
+    "pdfDeviceCheck": "Contrôle de l’appareil (fiche technique Zehnder)",
+    "pdfOk": "respecté",
+    "pdfNotOk": "non respecté",
+    "pdfSpiCheck": "valeur limite {limit}, valeur cible {target} : {status}",
+    "pdfSpi": {
+      "target": "valeur cible respectée",
+      "limit": "valeur limite respectée",
+      "exceeded": "valeur limite dépassée"
+    },
+    "pdfFond": "ComfoFond-L Q",
+    "pdfPump": "pompe {w} W",
+    "pdfHeatCool": "chauffage / refroidissement",
+    "pdfSchemaHint": "Symboles selon SIA 410. Par élément débit et perte de charge ; pour les pièces bouche + recouvrement.",
+    "pdfElements": "Éléments",
+    "pdfDetail": "Longueur / nombre",
+    "pdfCumulative": "cumulé",
+    "pdfPieces": "pce",
+    "pdfParallel": "en parallèle",
+    "pdfBends": "Coudes",
+    "pdfNotes": "Remarques"
   },
   "kwlDevice": {
     "attachments": "Accessoires de l’appareil",

@@ -1,15 +1,15 @@
 "use client";
 
-import { ListPlus, Save, Trash2, Wand2 } from "lucide-react";
+import { FileText, ListPlus, Save, Trash2, Wand2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { ConfirmButton } from "@/components/confirm-button";
 import type { FormMessageKey } from "@/components/form";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { normalizeOptions, optionsLabel } from "@/lib/kwl/attachments";
+import { normalizeOptions, optionsList } from "@/lib/kwl/attachments";
 import { evaluateSystem, type NetNode, pathTo, roomFlows, type SystemData } from "@/lib/kwl/network";
 import { defaultSystem, starToSystem } from "@/lib/kwl/network-defaults";
 import { checkDevice } from "@/lib/kwl/network-device";
@@ -145,23 +145,40 @@ export function SystemEditor({
             />
           </div>
         </div>
-        {editable && (
-          <div className="flex flex-wrap gap-2">
-            <ConfirmButton
-              variant="outline"
-              label={t("delete")}
-              trigger={<Trash2 />}
-              title={t("deleteTitle")}
-              text={t("deleteText", { name })}
-              confirmLabel={t("delete")}
-              onConfirm={() => deleteSystem(id, projectId)}
-            />
-            <Button onClick={save} disabled={!dirty || pending || !name.trim()}>
-              <Save />
-              {dirty ? t("save") : t("saved")}
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={`/api/pdf/kwl-system/${id}`}
+            target="_blank"
+            rel="noopener"
+            className={buttonVariants({ variant: "outline" })}
+            onClick={(e) => {
+              if (dirty) {
+                e.preventDefault();
+                toast.error(t("saveFirst"));
+              }
+            }}
+          >
+            <FileText />
+            {t("pdf")}
+          </a>
+          {editable && (
+            <>
+              <ConfirmButton
+                variant="outline"
+                label={t("delete")}
+                trigger={<Trash2 />}
+                title={t("deleteTitle")}
+                text={t("deleteText", { name })}
+                confirmLabel={t("delete")}
+                onConfirm={() => deleteSystem(id, projectId)}
+              />
+              <Button onClick={save} disabled={!dirty || pending || !name.trim()}>
+                <Save />
+                {dirty ? t("save") : t("saved")}
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <fieldset className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
@@ -242,9 +259,13 @@ export function SystemEditor({
               }}
               labels={{
                 device: device.name ?? t("device"),
-                deviceLines: optionsLabel(data.device, data.deviceOptions, { erv: tDevice("ervShort"), fond: "ComfoFond-L Q", fondFilter: tDevice("fondFilter"), fondLeft: tDevice("fondLeft"), fondRight: tDevice("fondRight") })
-                  .split(", ")
-                  .filter(Boolean),
+                deviceLines: optionsList(data.device, data.deviceOptions, {
+                  erv: tDevice("ervShort"),
+                  fond: "ComfoFond-L Q",
+                  fondFilter: tDevice("fondFilter"),
+                  fondLeft: tDevice("fondLeft"),
+                  fondRight: tDevice("fondRight"),
+                }),
                 outdoor: t("air.outdoor"),
                 supply: t("air.supply"),
                 extract: t("air.extract"),

@@ -990,6 +990,27 @@
       "baseLow": "In diesen Räumen liegt die eingesetzte Zuluft unter der Grundlüftung von 0.1 h⁻¹: {rooms}.",
       "apply": "Nach SIA 382/5 verteilen (Schritte 3 + 4)",
       "applyHint": "Setzt Zu- und Abluft auf den massgebenden Wert: Zuluft gleichmässig auf die Zimmer, Abluft im Verhältnis der Werte nach Tabelle 3. Höhere Werte (z. B. LUPI-Werte) danach mit der Bauherrschaft vereinbaren."
+    },
+    "pdfFlows": "PDF Luftmengen & Filter",
+    "pdfFull": "PDF komplett",
+    "pdfFullHint": "Die Druckverluste sind noch von Hand eingegeben – die Netzberechnung der Lüftungsanlage fehlt.",
+    "report": {
+      "flowsTitle": "Luftmengen und Filterstufen",
+      "flowsNote": "Vorabzug: Luftmengen nach SIA 382/5 und Filterstufen. Druckverlustberechnung und Gerätewahl folgen.",
+      "manualDropsNote": "Die externen Druckverluste sind von Hand eingegeben; die Netzberechnung der Lüftungsanlage steht noch aus.",
+      "area": "Energiebezugsfläche",
+      "volume": "Luftvolumen",
+      "supply": "Zuluft",
+      "extract": "Abluft",
+      "airChange": "Luftwechsel",
+      "base": "Grundlüftung",
+      "pressureTitle": "Externe Druckverluste",
+      "pressureSource": "Grundlage",
+      "fromSystem": "Netzberechnung Lüftungsanlage «{name}»",
+      "manual": "von Hand eingegeben",
+      "table7": "SIA 382/5 Tabelle 7",
+      "deviceCheck": "Gerätekontrolle",
+      "typeShort": "Typ"
     }
   },
   "kwlPlan": {
@@ -1567,7 +1588,31 @@
     "partCaseNone": "kein Zuschlag",
     "partTotal": "Δp Auslass + Abdeckung",
     "bendReference": "kein Formstück im System – ζ-Richtwert {zeta}, R-Position im LV",
-    "bendsDp": "davon Bögen"
+    "bendsDp": "davon Bögen",
+    "pdf": "PDF",
+    "pdfTitle": "Lüftungsanlage",
+    "pdfSystem": "Anlage",
+    "pdfTable7": "SIA 382/5 Tabelle 7",
+    "pdfDeviceCheck": "Gerätekontrolle (Zehnder-Datenblatt)",
+    "pdfOk": "eingehalten",
+    "pdfNotOk": "nicht eingehalten",
+    "pdfSpiCheck": "Grenzwert {limit}, Zielwert {target}: {status}",
+    "pdfSpi": {
+      "target": "Zielwert eingehalten",
+      "limit": "Grenzwert eingehalten",
+      "exceeded": "Grenzwert überschritten"
+    },
+    "pdfFond": "ComfoFond-L Q",
+    "pdfPump": "Solepumpe {w} W",
+    "pdfHeatCool": "Heizen / Kühlen",
+    "pdfSchemaHint": "Symbole nach SIA 410. Je Element Volumenstrom und Druckverlust; bei den Räumen Auslass + Abdeckung.",
+    "pdfElements": "Elemente",
+    "pdfDetail": "Länge / Anzahl",
+    "pdfCumulative": "kumuliert",
+    "pdfPieces": "Stk",
+    "pdfParallel": "parallel",
+    "pdfBends": "Bögen",
+    "pdfNotes": "Bemerkungen"
   },
   "kwlDevice": {
     "attachments": "Zubehör zum Gerät",

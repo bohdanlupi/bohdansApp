@@ -537,3 +537,25 @@ export function overRange(data: SystemData, result: SystemResult): { id: string;
   walk(data.exhaust, result.exhaust.nodes);
   return out;
 }
+
+/** Checks of a system for notices: rooms without a terminal, too fast elements, elements without data, flows above the range. */
+export function systemChecks(data: SystemData, rooms: RoomFlow[], result: SystemResult) {
+  const served = new Set<string>();
+  const collect = (nodes: NetNode[], side: "supply" | "extract") =>
+    nodes.forEach(function walk(n) {
+      if (n.type === "terminal" && n.calcId && n.roomId) served.add(`${side}|${n.calcId}|${n.roomId}`);
+      n.children.forEach(walk);
+    });
+  collect(data.supply, "supply");
+  collect(data.extract, "extract");
+  const missing = rooms.flatMap((r) =>
+    (["supply", "extract"] as const).filter((s) => r[s] > 0 && !served.has(`${s}|${r.calcId}|${r.roomId}`)).map((side) => ({ room: r.name, side })),
+  );
+  const all = [...result.supply.nodes.values(), ...result.extract.nodes.values(), ...result.outdoor.nodes.values(), ...result.exhaust.nodes.values()];
+  return {
+    missing,
+    fast: all.filter((n) => n.velocity != null && n.velocityLimit != null && n.velocity > n.velocityLimit).length,
+    noData: all.filter((n) => n.source === "none").length,
+    overRange: overRange(data, result),
+  };
+}

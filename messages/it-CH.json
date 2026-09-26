@@ -990,6 +990,27 @@
       "baseLow": "In questi locali l’immissione adottata è inferiore alla ventilazione di base di 0.1 h⁻¹: {rooms}.",
       "apply": "Ripartire secondo SIA 382/5 (fasi 3 + 4)",
       "applyHint": "Porta immissione e ripresa al valore determinante: immissione ripartita ugualmente sulle camere, ripresa secondo i valori della tabella 3. Valori più elevati (p. es. LUPI) vanno poi convenuti con il committente."
+    },
+    "pdfFlows": "PDF portate & filtri",
+    "pdfFull": "PDF completo",
+    "pdfFullHint": "Le perdite di carico sono ancora inserite a mano – manca il calcolo della rete dell’impianto.",
+    "report": {
+      "flowsTitle": "Portate d’aria e classi di filtri",
+      "flowsNote": "Versione provvisoria: portate secondo SIA 382/5 e classi di filtri. Seguono il calcolo delle perdite di carico e la scelta dell’apparecchio.",
+      "manualDropsNote": "Le perdite di carico esterne sono inserite a mano; il calcolo della rete dell’impianto è ancora in sospeso.",
+      "area": "Superficie di riferimento energetico",
+      "volume": "Volume d’aria",
+      "supply": "Aria immessa",
+      "extract": "Aria ripresa",
+      "airChange": "Ricambio d’aria",
+      "base": "Aerazione di base",
+      "pressureTitle": "Perdite di carico esterne",
+      "pressureSource": "Base",
+      "fromSystem": "Calcolo della rete dell’impianto «{name}»",
+      "manual": "inserite a mano",
+      "table7": "SIA 382/5 tabella 7",
+      "deviceCheck": "Verifica dell’apparecchio",
+      "typeShort": "Tipo"
     }
   },
   "kwlPlan": {
@@ -1567,7 +1588,31 @@
     "partCaseNone": "nessun supplemento",
     "partTotal": "Δp cassetta + copertura",
     "bendReference": "nessun pezzo nel sistema – ζ di riferimento {zeta}, posizione R nell’elenco",
-    "bendsDp": "di cui curve"
+    "bendsDp": "di cui curve",
+    "pdf": "PDF",
+    "pdfTitle": "Impianto di ventilazione",
+    "pdfSystem": "Impianto",
+    "pdfTable7": "SIA 382/5 tabella 7",
+    "pdfDeviceCheck": "Verifica dell’apparecchio (scheda tecnica Zehnder)",
+    "pdfOk": "rispettato",
+    "pdfNotOk": "non rispettato",
+    "pdfSpiCheck": "valore limite {limit}, valore obiettivo {target}: {status}",
+    "pdfSpi": {
+      "target": "valore obiettivo rispettato",
+      "limit": "valore limite rispettato",
+      "exceeded": "valore limite superato"
+    },
+    "pdfFond": "ComfoFond-L Q",
+    "pdfPump": "pompa {w} W",
+    "pdfHeatCool": "riscaldamento / raffreddamento",
+    "pdfSchemaHint": "Simboli secondo SIA 410. Per elemento portata e perdita di carico; per i locali bocchetta + copertura.",
+    "pdfElements": "Elementi",
+    "pdfDetail": "Lunghezza / numero",
+    "pdfCumulative": "cumulato",
+    "pdfPieces": "pz",
+    "pdfParallel": "in parallelo",
+    "pdfBends": "Curve",
+    "pdfNotes": "Osservazioni"
   },
   "kwlDevice": {
     "attachments": "Accessori dell’apparecchio",

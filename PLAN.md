@@ -245,6 +245,11 @@ for a combination measured in the case datasheet). Δp: measured combination if 
 most open setting) + manual Auslass allowance (dpRef/qRef) – the datasheets give no Δp of the case alone. Old
 terminals with a grille/valve as product are moved to the cover. Both parts go into the LV; schema shows
 «Auslass + cover» under the room.
+PDFs: /api/pdf/kwl/<calcId>?variant=flows|full – «flows» = air flows + filter classes (draft before the pressure
+drop calculation), «full» = with device, external pressures (source), Table 7, device check, stages; default «full»
+once a system serves the dwelling. /api/pdf/kwl-system/<systemId> – system: device + attachments, results and
+notices, strands with throttling, Prinzipschema (landscape, src/pdf/kwl-system-document.tsx redraws the layout with
+react-pdf primitives), elements per air type, quantities. WinAnsi only: winAnsi() replaces Δ, ζ, ≤, ≥, →.
 Old star networks (data.network, pressure.ts) are only kept for the «Sternnetz übernehmen» conversion.
 
 Open / ideas for later:

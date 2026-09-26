@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { overRange, type RoomFlow, type SystemData, type SystemResult } from "@/lib/kwl/network";
+import { type RoomFlow, type SystemData, type SystemResult, systemChecks } from "@/lib/kwl/network";
 import type { DeviceCheck } from "@/lib/kwl/network-device";
 import type { PlanParams } from "@/lib/kwl/plan-schema";
 import { externalPressureCheck } from "@/lib/kwl/sia3825";
@@ -33,26 +33,11 @@ export function ResultsPanel({
   const tone = (s: string | null) => (s === null ? undefined : s === "target" ? "ok" : s === "limit" ? "warn" : "bad");
   const sideTone = (ok: boolean | null) => (ok === null ? undefined : ok ? "ok" : "bad");
 
-  // Rooms with flow but no terminal in the network.
-  const served = new Set<string>();
-  const collect = (nodes: SystemData["supply"], side: "supply" | "extract") =>
-    nodes.forEach(function walk(n) {
-      if (n.type === "terminal" && n.calcId && n.roomId) served.add(`${side}|${n.calcId}|${n.roomId}`);
-      n.children.forEach(walk);
-    });
-  collect(data.supply, "supply");
-  collect(data.extract, "extract");
-  const missing = rooms.flatMap((r) =>
-    (["supply", "extract"] as const).filter((s) => r[s] > 0 && !served.has(`${s}|${r.calcId}|${r.roomId}`)).map((s) => `${r.name} (${t(`air.${s}`)})`),
-  );
-  const fast = [...result.supply.nodes.values(), ...result.extract.nodes.values(), ...result.outdoor.nodes.values(), ...result.exhaust.nodes.values()].filter(
-    (n) => n.velocity != null && n.velocityLimit != null && n.velocity > n.velocityLimit,
-  ).length;
-  const noData = [...result.supply.nodes.values(), ...result.extract.nodes.values(), ...result.outdoor.nodes.values(), ...result.exhaust.nodes.values()].filter(
-    (n) => n.source === "none",
-  ).length;
+  const checks = systemChecks(data, rooms, result);
+  const missing = checks.missing.map((m) => `${m.room} (${t(`air.${m.side}`)})`);
+  const { fast, noData } = checks;
 
-  const above = overRange(data, result);
+  const above = checks.overRange;
 
   return (
     <section className="space-y-3 rounded-xl border p-3">

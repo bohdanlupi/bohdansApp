@@ -154,11 +154,14 @@ export function deviceArticles(deviceKey: string | null, deviceName: string, dev
 }
 
 /** Short description of the selected attachments, e.g. «Enthalpietauscher, ComfoFond-L Q, ComfoClime 24». */
-export function optionsLabel(
-  deviceKey: string | null,
-  options: DeviceOptions,
-  labels: { erv: string; fond: string; fondFilter: string; fondLeft: string; fondRight: string },
-) {
+export type OptionLabels = { erv: string; fond: string; fondFilter: string; fondLeft: string; fondRight: string };
+
+export function optionsLabel(deviceKey: string | null, options: DeviceOptions, labels: OptionLabels) {
+  return optionsList(deviceKey, options, labels).join(", ");
+}
+
+/** The selected attachments, one entry each (e.g. for the lines under the device in the Prinzipschema). */
+export function optionsList(deviceKey: string | null, options: DeviceOptions, labels: OptionLabels): string[] {
   const o = normalizeOptions(deviceKey, options);
   const parts: string[] = [];
   if (o.erv) parts.push(labels.erv);
@@ -168,5 +171,5 @@ export function optionsLabel(
   }
   const clime = o.clime ? zehnderAttachments.clime.find((c) => c.key === o.clime) : undefined;
   if (clime) parts.push(clime.name);
-  return parts.join(", ");
+  return parts;
 }

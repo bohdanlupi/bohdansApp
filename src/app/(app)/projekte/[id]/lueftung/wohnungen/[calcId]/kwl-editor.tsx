@@ -90,21 +90,25 @@ export function KwlEditor({
           <Input id="kwl-name" value={name} maxLength={200} disabled={!editable} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="flex flex-wrap gap-2">
-          <a
-            href={`/api/pdf/kwl/${id}`}
-            target="_blank"
-            rel="noopener"
-            className={buttonVariants({ variant: "outline" })}
-            onClick={(e) => {
-              if (dirty) {
-                e.preventDefault();
-                toast.error(t("saveFirst"));
-              }
-            }}
-          >
-            <FileText />
-            {t("pdf")}
-          </a>
+          {(["flows", "full"] as const).map((variant) => (
+            <a
+              key={variant}
+              href={`/api/pdf/kwl/${id}?variant=${variant}`}
+              target="_blank"
+              rel="noopener"
+              title={variant === "full" && result.drops.source !== "system" ? t("pdfFullHint") : undefined}
+              className={buttonVariants({ variant: variant === "full" && result.drops.source !== "system" ? "ghost" : "outline" })}
+              onClick={(e) => {
+                if (dirty) {
+                  e.preventDefault();
+                  toast.error(t("saveFirst"));
+                }
+              }}
+            >
+              <FileText />
+              {variant === "flows" ? t("pdfFlows") : t("pdfFull")}
+            </a>
+          ))}
           {editable && (
             <>
               <Button variant="outline" onClick={duplicate} disabled={pending}>
