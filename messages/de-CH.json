@@ -1550,7 +1550,22 @@
     "insertIntoLv": "Ins LV übernehmen",
     "inserted": "{count, plural, one {# Position} other {# Positionen}} ins LV übernommen.",
     "saveFirst": "Zuerst speichern",
-    "overRange": "Über dem empfohlenen Einsatzbereich des Herstellers (Volumenstrom je Stück bzw. je Rohr / Maximum): {items}. Grösseres Produkt oder mehr Rohre/Durchlässe wählen (Schall)."
+    "overRange": "Über dem empfohlenen Einsatzbereich des Herstellers (Volumenstrom je Stück bzw. je Rohr / Maximum): {items}. Grösseres Produkt oder mehr Rohre/Durchlässe wählen (Schall).",
+    "case": "Auslass (Gehäuse)",
+    "noCase": "– ohne Gehäuse (Ventil / Gitter direkt) –",
+    "cover": "Abdeckung (Gitter / Tellerventil)",
+    "noCover": "– keine Abdeckung gewählt –",
+    "measuredWith": "Mit {name} gemessen",
+    "fittingCovers": "Passend zum Auslass",
+    "coverCurve": "Ausführung / Einstellung",
+    "caseAllowance": "Zuschlag Auslass Pa",
+    "caseAllowanceHint": "Die Datenblätter geben den Druckverlust des Auslasses nicht separat an (nur in Kombination mit Gittern/Ventilen). Für diese Kombination zählt die Kennlinie der Abdeckung; einen Zuschlag für den Auslass hier eintragen (Δp bei Referenz-Volumenstrom, ∝ q²).",
+    "measuredHint": "Druckverlust der gemessenen Kombination Auslass + Abdeckung aus dem Datenblatt des Auslasses.",
+    "partCombined": "Kombination {name} (gemessen)",
+    "partCase": "Auslass {name}",
+    "partCover": "Abdeckung {name}",
+    "partCaseNone": "kein Zuschlag",
+    "partTotal": "Δp Auslass + Abdeckung"
   },
   "kwlDevice": {
     "attachments": "Zubehör zum Gerät",

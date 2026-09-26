@@ -3,7 +3,7 @@
 
 import { type NetNode, newNode, type NodeType, type RoomFlow, type SystemData } from "./network";
 import type { Network, Segment } from "./pressure";
-import { type Product, products, type ProductKind } from "./products";
+import { curveGroup, measuredCoverPrefix, type Product, productCurve, products, type ProductKind } from "./products";
 
 /** First Zehnder product of a kind whose name matches – null when the data has no such product. */
 function pick(kind: ProductKind, ...patterns: RegExp[]): Product | null {
@@ -35,6 +35,12 @@ export type DefaultLabels = {
  * Single-family house: device → main duct → silencer → distributor → one ComfoTube branch per room (1–3 tubes as
  * in the workbook's distribution sketch) → terminal; outdoor / exhaust air: duct and weather grille.
  */
+/** Cover measured with the Auslass for the air side (first curve of the case datasheet for that side). */
+function coverFor(casing: Product | null, side: "supply" | "extract"): Partial<NetNode> {
+  const curve = productCurve(casing, null, side);
+  return curve ? { cover: measuredCoverPrefix + curveGroup(curve.label), curve: curve.label } : {};
+}
+
 export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: SystemData): SystemData {
   const pipe = pick("duct", /ComfoPipe Compact.*DN160/i, /ComfoPipe/i);
   const tube = pick("duct", /ComfoTube Flow 90/i, /ComfoTube.*90/i);
@@ -60,7 +66,7 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
     const branches = served.map((r) =>
       duct(tube, labels.roomDuct, 10, 2, {
         count: tubes(r[side]),
-        children: [component("terminal", side === "supply" ? supplyTerminal : extractTerminal, r.name, { calcId: r.calcId, roomId: r.roomId })],
+        children: [component("terminal", side === "supply" ? supplyTerminal : extractTerminal, r.name, { calcId: r.calcId, roomId: r.roomId, ...coverFor(side === "supply" ? supplyTerminal : extractTerminal, side) })],
       }),
     );
     return [

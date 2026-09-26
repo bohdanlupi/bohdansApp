@@ -77,6 +77,48 @@ export function currentProductKey(key: string | null): string | null {
   return datasheetDevice(key)?.key ?? null;
 }
 
+// ---------------------------------------------------------------------------
+// Terminals: Auslass (ComfoCase) + cover (grille / disc valve)
+// ---------------------------------------------------------------------------
+
+/** Prefix of a cover measured together with the terminal case (a curve group of the case datasheet). */
+export const measuredCoverPrefix = "case:";
+
+/**
+ * Curve of a separate cover (grille, disc valve): the chosen one, else the most open setting – the lowest pressure
+ * drop at the flow among the curves for the air side (a valve is throttled from fully open when balancing).
+ */
+export function coverCurve(cover: Product | null, label: string | null | undefined, side: "supply" | "extract", flow: number): Curve | null {
+  if (!cover?.curves.length) return null;
+  const chosen = cover.curves.find((c) => c.label === label);
+  if (chosen) return chosen;
+  const forSide = cover.curves.filter((c) => c.use === side);
+  const candidates = forSide.length ? forSide : cover.curves;
+  const q = flow > 0 ? flow : 30;
+  return candidates.reduce((best, c) => ((curveValue(c.points, q) ?? Infinity) < (curveValue(best.points, q) ?? Infinity) ? c : best));
+}
+
+/** Cover named in a curve label of a terminal case: the part before the first comma. */
+export const curveGroup = (label: string) => label.split(",")[0].trim();
+
+/** Covers the case datasheet gives measured combinations for (e.g. «ComfoGrid Roma breit»). */
+export const measuredCovers = (casing: Product | null) => (casing ? [...new Set(casing.curves.map((c) => curveGroup(c.label)))] : []);
+
+/** Separate Zehnder grilles and disc valves; those that fit the case first. */
+export function coverProducts(casing: Product | null): { fitting: Product[]; others: Product[] } {
+  const all = products.filter((p) => p.manufacturer === "Zehnder" && (p.kind === "grille" || p.kind === "valve") && p.family !== "ComfoSet");
+  if (!casing) return { fitting: [], others: all };
+  const family = (casing.family ?? "").replace(/^ComfoCase\s*/, "");
+  const size = /\b(400|600)\b/.exec(casing.name)?.[1];
+  const fits = (p: Product) => {
+    const target = /für ComfoCase (.+)$/.exec(p.name);
+    if (target) return target[1].split("/").map((x) => x.trim()).includes(family);
+    if (p.kind === "valve") return /125/.test(casing.name) && /125/.test(p.name);
+    return !!size && new RegExp(`\\b${size}\\b`).test(p.name);
+  };
+  return { fitting: all.filter(fits), others: all.filter((p) => !fits(p)) };
+}
+
 /** Group label for selections: manufacturer and family. */
 export const productGroup = (p: Product) => [p.manufacturer, p.family].filter(Boolean).join(" · ");
 export const productsOfKind = (...kinds: ProductKind[]) => products.filter((p) => kinds.includes(p.kind));

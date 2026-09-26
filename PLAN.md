@@ -236,6 +236,11 @@ of the combination (not above the device limit), stage table hidden, no power da
 EPP adapter kit. Device + attachments go into the LV with the quantities.
 Dwellings served by a system take its external pressures. Quantities → LV group (IGH Zehnder / Meier Tobler catalogue positions by
 primary article number, else R-positions naming the article; grille/valve of the chosen curve as its own line).
+Terminals = Auslass (ComfoCase, node.product) + cover (node.cover: grille / disc valve product, or «case:<name>»
+for a combination measured in the case datasheet). Δp: measured combination if chosen, else cover curve (default =
+most open setting) + manual Auslass allowance (dpRef/qRef) – the datasheets give no Δp of the case alone. Old
+terminals with a grille/valve as product are moved to the cover. Both parts go into the LV; schema shows
+«Auslass + cover» under the room.
 Old star networks (data.network, pressure.ts) are only kept for the «Sternnetz übernehmen» conversion.
 
 Open / ideas for later:

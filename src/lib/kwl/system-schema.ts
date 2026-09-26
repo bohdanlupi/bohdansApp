@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { NetNode, SystemData } from "./network";
 import { deviceOptionsSchema, normalizeOptions } from "./attachments";
 import { ductMaterials, type DuctMaterial } from "./pressure";
-import { currentProductKey, datasheetDevice } from "./products";
+import { currentProductKey, datasheetDevice, findProduct } from "./products";
 
 // Data of a ventilation system (ventilation_systems.data). Parsed leniently: invalid nodes are dropped one by one.
 
@@ -17,6 +17,8 @@ const nodeFields = z.object({
   label: text(120),
   product: z.string().max(80).nullable().catch(null).transform(currentProductKey),
   curve: z.string().max(120).nullable().catch(null),
+  cover: z.string().max(160).nullable().catch(null),
+  coverCurve: z.string().max(120).nullable().catch(null),
   length: num(1000),
   count: z.number().int().min(1).max(50).catch(1),
   bends: num(100),
@@ -35,6 +37,12 @@ const nodeFields = z.object({
 const MAX_DEPTH = 40;
 const MAX_NODES = 2000;
 
+/** Terminals saved with a grille / valve as their product: that part is the cover (no Auslass). */
+function moveCover<T extends { type: string; product: string | null; curve: string | null; cover: string | null; coverCurve: string | null }>(n: T): T {
+  const p = n.type === "terminal" && !n.cover ? findProduct(n.product) : null;
+  return p && (p.kind === "grille" || p.kind === "valve") ? { ...n, product: null, curve: null, cover: p.key, coverCurve: n.curve } : n;
+}
+
 function parseNodes(raw: unknown, depth: number, budget: { left: number }): NetNode[] {
   if (!Array.isArray(raw) || depth > MAX_DEPTH) return [];
   const out: NetNode[] = [];
@@ -44,7 +52,7 @@ function parseNodes(raw: unknown, depth: number, budget: { left: number }): NetN
     if (!parsed.success) continue;
     budget.left--;
     const children = parseNodes((item as { children?: unknown }).children, depth + 1, budget);
-    out.push({ ...parsed.data, children });
+    out.push({ ...moveCover(parsed.data), children });
   }
   return out;
 }

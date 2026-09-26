@@ -1550,7 +1550,22 @@
     "insertIntoLv": "Riprendi nell’elenco",
     "inserted": "{count, plural, one {# posizione ripresa} other {# posizioni riprese}} nell’elenco prestazioni.",
     "saveFirst": "Salvare prima",
-    "overRange": "Oltre il campo d’impiego raccomandato dal fabbricante (portata per pezzo o per tubo / massimo): {items}. Scegliere un prodotto più grande o più tubi/bocchette (acustica)."
+    "overRange": "Oltre il campo d’impiego raccomandato dal fabbricante (portata per pezzo o per tubo / massimo): {items}. Scegliere un prodotto più grande o più tubi/bocchette (acustica).",
+    "case": "Bocchetta (cassetta)",
+    "noCase": "– senza cassetta (valvola / griglia diretta) –",
+    "cover": "Copertura (griglia / valvola a disco)",
+    "noCover": "– nessuna copertura scelta –",
+    "measuredWith": "Misurato con {name}",
+    "fittingCovers": "Adatte alla cassetta",
+    "coverCurve": "Esecuzione / regolazione",
+    "caseAllowance": "Supplemento cassetta Pa",
+    "caseAllowanceHint": "Le schede tecniche non indicano la perdita di carico della cassetta da sola (solo in combinazione con griglie/valvole). Per questa combinazione vale la curva della copertura; inserire qui un supplemento per la cassetta (Δp alla portata di riferimento, ∝ q²).",
+    "measuredHint": "Perdita di carico della combinazione misurata cassetta + copertura dalla scheda tecnica della cassetta.",
+    "partCombined": "Combinazione {name} (misurata)",
+    "partCase": "Cassetta {name}",
+    "partCover": "Copertura {name}",
+    "partCaseNone": "nessun supplemento",
+    "partTotal": "Δp cassetta + copertura"
   },
   "kwlDevice": {
     "attachments": "Accessori dell’apparecchio",

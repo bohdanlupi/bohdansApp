@@ -8,7 +8,18 @@ import { NativeSelect } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { findNode, mapTree, type NetNode, newNode, type NodeResult, type NodeType, type RoomFlow, type SystemData, type SystemResult } from "@/lib/kwl/network";
-import { findProduct, type Product, productCurve, productGroup, products } from "@/lib/kwl/products";
+import {
+  coverCurve,
+  coverProducts,
+  curveGroup,
+  findProduct,
+  measuredCoverPrefix,
+  measuredCovers,
+  type Product,
+  productCurve,
+  productGroup,
+  products,
+} from "@/lib/kwl/products";
 import { ductMaterials, type DuctMaterial } from "@/lib/kwl/pressure";
 import { airColors } from "@/lib/kwl/schema-layout";
 import { cn } from "@/lib/utils";
@@ -360,6 +371,9 @@ function NodePanel({
         />
       </div>
 
+      {node.type === "terminal" && <TerminalFields node={node} side={side} editable={editable} onPatch={onPatch} result={result} />}
+
+      {node.type !== "terminal" && (
       <div className="space-y-1">
         <Label htmlFor="node-product" className="text-xs">
           {t("product")}
@@ -387,8 +401,9 @@ function NodePanel({
           </p>
         )}
       </div>
+      )}
 
-      {product && product.curves.length > 1 && (
+      {node.type !== "terminal" && product && product.curves.length > 1 && (
         <div className="space-y-1">
           <Label htmlFor="node-curve" className="text-xs">
             {t("curve")}
@@ -439,7 +454,7 @@ function NodePanel({
         </div>
       )}
 
-      {node.type !== "duct" && node.type !== "bend" && !product && (
+      {node.type !== "duct" && node.type !== "bend" && node.type !== "terminal" && !product && (
         <div className="grid grid-cols-2 gap-2">
           {numberField("dpRef", t("dpRef"), 1)}
           {numberField("qRef", t("qRef"), 0, result ? fmt(result.flow) : undefined)}
@@ -493,13 +508,197 @@ function NodePanel({
               <dd className="text-right tabular-nums">{fmt(result.r, 2)} Pa/m</dd>
             </>
           )}
-          <dt className="text-muted-foreground">Δp</dt>
+          {result.parts?.map((p, i) => (
+            <PartRow key={i} label={p.role === "combined" ? t("partCombined", { name: p.label }) : p.role === "case" ? t("partCase", { name: p.label }) : t("partCover", { name: p.label })}>
+              {p.dp === null ? (p.role === "case" ? t("partCaseNone") : t("noData")) : `${fmt(p.dp, 1) || "0"} Pa`}
+            </PartRow>
+          ))}
+          <dt className="text-muted-foreground">{result.parts ? t("partTotal") : "Δp"}</dt>
           <dd className="text-right font-medium tabular-nums">{fmt(result.dp, 1) || "0"} Pa</dd>
           <dt className="text-muted-foreground">{t("cumulative")}</dt>
           <dd className="text-right tabular-nums">{fmt(result.cumulative, 1) || "0"} Pa</dd>
           <dt className="text-muted-foreground">{t("dataSource")}</dt>
           <dd className="text-right">{t(`sources.${result.source}`)}</dd>
         </dl>
+      )}
+    </div>
+  );
+}
+
+function PartRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <>
+      <dt className="col-span-2 text-xs text-muted-foreground">{label}</dt>
+      <dd className="col-span-2 -mt-1 text-right text-xs tabular-nums">{children}</dd>
+    </>
+  );
+}
+
+/**
+ * Terminal = Auslass (ComfoCase) + cover (grille / disc valve). Covers measured together with the case come from
+ * the case datasheet; separate covers bring their own curve (setting), the Auslass then gets a manual allowance.
+ */
+function TerminalFields({
+  node,
+  side,
+  result,
+  editable,
+  onPatch,
+}: {
+  node: NetNode;
+  side: "supply" | "extract";
+  result: NodeResult | undefined;
+  editable: boolean;
+  onPatch: (patch: Partial<NetNode>) => void;
+}) {
+  const t = useTranslations("kwlSystem");
+  const casing = findProduct(node.product);
+  const cases = groupedOptions(products.filter((p) => p.kind === "terminal"));
+  const measured = measuredCovers(casing);
+  const { fitting, others } = coverProducts(casing);
+  const measuredGroup = node.cover?.startsWith(measuredCoverPrefix) ? node.cover.slice(measuredCoverPrefix.length) : null;
+  const coverProduct = measuredGroup ? null : findProduct(node.cover);
+  const groupCurves = measuredGroup && casing ? casing.curves.filter((c) => curveGroup(c.label) === measuredGroup) : [];
+  const groupCurve = groupCurves.find((c) => c.label === node.curve) ?? groupCurves.find((c) => c.use === side) ?? groupCurves[0];
+  const shortLabel = (label: string) => (measuredGroup && label.startsWith(measuredGroup) ? label.slice(measuredGroup.length).replace(/^,\s*/, "") || label : label);
+  const number = (key: "dpRef" | "qRef", label: string, decimals: number, placeholder?: string) => (
+    <div className="space-y-1">
+      <Label className="text-xs">{label}</Label>
+      <NumberField value={node[key]} decimals={decimals} label={label} placeholder={placeholder} disabled={!editable} onChange={(v) => onPatch({ [key]: v })} className="h-8 rounded-lg" />
+    </div>
+  );
+
+  const changeCase = (key: string | null) => {
+    const next = findProduct(key);
+    // A measured cover only exists with its case; a separate cover stays.
+    const keep = node.cover && !node.cover.startsWith(measuredCoverPrefix) ? { cover: node.cover, coverCurve: node.coverCurve } : { cover: null, coverCurve: null };
+    const curve = productCurve(next, null, side);
+    const measuredDefault = !keep.cover && curve ? { cover: measuredCoverPrefix + curveGroup(curve.label), curve: curve.label } : { curve: null };
+    onPatch({ product: key, ...keep, ...measuredDefault });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <Label htmlFor="node-case" className="text-xs">
+          {t("case")}
+        </Label>
+        <NativeSelect id="node-case" value={node.product ?? ""} disabled={!editable} onChange={(e) => changeCase(e.target.value || null)}>
+          <option value="">{t("noCase")}</option>
+          {cases.map(([group, list]) => (
+            <optgroup key={group} label={group}>
+              {list.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.name}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </NativeSelect>
+        {casing?.source && <p className="text-xs text-muted-foreground">{t("sourceRef", { file: casing.source.file, page: casing.source.page ?? "–" })}</p>}
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="node-cover" className="text-xs">
+          {t("cover")}
+        </Label>
+        <NativeSelect
+          id="node-cover"
+          value={node.cover ?? ""}
+          disabled={!editable}
+          onChange={(e) => onPatch({ cover: e.target.value || null, curve: null, coverCurve: null })}
+        >
+          <option value="">{t("noCover")}</option>
+          {casing && measured.length > 0 && (
+            <optgroup label={t("measuredWith", { name: casing.name })}>
+              {measured.map((g) => (
+                <option key={g} value={measuredCoverPrefix + g}>
+                  {g}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          {fitting.length > 0 && (
+            <optgroup label={t("fittingCovers")}>
+              {fitting.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.name}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          {groupedOptions(others).map(([group, list]) => (
+            <optgroup key={group} label={group}>
+              {list.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.name}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </NativeSelect>
+        {coverProduct?.source && <p className="text-xs text-muted-foreground">{t("sourceRef", { file: coverProduct.source.file, page: coverProduct.source.page ?? "–" })}</p>}
+      </div>
+
+      {groupCurves.length > 1 && (
+        <div className="space-y-1">
+          <Label htmlFor="node-curve" className="text-xs">
+            {t("coverCurve")}
+          </Label>
+          <NativeSelect id="node-curve" value={groupCurve?.label} disabled={!editable} onChange={(e) => onPatch({ curve: e.target.value })}>
+            {groupCurves.map((c) => (
+              <option key={c.label} value={c.label}>
+                {shortLabel(c.label)}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+      )}
+      {coverProduct && coverProduct.curves.length > 1 && (
+        <div className="space-y-1">
+          <Label htmlFor="node-cover-curve" className="text-xs">
+            {t("coverCurve")}
+          </Label>
+          <NativeSelect id="node-cover-curve" value={coverCurve(coverProduct, node.coverCurve, side, result?.flow ?? 0)?.label} disabled={!editable} onChange={(e) => onPatch({ coverCurve: e.target.value })}>
+            {coverProduct.curves.map((c) => (
+              <option key={c.label} value={c.label}>
+                {c.label}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+      )}
+
+      {/* Without a cover: the case curve as before; neither case nor cover: manual value. */}
+      {!node.cover && casing && casing.curves.length > 1 && (
+        <div className="space-y-1">
+          <Label htmlFor="node-curve" className="text-xs">
+            {t("curve")}
+          </Label>
+          <NativeSelect id="node-curve" value={productCurve(casing, node.curve, side)?.label} disabled={!editable} onChange={(e) => onPatch({ curve: e.target.value })}>
+            {casing.curves.map((c) => (
+              <option key={c.label} value={c.label}>
+                {c.label}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+      )}
+      {coverProduct && casing && (
+        <div className="space-y-1">
+          <div className="grid grid-cols-2 gap-2">
+            {number("dpRef", t("caseAllowance"), 1)}
+            {number("qRef", t("qRef"), 0, result ? fmt(result.flow) : undefined)}
+          </div>
+          <p className="text-xs text-muted-foreground">{t("caseAllowanceHint")}</p>
+        </div>
+      )}
+      {measuredGroup && <p className="text-xs text-muted-foreground">{t("measuredHint")}</p>}
+      {!node.cover && !casing && (
+        <div className="grid grid-cols-2 gap-2">
+          {number("dpRef", t("dpRef"), 1)}
+          {number("qRef", t("qRef"), 0, result ? fmt(result.flow) : undefined)}
+        </div>
       )}
     </div>
   );

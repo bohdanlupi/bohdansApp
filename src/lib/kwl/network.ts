@@ -9,7 +9,7 @@
 
 import { type DeviceOptions, deviceArticles } from "./attachments";
 import { maxVelocity } from "./calc";
-import { curveValue, findProduct, type Product, productCurve } from "./products";
+import { coverCurve, curveGroup, curveValue, findProduct, measuredCoverPrefix, type Product, productCurve } from "./products";
 import { airDensity, ductMaterials, type DuctMaterial, frictionFactor } from "./pressure";
 
 export type NodeType = "duct" | "bend" | "tee" | "distributor" | "component" | "terminal";
@@ -18,10 +18,17 @@ export type NetNode = {
   id: string;
   type: NodeType;
   label: string;
-  /** Product key (see products.ts) – Zehnder data has priority. */
+  /** Product key (see products.ts) – Zehnder data has priority. Terminals: the Auslass (ComfoCase). */
   product: string | null;
   /** Curve label of the product (e.g. grille design, throttle setting). */
   curve: string | null;
+  /**
+   * Terminals: the cover on the Auslass – a grille / disc valve product, or «case:<name>» for a cover the case
+   * datasheet gives measured combinations for (then `curve` is one of those curves).
+   */
+  cover: string | null;
+  /** Curve of a separate cover product (e.g. valve setting). */
+  coverCurve: string | null;
   /** Ducts: length [m], parallel ducts, bends, custom geometry when no product is chosen. */
   length: number | null;
   count: number;
@@ -72,7 +79,14 @@ export type NodeResult = {
   velocityLimit: number | null;
   /** Data source of the pressure drop. */
   source: "product" | "calculated" | "manual" | "none";
+  /**
+   * Terminals with a cover: how the pressure drop is made up – a measured combination (case datasheet), or the
+   * Auslass (manual allowance, the datasheets give no value of the case alone) plus the cover.
+   */
+  parts?: TerminalPart[];
 };
+
+export type TerminalPart = { role: "combined" | "case" | "cover"; label: string; dp: number | null; source: NodeResult["source"] };
 
 export type LeafResult = { id: string; path: number; throttle: number; flow: number; roomLabel: string };
 
@@ -99,6 +113,34 @@ function ductGeometry(node: NetNode) {
   }
   if (d) return { area: (Math.PI * (d / 1000) ** 2) / 4, dh: d / 1000 };
   return null;
+}
+
+/**
+ * Terminal = Auslass (ComfoCase) + cover (grille / disc valve). Priority: the combination measured in the case
+ * datasheet; else the cover's curve (grille datasheets are measured on their case) plus a manual allowance for the
+ * Auslass (dpRef at qRef) – the datasheets give no pressure drop of the case alone.
+ */
+function terminalResult(node: NetNode, flow: number, side: "supply" | "extract", empty: Pick<NodeResult, "id" | "flow" | "velocity" | "r" | "velocityLimit">): Omit<NodeResult, "cumulative"> {
+  const casing = findProduct(node.product);
+  const cover = node.cover ?? "";
+  if (cover.startsWith(measuredCoverPrefix)) {
+    const group = cover.slice(measuredCoverPrefix.length);
+    const curves = casing?.curves.filter((c) => curveGroup(c.label) === group) ?? [];
+    const curve = curves.find((c) => c.label === node.curve) ?? curves.find((c) => c.use === side) ?? curves[0];
+    const dp = curve ? (curveValue(curve.points, flow) ?? 0) : null;
+    const source: NodeResult["source"] = curve ? "product" : "none";
+    return { ...empty, dp: dp ?? 0, source, parts: [{ role: "combined", label: `${casing?.name ?? ""} + ${group}`, dp, source }] };
+  }
+  const coverProduct = findProduct(cover);
+  const curve = coverCurve(coverProduct, node.coverCurve, side, flow);
+  const coverDp = curve ? (curveValue(curve.points, flow) ?? 0) : null;
+  const caseDp = node.dpRef != null ? (node.qRef ? node.dpRef * (flow / node.qRef) ** 2 : node.dpRef) : null;
+  const parts: TerminalPart[] = [
+    ...(casing ? [{ role: "case" as const, label: casing.name, dp: caseDp, source: caseDp !== null ? ("manual" as const) : ("none" as const) }] : []),
+    { role: "cover", label: coverProduct?.name ?? cover, dp: coverDp, source: coverDp !== null ? "product" : "none" },
+  ];
+  const source: NodeResult["source"] = coverDp !== null ? "product" : caseDp !== null ? "manual" : "none";
+  return { ...empty, dp: (coverDp ?? 0) + (caseDp ?? 0), source, parts };
 }
 
 export function nodeResult(node: NetNode, flow: number, side: "supply" | "extract"): Omit<NodeResult, "cumulative"> {
@@ -134,6 +176,8 @@ export function nodeResult(node: NetNode, flow: number, side: "supply" | "extrac
     const length = node.type === "duct" ? (node.length ?? 0) : 0;
     return { ...empty, dp: (r ?? 0) * length + zeta * dynamic, velocity: v, r, velocityLimit: v !== null ? maxVelocity(q) : null, source };
   }
+
+  if (node.type === "terminal" && node.cover) return terminalResult(node, flow, side, empty);
 
   // Components, T-pieces, distributors, terminals: product curve, else manual Δp_ref at q_ref (∝ q²).
   const curve = productCurve(product, node.curve, side);
@@ -288,7 +332,17 @@ export function systemQuantities(data: SystemData): Quantity[] {
     // Only the product's own (first) article: the others are accessories and variants.
     const articles = product?.articles[0] ? [product.articles[0].number] : [];
     const label = product?.name ?? n.label;
-    const accessory = product && n.type !== "duct" ? curveArticle(product, productCurve(product, n.curve, side)?.label) : null;
+    const measured = n.cover?.startsWith(measuredCoverPrefix) ? n.cover.slice(measuredCoverPrefix.length) : null;
+    const coverProduct = n.type === "terminal" && n.cover && !measured ? findProduct(n.cover) : null;
+    const accessory =
+      product && n.type !== "duct" && !coverProduct ? curveArticle(product, measured ?? productCurve(product, n.curve, side)?.label) : null;
+    if (coverProduct) {
+      add(
+        `cover|${coverProduct.key}`,
+        { product: coverProduct.key, manufacturer: coverProduct.manufacturer, label: coverProduct.name, unit: "Stk", articles: coverProduct.articles[0] ? [coverProduct.articles[0].number] : [] },
+        Math.max(1, n.count),
+      );
+    }
     if (accessory) {
       add(`${n.product}|${accessory.number}`, { product: n.product, manufacturer: product?.manufacturer ?? null, label: accessory.text, unit: "Stk", articles: [accessory.number] }, Math.max(1, n.count));
     }
@@ -299,7 +353,7 @@ export function systemQuantities(data: SystemData): Quantity[] {
         { product: n.product, manufacturer: product?.manufacturer ?? null, label: product?.name ?? `${n.label} ${n.diameter ? `ø ${n.diameter}` : `${n.width}×${n.height}`}`, unit: "m", articles, piece: product?.lvPiece },
         (n.length ?? 0) * Math.max(1, n.count),
       );
-    } else if (n.type !== "tee" || n.product) {
+    } else if ((n.type !== "tee" || n.product) && !(n.type === "terminal" && !n.product && n.cover)) {
       add(n.product ?? `${n.type}-${n.label}`, { product: n.product, manufacturer: product?.manufacturer ?? null, label, unit: "Stk", articles }, Math.max(1, n.count));
     }
     n.children.forEach(walk(side));
@@ -332,6 +386,8 @@ export const newNode = (type: NodeType, patch: Partial<NetNode> = {}): NetNode =
   label: "",
   product: null,
   curve: null,
+  cover: null,
+  coverCurve: null,
   length: type === "duct" ? 1 : null,
   count: 1,
   bends: null,
@@ -411,6 +467,10 @@ export function systemDropsByCalc(
 export function overRange(data: SystemData, result: SystemResult): { id: string; label: string; flow: number; max: number }[] {
   const out: { id: string; label: string; flow: number; max: number }[] = [];
   const check = (n: NetNode, res: NodeResult | undefined) => {
+    const cover = n.type === "terminal" && n.cover && !n.cover.startsWith(measuredCoverPrefix) ? findProduct(n.cover) : null;
+    if (cover?.recommendedRange && res && res.flow > cover.recommendedRange[1] * 1.001) {
+      out.push({ id: n.id, label: n.label || cover.name, flow: res.flow, max: cover.recommendedRange[1] });
+    }
     const product = findProduct(n.product);
     const max = product?.recommendedRange?.[1];
     if (!res || !product || !max) return;

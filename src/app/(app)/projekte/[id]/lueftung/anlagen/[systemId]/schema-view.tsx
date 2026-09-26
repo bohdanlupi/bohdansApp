@@ -1,6 +1,6 @@
 "use client";
 
-import { findProduct } from "@/lib/kwl/products";
+import { findProduct, measuredCoverPrefix } from "@/lib/kwl/products";
 import type { NetNode } from "@/lib/kwl/network";
 import { type AirKind, airColors, type SchemaLayout } from "@/lib/kwl/schema-layout";
 import { formatNumber } from "@/lib/number-input";
@@ -117,11 +117,22 @@ export function SchemaView({
       ))}
 
       {/* Terminal labels (room) */}
-      {layout.labels.map((l) => (
-        <text key={l.nodeId} x={l.x} y={l.y + 4} className="cursor-pointer fill-foreground text-[11px]" onClick={() => onSelect(l.nodeId)}>
-          {l.text}
-        </text>
-      ))}
+      {layout.labels.map((l) => {
+        const node = layout.nodes.find((n) => n.node.id === l.nodeId)?.node;
+        const parts = node ? terminalParts(node) : "";
+        return (
+          <g key={l.nodeId} className="cursor-pointer" onClick={() => onSelect(l.nodeId)}>
+            <text x={l.x} y={l.y + 4} className="fill-foreground text-[11px]">
+              {l.text}
+            </text>
+            {parts && (
+              <text x={l.x} y={l.y + 15} className="fill-muted-foreground text-[8.5px]">
+                {parts}
+              </text>
+            )}
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -201,3 +212,17 @@ function NodeSymbol({ node, air, x, y, selected }: { node: NetNode; air: AirKind
 
 export const shortInfo = (flow: number | undefined, dp: number | undefined) =>
   flow === undefined ? "" : `${formatNumber(flow, 0)} m³/h · ${formatNumber(dp ?? 0, 1, false)} Pa`;
+
+/** Short «Auslass + Abdeckung» text for a terminal, e.g. «CLD breit + Roma breit». */
+function terminalParts(node: NetNode): string {
+  if (node.type !== "terminal") return "";
+  const casing = findProduct(node.product);
+  const short = (name: string) =>
+    name
+      .replace(/^Comfo(Case|Grid|Valve)\s+/, "")
+      .replace(/\s+für ComfoCase .*$/, "")
+      .replace(/\s*\(.*\)$/, "");
+  const caseName = casing ? short(casing.family ?? casing.name) : "";
+  const cover = node.cover?.startsWith(measuredCoverPrefix) ? node.cover.slice(measuredCoverPrefix.length) : (findProduct(node.cover)?.name ?? "");
+  return [caseName, cover && short(cover)].filter(Boolean).join(" + ");
+}

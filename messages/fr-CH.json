@@ -1550,7 +1550,22 @@
     "insertIntoLv": "Reprendre dans le descriptif",
     "inserted": "{count, plural, one {# position reprise} other {# positions reprises}} dans le descriptif.",
     "saveFirst": "Enregistrer d’abord",
-    "overRange": "Au-dessus de la plage d’utilisation recommandée par le fabricant (débit par pièce ou par conduit / maximum) : {items}. Choisir un produit plus grand ou plus de conduits/bouches (acoustique)."
+    "overRange": "Au-dessus de la plage d’utilisation recommandée par le fabricant (débit par pièce ou par conduit / maximum) : {items}. Choisir un produit plus grand ou plus de conduits/bouches (acoustique).",
+    "case": "Bouche (boîtier)",
+    "noCase": "– sans boîtier (bouche / grille directe) –",
+    "cover": "Recouvrement (grille / bouche à disque)",
+    "noCover": "– aucun recouvrement choisi –",
+    "measuredWith": "Mesuré avec {name}",
+    "fittingCovers": "Adapté au boîtier",
+    "coverCurve": "Exécution / réglage",
+    "caseAllowance": "Supplément boîtier Pa",
+    "caseAllowanceHint": "Les fiches techniques n’indiquent pas la perte de charge du boîtier seul (seulement combiné avec grilles/bouches). Pour cette combinaison, la courbe du recouvrement compte ; saisir ici un supplément pour le boîtier (Δp au débit de référence, ∝ q²).",
+    "measuredHint": "Perte de charge de la combinaison mesurée boîtier + recouvrement selon la fiche technique du boîtier.",
+    "partCombined": "Combinaison {name} (mesurée)",
+    "partCase": "Boîtier {name}",
+    "partCover": "Recouvrement {name}",
+    "partCaseNone": "sans supplément",
+    "partTotal": "Δp boîtier + recouvrement"
   },
   "kwlDevice": {
     "attachments": "Accessoires de l’appareil",
