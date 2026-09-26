@@ -30,7 +30,18 @@ export const winAnsi = (text: string) =>
     .replace(/Δp/g, "dp")
     .replace(/Δ/g, "D")
     .replace(/ζ/g, "zeta")
-    .replace(/×/g, "x");
+    .replace(/×/g, "x")
+    .replace(/Rλ/g, "R_l")
+    .replace(/λ/g, "lambda ")
+    .replace(/θ/g, "t")
+    .replace(/Φ/g, "Q")
+    .replace(/ψ/g, "psi")
+    .replace(/χ/g, "chi")
+    .replace(/−/g, "-")
+    .replace(/Σ/g, "Summe ")
+    .replace(/ρ/g, "rho")
+    .replace(/τ/g, "tau")
+    .replace(/′/g, "'");
 
 const n = (value: number | null | undefined, decimals = 0) =>
   value === null || value === undefined || !Number.isFinite(value) || value === 0 ? "" : formatNumber(value, decimals);

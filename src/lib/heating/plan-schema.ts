@@ -2,8 +2,11 @@ import { z } from "zod";
 
 import { checkSchema, lenientRecord } from "@/lib/planning";
 
+import { catalogSchema, defaultHeatSite, heatSiteSchema } from "./heat-load-schema";
+
 // Heizungsplanung of a project (heating_plans.data): design criteria, checklist states and notes per SIA 108
-// phase. Parsed leniently: broken fields fall back to defaults.
+// phase, plus the project-wide basics of the heat load (site, climate) and the construction catalogue. Parsed
+// leniently: broken fields fall back to defaults.
 
 export const generatorTypes = ["hpAir", "hpBrine", "hpWater", "pellets", "logWood", "district", "gasOil"] as const;
 export const emitterTypes = ["floor", "radiators", "tabs", "air"] as const;
@@ -41,6 +44,9 @@ export const heatingPlanSchema = z.object({
   /** Checklist item id → state. Missing = open. */
   checks: lenientRecord(checkSchema),
   notes: lenientRecord(z.string().max(4000), 10),
+  /** Heat load after SIA 384/2: site and climate, catalogue of constructions (U, Ueq, ψ, χ). */
+  site: heatSiteSchema.catch(() => defaultHeatSite),
+  catalog: catalogSchema,
 });
 
 export type HeatingPlan = z.infer<typeof heatingPlanSchema>;

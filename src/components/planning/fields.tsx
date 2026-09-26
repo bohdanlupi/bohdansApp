@@ -15,6 +15,7 @@ export function NumberField({
   className,
   disabled,
   placeholder,
+  negative = false,
 }: {
   id?: string;
   value: number | null;
@@ -24,6 +25,8 @@ export function NumberField({
   className?: string;
   disabled?: boolean;
   placeholder?: string;
+  /** Allow values below zero (e.g. temperatures). */
+  negative?: boolean;
 }) {
   const [text, setText] = useState(formatNumber(value, decimals, false));
   const [shown, setShown] = useState(value);
@@ -45,7 +48,7 @@ export function NumberField({
       onChange={(e) => setText(e.target.value)}
       onBlur={() => {
         const parsed = parseNumber(text);
-        const clean = parsed === null ? null : Math.max(0, parsed);
+        const clean = parsed === null ? null : negative ? parsed : Math.max(0, parsed);
         setText(formatNumber(clean, decimals, false));
         if (clean !== value) onChange(clean);
       }}

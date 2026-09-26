@@ -206,6 +206,7 @@ export function NumberParam({
   decimals = 0,
   hint,
   placeholder,
+  negative,
 }: {
   label: string;
   value: number | null;
@@ -214,12 +215,13 @@ export function NumberParam({
   decimals?: number;
   hint?: string;
   placeholder?: string;
+  negative?: boolean;
 }) {
   const id = useId();
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <NumberField id={id} value={value} decimals={decimals} label={label} disabled={!editable} placeholder={placeholder} onChange={onChange} className="h-8 rounded-lg" />
+      <NumberField id={id} value={value} decimals={decimals} label={label} disabled={!editable} placeholder={placeholder} negative={negative} onChange={onChange} className="h-8 rounded-lg" />
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );

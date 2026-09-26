@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
-/** Side navigation of the Heizungsplanung: overview and SIA 108 phases with checklist progress. */
+/** Side navigation of the Heizungsplanung: overview, SIA 108 phases with checklist progress, Anlagen. */
 export function HeatingNav({
   projectId,
   phases,
@@ -56,6 +56,9 @@ export function HeatingNav({
           ),
         ),
       )}
+      <p className="mt-3 mb-1 px-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{t("calculations")}</p>
+      {link(`${base}/konzepte`, t("conceptsNav"), pathname.startsWith(`${base}/konzepte`))}
+      {link(`${base}/dimensionierung`, t("systemsNav"), pathname.startsWith(`${base}/dimensionierung`))}
     </nav>
   );
 }
