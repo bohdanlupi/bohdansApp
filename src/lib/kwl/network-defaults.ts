@@ -33,24 +33,31 @@ export type DefaultLabels = {
   roomDuct: string;
 };
 
-/** Cover measured with the Auslass for the air side (first curve of the case datasheet for that side). */
-function coverFor(casing: Product | null, side: "supply" | "extract"): Partial<NetNode> {
-  const curve = productCurve(casing, null, side);
+/**
+ * Cover measured with the Auslass: the curve of the group (e.g. «ComfoGrid Genua breit») for the air side, the one
+ * matching the connections if there is one; without such a group the first curve of the case for that side.
+ */
+function measuredCover(casing: Product | null, group: string, side: "supply" | "extract", connections: RegExp): Partial<NetNode> {
+  const curves = casing?.curves.filter((c) => curveGroup(c.label) === group && c.use === side) ?? [];
+  const curve = curves.find((c) => connections.test(c.label)) ?? curves[0] ?? productCurve(casing, null, side);
   return curve ? { cover: measuredCoverPrefix + curveGroup(curve.label), curve: curve.label } : {};
 }
 
 /**
  * Standard network: every strand starts with a silencer at the unit. Supply / extract air: silencer → main duct →
  * per storey a floor duct and its own distributor (one storey: straight to the distributor) → one ComfoTube branch
- * per room (1–3 tubes as in the workbook's distribution sketch) → terminal. Outdoor / exhaust air: silencer → duct
+ * per room (1–3 tubes as in the workbook's distribution sketch) → terminal by room type (branchFor). Outdoor / exhaust air: silencer → duct
  * → weather grille.
  */
 export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: SystemData): SystemData {
   const pipe = pick("duct", /ComfoPipe Compact.*DN160/i, /ComfoPipe/i);
   const tube = pick("duct", /ComfoTube Flow 90/i, /ComfoTube.*90/i);
   const silencer = pick("silencer", /ComfoSilence 350 16\/16 L700/i, /ComfoSilence \d/i);
-  const supplyTerminal = pick("terminal", /CLD breit L430/i, /CLD/i);
-  const extractTerminal = pick("terminal", /TVA-P 125 1x90 H=170/i, /TVA-P/i);
+  const cld = pick("terminal", /CLD breit L430/i, /CLD/i);
+  const csbp400 = pick("terminal", /CSB-P 400/i, /CLD breit L430/i);
+  const csbp600 = pick("terminal", /CSB-P 600/i, /CLD breit L430/i);
+  const stcValve = pickOnly("valve", /ComfoValve Via STC/i);
+  const spiro125 = pickOnly("duct", /^Spirorohr DN 125\b/);
   // Weather protection grille: round in the pipe diameter (Schmidlin WS-R from Ø 200), else rectangular WS-50 Alu.
   const pipeDiameter = pipe?.inner?.diameter;
   const outerGrille =
@@ -69,21 +76,35 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
       .filter((p) => p.kind === "distributor" && /APV F \d/.test(p.name) && (p.outlets ?? 0) >= outlets)
       .sort((a, b) => (a.outlets ?? 0) - (b.outlets ?? 0))[0] ?? pick("distributor", /APV F 10/i, /ComfoCube/i);
 
+  /**
+   * Room branch by room type (SIA 382/5): 1.1 Zimmer (supply) → ComfoCase CSB-P + ComfoGrid Bilamina (400 for one
+   * tube, 600 for two); 2.5 short use (extract) → ComfoValve Via STC directly in a spiro pipe DN 125; all other
+   * rooms → ComfoCase CLD breit 2×90 + ComfoGrid Genua breit. Returns the branch and the distributor outlets it uses.
+   */
+  const branchFor = (r: RoomFlow, side: "supply" | "extract"): { node: NetNode; outlets: number } => {
+    const room = { calcId: r.calcId, roomId: r.roomId };
+    if (side === "extract" && r.type === "shortUse" && stcValve && spiro125) {
+      const valve = component("terminal", null, r.name, { ...room, cover: stcValve.key });
+      return { node: duct(spiro125, labels.roomDuct, 10, 2, { children: [valve] }), outlets: 1 };
+    }
+    const count = tubes(r[side]);
+    const bilamina = side === "supply" && r.type === "room";
+    const casing = bilamina ? (count > 1 ? csbp600 : csbp400) : cld;
+    const group = bilamina ? `ComfoGrid Bilamina ${count > 1 ? 600 : 400}` : "ComfoGrid Genua breit";
+    const terminal = component("terminal", casing, r.name, { ...room, ...measuredCover(casing, group, side, count > 1 ? /2x DN90/ : /1x DN90/) });
+    return { node: duct(tube, labels.roomDuct, 10, 2, { count, children: [terminal] }), outlets: count };
+  };
+
   const tree = (side: "supply" | "extract") => {
     const served = rooms.filter((r) => r[side] > 0);
-    const terminal = side === "supply" ? supplyTerminal : extractTerminal;
     const floors = [...new Set(served.map((r) => r.floor.trim()))].sort((a, b) => floorOrder(a) - floorOrder(b));
     const several = floors.length > 1;
     const distributorOf = (floor: string) => {
-      const floorRooms = served.filter((r) => r.floor.trim() === floor);
-      const branches = floorRooms.map((r) =>
-        duct(tube, labels.roomDuct, 10, 2, {
-          count: tubes(r[side]),
-          children: [component("terminal", terminal, r.name, { calcId: r.calcId, roomId: r.roomId, ...coverFor(terminal, side) })],
-        }),
-      );
-      const outlets = floorRooms.reduce((s, r) => s + tubes(r[side]), 0);
-      return component("distributor", distributorFor(outlets), several && floor ? `${labels.distributor} ${floor}` : labels.distributor, { children: branches });
+      const branches = served.filter((r) => r.floor.trim() === floor).map((r) => branchFor(r, side));
+      const outlets = branches.reduce((s, b) => s + b.outlets, 0);
+      return component("distributor", distributorFor(outlets), several && floor ? `${labels.distributor} ${floor}` : labels.distributor, {
+        children: branches.map((b) => b.node),
+      });
     };
     // Several storeys: a floor duct to each storey's own distributor.
     const afterMain = several

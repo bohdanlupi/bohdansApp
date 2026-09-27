@@ -22,6 +22,7 @@ import {
   noBends,
   type Product,
   productCurve,
+  products,
 } from "./products";
 import { airDensity, ductMaterials, type DuctMaterial, frictionFactor } from "./pressure";
 
@@ -79,7 +80,8 @@ export type SystemData = {
   notes: string;
 };
 
-export type RoomFlow = { calcId: string; roomId: string; name: string; floor: string; supply: number; extract: number };
+/** Room of a dwelling calculation as input for the network; `type` = room type key (SIA 382/5 1.1 … 2.6, calc.ts). */
+export type RoomFlow = { calcId: string; roomId: string; name: string; floor: string; supply: number; extract: number; type?: string | null };
 
 export type NodeResult = {
   id: string;
@@ -370,6 +372,25 @@ function curveArticle(product: Product, curveLabel: string | undefined): Product
   return best && best.score >= Math.min(2, words.length) ? best.article : null;
 }
 
+/**
+ * ComfoSet (flow regulator) at an Auslass: one per ComfoTube connection, i.e. per tube of the duct feeding the
+ * terminal – ComfoSet 75 / 90 / flat 51 by the tube; the short version (30 mm) in ComfoCase CSB-P / EBK, the L
+ * version (75 mm) in the others. ComfoValve terminals and terminals on other ducts need none.
+ */
+export function comfoSetFor(terminal: NetNode, duct: NetNode | null) {
+  const tube = duct?.type === "duct" ? findProduct(duct.product) : null;
+  if (!tube || !/^ComfoTube/.test(tube.family ?? "")) return null;
+  const cover = terminal.cover ?? "";
+  const coverName = cover.startsWith(measuredCoverPrefix) ? cover.slice(measuredCoverPrefix.length) : (findProduct(cover)?.name ?? "");
+  if (/ComfoValve/.test(coverName) || !terminal.product) return null;
+  const size = /flat 51/.test(tube.name) ? "flat-51" : /\b75\b/.test(tube.name) ? "75" : "90";
+  const product = products.find((p) => p.family === "ComfoSet" && p.kind === "valve" && (size === "flat-51" ? /flat 51/.test(p.name) : p.name.startsWith(`ComfoSet ${size} `)));
+  if (!product?.articles.length) return null;
+  const short = /CSB-P|EBK/.test(findProduct(terminal.product)?.name ?? "");
+  const article = product.articles.find((a) => (short ? /kurz/.test(a.text) : /ComfoSet L\b/.test(a.text))) ?? product.articles[0];
+  return { product, article, pieces: Math.max(1, duct!.count) };
+}
+
 export function systemQuantities(data: SystemData): Quantity[] {
   const map = new Map<string, Quantity>();
   const add = (key: string, q: Omit<Quantity, "quantity" | "key">, amount: number) => {
@@ -388,7 +409,7 @@ export function systemQuantities(data: SystemData): Quantity[] {
     if (!product && n.type === "component") return outer ? 4 : 2;
     return 1;
   };
-  const walk = (side: "supply" | "extract", outer: boolean) => (n: NetNode) => {
+  const walk = (side: "supply" | "extract", outer: boolean, parent: NetNode | null = null) => (n: NetNode) => {
     const product = findProduct(n.product);
     const chapter = chapterOf(n, product, outer);
     // Only the product's own (first) article: the others are accessories and variants.
@@ -429,7 +450,11 @@ export function systemQuantities(data: SystemData): Quantity[] {
     } else if ((n.type !== "tee" || n.product) && !(n.type === "terminal" && !n.product && n.cover)) {
       add(n.product ?? `${n.type}-${n.label}`, { chapter, product: n.product, manufacturer: product?.manufacturer ?? null, label, unit: "Stk", articles }, Math.max(1, n.count));
     }
-    n.children.forEach(walk(side, outer));
+    const set = n.type === "terminal" ? comfoSetFor(n, parent) : null;
+    if (set) {
+      add(`comfoset|${set.article.number}`, { chapter: 3, product: set.product.key, manufacturer: set.product.manufacturer, label: set.article.text, unit: "Stk", articles: [set.article.number] }, set.pieces);
+    }
+    n.children.forEach(walk(side, outer, n));
   };
   // Device with its attachments (one piece each).
   const device = findProduct(data.device);
@@ -507,7 +532,7 @@ export function pathTo(roots: NetNode[], id: string): string[] {
 }
 
 /** Room flows of dwelling calculations, as input for the network. */
-export function roomFlows(calcs: { id: string; name: string; data: { rooms: { id: string; number: string; name: string; floor: string; supply: number | null; extract: number | null }[] } }[], calcIds: string[]): RoomFlow[] {
+export function roomFlows(calcs: { id: string; name: string; data: { rooms: { id: string; number: string; name: string; floor: string; supply: number | null; extract: number | null; type?: string | null }[] } }[], calcIds: string[]): RoomFlow[] {
   const multiple = calcIds.length > 1;
   return calcs
     .filter((c) => calcIds.includes(c.id))
@@ -519,6 +544,7 @@ export function roomFlows(calcs: { id: string; name: string; data: { rooms: { id
         floor: r.floor,
         supply: r.supply ?? 0,
         extract: r.extract ?? 0,
+        type: r.type ?? null,
       })),
     );
 }

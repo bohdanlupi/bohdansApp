@@ -265,7 +265,11 @@ also Schmidlin caps and weather protection grilles: src/lib/kwl/schmidlin-data.t
 scripts/gen-schmidlin-data.mjs from the Schmidlin price book PDF (Berechnungsvorlagen/Lüftung KWL/Schmidlin, list
 01.2014 × 1.2 from 01.07.2026); `--import` replaces the priced catalogue (catalogs.source 'pricebook'). Round parts
 limited to the diameter of the adjacent duct, exhaust-only parts (Regenhut, Säulenhut, WSH) only in the exhaust air;
-ζ reference values (no Schmidlin Δp data). Article numbers are made up as code-size-variant-material. Product keys are referenced by saved networks, keep them stable (currentProductKey maps old
+ζ reference values (no Schmidlin Δp data). Article numbers are made up as code-size-variant-material.
+Standardnetz (network-defaults.ts): silencer first on all four strands, one Geschossleitung + distributor per storey;
+terminals by room type – 1.1 Zimmer: CSB-P 400/600 + Bilamina; 2.5: ComfoValve Via STC on Spiro DN 125; all others:
+CLD breit 2×90 + Genua breit. Quantities add one ComfoSet per ComfoTube connection at an Auslass (short 30 mm in
+CSB-P / EBK, L 75 mm otherwise; none for ComfoValve), chapter 3 Regulierung (comfoSetFor in network.ts). Product keys are referenced by saved networks, keep them stable (currentProductKey maps old
 generic «spiro-D» → Meier Tobler). Devices: only the 7 Zehnder datasheet units (no workbook devices, no Hoval/Helios);
 old device ids (…-st) are mapped, unknown ones dropped. No fan Kennlinien, operating points, device diagrams or party flows (2026-09-26, user decision: the
 datasheet data of the units is not uniform); the device tab shows the uniform datasheet check only (max. external
