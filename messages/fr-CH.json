@@ -1817,7 +1817,59 @@
     },
     "calculations": "Installations",
     "conceptsNav": "Concepts",
-    "systemsNav": "Dimensionnement"
+    "systemsNav": "Dimensionnement",
+    "chapters": {
+      "generation": "242 Production de chaleur",
+      "distribution": "243 Distribution de chaleur",
+      "system": "Système",
+      "hotWater": "Eau chaude",
+      "storage": "Accumulateur d’énergie",
+      "groups": "Groupes",
+      "schemaGeneration": "Schéma de principe production",
+      "heatDemand": "Besoins de chaleur SIA 384/2",
+      "floorHeating": "Chauffage au sol",
+      "radiators": "Radiateurs",
+      "safety": "Dispositifs de sécurité",
+      "schemaDistribution": "Schéma de principe distribution"
+    },
+    "plant": {
+      "label": "Installation",
+      "new": "Nouvelle installation",
+      "create": "Créer l’installation",
+      "defaultName": "Installation {n}",
+      "name": "Nom de l’installation",
+      "nameHint": "p. ex. chaufferie bâtiment A",
+      "rename": "Renommer",
+      "save": "Enregistrer",
+      "delete": "Supprimer l’installation",
+      "deleteConfirm": "L’installation «{name}» sera supprimée. Les chauffages au sol attribués sont conservés mais ne sont plus attribués.",
+      "noneTitle": "Pas encore d’installation de production",
+      "noneText": "Créez d’abord une installation. Le chapitre 242 et les chapitres d’installation du 243 appartiennent chacun à une installation.",
+      "unassigned": "non attribué"
+    },
+    "system": {
+      "building": "Bâtiment",
+      "buildingHint": "Valable pour toutes les installations du projet. Avec les chapitres (producteurs, accumulateur, chauffage au sol, besoins de chaleur), ces données déterminent les points applicables des listes de contrôle.",
+      "generators": "Producteurs de chaleur",
+      "generatorsHint": "Les producteurs de toutes les installations pilotent les listes de contrôle (p. ex. sondes géothermiques, évacuation des gaz).",
+      "more": "Autres",
+      "cooling": "L’installation refroidit aussi (PAC réversible, free cooling)",
+      "power": "Puissance de chauffage selon les besoins de chaleur",
+      "powerNone": "Pas encore de calcul des besoins de chaleur – les seuils des listes de contrôle s’appliquent par précaution.",
+      "notes": "Notes"
+    },
+    "storageToggle": "Accumulateur d’énergie présent",
+    "placeholder": {
+      "title": "À suivre",
+      "hotWater": "Besoins et accumulateur d’eau chaude (SIA 385/2), puissance pour la production d’eau chaude, protection contre les légionelles.",
+      "storage": "Accumulateur technique / tampon : volume, temps de coupure, raccordement.",
+      "groups": "Groupes de chauffage : émission, puissance, températures aller/retour, courbe de chauffe, circulateur, vanne mélangeuse.",
+      "schemaGeneration": "Schéma de principe de la production avec cartouche et légende.",
+      "radiators": "Dimensionnement des radiateurs par local selon les besoins de chaleur.",
+      "safety": "Expansion, soupape de sécurité et autres dispositifs de sécurité (SSIGE HE301-01, SIA 384/1).",
+      "schemaDistribution": "Schéma de principe de la distribution (groupes, distributeurs, locaux) avec cartouche et légende.",
+      "text": "Ce chapitre sera élaboré prochainement."
+    }
   },
   "heatLoad": {
     "title": "Concepts – charge thermique",

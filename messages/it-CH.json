@@ -1817,7 +1817,59 @@
     },
     "calculations": "Impianti",
     "conceptsNav": "Concetti",
-    "systemsNav": "Dimensionamento"
+    "systemsNav": "Dimensionamento",
+    "chapters": {
+      "generation": "242 Produzione di calore",
+      "distribution": "243 Distribuzione di calore",
+      "system": "Sistema",
+      "hotWater": "Acqua calda",
+      "storage": "Accumulatore di energia",
+      "groups": "Gruppi",
+      "schemaGeneration": "Schema di principio produzione",
+      "heatDemand": "Fabbisogno di calore SIA 384/2",
+      "floorHeating": "Riscaldamento a pavimento",
+      "radiators": "Radiatori",
+      "safety": "Dispositivi di sicurezza",
+      "schemaDistribution": "Schema di principio distribuzione"
+    },
+    "plant": {
+      "label": "Impianto",
+      "new": "Nuovo impianto",
+      "create": "Creare l’impianto",
+      "defaultName": "Impianto {n}",
+      "name": "Nome dell’impianto",
+      "nameHint": "p. es. centrale termica edificio A",
+      "rename": "Rinominare",
+      "save": "Salvare",
+      "delete": "Eliminare l’impianto",
+      "deleteConfirm": "L’impianto «{name}» viene eliminato. I riscaldamenti a pavimento assegnati restano, ma non sono più assegnati.",
+      "noneTitle": "Nessun impianto di produzione",
+      "noneText": "Creare prima un impianto. Il capitolo 242 e i capitoli d’impianto del 243 appartengono ciascuno a un impianto.",
+      "unassigned": "non assegnato"
+    },
+    "system": {
+      "building": "Edificio",
+      "buildingHint": "Vale per tutti gli impianti del progetto. Insieme ai capitoli (generatori, accumulatore, riscaldamento a pavimento, fabbisogno di calore) questi dati determinano i punti validi delle liste di controllo.",
+      "generators": "Generatori di calore",
+      "generatorsHint": "I generatori di tutti gli impianti comandano le liste di controllo (p. es. sonde geotermiche, evacuazione fumi).",
+      "more": "Altro",
+      "cooling": "L’impianto raffredda anche (PdC reversibile, free cooling)",
+      "power": "Potenza di riscaldamento dal fabbisogno di calore",
+      "powerNone": "Nessun calcolo del fabbisogno di calore – le soglie delle liste di controllo valgono per prudenza.",
+      "notes": "Note"
+    },
+    "storageToggle": "Accumulatore di energia presente",
+    "placeholder": {
+      "title": "In arrivo",
+      "hotWater": "Fabbisogno e accumulatore d’acqua calda (SIA 385/2), potenza per la produzione d’acqua calda, protezione dalla legionella.",
+      "storage": "Accumulatore tecnico / volano: volume, interruzioni, allacciamento.",
+      "groups": "Gruppi di riscaldamento: emissione, potenza, temperature di mandata e ritorno, curva di riscaldamento, circolatore, valvola miscelatrice.",
+      "schemaGeneration": "Schema di principio della produzione con cartiglio e legenda.",
+      "radiators": "Dimensionamento dei radiatori per locale dal fabbisogno di calore.",
+      "safety": "Espansione, valvola di sicurezza e altri dispositivi di sicurezza (SSIGA HE301-01, SIA 384/1).",
+      "schemaDistribution": "Schema di principio della distribuzione (gruppi, collettori, locali) con cartiglio e legenda.",
+      "text": "Questo capitolo sarà elaborato prossimamente."
+    }
   },
   "heatLoad": {
     "title": "Concetti – carico termico",

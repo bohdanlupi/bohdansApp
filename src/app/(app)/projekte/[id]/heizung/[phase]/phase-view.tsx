@@ -9,7 +9,7 @@ import { usePlan } from "@/components/planning/use-plan";
 import { buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { findHeatingPhase } from "@/lib/heating/phases";
-import type { HeatingPlan } from "@/lib/heating/plan-schema";
+import type { HeatingParams, HeatingPlan } from "@/lib/heating/plan-schema";
 import type { AppLanguage } from "@/lib/supabase/types";
 
 import { saveHeatingPlan } from "../actions";
@@ -20,12 +20,15 @@ export function HeatingPhaseView({
   code,
   projectId,
   initial,
+  params,
   language,
   editable,
 }: {
   code: string;
   projectId: string;
   initial: HeatingPlan;
+  /** Checklist parameters taken from the chapters (242 / 243). */
+  params: HeatingParams;
   language: AppLanguage;
   editable: boolean;
 }) {
@@ -52,13 +55,13 @@ export function HeatingPhaseView({
         </div>
       </div>
 
-      {plan.params.generators.length === 0 && phase.code === "31" && <p className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">{t("chooseGenerators")}</p>}
+      {params.generators.length === 0 && phase.code === "31" && <p className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">{t("chooseGenerators")}</p>}
 
       {phase.sections.map((section) => (
         <Checklist
           key={section.key}
           title={section.title[language]}
-          items={section.items.filter((item) => !item.when || item.when(plan.params))}
+          items={section.items.filter((item) => !item.when || item.when(params))}
           checks={plan.checks}
           language={language}
           editable={editable}

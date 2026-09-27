@@ -12,7 +12,7 @@ import { climateStations } from "@/lib/heating/climate";
 import { type Construction, type ConstructionKind, constructionValue, evaluateSite, groundwaterLevels, type HeatSite, inertiaModes } from "@/lib/heating/heat-load";
 import type { HeatingPlan } from "@/lib/heating/plan-schema";
 
-import { saveHeatingPlan } from "../actions";
+import { saveHeatingPlan } from "../../actions";
 
 const newId = () => crypto.randomUUID();
 

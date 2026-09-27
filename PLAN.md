@@ -99,8 +99,10 @@ heating_plans       project_id (PK), data jsonb (Planungsgrundlagen, checklist s
                     construction catalogue) → src/lib/heating/plan-schema.ts
 heating_calcs       id, project_id, name, sort, data jsonb (Konzepte: SIA 384/2 heat load, rooms with elements)
                     → src/lib/heating/heat-load-schema.ts, computed in heat-load.ts
-heating_systems     id, project_id, name, sort, data jsonb (Dimensionierung: floor heating per distributor)
+heating_systems     id, project_id, name, sort, data jsonb (243 Fussbodenheizung per distributor, plantId = Anlage)
                     → src/lib/heating/floor-schema.ts, computed in floor.ts
+heating_plants      id, project_id, name, sort, data jsonb (242 Wärmeerzeugungsanlage: generators, cooling, storage …)
+                    → src/lib/heating/plant-schema.ts
 ```
 
 All tables get `created_at/updated_at/created_by`. RLS policies: authenticated users of the firm
@@ -113,10 +115,11 @@ can read everything; write access by role.
 /projekte                      list + create
 /projekte/[id]                 overview, Beteiligte, documents
 /projekte/[id]/kostenplan      BKP / KV
-/projekte/[id]/heizung         Heizungsplanung: Planungsgrundlagen + phase progress, PDF /api/pdf/heating-plan/[id]
+/projekte/[id]/heizung         redirects to the first checklist (31); checklist PDF /api/pdf/heating-plan/[id]
 /projekte/[id]/heizung/[31…61] SIA 108 phase: checklists (SIA 384/1, 384/2, 384/6, 384/7, EN-103, HE301 refs)
-/projekte/[id]/heizung/konzepte[/calcId]  site, climate, construction catalogue + heat load SIA 384/2, PDF /api/pdf/heat-load/[calcId]
-/projekte/[id]/heizung/dimensionierung[/systemId]  floor heating HAKA.GERODUR, PDF /api/pdf/floor-heating/[systemId]
+/projekte/[id]/heizung/erzeugung/{system,warmwasser,speicher,gruppen,schema}?anlage=  242 Wärmeerzeugung, per Anlage
+/projekte/[id]/heizung/verteilung/waermebedarf[/calcId]  243 Wärmebedarf SIA 384/2 (project-wide), PDF /api/pdf/heat-load/[calcId]
+/projekte/[id]/heizung/verteilung/{fussbodenheizung[/systemId],heizkoerper,sicherheit,schema}?anlage=  243, per Anlage
 /projekte/[id]/lueftung        KWL-Planung: design criteria + phase progress, PDF /api/pdf/kwl-plan/[id]
 /projekte/[id]/lueftung/[31…61] SIA 108 phase: checklists (SIA 382/5 refs) + calculations + diagrams
 /projekte/[id]/lueftung/wohnungen[/calcId]  dwelling calculations, PDF /api/pdf/kwl/[calcId]
@@ -230,6 +233,14 @@ digitised charts B1–B9, C, D in `Berechnungsvorlagen/Heizung/Fussbodenheizung/
 temperature from the most demanding room at the design spacing, edge zone, largest sufficient spacing, downward loss,
 mass flow, pipe length incl. edge zone, rings, Tab. D as drawn (17/13 @ 100 kg/h 58 Pa/m; guide text says 64). Rooms link to
 the heat load; Qh = room load minus the elements marked «FBH». Max. ring length is a LUPI value (not in HAKA).
+Heizung restructured (2026-09-27, user decision «start over, keep the checklists»): chapters 242 Wärmeerzeugung (System,
+Warmwasser, Energiespeicher, Gruppen, Prinzipschema) and 243 Wärmeverteilung (Wärmebedarf SIA 384/2, Fussbodenheizung,
+Heizkörper, Sicherheitseinrichtungen, Prinzipschema). Several Anlagen per project (heating_plants), chosen with an Anlage
+bar (?anlage=, chapter-frame.tsx / plant-bar.tsx); Wärmebedarf is project-wide, the other 243 chapters belong to an
+Anlage. The Planungsgrundlagen page was dropped: checklist params come from the chapters (effectiveHeatingParams in
+src/lib/heating/params.ts: generators / cooling / storage from the Anlagen, floor from the FBH systems, power from the
+heat loads, building data edited in 242 System). Engines of heat load and floor heating kept; their new UI and the
+other subchapters (Warmwasser, Speicher sizing, Gruppen, Heizkörper, Sicherheit, both Prinzipschemas) follow one by one.
 
 KWL-Planung (2026-09-25): the Lüftung tab is a planning dossier by SIA 108 phases 31, 32, 33, 41, 51, 52, 53, 61
 (src/lib/kwl/phases.ts: goals + checklists DE/FR/IT with SIA 382/5 / SIA 108 references, conditional on the design

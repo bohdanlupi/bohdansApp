@@ -1817,7 +1817,59 @@
     },
     "calculations": "Anlagen",
     "conceptsNav": "Konzepte",
-    "systemsNav": "Dimensionierung"
+    "systemsNav": "Dimensionierung",
+    "chapters": {
+      "generation": "242 Wärmeerzeugung",
+      "distribution": "243 Wärmeverteilung",
+      "system": "System",
+      "hotWater": "Warmwasser",
+      "storage": "Energiespeicher",
+      "groups": "Gruppen",
+      "schemaGeneration": "Prinzipschema Wärmeerzeugung",
+      "heatDemand": "Wärmebedarf SIA 384/2",
+      "floorHeating": "Fussbodenheizung",
+      "radiators": "Heizkörper",
+      "safety": "Sicherheitseinrichtungen",
+      "schemaDistribution": "Prinzipschema Wärmeverteilung"
+    },
+    "plant": {
+      "label": "Anlage",
+      "new": "Neue Anlage",
+      "create": "Anlage anlegen",
+      "defaultName": "Anlage {n}",
+      "name": "Name der Anlage",
+      "nameHint": "z. B. Heizzentrale Haus A",
+      "rename": "Umbenennen",
+      "save": "Speichern",
+      "delete": "Anlage löschen",
+      "deleteConfirm": "Die Anlage «{name}» wird gelöscht. Zugeordnete Fussbodenheizungen bleiben erhalten, sind dann aber keiner Anlage zugeordnet.",
+      "noneTitle": "Noch keine Wärmeerzeugungsanlage",
+      "noneText": "Lege zuerst eine Anlage an. Die Kapitel 242 und die Anlagenkapitel von 243 gehören jeweils zu einer Anlage.",
+      "unassigned": "keiner Anlage zugeordnet"
+    },
+    "system": {
+      "building": "Gebäude",
+      "buildingHint": "Gilt für alle Anlagen des Projekts. Zusammen mit den Kapiteln (Wärmeerzeuger, Speicher, Fussbodenheizung, Wärmebedarf) bestimmen diese Angaben, welche Punkte der Checklisten gelten.",
+      "generators": "Wärmeerzeuger",
+      "generatorsHint": "Die Wärmeerzeuger aller Anlagen steuern die Checklisten (z. B. Erdwärmesonden, Abgasanlage).",
+      "more": "Weiteres",
+      "cooling": "Anlage kühlt auch (reversible WP, Freecooling)",
+      "power": "Heizleistung aus dem Wärmebedarf",
+      "powerNone": "Noch keine Wärmebedarfsberechnung – Schwellenwerte der Checklisten gelten vorsichtshalber.",
+      "notes": "Notizen"
+    },
+    "storageToggle": "Energiespeicher vorhanden",
+    "placeholder": {
+      "title": "Folgt",
+      "hotWater": "Warmwasserbedarf und -speicher (SIA 385/2), Leistung für die Wassererwärmung, Legionellenschutz.",
+      "storage": "Technischer Speicher / Pufferspeicher: Volumen, Sperrzeiten, Einbindung.",
+      "groups": "Heizgruppen: Wärmeabgabe, Leistung, Vor- und Rücklauftemperatur, Heizkurve, Umwälzpumpe, Mischventil.",
+      "schemaGeneration": "Prinzipschema der Wärmeerzeugung mit Plankopf und Legende.",
+      "radiators": "Heizkörperauslegung je Raum aus dem Wärmebedarf.",
+      "safety": "Expansion, Sicherheitsventil und weitere Sicherheitseinrichtungen (SWKI HE301-01, SIA 384/1).",
+      "schemaDistribution": "Prinzipschema der Wärmeverteilung (Gruppen, Verteiler, Räume) mit Plankopf und Legende.",
+      "text": "Dieses Kapitel wird als Nächstes ausgearbeitet."
+    }
   },
   "heatLoad": {
     "title": "Konzepte – Heizlast",

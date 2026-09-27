@@ -9,6 +9,7 @@ import type { FormState } from "@/lib/form-state";
 import { emptyFloorSystem, parseFloorSystem } from "@/lib/heating/floor-schema";
 import { emptyHeatLoad, parseHeatLoad } from "@/lib/heating/heat-load-schema";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
+import { emptyPlant, parsePlant } from "@/lib/heating/plant-schema";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -30,6 +31,72 @@ export async function saveHeatingPlan(projectId: string, data: unknown): Promise
   return {};
 }
 
+// ---------------------------------------------------------------------------
+// Wärmeerzeugungsanlagen (242)
+// ---------------------------------------------------------------------------
+
+/** Creates an Anlage and opens its System page. */
+export async function createHeatingPlant(_prev: FormState, formData: FormData): Promise<FormState> {
+  await assertRole("admin", "planer");
+  const projectId = z.uuid().safeParse(formData.get("project_id"));
+  const name = nameSchema.safeParse(formData.get("name"));
+  if (!projectId.success || !name.success) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  const { count } = await supabase.from("heating_plants").select("id", { count: "exact", head: true }).eq("project_id", projectId.data);
+  // The first Anlage takes over what was chosen on the former overview page (generators, storage, cooling).
+  let initial = emptyPlant();
+  if (!count) {
+    const { data: plan } = await supabase.from("heating_plans").select("data").eq("project_id", projectId.data).maybeSingle();
+    const { generators, storage, cooling } = parseHeatingPlan(plan?.data).params;
+    initial = { ...initial, generators, storage, cooling };
+  }
+  const { data, error } = await supabase
+    .from("heating_plants")
+    .insert({ project_id: projectId.data, name: name.data, sort: count ?? 0, data: initial as Json })
+    .select("id")
+    .single();
+  if (error || !data) return { error: "saveFailed" };
+
+  revalidatePath(`/projekte/${projectId.data}/heizung`, "layout");
+  redirect(`/projekte/${projectId.data}/heizung/erzeugung/system?anlage=${data.id}`);
+}
+
+/** Saves name and inputs of an Anlage. */
+export async function saveHeatingPlant(id: string, projectId: string, name: string, data: unknown): Promise<{ error?: string }> {
+  await assertRole("admin", "planer");
+  const parsedName = nameSchema.safeParse(name);
+  if (!ids.safeParse([id, projectId]).success || !parsedName.success) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("heating_plants")
+    .update({ name: parsedName.data, data: parsePlant(data) as Json })
+    .eq("id", id)
+    .eq("project_id", projectId);
+  if (error) return { error: "saveFailed" };
+
+  revalidatePath(`/projekte/${projectId}/heizung`, "layout");
+  return {};
+}
+
+/** Deletes an Anlage; floor heating systems assigned to it become unassigned. */
+export async function deleteHeatingPlant(id: string, projectId: string): Promise<FormState> {
+  await assertRole("admin", "planer");
+  if (!ids.safeParse([id, projectId]).success) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("heating_plants").delete().eq("id", id).eq("project_id", projectId);
+  if (error) return { error: "deleteFailed" };
+
+  revalidatePath(`/projekte/${projectId}/heizung`, "layout");
+  redirect(`/projekte/${projectId}/heizung/erzeugung/system`);
+}
+
+// ---------------------------------------------------------------------------
+// Wärmebedarf SIA 384/2 (243)
+// ---------------------------------------------------------------------------
+
 export async function createHeatCalc(_prev: FormState, formData: FormData): Promise<FormState> {
   await assertRole("admin", "planer");
   const projectId = z.uuid().safeParse(formData.get("project_id"));
@@ -46,7 +113,7 @@ export async function createHeatCalc(_prev: FormState, formData: FormData): Prom
   if (error || !data) return { error: "saveFailed" };
 
   revalidatePath(`/projekte/${projectId.data}/heizung`, "layout");
-  redirect(`/projekte/${projectId.data}/heizung/konzepte/${data.id}`);
+  redirect(`/projekte/${projectId.data}/heizung/verteilung/waermebedarf/${data.id}`);
 }
 
 /** Saves name and inputs of a heat load calculation (results are computed, never stored). */
@@ -83,7 +150,7 @@ export async function duplicateHeatCalc(id: string, projectId: string): Promise<
   if (error || !data) return { error: "saveFailed" };
 
   revalidatePath(`/projekte/${projectId}/heizung`, "layout");
-  redirect(`/projekte/${projectId}/heizung/konzepte/${data.id}`);
+  redirect(`/projekte/${projectId}/heizung/verteilung/waermebedarf/${data.id}`);
 }
 
 export async function deleteHeatCalc(id: string, projectId: string): Promise<FormState> {
@@ -95,7 +162,7 @@ export async function deleteHeatCalc(id: string, projectId: string): Promise<For
   if (error) return { error: "deleteFailed" };
 
   revalidatePath(`/projekte/${projectId}/heizung`, "layout");
-  redirect(`/projekte/${projectId}/heizung/konzepte`);
+  redirect(`/projekte/${projectId}/heizung/verteilung/waermebedarf`);
 }
 
 export async function createHeatingSystem(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -107,7 +174,8 @@ export async function createHeatingSystem(_prev: FormState, formData: FormData):
   const supabase = await createClient();
   const { data: calcs } = await supabase.from("heating_calcs").select("id").eq("project_id", projectId.data);
   const { count } = await supabase.from("heating_systems").select("id", { count: "exact", head: true }).eq("project_id", projectId.data);
-  const data = { ...emptyFloorSystem(), calcIds: (calcs ?? []).map((c) => c.id) };
+  const plantId = z.uuid().safeParse(formData.get("plant_id"));
+  const data = { ...emptyFloorSystem(), plantId: plantId.success ? plantId.data : null, calcIds: (calcs ?? []).map((c) => c.id) };
   const { data: row, error } = await supabase
     .from("heating_systems")
     .insert({ project_id: projectId.data, name: name.data, sort: count ?? 0, data: data as Json })
@@ -116,7 +184,7 @@ export async function createHeatingSystem(_prev: FormState, formData: FormData):
   if (error || !row) return { error: "saveFailed" };
 
   revalidatePath(`/projekte/${projectId.data}/heizung`, "layout");
-  redirect(`/projekte/${projectId.data}/heizung/dimensionierung/${row.id}`);
+  redirect(`/projekte/${projectId.data}/heizung/verteilung/fussbodenheizung/${row.id}`);
 }
 
 /** Saves name and inputs of a floor heating system. */
@@ -146,5 +214,5 @@ export async function deleteHeatingSystem(id: string, projectId: string): Promis
   if (error) return { error: "deleteFailed" };
 
   revalidatePath(`/projekte/${projectId}/heizung`, "layout");
-  redirect(`/projekte/${projectId}/heizung/dimensionierung`);
+  redirect(`/projekte/${projectId}/heizung/verteilung/fussbodenheizung`);
 }

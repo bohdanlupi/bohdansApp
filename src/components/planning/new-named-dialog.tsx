@@ -17,11 +17,14 @@ export function NewNamedDialog({
   defaultName,
   action: create,
   labels,
+  hidden,
 }: {
   projectId: string;
   defaultName: string;
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   labels: { button: string; name: string; hint?: string; create: string };
+  /** Further hidden form fields (e.g. the Anlage a new record belongs to). */
+  hidden?: Record<string, string>;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -30,7 +33,7 @@ export function NewNamedDialog({
         <Plus />
         {labels.button}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">{open && <NamedForm projectId={projectId} defaultName={defaultName} action={create} labels={labels} />}</DialogContent>
+      <DialogContent className="sm:max-w-md">{open && <NamedForm projectId={projectId} defaultName={defaultName} action={create} labels={labels} hidden={hidden} />}</DialogContent>
     </Dialog>
   );
 }
@@ -40,11 +43,14 @@ function NamedForm({
   defaultName,
   action: create,
   labels,
+  hidden,
 }: {
   projectId: string;
   defaultName: string;
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   labels: { button: string; name: string; hint?: string; create: string };
+  /** Further hidden form fields (e.g. the Anlage a new record belongs to). */
+  hidden?: Record<string, string>;
 }) {
   const t = useTranslations("common");
   const [state, action] = useActionState(create, initialFormState);
@@ -54,6 +60,9 @@ function NamedForm({
         <DialogTitle>{labels.button}</DialogTitle>
       </DialogHeader>
       <input type="hidden" name="project_id" value={projectId} />
+      {Object.entries(hidden ?? {}).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
       <FormMessage state={state} />
       <div className="space-y-2">
         <Label htmlFor="new-name">{labels.name}</Label>

@@ -10,18 +10,18 @@ import { requireProfile } from "@/lib/auth";
 import { evaluateHeatLoad } from "@/lib/heating/heat-load";
 import { formatNumber } from "@/lib/number-input";
 
-import { loadProject } from "../../load-project";
-import { createHeatCalc } from "../actions";
-import { loadHeatCalcs, loadHeatingPlan } from "../load-plan";
+import { loadProject } from "../../../load-project";
+import { createHeatCalc } from "../../actions";
+import { loadHeatCalcs, loadHeatingPlan } from "../../load-plan";
 import { HeatBasics } from "./heat-basics";
 
-export async function generateMetadata({ params }: PageProps<"/projekte/[id]/heizung/konzepte">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/projekte/[id]/heizung/verteilung/waermebedarf">): Promise<Metadata> {
   const project = await loadProject((await params).id);
   const t = await getTranslations("heatLoad");
   return { title: project ? `${t("title")} · ${project.number}` : t("title") };
 }
 
-export default async function HeatConceptsPage({ params }: PageProps<"/projekte/[id]/heizung/konzepte">) {
+export default async function HeatConceptsPage({ params }: PageProps<"/projekte/[id]/heizung/verteilung/waermebedarf">) {
   const { id } = await params;
   const profile = await requireProfile();
   const t = await getTranslations("heatLoad");
@@ -68,7 +68,7 @@ export default async function HeatConceptsPage({ params }: PageProps<"/projekte/
               {rows.map(({ calc, result }) => (
                 <TableRow key={calc.id} className="relative">
                   <TableCell className="pl-4">
-                    <Link href={`/projekte/${id}/heizung/konzepte/${calc.id}`} className="font-medium after:absolute after:inset-0">
+                    <Link href={`/projekte/${id}/heizung/verteilung/waermebedarf/${calc.id}`} className="font-medium after:absolute after:inset-0">
                       {calc.name}
                     </Link>
                   </TableCell>

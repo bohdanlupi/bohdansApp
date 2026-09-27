@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { evaluateFloor, type FloorDistributor, type FloorRoom, floorPipes, floorSpacings, type FloorSystemData, insulationThicknesses, type LinkedRoom } from "@/lib/heating/floor";
 import { cn } from "@/lib/utils";
 
-import { deleteHeatingSystem, saveHeatingSystem } from "../../actions";
+import { deleteHeatingSystem, saveHeatingSystem } from "../../../actions";
 
 const newId = () => crypto.randomUUID();
 
@@ -45,18 +45,22 @@ export function FloorEditor({
   initialName,
   initialData,
   calcs,
+  plants,
   editable,
 }: {
   id: string;
   projectId: string;
   initialName: string;
   initialData: FloorSystemData;
+  /** Wärmeerzeugungsanlagen the system can be assigned to (242). */
+  plants: { id: string; name: string }[];
   /** Heat load calculations with their heated rooms (Qh without floor loss). */
   calcs: CalcRooms[];
   editable: boolean;
 }) {
   const t = useTranslations("floorHeating");
   const tForms = useTranslations("forms");
+  const tPlant = useTranslations("heatingPlan.plant");
   const [name, setName] = useState(initialName);
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState({ name: initialName, data: initialData });
@@ -154,6 +158,16 @@ export function FloorEditor({
 
       <Section title={t("settings")} description={t("settingsHint")}>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {plants.length > 0 && (
+            <OptionField
+              label={tPlant("label")}
+              value={plants.some((p) => p.id === data.plantId) ? data.plantId! : plants[0].id}
+              options={plants.map((p) => p.id)}
+              optionLabel={(v) => plants.find((p) => p.id === v)?.name ?? v}
+              editable={editable}
+              onChange={(v) => set("plantId", v)}
+            />
+          )}
           <NumberParam label={t("spread")} value={data.spread} decimals={1} editable={editable} onChange={(v) => set("spread", v ?? 10)} />
           <OptionField label={t("designSpacing")} value={String(data.designSpacing)} options={floorSpacings.map(String)} optionLabel={(v) => `${v} cm`} editable={editable} onChange={(v) => set("designSpacing", Number(v))} hint={t("designSpacingHint")} />
           <NumberParam label={t("flowOverride")} value={data.flowOverride} decimals={0} editable={editable} onChange={(v) => set("flowOverride", v)} hint={t("flowOverrideHint")} />

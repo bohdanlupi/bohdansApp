@@ -4,7 +4,11 @@ import { createTranslator } from "next-intl";
 import { languageToLocale } from "@/i18n/config";
 import { getCurrentProfile } from "@/lib/auth";
 import { heatingPhases } from "@/lib/heating/phases";
+import { evaluateHeatLoad } from "@/lib/heating/heat-load";
+import { parseHeatLoad } from "@/lib/heating/heat-load-schema";
+import { effectiveHeatingParams } from "@/lib/heating/params";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
+import { parsePlant } from "@/lib/heating/plant-schema";
 import { createClient } from "@/lib/supabase/server";
 import { HeatingPlanDocument } from "@/pdf/heating-plan-document";
 import type { KwlTranslate } from "@/pdf/kwl-document";
@@ -20,10 +24,13 @@ export async function GET(request: Request, { params }: RouteContext<"/api/pdf/h
   if (!/^[0-9a-f-]{36}$/i.test(projectId)) return new Response("Not found", { status: 404 });
 
   const supabase = await createClient();
-  const [{ data: project }, { data: firm }, { data: plan }] = await Promise.all([
+  const [{ data: project }, { data: firm }, { data: plan }, { data: plants }, { data: calcs }, { count: floorSystems }] = await Promise.all([
     supabase.from("projects").select("*").eq("id", projectId).maybeSingle(),
     supabase.from("firm_settings").select("*").eq("id", true).single(),
     supabase.from("heating_plans").select("data").eq("project_id", projectId).maybeSingle(),
+    supabase.from("heating_plants").select("data").eq("project_id", projectId),
+    supabase.from("heating_calcs").select("data").eq("project_id", projectId),
+    supabase.from("heating_systems").select("id", { count: "exact", head: true }).eq("project_id", projectId),
   ]);
   if (!project) return new Response("Not found", { status: 404 });
   if (!firm) return new Response("Firm settings missing", { status: 500 });
@@ -36,6 +43,10 @@ export async function GET(request: Request, { params }: RouteContext<"/api/pdf/h
   const messages = (await import(`../../../../../../messages/${locale}.json`)).default;
   const t = createTranslator({ locale, messages, namespace: "heatingPlan" }) as unknown as KwlTranslate;
   const labels = pdfLabels(project.language);
+  // Checklist parameters taken from the chapters, as in the app.
+  const parsed = parseHeatingPlan(plan?.data);
+  const loads = (calcs ?? []).map((c) => evaluateHeatLoad(parseHeatLoad(c.data), parsed.site, parsed.catalog).building);
+  const planWithParams = { ...parsed, params: effectiveHeatingParams(parsed.params, (plants ?? []).map((p) => ({ data: parsePlant(p.data) })), floorSystems ?? 0, loads) };
 
   const pdf = await renderToBuffer(
     <HeatingPlanDocument
@@ -47,7 +58,7 @@ export async function GET(request: Request, { params }: RouteContext<"/api/pdf/h
       projectLabel={labels.project}
       dateLabel={labels.date}
       project={project}
-      plan={parseHeatingPlan(plan?.data)}
+      plan={planWithParams}
       phases={selected}
     />,
   );

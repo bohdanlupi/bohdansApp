@@ -95,6 +95,8 @@ export type FloorRoom = {
 export type FloorDistributor = { id: string; name: string; rooms: FloorRoom[] };
 
 export type FloorSystemData = {
+  /** Wärmeerzeugungsanlage (heating_plants) that feeds the system; null = not assigned yet (counts to the first). */
+  plantId: string | null;
   calcIds: string[];
   /** Spread Δt = tv − tr [K]. */
   spread: number;

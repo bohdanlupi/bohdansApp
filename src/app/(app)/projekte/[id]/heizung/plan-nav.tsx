@@ -1,12 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
-/** Side navigation of the Heizungsplanung: overview, SIA 108 phases with checklist progress, Anlagen. */
+/** Subchapters of 242 Wärmeerzeugung and 243 Wärmeverteilung: path below /heizung and message key. */
+export const generationChapters = [
+  ["erzeugung/system", "system"],
+  ["erzeugung/warmwasser", "hotWater"],
+  ["erzeugung/speicher", "storage"],
+  ["erzeugung/gruppen", "groups"],
+  ["erzeugung/schema", "schemaGeneration"],
+] as const;
+export const distributionChapters = [
+  ["verteilung/waermebedarf", "heatDemand"],
+  ["verteilung/fussbodenheizung", "floorHeating"],
+  ["verteilung/heizkoerper", "radiators"],
+  ["verteilung/sicherheit", "safety"],
+  ["verteilung/schema", "schemaDistribution"],
+] as const;
+
+/**
+ * Side navigation of the Heizung: SIA 108 checklists with their progress, then 242 Wärmeerzeugung and 243
+ * Wärmeverteilung with their subchapters. The chosen Anlage (?anlage=) is kept when switching subchapters.
+ */
 export function HeatingNav({
   projectId,
   phases,
@@ -16,6 +35,7 @@ export function HeatingNav({
 }) {
   const t = useTranslations("heatingPlan");
   const pathname = usePathname();
+  const plant = useSearchParams().get("anlage");
   const base = `/projekte/${projectId}/heizung`;
   const link = (href: string, label: React.ReactNode, active: boolean, extra?: React.ReactNode) => (
     <Link
@@ -31,11 +51,15 @@ export function HeatingNav({
       {extra}
     </Link>
   );
+  const heading = (label: string) => <p className="mt-3 mb-1 px-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{label}</p>;
+  const chapter = ([path, key]: readonly [string, string]) => {
+    const href = `${base}/${path}`;
+    return link(plant ? `${href}?anlage=${plant}` : href, t(`chapters.${key}` as never), pathname === href || pathname.startsWith(`${href}/`));
+  };
 
   return (
     <nav aria-label={t("navLabel")} className="flex flex-col gap-0.5 lg:sticky lg:top-4 lg:self-start">
-      {link(base, t("overview"), pathname === base)}
-      <p className="mt-3 mb-1 px-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{t("phases")}</p>
+      {heading(t("phases"))}
       {phases.map((p) =>
         link(
           `${base}/${p.code}`,
@@ -56,9 +80,10 @@ export function HeatingNav({
           ),
         ),
       )}
-      <p className="mt-3 mb-1 px-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{t("calculations")}</p>
-      {link(`${base}/konzepte`, t("conceptsNav"), pathname.startsWith(`${base}/konzepte`))}
-      {link(`${base}/dimensionierung`, t("systemsNav"), pathname.startsWith(`${base}/dimensionierung`))}
+      {heading(t("chapters.generation"))}
+      {generationChapters.map(chapter)}
+      {heading(t("chapters.distribution"))}
+      {distributionChapters.map(chapter)}
     </nav>
   );
 }

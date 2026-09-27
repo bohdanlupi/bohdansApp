@@ -7,7 +7,7 @@ import { requireProfile } from "@/lib/auth";
 import { findHeatingPhase } from "@/lib/heating/phases";
 
 import { loadProject } from "../../load-project";
-import { loadHeatingPlan } from "../load-plan";
+import { loadHeatingParams, loadHeatingPlan } from "../load-plan";
 import { HeatingPhaseView } from "./phase-view";
 
 export async function generateMetadata({ params }: PageProps<"/projekte/[id]/heizung/[phase]">): Promise<Metadata> {
@@ -23,8 +23,8 @@ export default async function HeatingPhasePage({ params }: PageProps<"/projekte/
   const phase = findHeatingPhase(code);
   if (!phase) notFound();
   const profile = await requireProfile();
-  const plan = await loadHeatingPlan(id);
+  const [plan, heatingParams] = await Promise.all([loadHeatingPlan(id), loadHeatingParams(id)]);
   const language = localeToLanguage((await getLocale()) as Locale);
 
-  return <HeatingPhaseView key={phase.code} code={phase.code} projectId={id} initial={plan} language={language} editable={profile.role !== "viewer"} />;
+  return <HeatingPhaseView key={phase.code} code={phase.code} projectId={id} initial={plan} params={heatingParams} language={language} editable={profile.role !== "viewer"} />;
 }

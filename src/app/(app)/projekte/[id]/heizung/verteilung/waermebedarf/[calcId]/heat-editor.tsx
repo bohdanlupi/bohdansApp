@@ -28,7 +28,7 @@ import {
 } from "@/lib/heating/heat-load";
 import { cn } from "@/lib/utils";
 
-import { deleteHeatCalc, duplicateHeatCalc, saveHeatCalc } from "../../actions";
+import { deleteHeatCalc, duplicateHeatCalc, saveHeatCalc } from "../../../actions";
 
 const newId = () => crypto.randomUUID();
 

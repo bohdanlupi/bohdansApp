@@ -2,7 +2,7 @@ import "server-only";
 
 import { linkedRooms, roomLookup } from "@/lib/heating/links";
 
-import { loadHeatCalcs, loadHeatingPlan } from "../load-plan";
+import { loadHeatCalcs, loadHeatingPlan } from "../../load-plan";
 import type { CalcRooms } from "./[systemId]/floor-editor";
 
 /** Heat load calculations with their heated rooms as floor heating input (Qh without the floor loss). */

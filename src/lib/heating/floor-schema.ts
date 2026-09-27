@@ -44,6 +44,7 @@ const roomSchema = z.object({
 const distributorSchema = z.object({ id, name: text(80), rooms: lenientArray(roomSchema, 100) });
 
 export const floorSystemSchema = z.object({
+  plantId: z.string().max(40).nullable().catch(null),
   calcIds: z.array(z.string().max(40)).max(50).catch([]),
   spread: z.number().finite().min(2).max(20).catch(10),
   pipe: z.enum(floorPipes as [string, ...string[]]).catch("17/13"),

@@ -10,36 +10,55 @@ import { requireProfile } from "@/lib/auth";
 import { evaluateFloor } from "@/lib/heating/floor";
 import { formatNumber } from "@/lib/number-input";
 
-import { loadProject } from "../../load-project";
-import { createHeatingSystem } from "../actions";
-import { loadHeatingSystems } from "../load-plan";
+import { loadProject } from "../../../load-project";
+import { createHeatingSystem } from "../../actions";
+import { ChapterFrame } from "../../chapter-frame";
+import { loadHeatingPlants, loadHeatingSystems, selectPlant } from "../../load-plan";
 import { loadCalcRooms } from "./load-rooms";
 
-export async function generateMetadata({ params }: PageProps<"/projekte/[id]/heizung/dimensionierung">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/projekte/[id]/heizung/verteilung/fussbodenheizung">): Promise<Metadata> {
   const project = await loadProject((await params).id);
   const t = await getTranslations("floorHeating");
   return { title: project ? `${t("title")} · ${project.number}` : t("title") };
 }
 
-export default async function FloorSystemsPage({ params }: PageProps<"/projekte/[id]/heizung/dimensionierung">) {
+/** 243 Fussbodenheizung: the floor heating systems of the chosen Anlage (unassigned ones count to the first). */
+export default async function FloorSystemsPage({ params, searchParams }: PageProps<"/projekte/[id]/heizung/verteilung/fussbodenheizung">) {
   const { id } = await params;
+  const { anlage } = await searchParams;
   const profile = await requireProfile();
   const t = await getTranslations("floorHeating");
-  const [systems, { lookup }] = await Promise.all([loadHeatingSystems(id), loadCalcRooms(id)]);
+  const tPlan = await getTranslations("heatingPlan");
+  const [all, plants, { lookup }] = await Promise.all([loadHeatingSystems(id), loadHeatingPlants(id), loadCalcRooms(id)]);
+  const plant = selectPlant(plants, anlage);
+  const plantOf = (plantId: string | null) => (plants.some((p) => p.id === plantId) ? plantId : (plants[0]?.id ?? null));
+  const systems = all.filter((s) => plant && plantOf(s.data.plantId) === plant.id);
   const rows = systems.map((s) => ({ system: s, result: evaluateFloor(s.data, lookup) }));
+  const editable = profile.role !== "viewer";
   const num = (v: number | null | undefined, d = 0) => (v ? formatNumber(v, d) : "");
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold">{t("title")}</h2>
-          <p className="max-w-3xl text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        {profile.role !== "viewer" && (
-          <NewNamedDialog projectId={id} defaultName={t("defaultName", { n: systems.length + 1 })} action={createHeatingSystem} labels={{ button: t("new"), name: t("name"), hint: t("nameHint"), create: t("create") }} />
-        )}
-      </div>
+    <ChapterFrame
+      chapter="243"
+      title={tPlan("chapters.floorHeating")}
+      description={t("description")}
+      projectId={id}
+      plants={plants}
+      plant={plant}
+      editable={editable}
+      actions={
+        editable &&
+        plant && (
+          <NewNamedDialog
+            projectId={id}
+            defaultName={t("defaultName", { n: all.length + 1 })}
+            action={createHeatingSystem}
+            labels={{ button: t("new"), name: t("name"), hint: t("nameHint"), create: t("create") }}
+            hidden={{ plant_id: plant.id }}
+          />
+        )
+      }
+    >
       {rows.length === 0 ? (
         <EmptyState icon={Layers} title={t("emptyTitle")} text={t("emptyText")} />
       ) : (
@@ -59,7 +78,7 @@ export default async function FloorSystemsPage({ params }: PageProps<"/projekte/
               {rows.map(({ system, result }) => (
                 <TableRow key={system.id} className="relative">
                   <TableCell className="pl-4">
-                    <Link href={`/projekte/${id}/heizung/dimensionierung/${system.id}`} className="font-medium after:absolute after:inset-0">
+                    <Link href={`/projekte/${id}/heizung/verteilung/fussbodenheizung/${system.id}`} className="font-medium after:absolute after:inset-0">
                       {system.name}
                     </Link>
                   </TableCell>
@@ -74,6 +93,6 @@ export default async function FloorSystemsPage({ params }: PageProps<"/projekte/
           </Table>
         </div>
       )}
-    </div>
+    </ChapterFrame>
   );
 }
