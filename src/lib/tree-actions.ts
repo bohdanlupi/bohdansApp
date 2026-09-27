@@ -369,7 +369,7 @@ export async function insertFromCatalog(
     .from("catalogs")
     .select("id, supplier")
     .in("id", [...new Set(source.map((n) => n.catalog_id))])
-    .eq("source", "igh");
+    .neq("source", "own");
   const supplierOf = new Map((suppliers ?? []).map((c) => [c.id, c.supplier]));
   const longText = (node: Tables<"catalog_nodes">): Json => {
     const supplier = supplierOf.get(node.catalog_id);

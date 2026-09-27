@@ -1,10 +1,12 @@
 // Product data for the network calculation: Zehnder (digitised from the Zehnder CH datasheets in
-// Berechnungsvorlagen/Lüftung KWL/Zehnder Daten) and the Meier Tobler spiro range (IGH catalogue).
+// Berechnungsvorlagen/Lüftung KWL/Zehnder Daten), the Meier Tobler spiro range (IGH catalogue) and the Schmidlin
+// caps and weather protection grilles (price book) for the end of the outdoor / exhaust air.
 // Curves are pressure drop [Pa] over air flow [m³/h]; duct curves are [Pa/m]. Without a curve: ducts by
 // Darcy–Weisbach, fittings by their loss coefficient ζ.
 
 import type { DuctMaterial } from "./pressure";
 import { meierToblerProducts } from "./meiertobler-data";
+import { schmidlinProducts } from "./schmidlin-data";
 import { zehnderProducts } from "./zehnder-data";
 
 export type Curve = {
@@ -64,7 +66,7 @@ export type Product = {
   };
 };
 
-export const products: Product[] = [...zehnderProducts, ...meierToblerProducts];
+export const products: Product[] = [...zehnderProducts, ...meierToblerProducts, ...schmidlinProducts];
 
 const byKey = new Map(products.map((p) => [p.key, p]));
 export const findProduct = (key: string | null | undefined) => (key ? (byKey.get(key) ?? null) : null);

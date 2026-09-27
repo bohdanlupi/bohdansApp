@@ -55,7 +55,7 @@ export default async function CatalogPage({ params }: PageProps<"/kataloge/[id]"
         description={
           isSupplier
             ? [
-                t("catalogs.supplierInfo", { version: catalog.version ?? "–" }),
+                t(catalog.source === "igh" ? "catalogs.supplierInfo" : "catalogs.pricebookInfo", { version: catalog.version ?? "–" }),
                 catalog.valid_from && t("catalogs.validFrom", { date: new Date(catalog.valid_from).toLocaleDateString("de-CH") }),
               ]
                 .filter(Boolean)

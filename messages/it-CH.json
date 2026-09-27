@@ -264,6 +264,8 @@
       "active": "Attivo (proporre durante l'inserimento nei capitolati)"
     },
     "supplierInfo": "Catalogo fornitore IGH, versione {version} – solo lettura, aggiornato tramite importazione",
+    "pricebook": "Listino prezzi",
+    "pricebookInfo": "Listino prezzi fornitore, versione {version} – solo lettura, aggiornato tramite importazione",
     "validFrom": "Prezzi validi dal {date}"
   },
   "catalogBrowser": {

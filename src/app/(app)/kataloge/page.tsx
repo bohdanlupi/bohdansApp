@@ -56,9 +56,13 @@ export default async function CatalogsPage() {
                     <Link href={`/kataloge/${c.id}`} className="font-medium after:absolute after:inset-0">
                       {c.name}
                     </Link>
-                    {c.source === "igh" && (
-                      <Badge variant="secondary" className="ml-2" title={t("catalogs.supplierInfo", { version: c.version ?? "–" })}>
-                        IGH
+                    {c.source !== "own" && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-2"
+                        title={t(c.source === "igh" ? "catalogs.supplierInfo" : "catalogs.pricebookInfo", { version: c.version ?? "–" })}
+                      >
+                        {c.source === "igh" ? "IGH" : t("catalogs.pricebook")}
                       </Badge>
                     )}
                     {c.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{c.description}</div>}

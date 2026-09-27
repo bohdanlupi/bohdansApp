@@ -79,7 +79,8 @@ const targetsSchema = z.record(z.string().max(300), z.uuid().nullable());
 /**
  * Inserts the quantities of a system into an LV, one position per product, each line into the chapter chosen for
  * it (`targets`: quantity key → LV group); lines without a chapter go into a new group `groupTitle`. Products
- * with an article in the IGH catalogues of Zehnder / Meier Tobler become catalogue positions (text, unit, price);
+ * with an article in the IGH catalogues of Zehnder / Meier Tobler or the Schmidlin price book become catalogue
+ * positions (text, unit, price);
  * the rest become R-positions.
  */
 export async function insertSystemQuantities(
@@ -117,9 +118,12 @@ export async function insertSystemQuantities(
   const title = nameSchema.safeParse(groupTitle);
   if (needsGroup && !title.success) return { error: "invalidInput" };
 
-  // Catalogue positions by article number (IGH catalogues of Zehnder and Meier Tobler).
+  // Catalogue positions by article number (IGH catalogues of Zehnder and Meier Tobler, Schmidlin price book).
   const articles = [...new Set(quantities.flatMap((q) => q.articles.map(normalizeArticle)))];
-  const { data: catalogs } = await supabase.from("catalogs").select("id, supplier").eq("source", "igh").or("name.ilike.%zehnder%,name.ilike.%meier tobler%");
+  const { data: catalogs } = await supabase
+    .from("catalogs")
+    .select("id, supplier")
+    .or("external_key.eq.pricebook:schmidlin:komponenten,and(source.eq.igh,or(name.ilike.%zehnder%,name.ilike.%meier tobler%))");
   const catalogIds = (catalogs ?? []).map((c) => c.id);
   const { data: entries } = articles.length && catalogIds.length
     ? await supabase

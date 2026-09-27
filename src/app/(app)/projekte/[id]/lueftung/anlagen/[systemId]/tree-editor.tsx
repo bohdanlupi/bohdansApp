@@ -37,8 +37,30 @@ const nodeTypes: NodeType[] = ["duct", "reducer", "tee", "distributor", "compone
 const componentFamilies = ["Rohrabschluss / Enddeckel", "Schalldämpfer", "Absperrklappen", "Revisionsdeckel"];
 const isComponent = (p: Product) =>
   p.manufacturer === "Meier Tobler" ? componentFamilies.includes(p.family ?? "") : p.manufacturer === "Zehnder" && /^Comfo(Silence|Fresh)/.test(p.family ?? "");
-/** Products that fit a node type (fittings by their role). */
-function productOptions(type: NodeType): Product[] {
+/**
+ * Schmidlin caps and weather protection grilles for the end of the outdoor / exhaust air: exhaust-only parts only
+ * in the exhaust air, round ones only in the diameter of the adjacent duct (when known).
+ */
+function outerParts(list: "outdoor" | "exhaust", diameter: number | null): Product[] {
+  return products.filter(
+    (p) =>
+      p.manufacturer === "Schmidlin" &&
+      (list === "exhaust" || p.use !== "exhaust") &&
+      (!diameter || !p.inner?.diameter || p.inner.diameter === diameter),
+  );
+}
+
+/** Diameter of the duct next to a chain element (the one before it, else the one after it). */
+function chainDiameter(chain: NetNode[], id: string): number | null {
+  const i = chain.findIndex((n) => n.id === id);
+  const diameterOf = (n: NetNode | undefined) => (n?.type === "duct" ? (findProduct(n.product)?.inner?.diameter ?? n.diameter) : null);
+  for (let j = i - 1; j >= 0; j--) if (chain[j].type === "duct") return diameterOf(chain[j]);
+  for (let j = i + 1; j < chain.length; j++) if (chain[j].type === "duct") return diameterOf(chain[j]);
+  return null;
+}
+
+/** Products that fit a node type (fittings by their role); components in the outdoor / exhaust air also the outer parts. */
+function productOptions(type: NodeType, list?: ListKey, diameter: number | null = null): Product[] {
   switch (type) {
     case "duct":
       return products.filter((p) => p.kind === "duct");
@@ -53,7 +75,7 @@ function productOptions(type: NodeType): Product[] {
     case "terminal":
       return products.filter((p) => p.kind === "terminal" || p.kind === "grille" || p.kind === "valve");
     default:
-      return products.filter(isComponent);
+      return list === "outdoor" || list === "exhaust" ? [...outerParts(list, diameter), ...products.filter(isComponent)] : products.filter(isComponent);
   }
 }
 
@@ -228,6 +250,7 @@ export function TreeEditor({
             key={selectedNode.id}
             node={selectedNode}
             list={selectedList}
+            diameter={isChain(selectedList) ? chainDiameter(data[selectedList], selectedNode.id) : null}
             result={resultOf(selectedNode.id)}
             rooms={rooms}
             editable={editable}
@@ -325,6 +348,7 @@ function TreeRow({
 function NodePanel({
   node,
   list,
+  diameter,
   result,
   rooms,
   editable,
@@ -333,6 +357,8 @@ function NodePanel({
 }: {
   node: NetNode;
   list: ListKey;
+  /** Outdoor / exhaust air: diameter of the adjacent duct (limits the round outer parts). */
+  diameter: number | null;
   result: NodeResult | undefined;
   rooms: RoomFlow[];
   editable: boolean;
@@ -342,7 +368,7 @@ function NodePanel({
   const t = useTranslations("kwlSystem");
   const product = findProduct(node.product);
   // A product chosen before the lists were narrowed stays selectable.
-  const choices = productOptions(node.type);
+  const choices = productOptions(node.type, list, diameter);
   const options = groupedOptions(product && !choices.includes(product) ? [product, ...choices] : choices);
   const side = list === "supply" || list === "outdoor" ? "supply" : "extract";
   const numberField = (key: keyof NetNode, label: string, decimals = 1, placeholder?: string) => (

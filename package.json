@@ -43,6 +43,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
     "fflate": "^0.8.3",
+    "pdfjs-dist": "^4.10.38",
     "prettier": "^3.9.8",
     "supabase": "^2.117.0",
     "tailwindcss": "^4",

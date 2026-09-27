@@ -264,6 +264,8 @@
       "active": "Aktiv (beim Einfügen in LVs anbieten)"
     },
     "supplierInfo": "IGH-Lieferantenkatalog, Version {version} – nur lesbar, wird per Import aktualisiert",
+    "pricebook": "Preisbuch",
+    "pricebookInfo": "Lieferanten-Preisbuch, Version {version} – nur lesbar, wird per Import aktualisiert",
     "validFrom": "Preise gültig ab {date}"
   },
   "catalogBrowser": {
