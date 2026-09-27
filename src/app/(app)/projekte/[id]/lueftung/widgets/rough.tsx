@@ -71,7 +71,7 @@ export function RoughWidget({ plan, update, editable }: WidgetProps) {
                     maxLength={120}
                     disabled={!editable}
                     onBlur={(e) => e.target.value !== row.type.name && change(index, { name: e.target.value })}
-                    className="h-7 w-full rounded border border-input bg-transparent px-1.5 outline-none focus:border-ring"
+                    className="h-7 w-full rounded border border-input bg-field px-1.5 outline-none focus:border-ring"
                   />
                 </td>
                 {num(index, "count", t("count"))}

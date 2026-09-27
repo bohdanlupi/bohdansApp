@@ -59,7 +59,7 @@ function nextNumber(rooms: HeatRoom[]): string {
   return match[1] + String(Number(match[2]) + 1).padStart(match[2].length, "0");
 }
 
-const inputCls = "h-7 w-full rounded border border-input bg-transparent px-1.5 outline-none focus:border-ring disabled:opacity-60";
+const inputCls = "h-7 w-full rounded border border-input bg-field px-1.5 outline-none focus:border-ring disabled:opacity-60";
 
 export function HeatEditor({
   id,
@@ -359,7 +359,7 @@ export function HeatEditor({
 
       <Section title={t("notes")}>
         <textarea
-          className="min-h-24 w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-sm outline-none focus:border-ring"
+          className="min-h-24 w-full rounded-md border border-input bg-field px-2 py-1.5 text-sm outline-none focus:border-ring"
           value={data.notes}
           maxLength={20000}
           disabled={!editable}

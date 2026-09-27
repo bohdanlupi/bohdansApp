@@ -147,10 +147,10 @@ export function HeatBasics({ projectId, initial, editable }: { projectId: string
                   return (
                     <tr key={c.id} className="border-b last:border-0">
                       <td className="w-20 py-0.5 pr-1">
-                        <input className="h-7 w-full rounded border border-input bg-transparent px-1.5" value={c.code} maxLength={20} disabled={!editable} aria-label={t("catalog.code")} onChange={(e) => setItem(c.id, { code: e.target.value })} />
+                        <input className="h-7 w-full rounded border border-input bg-field px-1.5" value={c.code} maxLength={20} disabled={!editable} aria-label={t("catalog.code")} onChange={(e) => setItem(c.id, { code: e.target.value })} />
                       </td>
                       <td className="px-1">
-                        <input className="h-7 w-full min-w-48 rounded border border-input bg-transparent px-1.5" value={c.name} maxLength={120} disabled={!editable} aria-label={t("catalog.name")} onChange={(e) => setItem(c.id, { name: e.target.value })} />
+                        <input className="h-7 w-full min-w-48 rounded border border-input bg-field px-1.5" value={c.name} maxLength={120} disabled={!editable} aria-label={t("catalog.name")} onChange={(e) => setItem(c.id, { name: e.target.value })} />
                       </td>
                       <td className="px-1 whitespace-nowrap text-xs text-muted-foreground">{t(`kinds.${c.kind}`)}</td>
                       <td className="w-20 px-1">

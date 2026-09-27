@@ -99,7 +99,7 @@ export function CompanyPicker({
             }
           }}
           className={cn(
-            "h-8 w-full rounded-lg border border-input bg-transparent pr-8 pl-2.5 text-sm outline-none",
+            "h-8 w-full rounded-lg border border-input bg-field pr-8 pl-2.5 text-sm outline-none",
             "placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
             selected && !open && "placeholder:text-foreground",
           )}

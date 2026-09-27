@@ -122,7 +122,7 @@ export function SystemEditor({
             </label>
             <select
               id="system-device"
-              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+              className="h-8 w-full rounded-lg border border-input bg-field px-2.5 text-sm"
               value={data.device ?? ""}
               disabled={!editable}
               onChange={(e) => setData((d) => ({ ...d, device: e.target.value || null, deviceOptions: normalizeOptions(e.target.value || null, d.deviceOptions) }))}

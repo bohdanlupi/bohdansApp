@@ -134,7 +134,7 @@ function ChecklistRow({
                 if (state) onChange(n || state.s !== "open" ? { ...state, n: n || undefined } : null);
                 else if (n) onChange({ s: "open", n });
               }}
-              className="mt-1.5 w-full rounded-md border border-input bg-transparent px-2 py-1 text-sm outline-none focus:border-ring"
+              className="mt-1.5 w-full rounded-md border border-input bg-field px-2 py-1 text-sm outline-none focus:border-ring"
             />
           )}
         </div>

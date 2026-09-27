@@ -284,7 +284,7 @@ function TextCell({
       maxLength={maxLength}
       onBlur={(e) => e.target.value !== value && onChange(e.target.value)}
       onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-      className="h-7 w-full rounded border border-input bg-transparent px-1.5 outline-none focus:border-ring"
+      className="h-7 w-full rounded border border-input bg-field px-1.5 outline-none focus:border-ring"
     />
   );
 }

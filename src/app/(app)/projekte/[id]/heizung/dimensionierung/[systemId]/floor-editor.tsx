@@ -187,7 +187,7 @@ export function FloorEditor({
             <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <input
-                  className="h-8 w-40 rounded border border-input bg-transparent px-2 font-semibold"
+                  className="h-8 w-40 rounded border border-input bg-field px-2 font-semibold"
                   value={dist.name}
                   maxLength={80}
                   disabled={!editable}
@@ -276,7 +276,7 @@ export function FloorEditor({
                         <tr key={room.id} className={cn("border-b last:border-0", result.decisiveRoomId === room.id && "bg-brand/5")}>
                           <td className="px-2 py-0.5">
                             <input
-                              className="h-7 w-40 rounded border border-input bg-transparent px-1.5"
+                              className="h-7 w-40 rounded border border-input bg-field px-1.5"
                               value={room.name}
                               placeholder={link?.name ?? ""}
                               maxLength={120}
@@ -357,7 +357,7 @@ export function FloorEditor({
 
       <Section title={t("notes")}>
         <textarea
-          className="min-h-24 w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-sm outline-none focus:border-ring"
+          className="min-h-24 w-full rounded-md border border-input bg-field px-2 py-1.5 text-sm outline-none focus:border-ring"
           value={data.notes}
           maxLength={20000}
           disabled={!editable}

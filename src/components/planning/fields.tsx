@@ -54,7 +54,7 @@ export function NumberField({
       }}
       onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
       className={cn(
-        "h-7 w-full rounded border border-input bg-transparent px-1.5 text-right tabular-nums outline-none focus:border-ring disabled:opacity-60",
+        "h-7 w-full rounded border border-input bg-field px-1.5 text-right tabular-nums outline-none focus:border-ring disabled:opacity-60",
         className,
       )}
     />

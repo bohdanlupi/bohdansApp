@@ -236,7 +236,7 @@ export function OfferEntry({
                           focusNext(row.id, -1);
                         }
                       }}
-                      className="h-7 w-full rounded border border-input bg-transparent px-1.5 text-right tabular-nums outline-none focus:border-ring focus:ring-2 focus:ring-ring/40"
+                      className="h-7 w-full rounded border border-input bg-field px-1.5 text-right tabular-nums outline-none focus:border-ring focus:ring-2 focus:ring-ring/40"
                     />
                   </td>
                   <td className="pr-4 pl-2 text-right tabular-nums">{amount !== null && (row.is_optional ? `(${formatMoney(amount)})` : formatMoney(amount))}</td>

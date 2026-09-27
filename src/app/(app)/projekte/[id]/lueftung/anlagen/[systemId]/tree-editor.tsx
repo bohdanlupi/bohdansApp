@@ -403,7 +403,7 @@ function NodePanel({
           maxLength={120}
           disabled={!editable}
           onBlur={(e) => e.target.value !== node.label && onPatch({ label: e.target.value })}
-          className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring"
+          className="h-8 w-full rounded-lg border border-input bg-field px-2.5 text-sm outline-none focus:border-ring"
         />
       </div>
 
