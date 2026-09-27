@@ -200,12 +200,12 @@ export function drawSymbol(key: LegendKey, x: number, y: number, color: Paint, d
       return { prims, top: 16 };
     }
     case "filter":
-      // 3.3.8 filter with its class letter.
+      // 3.3.8 filter with its class letter; the V points in the flow direction.
       return {
         prims: [
           box(x, y, 12, 30),
-          { t: "path", d: `M${x - 6},${y - 15} L${x + 6},${y} L${x - 6},${y + 15}`, fill: "none", stroke: "ink", sw: 0.9 },
-          { t: "text", x: x - 2.5, y: y + 3, text: letter, size: 7, anchor: "middle", fill: "ink", bold: true },
+          { t: "path", d: `M${x - 6 * dir},${y - 15} L${x + 6 * dir},${y} L${x - 6 * dir},${y + 15}`, fill: "none", stroke: "ink", sw: 0.9 },
+          { t: "text", x: x - 2.5 * dir, y: y + 3, text: letter, size: 7, anchor: "middle", fill: "ink", bold: true },
         ],
         top: 15,
       };
@@ -370,11 +370,11 @@ export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[
   ];
   // Filters at the air inlets of the unit (outdoor air left, extract air before the extract fan), class above.
   if (attachments.filters) {
-    for (const [fx, y, f] of [
-      [device.x + 34, airY.supply, attachments.filters.supply],
-      [device.x + device.w - 50, airY.extract, attachments.filters.extract],
+    for (const [fx, y, dir, f] of [
+      [device.x + 34, airY.supply, 1, attachments.filters.supply],
+      [device.x + device.w - 50, airY.extract, -1, attachments.filters.extract],
     ] as const) {
-      prims.push(...drawSymbol("filter", fx, y, "ink", 1, f.letter).prims);
+      prims.push(...drawSymbol("filter", fx, y, "ink", dir, f.letter).prims);
       prims.push({ t: "text", x: fx, y: y - 19, text: f.text, size: 7, anchor: "middle", fill: "ink" });
     }
   }

@@ -18,7 +18,6 @@ import type { LogoSource } from "./letterhead";
 
 const ink = "#111111";
 const muted = "#666666";
-const red = "#e00000";
 const blue = "#0000ff";
 
 const pdfPaint = (p: Paint | undefined) => (p === undefined ? undefined : p === "ink" ? ink : p === "bg" ? "#ffffff" : p === "muted" ? muted : p);
@@ -228,7 +227,6 @@ function TitleBlock({
   const line = (x1: number, ya: number, x2: number, yb: number, w = 0.6) => <Line x1={x1} y1={ya} x2={x2} y2={yb} stroke={ink} strokeWidth={w} />;
   const address = [project.street, [project.zip, project.city].filter(Boolean).join(" "), project.parcel ? `${labels.parcel} ${project.parcel}` : ""].filter(Boolean).join(", ");
   const shown = revisions.slice(-6);
-  const latest = revisions.at(-1)?.index;
   const fmtDate = (d: string) => d.split("-").reverse().join(".");
   const firmLines = [firm.name, [firm.street, [firm.zip, firm.city].filter(Boolean).join(" ")].filter(Boolean).join(", "), [firm.phone, firm.email].filter(Boolean).join(" - ")].filter(Boolean);
 
@@ -267,7 +265,7 @@ function TitleBlock({
             {svgText(cols[0] + 3, ry + revH - 4, r?.index ?? String.fromCharCode(65 + i + Math.max(0, revisions.length - 6)), 7.5)}
             {svgText(cols[1] + 3, ry + revH - 4, r?.initials ?? "...", 7.5)}
             {svgText(cols[2] + 3, ry + revH - 4, r ? fmtDate(r.date) : "...", 7.5)}
-            {svgText(cols[3] + 3, ry + revH - 4, r?.comment ?? "...", 7.5, { fill: r && r.index === latest ? red : ink })}
+            {svgText(cols[3] + 3, ry + revH - 4, r?.comment ?? "...", 7.5)}
           </G>
         );
       })}
