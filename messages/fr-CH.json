@@ -1485,6 +1485,7 @@
     "types": {
       "duct": "Conduit",
       "bend": "Coude",
+      "reducer": "Réduction",
       "tee": "Té",
       "distributor": "Répartiteur",
       "component": "Composant",

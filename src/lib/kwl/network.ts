@@ -25,7 +25,8 @@ import {
 } from "./products";
 import { airDensity, ductMaterials, type DuctMaterial, frictionFactor } from "./pressure";
 
-export type NodeType = "duct" | "bend" | "tee" | "distributor" | "component" | "terminal";
+/** «bend» is legacy: bends are counted on the duct (bendCounts); new networks use no bend nodes. */
+export type NodeType = "duct" | "bend" | "reducer" | "tee" | "distributor" | "component" | "terminal";
 
 export type NetNode = {
   id: string;

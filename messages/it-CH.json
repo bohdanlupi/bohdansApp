@@ -1485,6 +1485,7 @@
     "types": {
       "duct": "Condotta",
       "bend": "Curva",
+      "reducer": "Riduzione",
       "tee": "Raccordo a T",
       "distributor": "Distributore",
       "component": "Componente",

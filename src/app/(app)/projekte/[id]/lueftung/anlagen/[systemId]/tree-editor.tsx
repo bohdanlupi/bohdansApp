@@ -31,7 +31,12 @@ import { fmt, NumberField } from "@/components/planning/fields";
 
 type ListKey = "outdoor" | "supply" | "extract" | "exhaust";
 const lists: ListKey[] = ["outdoor", "supply", "extract", "exhaust"];
-const nodeTypes: NodeType[] = ["duct", "bend", "tee", "distributor", "component", "terminal"];
+// Bends are counted on the duct, so «bend» is not offered for new elements (old bend nodes still work).
+const nodeTypes: NodeType[] = ["duct", "reducer", "tee", "distributor", "component", "terminal"];
+/** Meier Tobler families and Zehnder family prefixes offered as components. */
+const componentFamilies = ["Rohrabschluss / Enddeckel", "Schalldämpfer", "Absperrklappen", "Revisionsdeckel"];
+const isComponent = (p: Product) =>
+  p.manufacturer === "Meier Tobler" ? componentFamilies.includes(p.family ?? "") : p.manufacturer === "Zehnder" && /^Comfo(Silence|Fresh)/.test(p.family ?? "");
 /** Products that fit a node type (fittings by their role). */
 function productOptions(type: NodeType): Product[] {
   switch (type) {
@@ -39,6 +44,8 @@ function productOptions(type: NodeType): Product[] {
       return products.filter((p) => p.kind === "duct");
     case "bend":
       return products.filter((p) => p.kind === "fitting" && p.fitting === "bend");
+    case "reducer":
+      return products.filter((p) => p.manufacturer === "Meier Tobler" && p.kind === "fitting" && p.fitting === "reducer");
     case "tee":
       return products.filter((p) => p.kind === "fitting" && p.fitting === "tee");
     case "distributor":
@@ -46,9 +53,7 @@ function productOptions(type: NodeType): Product[] {
     case "terminal":
       return products.filter((p) => p.kind === "terminal" || p.kind === "grille" || p.kind === "valve");
     default:
-      return products.filter(
-        (p) => !["device", "duct", "distributor"].includes(p.kind) && !(p.kind === "fitting" && (p.fitting === "bend" || p.fitting === "tee")),
-      );
+      return products.filter(isComponent);
   }
 }
 
@@ -336,7 +341,9 @@ function NodePanel({
 }) {
   const t = useTranslations("kwlSystem");
   const product = findProduct(node.product);
-  const options = groupedOptions(productOptions(node.type));
+  // A product chosen before the lists were narrowed stays selectable.
+  const choices = productOptions(node.type);
+  const options = groupedOptions(product && !choices.includes(product) ? [product, ...choices] : choices);
   const side = list === "supply" || list === "outdoor" ? "supply" : "extract";
   const numberField = (key: keyof NetNode, label: string, decimals = 1, placeholder?: string) => (
     <div className="space-y-1">

@@ -1485,6 +1485,7 @@
     "types": {
       "duct": "Leitung",
       "bend": "Bogen",
+      "reducer": "Reduktion",
       "tee": "T-Stück",
       "distributor": "Verteiler",
       "component": "Komponente",

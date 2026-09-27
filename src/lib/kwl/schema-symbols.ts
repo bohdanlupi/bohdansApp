@@ -66,6 +66,12 @@ export function nodeSymbol(node: NetNode, air: AirKind, x: number, y: number): {
       return { prims: [{ t: "path", d: `M${x - 6},${y} A6,6 0 0 1 ${x},${y - 6}`, fill: "none", stroke: color, sw: 2 }], top: 7 };
     case "tee":
       return { prims: [{ t: "circle", cx: x, cy: y, r: 3.5, fill: color }], top: 4 };
+    case "reducer":
+      // Change of cross-section: trapezoid narrowing in flow direction.
+      return {
+        prims: [{ t: "path", d: `M${x - 5 * dir},${y - 6} L${x + 5 * dir},${y - 3} L${x + 5 * dir},${y + 3} L${x - 5 * dir},${y + 6} Z`, fill: "none", stroke: color, sw: 1.4 }],
+        top: 7,
+      };
     case "distributor": {
       // 3.3.19 flow distributor: frame with double sides and rungs.
       const prims: Prim[] = [box(x, y, 16, 32)];

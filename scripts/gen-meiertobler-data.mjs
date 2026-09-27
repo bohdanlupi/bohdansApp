@@ -60,7 +60,11 @@ const rules = [
   [/Schiebenippel mit Dichtung (\d+)-(\d+) ?mm/, (m) => ({ kind: "fitting", fitting: "joint", family: "Verbindungen", name: `Schiebenippel DN ${n(m[1])}, L ${n(m[2])} mm`, d: n(m[1]), zeta: 0 })],
   [/Verbindungsrohr für Formstück (\d+) ?mm/, (m) => ({ kind: "fitting", fitting: "joint", family: "Verbindungen", name: `Verbindungsrohr für Formstück DN ${n(m[1])}`, d: n(m[1]), zeta: 0 })],
   [/Spiro-Stutzen mit Bord mit Dichtung (\d+) ?mm/, (m) => ({ kind: "fitting", fitting: "joint", family: "Verbindungen", name: `Stutzen mit Bord DN ${n(m[1])}`, d: n(m[1]), zeta: 0 })],
-  [/Rohrabschlussdeckel mit Dichtung (\d+) ?mm/, (m) => ({ kind: "fitting", fitting: "cap", family: "Deckel", name: `Rohrabschlussdeckel DN ${n(m[1])}`, d: n(m[1]), zeta: 0 })],
+  [/Rohrabschlussdeckel mit Dichtung (\d+) ?mm/, (m) => ({ kind: "fitting", fitting: "cap", family: "Rohrabschluss / Enddeckel", name: `Rohrabschlussdeckel DN ${n(m[1])}`, d: n(m[1]), zeta: 0 })],
+  // Pipe end with grille: exit loss plus grille.
+  [/Endstück Innen mit Gitter Dichtung (\d+) ?mm/, (m) => ({ kind: "grille", family: "Rohrabschluss / Enddeckel", name: `Endstück mit Gitter DN ${n(m[1])}`, d: n(m[1]), zeta: 1.0 })],
+  [/Revisions-Deckel Rundkanal mit Dichtung (\d+) ?mm/, (m) => ({ kind: "fitting", fitting: "access", family: "Revisionsdeckel", name: `Revisionsdeckel Rundkanal DN ${n(m[1])}`, d: n(m[1]), zeta: 0 })],
+  [/Revisions-Deckel Eckkanal mit Dichtung (\d+)-(\d+) ?mm/, (m) => ({ kind: "fitting", fitting: "access", family: "Revisionsdeckel", name: `Revisionsdeckel Eckkanal ${n(m[1])} × ${n(m[2])}`, w: n(m[1]), h: n(m[2]), zeta: 0 })],
   [/Absperrklappe mit Dichtung (\d+) ?mm/, (m) => ({ kind: "valve", family: "Absperrklappen", name: `Absperrklappe DN ${n(m[1])}`, d: n(m[1]), zeta: 0.2 })],
   [/Rohrschalldämpfer Isol 50mm, L1000mm (\d+) ?mm/, (m) => ({ kind: "silencer", family: "Schalldämpfer", name: `Rohrschalldämpfer isoliert 50 mm, L 1000 mm, DN ${n(m[1])}`, d: n(m[1]), zeta: 0.15 })],
 ];
@@ -88,7 +92,7 @@ for (const r of rows) {
       family: p.family,
       kind: p.kind,
       curves: [],
-      inner: { diameter: p.d },
+      inner: p.d ? { diameter: p.d } : { width: p.w, height: p.h },
       articles: [{ number: r.article_number, text }],
       source: { file: "IGH-Katalog Meier Tobler AG – Haustechniksysteme" },
     };
@@ -101,12 +105,13 @@ for (const r of rows) {
   }
 }
 
-const familyOrder = ["Spirorohre", "Bogen", "T-Stücke", "Sattelstücke", "Reduktionen", "Verbindungen", "Deckel", "Absperrklappen", "Schalldämpfer"];
+const familyOrder = ["Spirorohre", "Bogen", "T-Stücke", "Sattelstücke", "Reduktionen", "Verbindungen", "Rohrabschluss / Enddeckel", "Revisionsdeckel", "Absperrklappen", "Schalldämpfer"];
 const list = [...products.values()].sort(
   (a, b) =>
     familyOrder.indexOf(a.family) - familyOrder.indexOf(b.family) ||
     a.name.replace(/DN .*/, "").localeCompare(b.name.replace(/DN .*/, "")) ||
-    a.inner.diameter - b.inner.diameter ||
+    (a.inner.diameter ?? a.inner.width) - (b.inner.diameter ?? b.inner.width) ||
+    (a.inner.height ?? 0) - (b.inner.height ?? 0) ||
     a.name.localeCompare(b.name, "de", { numeric: true }),
 );
 

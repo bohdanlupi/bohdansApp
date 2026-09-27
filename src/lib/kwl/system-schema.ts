@@ -15,7 +15,7 @@ const count = z.number().int().min(0).max(100).catch(0);
 
 const nodeFields = z.object({
   id,
-  type: z.enum(["duct", "bend", "tee", "distributor", "component", "terminal"]),
+  type: z.enum(["duct", "bend", "reducer", "tee", "distributor", "component", "terminal"]),
   label: text(120),
   product: z.string().max(80).nullable().catch(null).transform(currentProductKey),
   curve: z.string().max(120).nullable().catch(null),

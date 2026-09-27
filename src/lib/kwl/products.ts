@@ -39,7 +39,7 @@ export type Product = {
   family?: string;
   kind: ProductKind;
   /** Role of a fitting in the network. */
-  fitting?: "bend" | "tee" | "reducer" | "joint" | "cap";
+  fitting?: "bend" | "tee" | "reducer" | "joint" | "cap" | "access";
   /** Loss coefficient related to the velocity in `inner` (used when there is no curve). */
   zeta?: number;
   /** Duct material for the friction calculation when there is no curve. */
