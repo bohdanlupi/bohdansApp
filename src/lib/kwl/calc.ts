@@ -262,11 +262,32 @@ export const ductSystems = [
   },
 ] as const satisfies { key: string; name: string; sizes: (readonly [outer: number, inner: number])[] }[];
 
-/** Suggested air terminal and ducts per room (Luftverteilung sketch of the workbook); null above 60 m³/h. */
-export function roomDistribution(flow: number | null, side: "supply" | "extract"): { terminal: string; ducts: string } | null {
+/** ComfoTube 90 per room branch (Luftverteilung sketch of the workbook): 1 below 38 m³/h, 2 up to 60, then 30 m³/h each. */
+export const tubeCount = (flow: number | null) => (!flow || flow < 38 ? 1 : flow <= 60 ? 2 : Math.ceil(flow / 30));
+
+/**
+ * Auslass of a room by its type (SIA 382/5 1.1 … 2.6), used for the suggestions in the air flows and the standard
+ * network: 1.1 Zimmer (supply) → ComfoCase CSB-P + ComfoGrid Bilamina; 2.5 short use (extract) → ComfoValve Via STC
+ * in a spiro pipe; all other rooms → ComfoCase CLD breit + ComfoGrid Genua breit.
+ */
+export function terminalKind(type: string | null | undefined, side: "supply" | "extract"): "bilamina" | "genua" | "stc" {
+  if (side === "supply" && type === "room") return "bilamina";
+  if (side === "extract" && type === "shortUse") return "stc";
+  return "genua";
+}
+
+/** Suggested Auslass and ducts per room (terminalKind, tubeCount); null above 60 m³/h (ducts to be dimensioned). */
+export function roomDistribution(flow: number | null, side: "supply" | "extract", type?: string | null): { terminal: string; ducts: string } | null {
   if (!flow || flow <= 0 || flow > 60) return null;
-  if (flow < 38) return { terminal: side === "supply" ? "CLD breit" : "CSB-P 400", ducts: "1× ComfoTube 90" };
-  return { terminal: side === "supply" ? "CLD" : "CSB-P 600", ducts: "2× ComfoTube 90 / 1× ComfoTube 110" };
+  const tubes = tubeCount(flow);
+  switch (terminalKind(type, side)) {
+    case "bilamina":
+      return { terminal: `CSB-P ${tubes > 1 ? 600 : 400} + Bilamina`, ducts: `${tubes}× ComfoTube 90` };
+    case "stc":
+      return { terminal: "ComfoValve STC", ducts: "Spiro DN 125" };
+    default:
+      return { terminal: "CLD breit + Genua", ducts: `${tubes}× ComfoTube 90` };
+  }
 }
 
 // ---------------------------------------------------------------------------

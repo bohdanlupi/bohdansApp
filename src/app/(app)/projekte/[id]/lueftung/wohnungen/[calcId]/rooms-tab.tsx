@@ -52,6 +52,7 @@ export function RoomsTab({
   summary,
   height,
   demandControlled,
+  placed,
   editable,
   onChange,
   onHeightChange,
@@ -61,6 +62,8 @@ export function RoomsTab({
   summary: AirFlowSummary;
   height: number;
   demandControlled: boolean;
+  /** Rooms with an Auslass in a system network («supply|roomId»): no Auslass suggestion for them. */
+  placed: string[];
   editable: boolean;
   onChange: (rooms: KwlRoom[]) => void;
   onHeightChange: (height: number) => void;
@@ -83,9 +86,11 @@ export function RoomsTab({
     onChange(list);
   };
 
-  const distribution = (flow: number | null, side: "supply" | "extract") => {
-    if (!flow) return null;
-    const d = roomDistribution(flow, side);
+  const placedSet = new Set(placed);
+  // Auslass suggestion by room type, until the room has its Auslass in the system network.
+  const distribution = (room: KwlRoom, flow: number | null, side: "supply" | "extract") => {
+    if (!flow || placedSet.has(`${side}|${room.id}`)) return null;
+    const d = roomDistribution(flow, side, room.type);
     return d ? `${d.terminal} · ${d.ducts}` : t("rooms.distributionLarge");
   };
 
@@ -120,8 +125,8 @@ export function RoomsTab({
             )}
             {rows.map((row, index) => {
               const room = rooms[index];
-              const supplyHint = distribution(row.supply, "supply");
-              const extractHint = distribution(row.extract, "extract");
+              const supplyHint = distribution(room, row.supply, "supply");
+              const extractHint = distribution(room, row.extract, "extract");
               return (
                 <tr key={room.id} className="border-b align-top last:border-0">
                   <td className="py-1 pl-3">

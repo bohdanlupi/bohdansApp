@@ -549,6 +549,23 @@ export function roomFlows(calcs: { id: string; name: string; data: { rooms: { id
     );
 }
 
+/**
+ * Rooms of a dwelling calculation that already have an Auslass in a system network, as «supply|roomId» /
+ * «extract|roomId» (the air-flow suggestions are hidden for them).
+ */
+export function placedTerminals(systems: { data: SystemData }[], calcId: string): string[] {
+  const out = new Set<string>();
+  for (const s of systems) {
+    for (const side of ["supply", "extract"] as const) {
+      s.data[side].forEach(function walk(n) {
+        if (n.type === "terminal" && n.calcId === calcId && n.roomId) out.add(`${side}|${n.roomId}`);
+        n.children.forEach(walk);
+      });
+    }
+  }
+  return [...out];
+}
+
 /** For each dwelling calculation: the external pressure drops of the (first) system that serves it. */
 export function systemDropsByCalc(
   systems: { id: string; name: string; data: SystemData }[],

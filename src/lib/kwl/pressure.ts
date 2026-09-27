@@ -211,7 +211,7 @@ export function defaultNetwork(rooms: KwlRoom[], names: DefaultNames): Network {
         .filter((r) => sideFlow(r, side) > 0)
         .map((r) => {
           const flow = sideFlow(r, side);
-          const hint = roomDistribution(flow, side);
+          const hint = roomDistribution(flow, side, r.type);
           return [
             r.id,
             [

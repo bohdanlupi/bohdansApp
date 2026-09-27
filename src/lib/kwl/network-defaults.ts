@@ -1,6 +1,7 @@
 // Starting points for a ventilation network: a standard network for a single-family house and the
 // conversion of the per-dwelling star networks (previous "Druckverlust" tab).
 
+import { terminalKind, tubeCount } from "./calc";
 import { type NetNode, newNode, type NodeType, type RoomFlow, type SystemData } from "./network";
 import type { Network, Segment } from "./pressure";
 import { curveGroup, measuredCoverPrefix, noBends, type Product, productCurve, products, type ProductKind } from "./products";
@@ -68,7 +69,6 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
     newNode("duct", { product: product?.key ?? null, diameter: product ? null : 160, label, length, bendCounts: { ...noBends(), 90: bends }, ...patch });
   const component = (type: NodeType, product: Product | null, label: string, patch: Partial<NetNode> = {}) =>
     newNode(type, { product: product?.key ?? null, label, ...patch });
-  const tubes = (flow: number) => (flow < 38 ? 1 : flow <= 60 ? 2 : Math.ceil(flow / 30));
 
   /** Smallest ComfoCube APV F with enough outlets for the tubes of one distributor. */
   const distributorFor = (outlets: number) =>
@@ -83,12 +83,13 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
    */
   const branchFor = (r: RoomFlow, side: "supply" | "extract"): { node: NetNode; outlets: number } => {
     const room = { calcId: r.calcId, roomId: r.roomId };
-    if (side === "extract" && r.type === "shortUse" && stcValve && spiro125) {
+    const kind = terminalKind(r.type, side);
+    if (kind === "stc" && stcValve && spiro125) {
       const valve = component("terminal", null, r.name, { ...room, cover: stcValve.key });
       return { node: duct(spiro125, labels.roomDuct, 10, 2, { children: [valve] }), outlets: 1 };
     }
-    const count = tubes(r[side]);
-    const bilamina = side === "supply" && r.type === "room";
+    const count = tubeCount(r[side]);
+    const bilamina = kind === "bilamina";
     const casing = bilamina ? (count > 1 ? csbp600 : csbp400) : cld;
     const group = bilamina ? `ComfoGrid Bilamina ${count > 1 ? 600 : 400}` : "ComfoGrid Genua breit";
     const terminal = component("terminal", casing, r.name, { ...room, ...measuredCover(casing, group, side, count > 1 ? /2x DN90/ : /1x DN90/) });

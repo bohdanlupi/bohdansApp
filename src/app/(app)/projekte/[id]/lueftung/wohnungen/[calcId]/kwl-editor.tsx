@@ -29,6 +29,7 @@ export function KwlEditor({
   initialData,
   planParams,
   system,
+  placed,
   editable,
 }: {
   id: string;
@@ -37,6 +38,8 @@ export function KwlEditor({
   initialData: KwlData;
   planParams: PlanParams;
   system: SystemDrops | null;
+  /** Rooms with an Auslass in a system network («supply|roomId»): no Auslass suggestion for them. */
+  placed: string[];
   editable: boolean;
 }) {
   const t = useTranslations("kwl");
@@ -148,6 +151,7 @@ export function KwlEditor({
             summary={result.summary}
             height={data.height}
             demandControlled={planParams.operation === "demand"}
+            placed={placed}
             editable={editable}
             onChange={(rooms) => update("rooms", rooms)}
             onHeightChange={(height) => update("height", height)}
