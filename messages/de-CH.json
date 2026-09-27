@@ -1451,6 +1451,12 @@
     },
     "schema": "Prinzipschema",
     "schemaHint": "Symbole nach SIA 410; Farben: Aussenluft grün, Zuluft rot, Abluft gelb, Fortluft blau. Element anklicken, um es zu bearbeiten. Der massgebende Strang je Seite ist hervorgehoben.",
+    "airShort": {
+      "outdoor": "AUL",
+      "supply": "ZUL",
+      "extract": "ABL",
+      "exhaust": "FOL"
+    },
     "air": {
       "outdoor": "Aussenluft",
       "supply": "Zuluft",
@@ -1516,6 +1522,11 @@
     "zeta": "Zusätzl. ζ",
     "diameter": "Durchmesser mm",
     "material": "Material",
+    "materialsShort": {
+      "plastic": "Kunststoff",
+      "steel": "Stahl",
+      "flex": "Flex"
+    },
     "materials": {
       "plastic": "Kunststoff glatt",
       "steel": "Stahl verzinkt (Spiro)",

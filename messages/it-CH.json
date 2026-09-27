@@ -1451,6 +1451,12 @@
     },
     "schema": "Schema di principio",
     "schemaHint": "Simboli secondo SIA 410; colori: aria esterna verde, aria immessa rossa, aria ripresa gialla, aria espulsa blu. Clicca un elemento per modificarlo. Il ramo determinante di ogni lato è evidenziato.",
+    "airShort": {
+      "outdoor": "ODA",
+      "supply": "SUP",
+      "extract": "ETA",
+      "exhaust": "EHA"
+    },
     "air": {
       "outdoor": "Aria esterna",
       "supply": "Aria immessa",
@@ -1516,6 +1522,11 @@
     "zeta": "ζ aggiuntivo",
     "diameter": "Diametro mm",
     "material": "Materiale",
+    "materialsShort": {
+      "plastic": "Plastica",
+      "steel": "Acciaio",
+      "flex": "Flex"
+    },
     "materials": {
       "plastic": "Plastica liscia",
       "steel": "Acciaio zincato (spiro)",

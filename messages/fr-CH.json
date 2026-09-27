@@ -1451,6 +1451,12 @@
     },
     "schema": "Schéma de principe",
     "schemaHint": "Symboles selon SIA 410 ; couleurs : air extérieur vert, air fourni rouge, air repris jaune, air rejeté bleu. Clique sur un élément pour le modifier. La branche déterminante de chaque côté est mise en évidence.",
+    "airShort": {
+      "outdoor": "AEX",
+      "supply": "AIN",
+      "extract": "ARE",
+      "exhaust": "AEJ"
+    },
     "air": {
       "outdoor": "Air extérieur",
       "supply": "Air fourni",
@@ -1516,6 +1522,11 @@
     "zeta": "ζ supplémentaire",
     "diameter": "Diamètre mm",
     "material": "Matériau",
+    "materialsShort": {
+      "plastic": "Plastique",
+      "steel": "Acier",
+      "flex": "Flex"
+    },
     "materials": {
       "plastic": "Plastique lisse",
       "steel": "Acier galvanisé (spiro)",

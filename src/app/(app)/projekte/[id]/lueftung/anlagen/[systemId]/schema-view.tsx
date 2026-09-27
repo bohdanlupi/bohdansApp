@@ -1,9 +1,10 @@
 "use client";
 
 import type { NetNode } from "@/lib/kwl/network";
+import type { DuctMaterial } from "@/lib/kwl/pressure";
 import { measuredCoverPrefix } from "@/lib/kwl/products";
 import { airColors, type SchemaLayout } from "@/lib/kwl/schema-layout";
-import { deviceSymbols, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import { deviceSymbols, ductLabel, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import { formatNumber } from "@/lib/number-input";
 
 const paint = (p: Paint | undefined) =>
@@ -59,10 +60,13 @@ export function SchemaView({
     device: string;
     deviceLines?: string[];
     attachments?: { fond: boolean; clime: boolean };
+    /** Short air types inside the unit (AUL, ZUL, ABL, FOL). */
     outdoor: string;
     supply: string;
     extract: string;
     exhaust: string;
+    /** Material name of ducts without product. */
+    material: (m: DuctMaterial) => string;
   };
   onSelect: (id: string) => void;
 }) {
@@ -97,14 +101,14 @@ export function SchemaView({
         );
       })}
 
-      {/* Unit (heat recovery, fans, attachments) and air types below the lines */}
+      {/* Unit (heat recovery, fans, attachments) and the air types below the lines, inside the unit */}
       <SvgPrims prims={deviceSymbols(layout, labels.device, labels.deviceLines ?? [], labels.attachments ?? { fond: false, clime: false })} />
       {(
         [
-          [device.x - 6, airY.supply, "end", labels.outdoor, airColors.outdoor],
-          [device.x - 6, airY.extract, "end", labels.exhaust, airColors.exhaust],
-          [device.x + device.w + 6, airY.supply, "start", labels.supply, airColors.supply],
-          [device.x + device.w + 6, airY.extract, "start", labels.extract, airColors.extract],
+          [device.x + 6, airY.supply, "start", labels.outdoor, airColors.outdoor],
+          [device.x + 6, airY.extract, "start", labels.exhaust, airColors.exhaust],
+          [device.x + device.w - 6, airY.supply, "end", labels.supply, airColors.supply],
+          [device.x + device.w - 6, airY.extract, "end", labels.extract, airColors.extract],
         ] as const
       ).map(([x, y, anchor, text, color]) => (
         <text key={text} x={x} y={y + 28} textAnchor={anchor} className="text-[10px] font-semibold" fill={color}>
@@ -120,6 +124,11 @@ export function SchemaView({
             <circle cx={x} cy={y} r={Math.max(top, 9) + 3} fill="transparent" />
             <SvgPrims prims={prims} />
             {selected === node.id && <circle cx={x} cy={y} r={Math.max(top, 9) + 4} fill="none" strokeDasharray="3 2" className="stroke-brand" strokeWidth={1.5} />}
+            {node.type === "duct" && (
+              <text x={x} y={y - top - 15} textAnchor="middle" className="fill-foreground text-[9px] font-medium">
+                {ductLabel(node, labels.material)}
+              </text>
+            )}
             {node.type !== "terminal" && (
               <text x={x} y={y - top - 5} textAnchor="middle" className="fill-muted-foreground text-[9px]">
                 {nodeInfo(node)}

@@ -9,6 +9,7 @@
 // Ducts are drawn as single coloured lines (usual in a Prinzipschema; SIA 410 3.1.1 draws double lines in plans).
 
 import type { NetNode } from "./network";
+import type { DuctMaterial } from "./pressure";
 import { findProduct } from "./products";
 import { type AirKind, airColors, type SchemaLayout } from "./schema-layout";
 
@@ -243,6 +244,35 @@ export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[
   const textTop = below + (attachments.clime ? 43 : 13);
   lines.forEach((line, i) => prims.push({ t: "text", x: cx, y: textTop + i * 11, text: `+ ${line}`, size: 9, anchor: "middle", fill: "muted" }));
   return prims;
+}
+
+/** Short duct system names for the schema. */
+const ductTypes: [RegExp, string][] = [
+  [/^Spirorohre/, "Spiro"],
+  [/^ComfoTube Therm/, "Therm"],
+  [/^ComfoTube/, "ComfoTube"],
+  [/^ComfoPipe Plus/, "ComfoPipe+"],
+  [/^ComfoPipe/, "ComfoPipe"],
+];
+
+/**
+ * Short text of a duct above it in the schema: type and nominal size, e.g. «Spiro DN 160», «ComfoTube flat 51»,
+ * «2× ComfoTube DN 75»; ducts without product: material and diameter / cross-section.
+ */
+export function ductLabel(node: NetNode, material: (m: DuctMaterial) => string): string {
+  if (node.type !== "duct") return "";
+  const product = findProduct(node.product);
+  let text: string;
+  if (product) {
+    const family = product.family ?? product.name;
+    const type = ductTypes.find(([re]) => re.test(family))?.[1] ?? family;
+    const size = /flat 51/.test(product.name) ? "flat 51" : `DN ${/DN ?(\d+)/.exec(product.name)?.[1] ?? /\d+/.exec(product.name)?.[0] ?? product.inner?.diameter ?? "?"}`;
+    text = `${type} ${size}`;
+  } else {
+    const size = node.diameter ? `DN ${node.diameter}` : node.width && node.height ? `${node.width}×${node.height}` : "";
+    text = [material(node.material), size].filter(Boolean).join(" ");
+  }
+  return node.count > 1 ? `${node.count}× ${text}` : text;
 }
 
 /** Short «Auslass + cover» text of a terminal, e.g. «CLD breit + Roma breit». */

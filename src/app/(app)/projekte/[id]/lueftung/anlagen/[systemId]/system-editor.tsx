@@ -273,10 +273,11 @@ export function SystemEditor({
                       fondRight: tDevice("fondRight"),
                     }),
                     attachments: schemaAttachments,
-                    outdoor: t("air.outdoor"),
-                    supply: t("air.supply"),
-                    extract: t("air.extract"),
-                    exhaust: t("air.exhaust"),
+                    outdoor: t("airShort.outdoor"),
+                    supply: t("airShort.supply"),
+                    extract: t("airShort.extract"),
+                    exhaust: t("airShort.exhaust"),
+                    material: (m) => t(`materialsShort.${m}`),
                   }}
                   onSelect={setSelected}
                 />

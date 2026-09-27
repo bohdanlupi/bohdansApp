@@ -6,7 +6,8 @@ import type { NetNode, Quantity, RoomFlow, SystemData, SystemResult, systemCheck
 import type { DeviceCheck } from "@/lib/kwl/network-device";
 import { bendAngles, findProduct, measuredCoverPrefix } from "@/lib/kwl/products";
 import { airColors, type SchemaLayout } from "@/lib/kwl/schema-layout";
-import { deviceSymbols, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import type { DuctMaterial } from "@/lib/kwl/pressure";
+import { deviceSymbols, ductLabel, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import { formatNumber } from "@/lib/number-input";
 import type { FirmSettings } from "@/lib/supabase/types";
 
@@ -193,10 +194,11 @@ export function KwlSystemDocument({
             device: product?.name ?? s("device"),
             deviceLines: attachmentList,
             attachments: { fond: data.deviceOptions.fond !== "none", clime: data.deviceOptions.clime !== null },
-            outdoor: s("air.outdoor"),
-            supply: s("air.supply"),
-            extract: s("air.extract"),
-            exhaust: s("air.exhaust"),
+            outdoor: s("airShort.outdoor"),
+            supply: s("airShort.supply"),
+            extract: s("airShort.extract"),
+            exhaust: s("airShort.exhaust"),
+            material: (m) => s(`materialsShort.${m}`),
           }}
           info={(node) => {
             const r = nodeResult(result, node.id);
@@ -355,10 +357,13 @@ function PdfSchema({
     device: string;
     deviceLines: string[];
     attachments: { fond: boolean; clime: boolean };
+    /** Short air types inside the unit (AUL, ZUL, ABL, FOL). */
     outdoor: string;
     supply: string;
     extract: string;
     exhaust: string;
+    /** Material name of ducts without product. */
+    material: (m: DuctMaterial) => string;
   };
   info: (node: NetNode) => string;
 }) {
@@ -386,16 +391,17 @@ function PdfSchema({
       })}
 
       <PdfPrims prims={deviceSymbols(layout, labels.device, labels.deviceLines, labels.attachments)} />
-      {text(device.x - 6, airY.supply + 28, labels.outdoor, 9.5, { anchor: "end", fill: airColors.outdoor, bold: true })}
-      {text(device.x - 6, airY.extract + 28, labels.exhaust, 9.5, { anchor: "end", fill: airColors.exhaust, bold: true })}
-      {text(device.x + device.w + 6, airY.supply + 28, labels.supply, 9.5, { fill: airColors.supply, bold: true })}
-      {text(device.x + device.w + 6, airY.extract + 28, labels.extract, 9.5, { fill: airColors.extract, bold: true })}
+      {text(device.x + 6, airY.supply + 28, labels.outdoor, 9.5, { fill: airColors.outdoor, bold: true })}
+      {text(device.x + 6, airY.extract + 28, labels.exhaust, 9.5, { fill: airColors.exhaust, bold: true })}
+      {text(device.x + device.w - 6, airY.supply + 28, labels.supply, 9.5, { anchor: "end", fill: airColors.supply, bold: true })}
+      {text(device.x + device.w - 6, airY.extract + 28, labels.extract, 9.5, { anchor: "end", fill: airColors.extract, bold: true })}
 
       {layout.nodes.map(({ node, air, x, y }) => {
         const { prims, top } = nodeSymbol(node, air, x, y);
         return (
           <G key={node.id}>
             <PdfPrims prims={prims} />
+            {node.type === "duct" && text(x, y - top - 15, ductLabel(node, labels.material), 8, { anchor: "middle" })}
             {node.type !== "terminal" && text(x, y - top - 5, info(node), 8, { anchor: "middle", fill: muted })}
           </G>
         );
