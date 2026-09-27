@@ -8,6 +8,7 @@ import { assertRole } from "@/lib/auth";
 import type { FormState } from "@/lib/form-state";
 import { systemQuantities } from "@/lib/kwl/network";
 import { normalizeArticle } from "@/lib/kwl/products";
+import { initialsOf, nextRevisionIndex, parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import { emptySystemData, parseSystemData } from "@/lib/kwl/system-schema";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -66,6 +67,47 @@ export async function deleteSystem(id: string, projectId: string): Promise<FormS
   if (error) return { error: "deleteFailed" };
   revalidatePath(`/projekte/${projectId}/lueftung`, "layout");
   redirect(`/projekte/${projectId}/lueftung/anlagen`);
+}
+
+const schemaPrintSchema = z.object({
+  phase: z.string().regex(/^\d{2}$/).nullable(),
+  /** Comment of a new revision; null = print with the existing revisions. */
+  comment: z.string().trim().max(80).nullable(),
+});
+
+/**
+ * Print dialog of the Prinzipschema: stores the SIA phase of the title block and, with a comment, appends a new
+ * revision (next index, initials of the user, today).
+ */
+export async function saveSchemaPlan(systemId: string, projectId: string, input: { phase: string | null; comment: string | null }): Promise<{ error?: string }> {
+  const profile = await assertRole("admin", "planer");
+  const parsed = schemaPrintSchema.safeParse(input);
+  if (!ids(systemId, projectId) || !parsed.success) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  const { data: system } = await supabase.from("ventilation_systems").select("schema_plan").eq("id", systemId).eq("project_id", projectId).maybeSingle();
+  if (!system) return { error: "invalidInput" };
+  const plan = parseSchemaPlan(system.schema_plan);
+  const revisions =
+    parsed.data.comment !== null
+      ? [
+          ...plan.revisions,
+          {
+            index: nextRevisionIndex(plan.revisions),
+            initials: initialsOf(profile.full_name, profile.email),
+            date: new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Zurich" }),
+            comment: parsed.data.comment,
+          },
+        ]
+      : plan.revisions;
+  const { error } = await supabase
+    .from("ventilation_systems")
+    .update({ schema_plan: { phase: parsed.data.phase, revisions } as unknown as Json })
+    .eq("id", systemId)
+    .eq("project_id", projectId);
+  if (error) return { error: "saveFailed" };
+  revalidatePath(`/projekte/${projectId}/lueftung/anlagen/${systemId}`);
+  return {};
 }
 
 const makeLabel: Record<AppLanguage, { make: string; number: string }> = {

@@ -52,6 +52,7 @@ export default async function SystemPage({ params }: PageProps<"/projekte/[id]/l
         projectId={id}
         initialName={system.name}
         initialData={system.data}
+        schemaPlan={system.schemaPlan}
         calcs={calcs.map((c) => ({ id: c.id, name: c.name, data: c.data }))}
         lvs={lvs}
         planParams={plan.params}

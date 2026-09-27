@@ -1168,6 +1168,7 @@ export type Database = {
           language: Database["public"]["Enums"]["app_language"]
           name: string
           number: string
+          parcel: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"]
           street: string | null
@@ -1185,6 +1186,7 @@ export type Database = {
           language?: Database["public"]["Enums"]["app_language"]
           name: string
           number: string
+          parcel?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           street?: string | null
@@ -1202,6 +1204,7 @@ export type Database = {
           language?: Database["public"]["Enums"]["app_language"]
           name?: string
           number?: string
+          parcel?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           street?: string | null
@@ -1334,6 +1337,7 @@ export type Database = {
           id: string
           name: string
           project_id: string
+          schema_plan: Json
           sort: number
           updated_at: string
         }
@@ -1344,6 +1348,7 @@ export type Database = {
           id?: string
           name: string
           project_id: string
+          schema_plan?: Json
           sort?: number
           updated_at?: string
         }
@@ -1354,6 +1359,7 @@ export type Database = {
           id?: string
           name?: string
           project_id?: string
+          schema_plan?: Json
           sort?: number
           updated_at?: string
         }

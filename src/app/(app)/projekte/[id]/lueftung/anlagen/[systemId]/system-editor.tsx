@@ -16,6 +16,7 @@ import { checkDevice } from "@/lib/kwl/network-device";
 import type { PlanParams } from "@/lib/kwl/plan-schema";
 import { productsOfKind } from "@/lib/kwl/products";
 import type { KwlData } from "@/lib/kwl/schema";
+import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { layoutSystem } from "@/lib/kwl/schema-layout";
 
 import { DeviceOptionsFields } from "../../device-options";
@@ -23,6 +24,7 @@ import { deleteSystem, saveSystem } from "../actions";
 import { Notice } from "@/components/planning/fields";
 import { type LvWithChapters, QuantitiesPanel } from "./quantities-panel";
 import { ResultsPanel } from "./results-panel";
+import { SchemaPrintButton } from "./schema-print-dialog";
 import { SchemaView, shortInfo } from "./schema-view";
 import { TreeEditor } from "./tree-editor";
 
@@ -33,6 +35,7 @@ export function SystemEditor({
   projectId,
   initialName,
   initialData,
+  schemaPlan,
   calcs,
   lvs,
   planParams,
@@ -42,6 +45,7 @@ export function SystemEditor({
   projectId: string;
   initialName: string;
   initialData: SystemData;
+  schemaPlan: SchemaPlan;
   calcs: EditorCalc[];
   lvs: LvWithChapters[];
   planParams: PlanParams;
@@ -165,6 +169,7 @@ export function SystemEditor({
             <FileText />
             {t("pdf")}
           </a>
+          <SchemaPrintButton systemId={id} projectId={projectId} plan={schemaPlan} editable={editable} dirty={dirty} />
           {editable && (
             <>
               <ConfirmButton

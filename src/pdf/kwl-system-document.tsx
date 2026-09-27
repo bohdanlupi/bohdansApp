@@ -1,13 +1,11 @@
-import { Circle, Document, G, Line, Path, Polygon, Rect, Svg, Text, View } from "@react-pdf/renderer";
+import { Document, Text, View } from "@react-pdf/renderer";
 
 import { hasOptions, optionsList } from "@/lib/kwl/attachments";
 import { spiLimit, spiTarget } from "@/lib/kwl/calc";
 import type { NetNode, Quantity, RoomFlow, SystemData, SystemResult, systemChecks } from "@/lib/kwl/network";
 import type { DeviceCheck } from "@/lib/kwl/network-device";
 import { bendAngles, findProduct, measuredCoverPrefix } from "@/lib/kwl/products";
-import { airColors, type SchemaLayout } from "@/lib/kwl/schema-layout";
-import type { DuctMaterial } from "@/lib/kwl/pressure";
-import { deviceSymbols, ductLabel, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import { airColors } from "@/lib/kwl/schema-layout";
 import { formatNumber } from "@/lib/number-input";
 import type { FirmSettings } from "@/lib/supabase/types";
 
@@ -20,7 +18,7 @@ const n = (value: number | null | undefined, decimals = 0) =>
 const cell = { paddingVertical: 2, paddingHorizontal: 2 };
 type Lists = "outdoor" | "supply" | "extract" | "exhaust";
 
-/** Lüftungsanlage: device and results, Prinzipschema, elements per air type, strands and quantities. */
+/** Lüftungsanlage: device and results, elements per air type, strands and quantities (Prinzipschema: kwl-schema-document.tsx). */
 export function KwlSystemDocument({
   firm,
   logo,
@@ -37,7 +35,6 @@ export function KwlSystemDocument({
   device,
   checks,
   pressure,
-  layout,
   quantities,
 }: {
   firm: FirmSettings;
@@ -56,7 +53,6 @@ export function KwlSystemDocument({
   device: DeviceCheck;
   checks: ReturnType<typeof systemChecks>;
   pressure: PressureCheck;
-  layout: SchemaLayout;
   quantities: Quantity[];
 }) {
   const t: KwlTranslate = (key, values) => winAnsi(translate(key, values));
@@ -183,32 +179,7 @@ export function KwlSystemDocument({
         <Text style={{ fontSize: 7, color: colors.muted, marginTop: 3 }}>{s("pathsHint")}</Text>
       </LetterPage>
 
-      {/* Page 2: Prinzipschema */}
-      <LetterPage firm={firm} logo={logo} pageLabel={pageLabel} orientation="landscape">
-        <Text style={{ ...styles.bold, fontSize: 11, marginBottom: 6 }}>
-          {s("schema")} · {winAnsi(name)}
-        </Text>
-        <PdfSchema
-          layout={layout}
-          labels={{
-            device: product?.name ?? s("device"),
-            deviceLines: attachmentList,
-            attachments: { fond: data.deviceOptions.fond !== "none", clime: data.deviceOptions.clime !== null },
-            outdoor: s("airShort.outdoor"),
-            supply: s("airShort.supply"),
-            extract: s("airShort.extract"),
-            exhaust: s("airShort.exhaust"),
-            material: (m) => s(`materialsShort.${m}`),
-          }}
-          info={(node) => {
-            const r = nodeResult(result, node.id);
-            return r ? `${n(r.flow)} m³/h · ${n(r.dp, 1)} Pa` : "";
-          }}
-        />
-        <Text style={{ fontSize: 7, color: colors.muted, marginTop: 4 }}>{s("pdfSchemaHint")}</Text>
-      </LetterPage>
-
-      {/* Page 3: elements and quantities */}
+      {/* Page 2: elements and quantities */}
       <LetterPage firm={firm} logo={logo} pageLabel={pageLabel}>
         <Heading>{s("pdfElements")}</Heading>
         {(["outdoor", "supply", "extract", "exhaust"] as Lists[]).map((list) => (
@@ -309,115 +280,3 @@ function ElementTable({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Prinzipschema (same layout and SIA 410 symbols as the editor, drawn with react-pdf primitives)
-// ---------------------------------------------------------------------------
-
-const PAGE_W = 742; // A4 landscape minus margins
-const PAGE_H = 390;
-const ink = "#111111";
-const muted = "#666666";
-
-const pdfPaint = (p: Paint | undefined) => (p === undefined ? undefined : p === "ink" ? ink : p === "bg" ? "#ffffff" : p === "muted" ? muted : p);
-
-function PdfPrims({ prims }: { prims: Prim[] }) {
-  return (
-    <G>
-      {prims.map((p, i) => {
-        switch (p.t) {
-          case "rect":
-            return <Rect key={i} x={p.x} y={p.y} width={p.w} height={p.h} rx={p.rx} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
-          case "line":
-            return <Line key={i} x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} strokeDasharray={p.dash} />;
-          case "circle":
-            return <Circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
-          case "path":
-            return <Path key={i} d={p.d} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
-          case "polygon":
-            return <Polygon key={i} points={p.points} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
-          case "text":
-            return (
-              <Text key={i} x={p.x} y={p.y} textAnchor={p.anchor ?? "start"} fill={pdfPaint(p.fill)} style={{ fontSize: p.size, fontFamily: p.bold ? "Helvetica-Bold" : "Helvetica" }}>
-                {winAnsi(p.text)}
-              </Text>
-            );
-        }
-      })}
-    </G>
-  );
-}
-
-function PdfSchema({
-  layout,
-  labels,
-  info,
-}: {
-  layout: SchemaLayout;
-  labels: {
-    device: string;
-    deviceLines: string[];
-    attachments: { fond: boolean; clime: boolean };
-    /** Short air types inside the unit (AUL, ZUL, ABL, FOL). */
-    outdoor: string;
-    supply: string;
-    extract: string;
-    exhaust: string;
-    /** Material name of ducts without product. */
-    material: (m: DuctMaterial) => string;
-  };
-  info: (node: NetNode) => string;
-}) {
-  const { width, height, device, airY } = layout;
-  const scale = Math.min(PAGE_W / width, PAGE_H / height, 1.4);
-  const text = (x: number, y: number, value: string, size: number, opts: { anchor?: "start" | "middle" | "end"; fill?: string; bold?: boolean } = {}) => (
-    <Text x={x} y={y} textAnchor={opts.anchor ?? "start"} fill={opts.fill ?? ink} style={{ fontSize: size, fontFamily: opts.bold ? "Helvetica-Bold" : "Helvetica" }}>
-      {winAnsi(value)}
-    </Text>
-  );
-
-  return (
-    <Svg width={width * scale} height={height * scale} viewBox={`0 0 ${width} ${height}`}>
-      {layout.floors.map((f, i) => (
-        <G key={`${f.air}-${f.floor}-${i}`}>
-          <Rect x={width - 60} y={f.y0} width={56} height={Math.max(f.y1 - f.y0, 10)} rx={3} fill="#f1f1f1" />
-          {text(width - 32, (f.y0 + f.y1) / 2 + 4, f.floor || "–", 10, { anchor: "middle", fill: muted })}
-        </G>
-      ))}
-
-      {layout.edges.map((e, i) => {
-        const midX = e.from.x + (e.to.x - e.from.x) / 2;
-        const d = e.from.y === e.to.y ? `M${e.from.x},${e.from.y} H${e.to.x}` : `M${e.from.x},${e.from.y} H${midX} V${e.to.y} H${e.to.x}`;
-        return <Path key={i} d={d} fill="none" stroke={airColors[e.air]} strokeWidth={1.8} />;
-      })}
-
-      <PdfPrims prims={deviceSymbols(layout, labels.device, labels.deviceLines, labels.attachments)} />
-      {text(device.x + 6, airY.supply + 28, labels.outdoor, 9.5, { fill: airColors.outdoor, bold: true })}
-      {text(device.x + 6, airY.extract + 28, labels.exhaust, 9.5, { fill: airColors.exhaust, bold: true })}
-      {text(device.x + device.w - 6, airY.supply + 28, labels.supply, 9.5, { anchor: "end", fill: airColors.supply, bold: true })}
-      {text(device.x + device.w - 6, airY.extract + 28, labels.extract, 9.5, { anchor: "end", fill: airColors.extract, bold: true })}
-
-      {layout.nodes.map(({ node, air, x, y }) => {
-        const { prims, top } = nodeSymbol(node, air, x, y);
-        return (
-          <G key={node.id}>
-            <PdfPrims prims={prims} />
-            {node.type === "duct" && text(x, y - top - 15, ductLabel(node, labels.material), 8, { anchor: "middle" })}
-            {node.type !== "terminal" && text(x, y - top - 5, info(node), 8, { anchor: "middle", fill: muted })}
-          </G>
-        );
-      })}
-
-      {layout.labels.map((l) => {
-        const node = layout.nodes.find((x) => x.node.id === l.nodeId)?.node;
-        const parts = node ? terminalParts(node, measuredCoverPrefix) : "";
-        const r = node ? info(node) : "";
-        return (
-          <G key={l.nodeId}>
-            {text(l.x, l.y + 1, l.text, 10)}
-            {text(l.x, l.y + 13, [parts, r].filter(Boolean).join(" · "), 7.5, { fill: muted })}
-          </G>
-        );
-      })}
-    </Svg>
-  );
-}

@@ -6,6 +6,7 @@ import { evaluateKwl } from "@/lib/kwl/evaluate";
 import { systemDropsByCalc } from "@/lib/kwl/network";
 import { parsePlanData } from "@/lib/kwl/plan-schema";
 import { parseKwlData } from "@/lib/kwl/schema";
+import { parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import { parseSystemData } from "@/lib/kwl/system-schema";
 import { createClient } from "@/lib/supabase/server";
 
@@ -37,11 +38,11 @@ export const loadSystems = cache(async (projectId: string) => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("ventilation_systems")
-    .select("id, name, data")
+    .select("id, name, data, schema_plan")
     .eq("project_id", projectId)
     .order("sort")
     .order("created_at");
-  return (data ?? []).map((s) => ({ id: s.id, name: s.name, data: parseSystemData(s.data) }));
+  return (data ?? []).map((s) => ({ id: s.id, name: s.name, data: parseSystemData(s.data), schemaPlan: parseSchemaPlan(s.schema_plan) }));
 });
 
 export type LoadedSystem = Awaited<ReturnType<typeof loadSystems>>[number];

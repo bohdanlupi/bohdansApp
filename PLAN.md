@@ -269,7 +269,13 @@ limited to the diameter of the adjacent duct, exhaust-only parts (Regenhut, Säu
 Standardnetz (network-defaults.ts): silencer first on all four strands, one Geschossleitung + distributor per storey;
 terminals by room type – 1.1 Zimmer: CSB-P 400/600 + Bilamina; 2.5: ComfoValve Via STC on Spiro DN 125; all others:
 CLD breit 2×90 + Genua breit. Quantities add one ComfoSet per ComfoTube connection at an Auslass (short 30 mm in
-CSB-P / EBK, L 75 mm otherwise; none for ComfoValve), chapter 3 Regulierung (comfoSetFor in network.ts). Product keys are referenced by saved networks, keep them stable (currentProductKey maps old
+CSB-P / EBK, L 75 mm otherwise; none for ComfoValve), chapter 3 Regulierung (comfoSetFor in network.ts).
+Prinzipschema PDF (2026-09-27): own button + dialog (SIA phase, optional new revision with comment → 
+ventilation_systems.schema_plan {phase, revisions[index, initials, date, comment]}), route /api/pdf/kwl-schema/<id>,
+src/pdf/kwl-schema-document.tsx: smallest ISO landscape sheet A3…A0 with schema scale ≥ 0.75, frame, legend of the
+used symbols (schemaLegend / drawSymbol in schema-symbols.ts), title block rebuilt as vector after
+vorlagen/Vorlage_Plankopf.pdf (gitignored scan). projects.parcel = Parzellen-Nr. The Lüftungsanlage PDF no longer
+contains the schema. Product keys are referenced by saved networks, keep them stable (currentProductKey maps old
 generic «spiro-D» → Meier Tobler). Devices: only the 7 Zehnder datasheet units (no workbook devices, no Hoval/Helios);
 old device ids (…-st) are mapped, unknown ones dropped. No fan Kennlinien, operating points, device diagrams or party flows (2026-09-26, user decision: the
 datasheet data of the units is not uniform); the device tab shows the uniform datasheet check only (max. external

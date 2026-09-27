@@ -51,16 +51,108 @@ function filterLetter(name: string): string {
   return "G";
 }
 
-/** Symbol of a network element; `top` = extent above the line (for the label above it). */
-export function nodeSymbol(node: NetNode, air: AirKind, x: number, y: number): { prims: Prim[]; top: number } {
-  const color = airColors[air] as Paint;
-  const dir = flowDirection(air);
+/** Symbols of the schema, also the entries of the legend (in legend order). */
+export const legendKeys = [
+  "flow",
+  "bend",
+  "reducer",
+  "tee",
+  "distributor",
+  "silencer",
+  "filter",
+  "orifice",
+  "damper",
+  "component",
+  "louvre",
+  "supplyTerminal",
+  "extractTerminal",
+  "heatRecovery",
+  "fan",
+  "coilBoth",
+  "coilCooling",
+  "coilHeating",
+  "pump",
+  "brine",
+  "compressor",
+  "expansionValve",
+] as const;
+export type LegendKey = (typeof legendKeys)[number];
+
+/** Which symbol a network element is drawn with. */
+export function symbolKey(node: NetNode, air: AirKind): LegendKey {
   const product = findProduct(node.product);
   const kind = product?.kind;
-  const outer = air === "outdoor" || air === "exhaust";
-
   switch (node.type) {
     case "duct":
+      return "flow";
+    case "bend":
+    case "tee":
+    case "reducer":
+    case "distributor":
+      return node.type;
+    case "terminal":
+      return air === "supply" ? "supplyTerminal" : "extractTerminal";
+    default:
+      if (kind === "silencer") return "silencer";
+      if (kind === "filter") return "filter";
+      if ((kind === "valve" || kind === "fitting") && /comfoset|drossel/i.test(`${product?.family ?? ""} ${product?.name ?? ""}`)) return "orifice";
+      if (kind === "valve") return "damper";
+      if (kind === "grille" || ((air === "outdoor" || air === "exhaust") && !product)) return "louvre";
+      return "component";
+  }
+}
+
+/** Heat recovery 3.3.18: square with cross and the two air paths. */
+function heatRecovery(cx: number, cy: number): Prim[] {
+  return [
+    { t: "rect", x: cx - 18, y: cy - 18, w: 36, h: 36, fill: "none", stroke: "ink", sw: 1.3 },
+    { t: "line", x1: cx - 18, y1: cy - 18, x2: cx + 18, y2: cy + 18, stroke: "ink", sw: 1.3 },
+    { t: "line", x1: cx + 18, y1: cy - 18, x2: cx - 18, y2: cy + 18, stroke: "ink", sw: 1.3 },
+    { t: "line", x1: cx - 28, y1: cy - 9, x2: cx - 20, y2: cy - 9, stroke: "ink", sw: 1 },
+    arrowHead(cx - 21, cy - 9, 1, "ink", 3),
+    { t: "line", x1: cx + 20, y1: cy - 9, x2: cx + 28, y2: cy - 9, stroke: "ink", sw: 1 },
+    arrowHead(cx + 27, cy - 9, 1, "ink", 3),
+    { t: "line", x1: cx + 28, y1: cy + 9, x2: cx + 20, y2: cy + 9, stroke: "ink", sw: 1 },
+    arrowHead(cx + 21, cy + 9, -1, "ink", 3),
+    { t: "line", x1: cx - 20, y1: cy + 9, x2: cx - 28, y2: cy + 9, stroke: "ink", sw: 1 },
+    arrowHead(cx - 27, cy + 9, -1, "ink", 3),
+  ];
+}
+
+/** Fan 3.4.1: circle with the triangle pointing in the flow direction. */
+function fan(x: number, y: number, dir: number): Prim[] {
+  return [
+    { t: "circle", cx: x, cy: y, r: 10, fill: "bg", stroke: "ink", sw: 1.3 },
+    { t: "polygon", points: `${x - 5 * dir},${y - 7} ${x + 8 * dir},${y} ${x - 5 * dir},${y + 7}`, fill: "none", stroke: "ink", sw: 1.1 },
+  ];
+}
+
+/** Compressor: circle with two lines narrowing in the flow direction (dir −1: to the left). */
+function compressor(x: number, y: number, dir = -1): Prim[] {
+  return [
+    { t: "circle", cx: x, cy: y, r: 6.5, fill: "bg", stroke: "ink", sw: 1.1 },
+    { t: "line", x1: x - 4.5 * dir, y1: y - 4.7, x2: x + 5.5 * dir, y2: y - 2, stroke: "ink", sw: 1 },
+    { t: "line", x1: x - 4.5 * dir, y1: y + 4.7, x2: x + 5.5 * dir, y2: y + 2, stroke: "ink", sw: 1 },
+  ];
+}
+
+/** Expansion valve: two triangles tip to tip, with the adjusting arrow across. */
+function expansionValve(x: number, y: number): Prim[] {
+  return [
+    { t: "polygon", points: `${x - 6},${y - 4} ${x},${y} ${x - 6},${y + 4}`, fill: "bg", stroke: "ink", sw: 1 },
+    { t: "polygon", points: `${x + 6},${y - 4} ${x},${y} ${x + 6},${y + 4}`, fill: "bg", stroke: "ink", sw: 1 },
+    { t: "line", x1: x - 5, y1: y + 6, x2: x + 5, y2: y - 6, stroke: "ink", sw: 1 },
+    { t: "polygon", points: `${x + 5},${y - 6} ${x + 1.2},${y - 4.8} ${x + 3.8},${y - 2.2}`, fill: "ink" },
+  ];
+}
+
+/**
+ * Draws a symbol at (x, y) on a line of the given colour and flow direction; `top` = extent above the line (for the
+ * label above it). `letter`: filter class.
+ */
+export function drawSymbol(key: LegendKey, x: number, y: number, color: Paint, dir: number, letter = "G"): { prims: Prim[]; top: number } {
+  switch (key) {
+    case "flow":
       // 3.1.7: flow direction on the duct.
       return { prims: [arrowHead(x, y, dir, color)], top: 5 };
     case "bend":
@@ -80,48 +172,85 @@ export function nodeSymbol(node: NetNode, air: AirKind, x: number, y: number): {
       for (let i = -2; i <= 2; i++) prims.push({ t: "line", x1: x - 5, y1: y + i * 6, x2: x + 5, y2: y + i * 6, stroke: "ink", sw: 0.8 });
       return { prims, top: 16 };
     }
-    case "terminal": {
+    case "supplyTerminal":
+    case "extractTerminal": {
       // 3.2.1 supply outlet / 3.2.2 extract inlet: grille with the air flowing out of / into the duct.
       const bar: Prim = { t: "line", x1: x - 2, y1: y - 9, x2: x - 2, y2: y + 9, stroke: "ink", sw: 2 };
-      if (air === "supply") return { prims: [bar, { t: "line", x1: x, y1: y, x2: x + 12, y2: y, stroke: color, sw: 1.6 }, arrowHead(x + 14, y, 1, color)], top: 9 };
+      if (key === "supplyTerminal") return { prims: [bar, { t: "line", x1: x, y1: y, x2: x + 12, y2: y, stroke: color, sw: 1.6 }, arrowHead(x + 14, y, 1, color)], top: 9 };
       return { prims: [bar, { t: "line", x1: x + 18, y1: y, x2: x + 6, y2: y, stroke: color, sw: 1.6 }, arrowHead(x + 4, y, -1, color)], top: 9 };
     }
-    default: {
-      if (kind === "silencer") {
-        // 3.3.6 silencer: frame divided into four cells.
-        const prims: Prim[] = [box(x, y, 12, 32)];
-        for (const k of [-8, 0, 8]) prims.push({ t: "line", x1: x - 6, y1: y + k, x2: x + 6, y2: y + k, stroke: "ink", sw: 0.8 });
-        return { prims, top: 16 };
-      }
-      if (kind === "filter") {
-        // 3.3.8 filter with its class letter.
-        return {
-          prims: [
-            box(x, y, 12, 30),
-            { t: "path", d: `M${x - 6},${y - 15} L${x + 6},${y} L${x - 6},${y + 15}`, fill: "none", stroke: "ink", sw: 0.9 },
-            { t: "text", x: x - 2.5, y: y + 3, text: filterLetter(product?.name ?? ""), size: 7, anchor: "middle", fill: "ink", bold: true },
-          ],
-          top: 15,
-        };
-      }
-      if ((kind === "valve" || kind === "fitting") && /comfoset|drossel/i.test(`${product?.family ?? ""} ${product?.name ?? ""}`)) {
-        // 3.4.9 throttling orifice.
-        return {
-          prims: [box(x, y, 10, 26), { t: "line", x1: x, y1: y - 13, x2: x, y2: y - 3, stroke: "ink", sw: 1 }, { t: "line", x1: x, y1: y + 3, x2: x, y2: y + 13, stroke: "ink", sw: 1 }],
-          top: 13,
-        };
-      }
-      if (kind === "valve") {
-        // 3.3.4 balancing damper.
-        return {
-          prims: [box(x, y, 22, 9), { t: "line", x1: x - 6, y1: y + 4, x2: x + 6, y2: y - 4, stroke: "ink", sw: 1 }, { t: "circle", cx: x, cy: y, r: 1.8, fill: "ink" }],
-          top: 5,
-        };
-      }
-      if (kind === "grille" || (outer && !product)) return { prims: louvre(x, y), top: 15 };
-      return { prims: [box(x, y, 16, 16)], top: 8 };
+    case "silencer": {
+      // 3.3.6 silencer: frame divided into four cells.
+      const prims: Prim[] = [box(x, y, 12, 32)];
+      for (const k of [-8, 0, 8]) prims.push({ t: "line", x1: x - 6, y1: y + k, x2: x + 6, y2: y + k, stroke: "ink", sw: 0.8 });
+      return { prims, top: 16 };
     }
+    case "filter":
+      // 3.3.8 filter with its class letter.
+      return {
+        prims: [
+          box(x, y, 12, 30),
+          { t: "path", d: `M${x - 6},${y - 15} L${x + 6},${y} L${x - 6},${y + 15}`, fill: "none", stroke: "ink", sw: 0.9 },
+          { t: "text", x: x - 2.5, y: y + 3, text: letter, size: 7, anchor: "middle", fill: "ink", bold: true },
+        ],
+        top: 15,
+      };
+    case "orifice":
+      // 3.4.9 throttling orifice.
+      return {
+        prims: [box(x, y, 10, 26), { t: "line", x1: x, y1: y - 13, x2: x, y2: y - 3, stroke: "ink", sw: 1 }, { t: "line", x1: x, y1: y + 3, x2: x, y2: y + 13, stroke: "ink", sw: 1 }],
+        top: 13,
+      };
+    case "damper":
+      // 3.3.4 balancing damper.
+      return {
+        prims: [box(x, y, 22, 9), { t: "line", x1: x - 6, y1: y + 4, x2: x + 6, y2: y - 4, stroke: "ink", sw: 1 }, { t: "circle", cx: x, cy: y, r: 1.8, fill: "ink" }],
+        top: 5,
+      };
+    case "louvre":
+      return { prims: louvre(x, y), top: 15 };
+    case "component":
+      return { prims: [box(x, y, 16, 16)], top: 8 };
+    case "heatRecovery":
+      return { prims: heatRecovery(x, y), top: 18 };
+    case "fan":
+      return { prims: fan(x, y, dir), top: 10 };
+    case "coilBoth":
+      return { prims: coil(x, y, "both"), top: 13 };
+    case "coilCooling":
+      return { prims: coil(x, y, "cooling"), top: 13 };
+    case "coilHeating":
+      return { prims: coil(x, y, "heating"), top: 13 };
+    case "pump":
+      return { prims: pump(x, y, dir, brine), top: 5 };
+    case "brine":
+      return {
+        prims: [
+          { t: "line", x1: x - 12, y1: y - 3, x2: x + 12, y2: y - 3, stroke: brine, sw: 1.4 },
+          { t: "line", x1: x - 12, y1: y + 3, x2: x + 12, y2: y + 3, stroke: brine, sw: 1.4 },
+        ],
+        top: 4,
+      };
+    case "compressor":
+      return { prims: compressor(x, y), top: 7 };
+    case "expansionValve":
+      return { prims: expansionValve(x, y), top: 6 };
   }
+}
+
+/** Symbol of a network element; `top` = extent above the line (for the label above it). */
+export function nodeSymbol(node: NetNode, air: AirKind, x: number, y: number): { prims: Prim[]; top: number } {
+  return drawSymbol(symbolKey(node, air), x, y, airColors[air] as Paint, flowDirection(air), filterLetter(findProduct(node.product)?.name ?? ""));
+}
+
+/** Legend entries of a schema: the symbols of its elements and of the unit with its attachments, in legend order. */
+export function schemaLegend(layout: SchemaLayout, attachments: { fond: boolean; clime: boolean }): LegendKey[] {
+  const used = new Set<LegendKey>(layout.nodes.map((n) => symbolKey(n.node, n.air)));
+  used.add("heatRecovery");
+  used.add("fan");
+  if (attachments.fond) ["coilBoth", "pump", "brine"].forEach((k) => used.add(k as LegendKey));
+  if (attachments.clime) ["coilCooling", "coilHeating", "compressor", "expansionValve"].forEach((k) => used.add(k as LegendKey));
+  return legendKeys.filter((k) => used.has(k));
 }
 
 /** Coil: frame with diagonal; heating 3.3.15 «+», cooling 3.3.16 «−», combined heating / cooling both. */
@@ -178,21 +307,8 @@ function refrigerantCircuit(xEvaporator: number, ySupply: number, xCondenser: nu
     line(xCondenser - 3, outer, xEvaporator + 3, outer),
     line(xEvaporator + 3, outer, xEvaporator + 3, ySupply + 13),
   ];
-  // Compressor: circle with two lines narrowing towards the condenser (flow to the left).
-  const cx = xCondenser + (xEvaporator - xCondenser) * 0.35;
-  prims.push(
-    { t: "circle", cx, cy: inner, r: 6.5, fill: "bg", stroke: "ink", sw: 1.1 },
-    line(cx + 4.5, inner - 4.7, cx - 5.5, inner - 2),
-    line(cx + 4.5, inner + 4.7, cx - 5.5, inner + 2),
-  );
-  // Expansion valve: two triangles tip to tip, with the adjusting arrow across.
-  const ex = xCondenser + (xEvaporator - xCondenser) * 0.65;
-  prims.push(
-    { t: "polygon", points: `${ex - 6},${outer - 4} ${ex},${outer} ${ex - 6},${outer + 4}`, fill: "bg", stroke: "ink", sw: 1 },
-    { t: "polygon", points: `${ex + 6},${outer - 4} ${ex},${outer} ${ex + 6},${outer + 4}`, fill: "bg", stroke: "ink", sw: 1 },
-    line(ex - 5, outer + 6, ex + 5, outer - 6),
-    { t: "polygon", points: `${ex + 5},${outer - 6} ${ex + 1.2},${outer - 4.8} ${ex + 3.8},${outer - 2.2}`, fill: "ink" },
-  );
+  // Compressor on the hot gas line (flow to the condenser, left), expansion valve on the liquid line.
+  prims.push(...compressor(xCondenser + (xEvaporator - xCondenser) * 0.35, inner), ...expansionValve(xCondenser + (xEvaporator - xCondenser) * 0.65, outer));
   return prims;
 }
 
@@ -208,28 +324,11 @@ export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[
   const prims: Prim[] = [
     { t: "rect", x: device.x, y: device.y, w: device.w, h: device.h, fill: "bg", stroke: "ink", sw: 1.5, rx: 4 },
     { t: "text", x: cx, y: device.y + 15, text: name, size: 10.5, anchor: "middle", fill: "ink", bold: true },
-    // Heat recovery: square with cross and the two air paths.
-    { t: "rect", x: cx - 18, y: cy - 18, w: 36, h: 36, fill: "none", stroke: "ink", sw: 1.3 },
-    { t: "line", x1: cx - 18, y1: cy - 18, x2: cx + 18, y2: cy + 18, stroke: "ink", sw: 1.3 },
-    { t: "line", x1: cx + 18, y1: cy - 18, x2: cx - 18, y2: cy + 18, stroke: "ink", sw: 1.3 },
-    { t: "line", x1: cx - 28, y1: cy - 9, x2: cx - 20, y2: cy - 9, stroke: "ink", sw: 1 },
-    arrowHead(cx - 21, cy - 9, 1, "ink", 3),
-    { t: "line", x1: cx + 20, y1: cy - 9, x2: cx + 28, y2: cy - 9, stroke: "ink", sw: 1 },
-    arrowHead(cx + 27, cy - 9, 1, "ink", 3),
-    { t: "line", x1: cx + 28, y1: cy + 9, x2: cx + 20, y2: cy + 9, stroke: "ink", sw: 1 },
-    arrowHead(cx + 21, cy + 9, -1, "ink", 3),
-    { t: "line", x1: cx - 20, y1: cy + 9, x2: cx - 28, y2: cy + 9, stroke: "ink", sw: 1 },
-    arrowHead(cx - 27, cy + 9, -1, "ink", 3),
+    ...heatRecovery(cx, cy),
+    // Fans: supply fan on the supply line (flow to the right), extract fan on the extract line (flow to the left).
+    ...fan(device.x + device.w - 22, airY.supply, 1),
+    ...fan(device.x + device.w - 22, airY.extract, -1),
   ];
-  // Fans: supply fan on the supply line (flow to the right), extract fan on the extract line (flow to the left).
-  for (const [y, dir] of [
-    [airY.supply, 1],
-    [airY.extract, -1],
-  ] as const) {
-    const fx = device.x + device.w - 22;
-    prims.push({ t: "circle", cx: fx, cy: y, r: 10, fill: "bg", stroke: "ink", sw: 1.3 });
-    prims.push({ t: "polygon", points: `${fx - 5 * dir},${y - 7} ${fx + 8 * dir},${y} ${fx - 5 * dir},${y + 7}`, fill: "none", stroke: "ink", sw: 1.1 });
-  }
   const below = device.y + device.h;
   if (attachments.fond) prims.push(...groundProbePipes(device.x - 16, airY.supply), ...coil(device.x - 16, airY.supply, "both"));
   if (attachments.clime) {

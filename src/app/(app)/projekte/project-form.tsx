@@ -30,7 +30,7 @@ export function ProjectForm({
   const tf = useTranslations("projects.form");
   const [state, action] = useActionState(project ? updateProject : createProject, initialFormState);
 
-  const text = (name: "number" | "name" | "street" | "zip" | "city", className = "") => (
+  const text = (name: "number" | "name" | "street" | "zip" | "city" | "parcel", className = "") => (
     <div className={`space-y-2 ${className}`}>
       <Label htmlFor={name}>{tf(`fields.${name}`)}</Label>
       <Input
@@ -107,6 +107,7 @@ export function ProjectForm({
             {text("street", "sm:col-span-4")}
             {text("zip", "sm:col-span-1")}
             {text("city", "sm:col-span-3")}
+            {text("parcel", "sm:col-span-2")}
           </CardContent>
         </Card>
 

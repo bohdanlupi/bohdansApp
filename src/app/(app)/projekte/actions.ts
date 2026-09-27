@@ -16,6 +16,7 @@ const projectSchema = z.object({
   street: optionalText,
   zip: optionalText,
   city: optionalText,
+  parcel: optionalText,
   status: z.enum(projectStatuses),
   language: languageSchema,
   start_date: optionalDate,

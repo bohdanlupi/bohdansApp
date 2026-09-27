@@ -7,7 +7,6 @@ import { evaluateSystem, roomFlows, systemChecks, systemQuantities } from "@/lib
 import { checkDevice } from "@/lib/kwl/network-device";
 import { parsePlanData } from "@/lib/kwl/plan-schema";
 import { parseKwlData } from "@/lib/kwl/schema";
-import { layoutSystem } from "@/lib/kwl/schema-layout";
 import { externalPressureCheck } from "@/lib/kwl/sia3825";
 import { parseSystemData } from "@/lib/kwl/system-schema";
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +15,7 @@ import { KwlSystemDocument } from "@/pdf/kwl-system-document";
 import { pdfLabels } from "@/pdf/labels";
 import { loadLogo } from "@/pdf/logo";
 
-// GET /api/pdf/kwl-system/<systemId> – Lüftungsanlage (device, results, Prinzipschema, elements, quantities).
+// GET /api/pdf/kwl-system/<systemId> – Lüftungsanlage (device, results, elements, quantities).
 export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/kwl-system/[systemId]">) {
   const profile = await getCurrentProfile();
   if (!profile) return new Response("Unauthorized", { status: 401 });
@@ -56,7 +55,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
     result.external.supply !== null || result.external.extract !== null ? (result.external.supply ?? 0) + fondDp + (result.external.extract ?? 0) : null;
   const design = parsePlanData(plan?.data).params;
   const check = externalPressureCheck(design.system, design.operation === "demand", total);
-  const layout = layoutSystem(data, rooms, (n) => rooms.find((r) => r.calcId === n.calcId && r.roomId === n.roomId)?.name ?? n.label);
 
   const pdf = await renderToBuffer(
     <KwlSystemDocument
@@ -75,7 +73,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
       device={device}
       checks={systemChecks(data, rooms, result)}
       pressure={{ status: check.status, limit: check.limit ?? null, target: check.target ?? null }}
-      layout={layout}
       quantities={systemQuantities(data).filter((q) => q.quantity > 0)}
     />,
   );
