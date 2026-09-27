@@ -142,6 +142,6 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
   const maxDepth = Math.max(0, ...nodes.filter((n) => n.air === "supply" || n.air === "extract").map((n) => n.depth));
   // Right of the last terminals: room name and «Auslass + cover · flow · Δp», then the storey bands.
   const width = treeX0 + maxDepth * DX + 34 + 250 + 70;
-  const height = extractTop + extract.height + 60; // room below the device for the attachment labels
+  const height = extractTop + extract.height + 90; // room below the device for the refrigerant circuit and attachment labels
   return { width, height, device: { x: deviceX, y: deviceY, w: deviceW, h: Math.max(deviceH, 80) }, airY: { supply: supplyY, extract: extractY }, nodes, edges, labels, floors };
 }

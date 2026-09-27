@@ -5,7 +5,7 @@
 //   3.3.6 silencer                                  3.3.8 filter (G / F / A)
 //   3.3.15 / 3.3.16 heating / cooling coil          3.3.18 recuperative heat exchanger
 //   3.3.19 flow distributor (Répartiteur)           3.4.1 fan
-//   3.4.9 throttling orifice (Drosselblende)
+//   3.4.9 throttling orifice (Drosselblende)       pump, compressor, expansion valve (ComfoFond / ComfoClime)
 // Ducts are drawn as single coloured lines (usual in a Prinzipschema; SIA 410 3.1.1 draws double lines in plans).
 
 import type { NetNode } from "./network";
@@ -124,16 +124,81 @@ export function nodeSymbol(node: NetNode, air: AirKind, x: number, y: number): {
 }
 
 /** Coil: frame with diagonal; heating 3.3.15 «+», cooling 3.3.16 «−», combined heating / cooling both. */
-function coil(x: number, y: number, mode: "cooling" | "both"): Prim[] {
+function coil(x: number, y: number, mode: "heating" | "cooling" | "both"): Prim[] {
   const prims: Prim[] = [box(x, y, 10, 26), { t: "line", x1: x - 5, y1: y + 13, x2: x + 5, y2: y - 13, stroke: "ink", sw: 0.8 }];
-  prims.push({ t: "text", x: x - 2, y: y - 5, text: "-", size: 8, anchor: "middle", fill: "ink", bold: true });
-  if (mode === "both") prims.push({ t: "text", x: x + 2, y: y + 10, text: "+", size: 7, anchor: "middle", fill: "ink", bold: true });
+  if (mode !== "heating") prims.push({ t: "text", x: x - 2, y: y - 5, text: "-", size: 8, anchor: "middle", fill: "ink", bold: true });
+  if (mode !== "cooling") prims.push({ t: "text", x: x + 2, y: y + 10, text: "+", size: 7, anchor: "middle", fill: "ink", bold: true });
+  return prims;
+}
+
+/** Brine of the ground probes (Erdwärmesonden) of the ComfoFond-L Q: dark violet. */
+const brine: Paint = "#5b1f8a";
+
+/** Pump: circle with the triangle pointing in the flow direction (dy = +1 downwards, −1 upwards). */
+function pump(x: number, y: number, dy: number, color: Paint): Prim[] {
+  return [
+    { t: "circle", cx: x, cy: y, r: 5, fill: "bg", stroke: color, sw: 1.1 },
+    { t: "polygon", points: `${x - 3.5},${y - 2.5 * dy} ${x + 3.5},${y - 2.5 * dy} ${x},${y + 4.5 * dy}`, fill: color },
+  ];
+}
+
+/**
+ * ComfoFond-L Q: short supply / return pipes from the coil to the ground probes, with the circulation pump on the
+ * supply pipe, ending in «EWS» below the coil.
+ */
+function groundProbePipes(x: number, y: number): Prim[] {
+  const top = y + 13;
+  const bottom = y + 44;
+  const prims: Prim[] = [
+    { t: "line", x1: x - 3, y1: top, x2: x - 3, y2: bottom, stroke: brine, sw: 1.4 },
+    { t: "line", x1: x + 3, y1: top, x2: x + 3, y2: bottom, stroke: brine, sw: 1.4 },
+    ...pump(x - 3, y + 28, -1, brine),
+    { t: "text", x, y: bottom + 9, text: "EWS", size: 7, anchor: "middle", fill: brine, bold: true },
+  ];
+  return prims;
+}
+
+/**
+ * ComfoClime: cooling coil (evaporator) in the supply air right of the unit, heating coil (condenser) in the exhaust
+ * air left of it, connected below the unit by the refrigerant circuit: evaporator → compressor → condenser →
+ * expansion valve → evaporator.
+ */
+function refrigerantCircuit(xEvaporator: number, ySupply: number, xCondenser: number, yExhaust: number, yBelow: number): Prim[] {
+  const inner = yBelow;
+  const outer = yBelow + 14;
+  const line = (x1: number, y1: number, x2: number, y2: number): Prim => ({ t: "line", x1, y1, x2, y2, stroke: "ink", sw: 1 });
+  const prims: Prim[] = [
+    // Suction and hot gas (inner path, with the compressor).
+    line(xEvaporator - 3, ySupply + 13, xEvaporator - 3, inner),
+    line(xEvaporator - 3, inner, xCondenser + 3, inner),
+    line(xCondenser + 3, inner, xCondenser + 3, yExhaust + 13),
+    // Liquid (outer path, with the expansion valve).
+    line(xCondenser - 3, yExhaust + 13, xCondenser - 3, outer),
+    line(xCondenser - 3, outer, xEvaporator + 3, outer),
+    line(xEvaporator + 3, outer, xEvaporator + 3, ySupply + 13),
+  ];
+  // Compressor: circle with two lines narrowing towards the condenser (flow to the left).
+  const cx = xCondenser + (xEvaporator - xCondenser) * 0.35;
+  prims.push(
+    { t: "circle", cx, cy: inner, r: 6.5, fill: "bg", stroke: "ink", sw: 1.1 },
+    line(cx + 4.5, inner - 4.7, cx - 5.5, inner - 2),
+    line(cx + 4.5, inner + 4.7, cx - 5.5, inner + 2),
+  );
+  // Expansion valve: two triangles tip to tip, with the adjusting arrow across.
+  const ex = xCondenser + (xEvaporator - xCondenser) * 0.65;
+  prims.push(
+    { t: "polygon", points: `${ex - 6},${outer - 4} ${ex},${outer} ${ex - 6},${outer + 4}`, fill: "bg", stroke: "ink", sw: 1 },
+    { t: "polygon", points: `${ex + 6},${outer - 4} ${ex},${outer} ${ex + 6},${outer + 4}`, fill: "bg", stroke: "ink", sw: 1 },
+    line(ex - 5, outer + 6, ex + 5, outer - 6),
+    { t: "polygon", points: `${ex + 5},${outer - 6} ${ex + 1.2},${outer - 4.8} ${ex + 3.8},${outer - 2.2}`, fill: "ink" },
+  );
   return prims;
 }
 
 /**
  * The ventilation unit: heat recovery (3.3.18) and two fans (3.4.1); ComfoFond-L Q in the outdoor air as
- * heating / cooling coil, ComfoClime in the supply air as cooling coil, both next to the unit.
+ * heating / cooling coil with its ground probe pipes and pump; ComfoClime as cooling coil in the supply air and
+ * heating coil in the exhaust air, connected by the refrigerant circuit below the unit.
  */
 export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[], attachments: { fond: boolean; clime: boolean }): Prim[] {
   const { device, airY } = layout;
@@ -164,9 +229,19 @@ export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[
     prims.push({ t: "circle", cx: fx, cy: y, r: 10, fill: "bg", stroke: "ink", sw: 1.3 });
     prims.push({ t: "polygon", points: `${fx - 5 * dir},${y - 7} ${fx + 8 * dir},${y} ${fx - 5 * dir},${y + 7}`, fill: "none", stroke: "ink", sw: 1.1 });
   }
-  if (attachments.fond) prims.push(...coil(device.x - 16, airY.supply, "both"));
-  if (attachments.clime) prims.push(...coil(device.x + device.w + 16, airY.supply, "cooling"));
-  lines.forEach((line, i) => prims.push({ t: "text", x: cx, y: device.y + device.h + 13 + i * 11, text: `+ ${line}`, size: 9, anchor: "middle", fill: "muted" }));
+  const below = device.y + device.h;
+  if (attachments.fond) prims.push(...groundProbePipes(device.x - 16, airY.supply), ...coil(device.x - 16, airY.supply, "both"));
+  if (attachments.clime) {
+    // Circuit first, so the coils cover the pipe ends.
+    prims.push(
+      ...refrigerantCircuit(device.x + device.w + 16, airY.supply, device.x - 16, airY.extract, below + 10),
+      ...coil(device.x + device.w + 16, airY.supply, "cooling"),
+      ...coil(device.x - 16, airY.extract, "heating"),
+    );
+  }
+  // Attachment names below the unit (below the refrigerant circuit).
+  const textTop = below + (attachments.clime ? 43 : 13);
+  lines.forEach((line, i) => prims.push({ t: "text", x: cx, y: textTop + i * 11, text: `+ ${line}`, size: 9, anchor: "middle", fill: "muted" }));
   return prims;
 }
 
