@@ -1657,7 +1657,11 @@
       "pump": "Circolatore",
       "brine": "Condotte sonde geotermiche",
       "compressor": "Compressore",
-      "expansionValve": "Valvola di espansione"
+      "expansionValve": "Valvola di espansione",
+      "controlUnit": "Unità di comando (CS ComfoSense, SW ComfoSwitch, RF radio)",
+      "sensor": "Sensore ambiente (H umidità, CO2)",
+      "interface": "Interfaccia / Option Box",
+      "controlLine": "Linea di comando (ComfoNet / 0-10 V)"
     }
   },
   "kwlDevice": {
@@ -1678,7 +1682,23 @@
     "noStagesClime": "Con ComfoClime i livelli dei ventilatori dell’apparecchio da solo non valgono – determinante è la curva della combinazione (scheda tecnica Zehnder sopra).",
     "fondSide": "Esecuzione ComfoFond-L Q",
     "fondLeft": "aria immessa a sinistra",
-    "fondRight": "aria immessa a destra"
+    "fondRight": "aria immessa a destra",
+    "controlsTitle": "Filtri, comando & interfacce (ComfoAir Q)",
+    "filterSet": "Set di filtri",
+    "filterClasses": "AI {supply} / AR {extract}",
+    "filterSupply": "aria esterna/immessa",
+    "filterExtract": "aria ripresa",
+    "filterMismatch": "Set di filtri {set}: {side} {actual} non soddisfa il concetto di filtrazione ({required}; {dwellings}).",
+    "filterTwoStage": "Set di filtri {set}: il concetto di filtrazione richiede due stadi per l’{side} ({required}; {dwellings}); l’apparecchio ha un solo filtro ({actual}) – prevedere un prefiltro.",
+    "controlUnits": "Unità di comando",
+    "surfaceHousing": "Scatola a vista per ComfoSense / ComfoSwitch",
+    "sensors": "Sensori",
+    "mount": "Montaggio",
+    "mountUp": "INC",
+    "mountAp": "VIS",
+    "interfaces": "Interfacce",
+    "notYetAvailable": "non ancora disponibile",
+    "optionBoxAuto": "L’Option Box per i sensori 0-10 V viene aggiunta automaticamente."
   },
   "lvStructure": {
     "button": "Struttura ventilazione",

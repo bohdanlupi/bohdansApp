@@ -75,8 +75,22 @@ export const legendKeys = [
   "brine",
   "compressor",
   "expansionValve",
+  "controlUnit",
+  "sensor",
+  "interface",
+  "controlLine",
 ] as const;
 export type LegendKey = (typeof legendKeys)[number];
+
+/** What the schema draws at the unit besides the network: attachments, filters, control parts. */
+export type DeviceExtras = {
+  fond: boolean;
+  clime: boolean;
+  /** Filter per side: SIA 410 letter (G / F / A) and ISO class text. */
+  filters?: { supply: { letter: string; text: string }; extract: { letter: string; text: string } } | null;
+  /** Control units, sensors, interfaces: kind, short text on the symbol, pieces. */
+  controls?: { kind: "control" | "sensor" | "interface"; short: string; count: number }[];
+};
 
 /** Which symbol a network element is drawn with. */
 export function symbolKey(node: NetNode, air: AirKind): LegendKey {
@@ -235,7 +249,29 @@ export function drawSymbol(key: LegendKey, x: number, y: number, color: Paint, d
       return { prims: compressor(x, y), top: 7 };
     case "expansionValve":
       return { prims: expansionValve(x, y), top: 6 };
+    case "controlUnit":
+      return { prims: controlSymbol("control", x, y, letter === "G" ? "CS" : letter), top: 7 };
+    case "sensor":
+      return { prims: controlSymbol("sensor", x, y, letter === "G" ? "H" : letter), top: 7 };
+    case "interface":
+      return { prims: controlSymbol("interface", x, y, letter === "G" ? "LAN" : letter), top: 7 };
+    case "controlLine":
+      return { prims: [{ t: "line", x1: x - 12, y1: y, x2: x + 12, y2: y, stroke: "ink", sw: 0.8, dash: "3 2" }], top: 2 };
   }
+}
+
+/** Control unit (rectangle), room sensor (circle) or interface (box with double frame), with its short text. */
+function controlSymbol(kind: "control" | "sensor" | "interface", x: number, y: number, text: string): Prim[] {
+  const label: Prim = { t: "text", x, y: y + 2.3, text, size: text.length > 2 ? 5 : 6, anchor: "middle", fill: "ink", bold: true };
+  if (kind === "sensor") return [{ t: "circle", cx: x, cy: y, r: 7, fill: "bg", stroke: "ink", sw: 1 }, label];
+  if (kind === "interface") {
+    return [
+      { t: "rect", x: x - 10, y: y - 7, w: 20, h: 14, fill: "bg", stroke: "ink", sw: 1 },
+      { t: "rect", x: x - 8, y: y - 5, w: 16, h: 10, fill: "none", stroke: "ink", sw: 0.5 },
+      label,
+    ];
+  }
+  return [{ t: "rect", x: x - 9, y: y - 7, w: 18, h: 14, rx: 2, fill: "bg", stroke: "ink", sw: 1 }, label];
 }
 
 /** Symbol of a network element; `top` = extent above the line (for the label above it). */
@@ -244,12 +280,15 @@ export function nodeSymbol(node: NetNode, air: AirKind, x: number, y: number): {
 }
 
 /** Legend entries of a schema: the symbols of its elements and of the unit with its attachments, in legend order. */
-export function schemaLegend(layout: SchemaLayout, attachments: { fond: boolean; clime: boolean }): LegendKey[] {
+export function schemaLegend(layout: SchemaLayout, extras: DeviceExtras): LegendKey[] {
   const used = new Set<LegendKey>(layout.nodes.map((n) => symbolKey(n.node, n.air)));
   used.add("heatRecovery");
   used.add("fan");
-  if (attachments.fond) ["coilBoth", "pump", "brine"].forEach((k) => used.add(k as LegendKey));
-  if (attachments.clime) ["coilCooling", "coilHeating", "compressor", "expansionValve"].forEach((k) => used.add(k as LegendKey));
+  if (extras.filters) used.add("filter");
+  if (extras.fond) ["coilBoth", "pump", "brine"].forEach((k) => used.add(k as LegendKey));
+  if (extras.clime) ["coilCooling", "coilHeating", "compressor", "expansionValve"].forEach((k) => used.add(k as LegendKey));
+  for (const c of extras.controls ?? []) used.add(c.kind === "control" ? "controlUnit" : c.kind);
+  if (extras.controls?.length) used.add("controlLine");
   return legendKeys.filter((k) => used.has(k));
 }
 
@@ -317,7 +356,7 @@ function refrigerantCircuit(xEvaporator: number, ySupply: number, xCondenser: nu
  * heating / cooling coil with its ground probe pipes and pump; ComfoClime as cooling coil in the supply air and
  * heating coil in the exhaust air, connected by the refrigerant circuit below the unit.
  */
-export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[], attachments: { fond: boolean; clime: boolean }): Prim[] {
+export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[], attachments: DeviceExtras): Prim[] {
   const { device, airY } = layout;
   const cx = device.x + device.w / 2;
   const cy = device.y + device.h / 2;
@@ -329,6 +368,16 @@ export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[
     ...fan(device.x + device.w - 22, airY.supply, 1),
     ...fan(device.x + device.w - 22, airY.extract, -1),
   ];
+  // Filters at the air inlets of the unit (outdoor air left, extract air before the extract fan), class above.
+  if (attachments.filters) {
+    for (const [fx, y, f] of [
+      [device.x + 34, airY.supply, attachments.filters.supply],
+      [device.x + device.w - 50, airY.extract, attachments.filters.extract],
+    ] as const) {
+      prims.push(...drawSymbol("filter", fx, y, "ink", 1, f.letter).prims);
+      prims.push({ t: "text", x: fx, y: y - 19, text: f.text, size: 7, anchor: "middle", fill: "ink" });
+    }
+  }
   const below = device.y + device.h;
   if (attachments.fond) prims.push(...groundProbePipes(device.x - 16, airY.supply), ...coil(device.x - 16, airY.supply, "both"));
   if (attachments.clime) {
@@ -342,6 +391,20 @@ export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[
   // Attachment names below the unit (below the refrigerant circuit).
   const textTop = below + (attachments.clime ? 43 : 13);
   lines.forEach((line, i) => prims.push({ t: "text", x: cx, y: textTop + i * 11, text: `+ ${line}`, size: 9, anchor: "middle", fill: "muted" }));
+  // Control units, sensors, interfaces on a dashed control line from the unit, below the texts; pieces below.
+  const controls = attachments.controls ?? [];
+  if (controls.length) {
+    const rowY = textTop + lines.length * 11 + 14;
+    const x0 = device.x + 8;
+    const step = 30;
+    const dashed = (x1: number, y1: number, x2: number, y2: number): Prim => ({ t: "line", x1, y1, x2, y2, stroke: "ink", sw: 0.8, dash: "3 2" });
+    prims.push(dashed(x0, below, x0, rowY), dashed(x0, rowY, x0 + 12 + (controls.length - 1) * step, rowY));
+    controls.forEach((c, i) => {
+      const x = x0 + 12 + i * step;
+      prims.push(...controlSymbol(c.kind, x, rowY, c.short));
+      if (c.count > 1) prims.push({ t: "text", x, y: rowY + 16, text: `${c.count}×`, size: 7, anchor: "middle", fill: "muted" });
+    });
+  }
   return prims;
 }
 

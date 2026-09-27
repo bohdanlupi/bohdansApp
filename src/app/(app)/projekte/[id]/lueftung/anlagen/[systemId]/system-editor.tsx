@@ -9,9 +9,10 @@ import { ConfirmButton } from "@/components/confirm-button";
 import type { FormMessageKey } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { normalizeOptions, optionsList } from "@/lib/kwl/attachments";
+import { normalizeOptions, optionsList, schemaExtras } from "@/lib/kwl/attachments";
 import { evaluateSystem, type NetNode, pathTo, roomFlows, type SystemData } from "@/lib/kwl/network";
 import { defaultSystem, starToSystem } from "@/lib/kwl/network-defaults";
+import { filterConceptWarnings } from "@/lib/kwl/evaluate";
 import { checkDevice } from "@/lib/kwl/network-device";
 import type { PlanParams } from "@/lib/kwl/plan-schema";
 import { productsOfKind } from "@/lib/kwl/products";
@@ -19,7 +20,7 @@ import type { KwlData } from "@/lib/kwl/schema";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { layoutSystem } from "@/lib/kwl/schema-layout";
 
-import { DeviceOptionsFields } from "../../device-options";
+import { ControlOptionsFields, DeviceOptionsFields } from "../../device-options";
 import { deleteSystem, saveSystem } from "../actions";
 import { Notice } from "@/components/planning/fields";
 import { type LvWithChapters, QuantitiesPanel } from "./quantities-panel";
@@ -62,6 +63,11 @@ export function SystemEditor({
   const dirty = name !== saved.name || data !== saved.data;
 
   const rooms = useMemo(() => roomFlows(calcs, data.calcIds), [calcs, data.calcIds]);
+  // Filter set of the device against the filter concept of the served dwellings.
+  const filterWarnings = useMemo(
+    () => filterConceptWarnings(data.device, data.deviceOptions, calcs.filter((c) => data.calcIds.includes(c.id))),
+    [calcs, data.device, data.deviceOptions, data.calcIds],
+  );
   const result = useMemo(() => evaluateSystem(data, rooms), [data, rooms]);
   const device = useMemo(
     () =>
@@ -74,8 +80,7 @@ export function SystemEditor({
     [data.device, data.deviceOptions, result],
   );
   const roomLabel = (n: NetNode) => rooms.find((r) => r.calcId === n.calcId && r.roomId === n.roomId)?.name ?? (n.label || t("unassigned"));
-  const schemaOptions = normalizeOptions(data.device, data.deviceOptions);
-  const schemaAttachments = { fond: schemaOptions.fond !== "none", clime: schemaOptions.clime !== null };
+  const schemaAttachments = schemaExtras(data.device, data.deviceOptions);
   const layout = useMemo(() => layoutSystem(data, rooms, roomLabel), [data, rooms]); // eslint-disable-line react-hooks/exhaustive-deps
   const highlight = useMemo(() => {
     const ids = new Set<string>();
@@ -149,6 +154,15 @@ export function SystemEditor({
               value={data.deviceOptions}
               disabled={!editable}
               idPrefix="system"
+              onChange={(deviceOptions) => setData((d) => ({ ...d, deviceOptions }))}
+            />
+          </div>
+          <div className="sm:col-span-2 ultra:col-span-3">
+            <ControlOptionsFields
+              deviceKey={data.device}
+              value={data.deviceOptions}
+              disabled={!editable}
+              warnings={filterWarnings}
               onChange={(deviceOptions) => setData((d) => ({ ...d, deviceOptions }))}
             />
           </div>

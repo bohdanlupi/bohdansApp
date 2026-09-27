@@ -275,7 +275,13 @@ ventilation_systems.schema_plan {phase, revisions[index, initials, date, comment
 src/pdf/kwl-schema-document.tsx: smallest ISO landscape sheet A3…A0 with schema scale ≥ 0.75, frame, legend of the
 used symbols (schemaLegend / drawSymbol in schema-symbols.ts), title block rebuilt as vector after
 vorlagen/Vorlage_Plankopf.pdf (gitignored scan). projects.parcel = Parzellen-Nr. The Lüftungsanlage PDF no longer
-contains the schema. Product keys are referenced by saved networks, keep them stable (currentProductKey maps old
+contains the schema.
+ComfoAir Q extras (src/lib/kwl/controls.ts, articles from the Zehnder IGH catalogue): filter set (G4/F7 default, G4/G4,
+Aktivkohle, Fresh Scent) checked against the dwellings' filter concept (filterConceptWarnings in evaluate.ts; one filter
+per side, so two-stage supply requirements always warn), control units ComfoSense CCH / ComfoSwitch CCH / ComfoSense
+Feller / RFZ (+ Aufputzgehäuse), sensors RFF / C67 / V67 (UP/AP), interfaces ComfoConnect LAN C / KNX C / Pro; Option
+Box added for 0-10 V sensors unless the ComfoFond-L Q (own Option Box). Stored in deviceOptions; schema: filters with ISO
+class inside the unit, control row on a dashed line below it (schemaExtras); quantities chapter 3, filter set chapter 0. Product keys are referenced by saved networks, keep them stable (currentProductKey maps old
 generic «spiro-D» → Meier Tobler). Devices: only the 7 Zehnder datasheet units (no workbook devices, no Hoval/Helios);
 old device ids (…-st) are mapped, unknown ones dropped. No fan Kennlinien, operating points, device diagrams or party flows (2026-09-26, user decision: the
 datasheet data of the units is not uniform); the device tab shows the uniform datasheet check only (max. external

@@ -1657,7 +1657,11 @@
       "pump": "Umwälzpumpe",
       "brine": "Erdwärmesonden-Leitungen (EWS)",
       "compressor": "Verdichter",
-      "expansionValve": "Expansionsventil"
+      "expansionValve": "Expansionsventil",
+      "controlUnit": "Bedieneinheit (CS ComfoSense, SW ComfoSwitch, RF Funk)",
+      "sensor": "Raumsensor (H Feuchte, CO2)",
+      "interface": "Schnittstelle / Option Box",
+      "controlLine": "Steuerleitung (ComfoNet / 0-10 V)"
     }
   },
   "kwlDevice": {
@@ -1678,7 +1682,23 @@
     "noStagesClime": "Mit ComfoClime gelten die Ventilatorstufen des Geräts allein nicht – massgebend ist die Kennlinie der Kombination (Zehnder-Datenblatt oben).",
     "fondSide": "ComfoFond-L Q Ausführung",
     "fondLeft": "Zuluft links",
-    "fondRight": "Zuluft rechts"
+    "fondRight": "Zuluft rechts",
+    "controlsTitle": "Filter, Bedienung & Schnittstellen (ComfoAir Q)",
+    "filterSet": "Filterset",
+    "filterClasses": "ZUL {supply} / ABL {extract}",
+    "filterSupply": "Aussenluft/Zuluft",
+    "filterExtract": "Abluft",
+    "filterMismatch": "Filterset {set}: {side} {actual} erfüllt das Filterkonzept nicht ({required}; {dwellings}).",
+    "filterTwoStage": "Filterset {set}: das Filterkonzept verlangt für die {side} zwei Stufen ({required}; {dwellings}); das Gerät hat nur einen Filter ({actual}) – Vorfilter bauseits vorsehen.",
+    "controlUnits": "Bedieneinheiten",
+    "surfaceHousing": "Aufputzgehäuse für ComfoSense / ComfoSwitch",
+    "sensors": "Sensoren",
+    "mount": "Montage",
+    "mountUp": "UP",
+    "mountAp": "AP",
+    "interfaces": "Schnittstellen",
+    "notYetAvailable": "noch nicht lieferbar",
+    "optionBoxAuto": "Option Box für die 0-10-V-Sensoren wird automatisch ergänzt."
   },
   "lvStructure": {
     "button": "Struktur Lüftung",

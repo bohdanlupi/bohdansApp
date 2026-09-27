@@ -4,6 +4,24 @@
 
 import { z } from "zod";
 
+import {
+  type ControlKey,
+  controlKeys,
+  controlUnits,
+  filterLetter,
+  filterSets,
+  filterText,
+  findFilterSet,
+  hasQOptions,
+  type InterfaceKey,
+  interfaceKeys,
+  interfaceTypes,
+  optionBox,
+  type SensorKey,
+  sensorKeys,
+  sensorTypes,
+  surfaceHousing,
+} from "./controls";
 import { curveValue } from "./products";
 import { zehnderAttachments } from "./zehnder-data";
 
@@ -45,9 +63,40 @@ export type ZehnderAttachments = {
 export type FondOption = "none" | "filter" | "noFilter";
 /** ComfoFond-L Q version: supply air connection on the left or on the right. */
 export type FondSide = "left" | "right";
-export type DeviceOptions = { erv: boolean; fond: FondOption; fondSide: FondSide; clime: string | null };
+export type Mount = "up" | "ap";
+export type DeviceOptions = {
+  erv: boolean;
+  fond: FondOption;
+  fondSide: FondSide;
+  clime: string | null;
+  /** ComfoAir Q: filter set (controls.ts), control units / sensors per piece, interfaces. */
+  filterSet: string | null;
+  controls: Record<ControlKey, number>;
+  /** Surface-mounting housing for each ComfoSense CCH / ComfoSwitch CCH. */
+  surfaceHousing: boolean;
+  sensors: Record<SensorKey, number>;
+  sensorMount: { c67: Mount; v67: Mount };
+  interfaces: Record<InterfaceKey, boolean>;
+};
 
-export const noDeviceOptions: DeviceOptions = { erv: false, fond: "none", fondSide: "right", clime: null };
+const zeroCounts = <K extends string>(keys: readonly K[]) => Object.fromEntries(keys.map((k) => [k, 0])) as Record<K, number>;
+
+export const noDeviceOptions: DeviceOptions = {
+  erv: false,
+  fond: "none",
+  fondSide: "right",
+  clime: null,
+  filterSet: null,
+  controls: zeroCounts(controlKeys),
+  surfaceHousing: false,
+  sensors: zeroCounts(sensorKeys),
+  sensorMount: { c67: "up", v67: "up" },
+  interfaces: Object.fromEntries(interfaceKeys.map((k) => [k, false])) as Record<InterfaceKey, boolean>,
+};
+
+const count = z.number().int().min(0).max(50).catch(0);
+const mount = z.enum(["up", "ap"]).catch("up");
+const flag = z.boolean().catch(false);
 
 export const deviceOptionsSchema = z
   .object({
@@ -55,6 +104,12 @@ export const deviceOptionsSchema = z
     fond: z.enum(["none", "filter", "noFilter"]).catch("none"),
     fondSide: z.enum(["left", "right"]).catch("right"),
     clime: z.string().max(40).nullable().catch(null),
+    filterSet: z.string().max(40).nullable().catch(null),
+    controls: z.object(Object.fromEntries(controlKeys.map((k) => [k, count])) as Record<ControlKey, typeof count>).catch(noDeviceOptions.controls),
+    surfaceHousing: flag,
+    sensors: z.object(Object.fromEntries(sensorKeys.map((k) => [k, count])) as Record<SensorKey, typeof count>).catch(noDeviceOptions.sensors),
+    sensorMount: z.object({ c67: mount, v67: mount }).catch(noDeviceOptions.sensorMount),
+    interfaces: z.object(Object.fromEntries(interfaceKeys.map((k) => [k, flag])) as Record<InterfaceKey, typeof flag>).catch(noDeviceOptions.interfaces),
   })
   .catch(noDeviceOptions);
 
@@ -65,18 +120,71 @@ export function availableOptions(deviceKey: string | null) {
     erv: key in zehnderAttachments.erv.devices,
     fond: key in zehnderAttachments.fond.devices,
     clime: zehnderAttachments.clime.filter((c) => c.combinations.some((x) => x.device === key)).map((c) => ({ key: c.key, name: c.name })),
+    /** Filter sets, control units, sensors and interfaces (ComfoAir Q). */
+    controls: hasQOptions(deviceKey),
   };
 }
 
 /** Options without the attachments that do not fit the device. */
 export function normalizeOptions(deviceKey: string | null, options: DeviceOptions | null | undefined): DeviceOptions {
-  const o = options ?? noDeviceOptions;
+  const o = { ...noDeviceOptions, ...options };
   const available = availableOptions(deviceKey);
+  const q = available.controls;
   return {
     erv: o.erv && available.erv,
     fond: available.fond ? o.fond : "none",
     fondSide: o.fondSide === "left" ? "left" : "right",
     clime: o.clime && available.clime.some((c) => c.key === o.clime) ? o.clime : null,
+    // ComfoAir Q: G4 / F7 unless another set is chosen.
+    filterSet: q ? (findFilterSet(o.filterSet)?.key ?? filterSets[0].key) : null,
+    controls: q ? { ...noDeviceOptions.controls, ...o.controls } : noDeviceOptions.controls,
+    surfaceHousing: q && o.surfaceHousing,
+    sensors: q ? { ...noDeviceOptions.sensors, ...o.sensors } : noDeviceOptions.sensors,
+    sensorMount: { ...noDeviceOptions.sensorMount, ...o.sensorMount },
+    interfaces: q ? { ...noDeviceOptions.interfaces, ...o.interfaces } : noDeviceOptions.interfaces,
+  };
+}
+
+export type ControlPart = { kind: "control" | "sensor" | "interface" | "housing"; key: string; name: string; short: string; count: number; article: Article };
+
+/**
+ * Control units, sensors and interfaces with their articles and pieces (for the quantities and the schema); the
+ * Option Box is added for 0-10 V sensors (RFF, V67) unless the ComfoFond-L Q brings its own.
+ */
+export function controlParts(deviceKey: string | null, options: DeviceOptions): ControlPart[] {
+  const o = normalizeOptions(deviceKey, options);
+  if (!availableOptions(deviceKey).controls) return [];
+  const parts: ControlPart[] = [];
+  for (const k of controlKeys) if (o.controls[k] > 0) parts.push({ kind: "control", key: k, ...controlUnits[k], count: o.controls[k] });
+  const housings = o.surfaceHousing ? o.controls.comfoSense + o.controls.comfoSwitch : 0;
+  if (housings > 0) parts.push({ kind: "housing", key: "housing", name: surfaceHousing.text, short: "", count: housings, article: surfaceHousing });
+  for (const k of sensorKeys) {
+    if (o.sensors[k] <= 0) continue;
+    const t = sensorTypes[k];
+    const article = k === "rff" ? sensorTypes.rff.articles.ap : sensorTypes[k].articles[o.sensorMount[k]];
+    parts.push({ kind: "sensor", key: k, name: t.name, short: t.short, count: o.sensors[k], article });
+  }
+  for (const k of interfaceKeys) if (o.interfaces[k]) parts.push({ kind: "interface", key: k, ...interfaceTypes[k], count: 1 });
+  const needsBox = sensorKeys.some((k) => o.sensors[k] > 0 && sensorTypes[k].optionBox) && o.fond === "none";
+  if (needsBox) parts.push({ kind: "interface", key: "optionBox", ...optionBox, count: 1 });
+  return parts;
+}
+
+/**
+ * What the Prinzipschema draws at the unit: ComfoFond-L Q, ComfoClime, the filter per side (letter and ISO class)
+ * and the control units, sensors and interfaces (short text, pieces).
+ */
+export function schemaExtras(deviceKey: string | null, options: DeviceOptions) {
+  const o = normalizeOptions(deviceKey, options);
+  const set = findFilterSet(o.filterSet);
+  const side = (f: Parameters<typeof filterText>[0]) => ({ letter: filterLetter(f), text: filterText(f) });
+  return {
+    fond: o.fond !== "none",
+    clime: o.clime !== null,
+    filters: set ? { supply: side(set.supply), extract: side(set.extract) } : null,
+    controls: controlParts(deviceKey, o)
+      .filter((p): p is ControlPart & { kind: "control" | "sensor" | "interface" } => p.kind !== "housing")
+      .map((p) => ({ kind: p.kind, short: p.short, count: p.count })),
   };
 }
 
@@ -150,6 +258,9 @@ export function deviceArticles(deviceKey: string | null, deviceName: string, dev
     const adapter = climeUnit.combinations.find((c) => c.device === deviceKey)?.adapter;
     if (adapter) out.push({ label: adapter.text, article: adapter });
   }
+  // Filter set of the chosen classes (as the spare set for the first change).
+  const filterSet = findFilterSet(o.filterSet);
+  if (filterSet) out.push({ label: filterSet.article.text, article: filterSet.article });
   return out;
 }
 

@@ -1,5 +1,6 @@
 import { attachmentEffects, normalizeOptions } from "./attachments";
-import { airFlows, outdoorAirClass, type SettlementKey, supplyFilterMatrix, type TrafficKey } from "./calc";
+import { airFlows, extractFilterMinimum, outdoorAirClass, type SettlementKey, supplyFilterMatrix, type TrafficKey } from "./calc";
+import { filterDeviations, findFilterSet, parseFilterStages } from "./controls";
 import { checkDevice } from "./network-device";
 import { datasheetDevice } from "./products";
 import type { KwlData, KwlFilterInput } from "./schema";
@@ -7,6 +8,27 @@ import type { KwlData, KwlFilterInput } from "./schema";
 /** Effective outdoor air class: set by hand, else from traffic + settlement. */
 export const effectiveOda = (filter: KwlFilterInput) =>
   filter.odaOverride ?? outdoorAirClass(filter.traffic as TrafficKey | null, filter.settlement as SettlementKey | null);
+
+/**
+ * Filter set of a system's device against the filter concept of the dwellings it serves (Konzepte, SIA 382/5):
+ * one entry per side and requirement, with the dwellings concerned.
+ */
+export function filterConceptWarnings(deviceKey: string | null, options: KwlData["device"]["options"], calcs: { name: string; data: KwlData }[]) {
+  const set = findFilterSet(normalizeOptions(deviceKey, options).filterSet);
+  if (!set) return [];
+  const out = new Map<string, { side: "supply" | "extract"; required: string; actual: string; twoStage: boolean; set: string; calcs: string[] }>();
+  for (const c of calcs) {
+    const oda = effectiveOda(c.data.filter);
+    const supply = oda ? supplyFilterMatrix[oda][c.data.filter.ida] : null;
+    for (const d of filterDeviations(set, { supply, extract: extractFilterMinimum })) {
+      const key = `${d.side}|${d.required}`;
+      const entry = out.get(key) ?? { ...d, twoStage: parseFilterStages(d.required).length > 1, set: set.name, calcs: [] };
+      entry.calcs.push(c.name);
+      out.set(key, entry);
+    }
+  }
+  return [...out.values()];
+}
 
 /** External pressure drops calculated in the ventilation system that serves the dwelling. */
 export type SystemDrops = { supply: number | null; extract: number | null; systemId: string; name: string };

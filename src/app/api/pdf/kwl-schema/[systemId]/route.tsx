@@ -3,7 +3,7 @@ import { createTranslator } from "next-intl";
 
 import { languageToLocale } from "@/i18n/config";
 import { getCurrentProfile } from "@/lib/auth";
-import { hasOptions, optionsList } from "@/lib/kwl/attachments";
+import { hasOptions, optionsList, schemaExtras } from "@/lib/kwl/attachments";
 import { evaluateSystem, roomFlows } from "@/lib/kwl/network";
 import { findPhase } from "@/lib/kwl/phases";
 import { findProduct } from "@/lib/kwl/products";
@@ -48,7 +48,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const rooms = roomFlows(calcs, data.calcIds);
   const result = evaluateSystem(data, rooms);
   const layout = layoutSystem(data, rooms, (n) => rooms.find((r) => r.calcId === n.calcId && r.roomId === n.roomId)?.name ?? n.label);
-  const attachments = { fond: data.deviceOptions.fond !== "none", clime: data.deviceOptions.clime !== null };
+  const attachments = schemaExtras(data.device, data.deviceOptions);
   const nodeResult = (id: string) => result.supply.nodes.get(id) ?? result.extract.nodes.get(id) ?? result.outdoor.nodes.get(id) ?? result.exhaust.nodes.get(id);
   const phase = plan.phase ? findPhase(plan.phase) : null;
   const airs = ["outdoor", "supply", "extract", "exhaust"] as const;

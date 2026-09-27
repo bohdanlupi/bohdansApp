@@ -5,6 +5,7 @@
 //                                      [ device ]
 //   [FOL terminal] ◄─ exhaust chain ──┘          └── extract tree ◄── terminals (rooms, by storey)
 
+import { controlParts } from "./attachments";
 import type { NetNode, RoomFlow, SystemData } from "./network";
 
 export type AirKind = "outdoor" | "supply" | "extract" | "exhaust";
@@ -106,15 +107,16 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
     return { rootYs, height: Math.max(leaf, 1) * DY };
   };
 
-  const supplyTop = 48;
+  const supplyTop = 76;
   const supply = placeTree(data.supply, "supply", supplyTop);
   const extractTop = supplyTop + supply.height + 50;
   const extract = placeTree(data.extract, "extract", extractTop);
 
-  const deviceY = supplyTop - 10;
-  const deviceH = extractTop + extract.height - deviceY - 10;
   const supplyY = supply.rootYs[0] ?? supplyTop;
   const extractY = extract.rootYs[0] ?? extractTop;
+  // Above the supply line inside the unit: its name and the filter with its class.
+  const deviceY = Math.min(supplyTop - 10, supplyY - 48);
+  const deviceH = extractTop + extract.height - deviceY - 10;
 
   // Device → tree roots.
   for (const [ys, air] of [
@@ -143,6 +145,7 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
   const maxDepth = Math.max(0, ...nodes.filter((n) => n.air === "supply" || n.air === "extract").map((n) => n.depth));
   // Right of the last terminals: room name and «Auslass + cover · flow · Δp», then the storey bands.
   const width = treeX0 + maxDepth * DX + 34 + 250 + 70;
-  const height = extractTop + extract.height + 90; // room below the device for the refrigerant circuit and attachment labels
+  // Room below the device for the refrigerant circuit, the attachment labels and the row of control units / sensors.
+  const height = extractTop + extract.height + 90 + (controlParts(data.device, data.deviceOptions).length ? 36 : 0);
   return { width, height, device: { x: deviceX, y: deviceY, w: deviceW, h: Math.max(deviceH, 80) }, airY: { supply: supplyY, extract: extractY }, nodes, edges, labels, floors };
 }

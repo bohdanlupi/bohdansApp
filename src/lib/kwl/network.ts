@@ -7,7 +7,7 @@
 // below it. The path with the largest pressure drop is the external pressure of the device on that side;
 // the other paths need throttling by the difference.
 
-import { type DeviceOptions, deviceArticles } from "./attachments";
+import { controlParts, type DeviceOptions, deviceArticles } from "./attachments";
 import { maxVelocity } from "./calc";
 import {
   bendAngles,
@@ -461,6 +461,10 @@ export function systemQuantities(data: SystemData): Quantity[] {
   if (device) {
     for (const d of deviceArticles(device.key, device.name, device.articles, data.deviceOptions)) {
       add(`device|${d.article?.number ?? d.label}`, { chapter: 0, product: device.key, manufacturer: device.manufacturer, label: d.label, unit: "Stk", articles: d.article ? [d.article.number] : [] }, 1);
+    }
+    // Control units, sensors and interfaces: chapter 3 Regulierung.
+    for (const p of controlParts(device.key, data.deviceOptions)) {
+      add(`control|${p.article.number}`, { chapter: 3, product: null, manufacturer: device.manufacturer, label: p.article.text, unit: "Stk", articles: [p.article.number] }, p.count);
     }
   }
   data.outdoor.forEach(walk("supply", true));

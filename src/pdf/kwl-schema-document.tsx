@@ -5,7 +5,7 @@ import type { DuctMaterial } from "@/lib/kwl/pressure";
 import { measuredCoverPrefix } from "@/lib/kwl/products";
 import { airColors, type AirKind, type SchemaLayout } from "@/lib/kwl/schema-layout";
 import type { SchemaRevision } from "@/lib/kwl/schema-plan";
-import { deviceSymbols, drawSymbol, ductLabel, type LegendKey, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import { type DeviceExtras, deviceSymbols, drawSymbol, ductLabel, type LegendKey, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import type { FirmSettings } from "@/lib/supabase/types";
 
 import { winAnsi } from "./kwl-document";
@@ -87,7 +87,7 @@ const svgText = (x: number, y: number, value: string, size: number, opts: { anch
 export type SchemaLabels = {
   device: string;
   deviceLines: string[];
-  attachments: { fond: boolean; clime: boolean };
+  attachments: DeviceExtras;
   /** Short air types (AUL, ZUL, ABL, FOL) and their names for the legend. */
   airShort: Record<AirKind, string>;
   air: Record<AirKind, string>;

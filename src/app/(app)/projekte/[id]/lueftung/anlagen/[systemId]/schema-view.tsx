@@ -4,7 +4,7 @@ import type { NetNode } from "@/lib/kwl/network";
 import type { DuctMaterial } from "@/lib/kwl/pressure";
 import { measuredCoverPrefix } from "@/lib/kwl/products";
 import { airColors, type SchemaLayout } from "@/lib/kwl/schema-layout";
-import { deviceSymbols, ductLabel, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import { type DeviceExtras, deviceSymbols, ductLabel, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import { formatNumber } from "@/lib/number-input";
 
 const paint = (p: Paint | undefined) =>
@@ -59,7 +59,7 @@ export function SchemaView({
   labels: {
     device: string;
     deviceLines?: string[];
-    attachments?: { fond: boolean; clime: boolean };
+    attachments?: DeviceExtras;
     /** Short air types inside the unit (AUL, ZUL, ABL, FOL). */
     outdoor: string;
     supply: string;
