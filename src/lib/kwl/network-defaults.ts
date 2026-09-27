@@ -4,6 +4,7 @@
 import { type NetNode, newNode, type NodeType, type RoomFlow, type SystemData } from "./network";
 import type { Network, Segment } from "./pressure";
 import { curveGroup, measuredCoverPrefix, noBends, type Product, productCurve, products, type ProductKind } from "./products";
+import { floorOrder } from "./schema-layout";
 
 /** First Zehnder product of a kind whose name matches – null when the data has no such product. */
 function pick(kind: ProductKind, ...patterns: RegExp[]): Product | null {
@@ -26,28 +27,35 @@ export type DefaultLabels = {
   outdoorDuct: string;
   exhaustDuct: string;
   mainDuct: string;
+  floorDuct: string;
   silencer: string;
   distributor: string;
   roomDuct: string;
 };
 
-/**
- * Single-family house: device → main duct → silencer → distributor → one ComfoTube branch per room (1–3 tubes as
- * in the workbook's distribution sketch) → terminal; outdoor / exhaust air: duct and weather grille.
- */
 /** Cover measured with the Auslass for the air side (first curve of the case datasheet for that side). */
 function coverFor(casing: Product | null, side: "supply" | "extract"): Partial<NetNode> {
   const curve = productCurve(casing, null, side);
   return curve ? { cover: measuredCoverPrefix + curveGroup(curve.label), curve: curve.label } : {};
 }
 
+/**
+ * Standard network: every strand starts with a silencer at the unit. Supply / extract air: silencer → main duct →
+ * per storey a floor duct and its own distributor (one storey: straight to the distributor) → one ComfoTube branch
+ * per room (1–3 tubes as in the workbook's distribution sketch) → terminal. Outdoor / exhaust air: silencer → duct
+ * → weather grille.
+ */
 export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: SystemData): SystemData {
   const pipe = pick("duct", /ComfoPipe Compact.*DN160/i, /ComfoPipe/i);
   const tube = pick("duct", /ComfoTube Flow 90/i, /ComfoTube.*90/i);
   const silencer = pick("silencer", /ComfoSilence 350 16\/16 L700/i, /ComfoSilence \d/i);
   const supplyTerminal = pick("terminal", /CLD breit L430/i, /CLD/i);
   const extractTerminal = pick("terminal", /TVA-P 125 1x90 H=170/i, /TVA-P/i);
-  const outerGrille = pickOnly("grille", /Wetterschutz|Aussenluft|Fortluft/i);
+  // Weather protection grille: round in the pipe diameter (Schmidlin WS-R from Ø 200), else rectangular WS-50 Alu.
+  const pipeDiameter = pipe?.inner?.diameter;
+  const outerGrille =
+    products.find((p) => p.manufacturer === "Schmidlin" && /^Wetterschutzgitter rund/.test(p.name) && p.inner?.diameter === pipeDiameter && /Alu$/.test(p.name)) ??
+    pickOnly("grille", /^Wetterschutzgitter eckig WS-50 200 × 200, Alu$/, /Wetterschutz/i);
 
   const duct = (product: Product | null, label: string, length: number, bends: number, patch: Partial<NetNode> = {}) =>
     newNode("duct", { product: product?.key ?? null, diameter: product ? null : 160, label, length, bendCounts: { ...noBends(), 90: bends }, ...patch });
@@ -55,33 +63,42 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
     newNode(type, { product: product?.key ?? null, label, ...patch });
   const tubes = (flow: number) => (flow < 38 ? 1 : flow <= 60 ? 2 : Math.ceil(flow / 30));
 
+  /** Smallest ComfoCube APV F with enough outlets for the tubes of one distributor. */
+  const distributorFor = (outlets: number) =>
+    products
+      .filter((p) => p.kind === "distributor" && /APV F \d/.test(p.name) && (p.outlets ?? 0) >= outlets)
+      .sort((a, b) => (a.outlets ?? 0) - (b.outlets ?? 0))[0] ?? pick("distributor", /APV F 10/i, /ComfoCube/i);
+
   const tree = (side: "supply" | "extract") => {
     const served = rooms.filter((r) => r[side] > 0);
-    // Smallest ComfoCube APV F with enough outlets for all tubes of this side.
-    const outletsNeeded = served.reduce((s, r) => s + tubes(r[side]), 0);
-    const distributor =
-      products
-        .filter((p) => p.kind === "distributor" && /APV F \d/.test(p.name) && (p.outlets ?? 0) >= outletsNeeded)
-        .sort((a, b) => (a.outlets ?? 0) - (b.outlets ?? 0))[0] ?? pick("distributor", /APV F 10/i, /ComfoCube/i);
-    const branches = served.map((r) =>
-      duct(tube, labels.roomDuct, 10, 2, {
-        count: tubes(r[side]),
-        children: [component("terminal", side === "supply" ? supplyTerminal : extractTerminal, r.name, { calcId: r.calcId, roomId: r.roomId, ...coverFor(side === "supply" ? supplyTerminal : extractTerminal, side) })],
-      }),
-    );
-    return [
-      duct(pipe, labels.mainDuct, 2, 1, {
-        children: [component("component", silencer, labels.silencer, { children: [component("distributor", distributor, labels.distributor, { children: branches })] })],
-      }),
-    ];
+    const terminal = side === "supply" ? supplyTerminal : extractTerminal;
+    const floors = [...new Set(served.map((r) => r.floor.trim()))].sort((a, b) => floorOrder(a) - floorOrder(b));
+    const several = floors.length > 1;
+    const distributorOf = (floor: string) => {
+      const floorRooms = served.filter((r) => r.floor.trim() === floor);
+      const branches = floorRooms.map((r) =>
+        duct(tube, labels.roomDuct, 10, 2, {
+          count: tubes(r[side]),
+          children: [component("terminal", terminal, r.name, { calcId: r.calcId, roomId: r.roomId, ...coverFor(terminal, side) })],
+        }),
+      );
+      const outlets = floorRooms.reduce((s, r) => s + tubes(r[side]), 0);
+      return component("distributor", distributorFor(outlets), several && floor ? `${labels.distributor} ${floor}` : labels.distributor, { children: branches });
+    };
+    // Several storeys: a floor duct to each storey's own distributor.
+    const afterMain = several
+      ? floors.map((floor) => duct(pipe, floor ? `${labels.floorDuct} ${floor}` : labels.floorDuct, 4, 1, { children: [distributorOf(floor)] }))
+      : [distributorOf(floors[0] ?? "")];
+    return [component("component", silencer, labels.silencer, { children: [duct(pipe, labels.mainDuct, 2, 1, { children: afterMain })] })];
   };
 
+  // Chains are listed from the unit outwards: the silencer sits at the unit, the grille at the end.
   return {
     ...base,
-    outdoor: [duct(pipe, labels.outdoorDuct, 4, 2), component("component", outerGrille, labels.intake)],
+    outdoor: [component("component", silencer, labels.silencer), duct(pipe, labels.outdoorDuct, 4, 2), component("component", outerGrille, labels.intake)],
     supply: tree("supply"),
     extract: tree("extract"),
-    exhaust: [duct(pipe, labels.exhaustDuct, 4, 2), component("component", outerGrille, labels.exhaust)],
+    exhaust: [component("component", silencer, labels.silencer), duct(pipe, labels.exhaustDuct, 4, 2), component("component", outerGrille, labels.exhaust)],
   };
 }
 

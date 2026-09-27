@@ -230,6 +230,7 @@ export function SystemEditor({
                         silencer: t("defaults.silencer"),
                         distributor: t("defaults.distributor"),
                         roomDuct: t("defaults.roomDuct"),
+                        floorDuct: t("defaults.floorDuct"),
                       },
                       d,
                     ),

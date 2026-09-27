@@ -1445,6 +1445,7 @@
       "outdoorDuct": "Conduit d’air extérieur",
       "exhaustDuct": "Conduit d’air rejeté",
       "mainDuct": "Conduit principal",
+      "floorDuct": "Conduit d’étage",
       "silencer": "Silencieux",
       "distributor": "Répartiteur",
       "roomDuct": "Conduit de pièce"

@@ -37,7 +37,8 @@ const DX = 112;
 const DY = 46;
 /** Gap between the unit and the first element on each side (room for the ComfoFond / ComfoClime coils). */
 const GAP = 70;
-const floorOrder = (floor: string) => {
+/** Sort key of a storey name: top floor first. */
+export const floorOrder = (floor: string) => {
   const f = floor.trim().toUpperCase();
   const known = ["DG", "OG3", "3.OG", "OG2", "2.OG", "OG", "1.OG", "OG1", "EG", "UG", "KG", "UG2"];
   const i = known.indexOf(f);

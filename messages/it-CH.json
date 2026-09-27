@@ -1445,6 +1445,7 @@
       "outdoorDuct": "Condotta aria esterna",
       "exhaustDuct": "Condotta aria espulsa",
       "mainDuct": "Condotta principale",
+      "floorDuct": "Condotta di piano",
       "silencer": "Silenziatore",
       "distributor": "Distributore",
       "roomDuct": "Condotta del locale"

@@ -1445,6 +1445,7 @@
       "outdoorDuct": "Aussenluftleitung",
       "exhaustDuct": "Fortluftleitung",
       "mainDuct": "Hauptleitung",
+      "floorDuct": "Geschossleitung",
       "silencer": "Schalldämpfer",
       "distributor": "Verteiler",
       "roomDuct": "Raumleitung"
