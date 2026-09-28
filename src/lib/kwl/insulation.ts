@@ -25,10 +25,15 @@ export const insulationStyles: Record<InsulationClass, { fill: string; edge: str
   EI60: { fill: "#dcc0f5", edge: "#8a4cc4", width: 15 },
 };
 
-/** Leitungen, Reduktionen, T-Stücke and Absperrklappen are insulated; other components never automatically. */
+/**
+ * Leitungen, Reduktionen, T-Stücke and Absperrklappen are insulated; other components never automatically, and
+ * ComfoTubes (Flow, flat, Therm, any size) never at all.
+ */
 export function isInsulatable(node: NetNode): boolean {
+  const product = findProduct(node.product);
+  if (/^ComfoTube/.test(product?.family ?? "")) return false;
   if (node.type === "duct" || node.type === "bend" || node.type === "reducer" || node.type === "tee") return true;
-  return node.type === "component" && findProduct(node.product)?.family === "Absperrklappen";
+  return node.type === "component" && product?.family === "Absperrklappen";
 }
 
 export type NodeInsulation = {

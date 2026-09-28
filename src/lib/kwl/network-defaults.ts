@@ -93,7 +93,8 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
     const casing = bilamina ? (count > 1 ? csbp600 : csbp400) : cld;
     const group = bilamina ? `ComfoGrid Bilamina ${count > 1 ? 600 : 400}` : "ComfoGrid Genua breit";
     const terminal = component("terminal", casing, r.name, { ...room, ...measuredCover(casing, group, side, count > 1 ? /2x DN90/ : /1x DN90/) });
-    return { node: duct(tube, labels.roomDuct, 10, 2, { count, children: [terminal] }), outlets: count };
+    // ComfoTubes are laid without bends (flexible tube).
+    return { node: duct(tube, labels.roomDuct, 10, 0, { count, children: [terminal] }), outlets: count };
   };
 
   const tree = (side: "supply" | "extract") => {
