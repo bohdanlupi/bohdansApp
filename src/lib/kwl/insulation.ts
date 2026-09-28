@@ -15,14 +15,14 @@ export type InsulationClass = (typeof insulationClasses)[number];
 
 /**
  * Highlighter band in the Prinzipschema: fill, dotted edge lines and band width (grows with the thickness).
- * Stabilo-like colours that differ from the air colours (green / red / amber / blue).
+ * Light highlighter tones: 30 mm green, 60 mm orange, 100 mm red, EI30 blue, EI60 violet.
  */
 export const insulationStyles: Record<InsulationClass, { fill: string; edge: string; width: number }> = {
-  "30": { fill: "#fff3a0", edge: "#b8a200", width: 9 },
+  "30": { fill: "#c4f2b4", edge: "#3f9a2a", width: 9 },
   "60": { fill: "#ffd2a0", edge: "#c4782a", width: 12 },
-  "100": { fill: "#ffc2e0", edge: "#c4508c", width: 15 },
-  EI30: { fill: "#dcc8ff", edge: "#7a55c4", width: 12 },
-  EI60: { fill: "#a8ecec", edge: "#2a9696", width: 15 },
+  "100": { fill: "#ffb8b8", edge: "#c43c3c", width: 15 },
+  EI30: { fill: "#b8d4ff", edge: "#3a6cc4", width: 12 },
+  EI60: { fill: "#dcc0f5", edge: "#8a4cc4", width: 15 },
 };
 
 /** Leitungen, Reduktionen, T-Stücke and Absperrklappen are insulated; other components never automatically. */
