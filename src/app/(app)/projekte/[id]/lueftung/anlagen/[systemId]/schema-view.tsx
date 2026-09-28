@@ -3,8 +3,8 @@
 import type { NetNode } from "@/lib/kwl/network";
 import type { DuctMaterial } from "@/lib/kwl/pressure";
 import { measuredCoverPrefix } from "@/lib/kwl/products";
-import { airColors, edgePath, insulationBands, type SchemaLayout } from "@/lib/kwl/schema-layout";
-import { type DeviceExtras, deviceSymbols, ductLabel, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import { airColors, edgePath, type SchemaLayout } from "@/lib/kwl/schema-layout";
+import { type DeviceExtras, deviceSymbols, ductLabel, insulationBands, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import { formatNumber } from "@/lib/number-input";
 
 const paint = (p: Paint | undefined) =>

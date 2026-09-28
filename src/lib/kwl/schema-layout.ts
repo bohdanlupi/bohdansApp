@@ -6,7 +6,7 @@
 //   [FOL terminal] ◄─ exhaust chain ──┘          └── extract tree ◄── terminals (rooms, by storey)
 
 import { controlParts } from "./attachments";
-import { type InsulationClass, insulationStyles, systemInsulation } from "./insulation";
+import { type InsulationClass, systemInsulation } from "./insulation";
 import type { NetNode, RoomFlow, SystemData } from "./network";
 
 export type AirKind = "outdoor" | "supply" | "extract" | "exhaust";
@@ -19,8 +19,20 @@ export const airColors: Record<AirKind, string> = {
 };
 
 export type LayoutNode = { node: NetNode; air: AirKind; x: number; y: number; depth: number };
-/** Line into the element `nodeId`; `insulation`: the class of that element (highlighter band). */
-export type LayoutEdge = { from: { x: number; y: number }; to: { x: number; y: number }; air: AirKind; nodeId: string; insulation?: InsulationClass | null };
+/**
+ * Line from the element `parentId` (null: the unit) into the element `nodeId`. `insulation`: highlighter band of
+ * the line; `bandFrom` / `bandTo`: the band stops at the outline of that end's symbol (element not insulated).
+ */
+export type LayoutEdge = {
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  air: AirKind;
+  nodeId: string;
+  parentId: string | null;
+  insulation?: InsulationClass | null;
+  bandFrom?: "center" | "outline";
+  bandTo?: "center" | "outline";
+};
 export type LayoutLeafLabel = { x: number; y: number; text: string; floor: string; air: AirKind; nodeId: string };
 
 export type SchemaLayout = {
@@ -36,22 +48,15 @@ export type SchemaLayout = {
 };
 
 /**
- * SVG path of a line: straight, or horizontal – vertical – horizontal between two heights. `extend` lengthens the
- * last piece (insulation bands reach over the symbol of the element).
+ * SVG path of a line: straight, or horizontal – vertical – horizontal between two heights. `trimFrom` / `trimTo`
+ * shorten the first / last piece (insulation bands stop at the outline of a symbol).
  */
-export function edgePath(e: LayoutEdge, extend = 0): string {
-  const endX = e.to.x + Math.sign(e.to.x - e.from.x || 1) * extend;
+export function edgePath(e: LayoutEdge, trimFrom = 0, trimTo = 0): string {
+  const dir = Math.sign(e.to.x - e.from.x || 1);
+  const startX = e.from.x + dir * trimFrom;
+  const endX = e.to.x - dir * trimTo;
   const midX = e.from.x + (e.to.x - e.from.x) / 2;
-  return e.from.y === e.to.y ? `M${e.from.x},${e.from.y} H${endX}` : `M${e.from.x},${e.from.y} H${midX} V${e.to.y} H${endX}`;
-}
-
-/** Insulated lines as two strokes each: the dotted edges (wide dashed stroke), then the highlighter fill over its middle. */
-export function insulationBands(layout: SchemaLayout) {
-  const bands = layout.edges.flatMap((e) => (e.insulation ? [{ d: edgePath(e, 8), style: insulationStyles[e.insulation] }] : []));
-  return {
-    edges: bands.map((b) => ({ d: b.d, stroke: b.style.edge, width: b.style.width, dash: "1.2 2.2" })),
-    fills: bands.map((b) => ({ d: b.d, stroke: b.style.fill, width: b.style.width - 2.4 })),
-  };
+  return e.from.y === e.to.y ? `M${startX},${e.from.y} H${endX}` : `M${startX},${e.from.y} H${midX} V${e.to.y} H${endX}`;
 }
 
 // Spacing so that the labels above the symbols («150 m³/h · 8.8 Pa») and the room labels never overlap.
@@ -117,7 +122,7 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
         y = ys.length === 1 ? ys[0] : (ys[0] + ys[ys.length - 1]) / 2;
         for (let i = 0; i < n.children.length; i++) {
           const cx = treeX0 + (depth + 1) * DX;
-          edges.push({ from: { x, y }, to: { x: cx, y: ys[i] }, air, nodeId: n.children[i].id });
+          edges.push({ from: { x, y }, to: { x: cx, y: ys[i] }, air, nodeId: n.children[i].id, parentId: n.id });
         }
       }
       nodes.push({ node: n, air, x, y, depth });
@@ -146,7 +151,7 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
   ] as const) {
     ys.forEach((y, i) => {
       const root = (air === "supply" ? data.supply : data.extract)[i];
-      edges.push({ from: { x: deviceX + deviceW, y }, to: { x: treeX0, y }, air, nodeId: root.id });
+      edges.push({ from: { x: deviceX + deviceW, y }, to: { x: treeX0, y }, air, nodeId: root.id, parentId: null });
     });
   }
 
@@ -155,7 +160,7 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
     let prevX = deviceX;
     chain.forEach((n, i) => {
       const x = deviceX - GAP - i * DX;
-      edges.push({ from: { x: prevX, y }, to: { x, y }, air, nodeId: n.id });
+      edges.push({ from: { x: prevX, y }, to: { x, y }, air, nodeId: n.id, parentId: i > 0 ? chain[i - 1].id : null });
       nodes.push({ node: n, air, x, y, depth: i });
       prevX = x;
     });
@@ -163,8 +168,19 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
   placeChain(data.outdoor, "outdoor", supplyY);
   placeChain(data.exhaust, "exhaust", extractY);
 
+  // Insulation from component to component: the line into a duct is that duct; the line into any other element
+  // belongs to the duct before it unless the element is insulated itself. The band runs on over insulated elements
+  // and stops at the outline of the others (a silencer, a distributor, the bar of a terminal).
   const insulation = systemInsulation(data);
-  for (const e of edges) e.insulation = insulation.get(e.nodeId)?.cls ?? null;
+  const clsOf = (id: string | null) => (id ? (insulation.get(id)?.cls ?? null) : null);
+  const typeOf = new Map(nodes.map((n) => [n.node.id, n.node.type]));
+  for (const e of edges) {
+    const own = clsOf(e.nodeId);
+    const before = clsOf(e.parentId);
+    e.insulation = typeOf.get(e.nodeId) === "duct" ? own : (own ?? before);
+    e.bandFrom = e.parentId && !before ? "outline" : "center";
+    e.bandTo = own ? "center" : "outline";
+  }
 
   const maxDepth = Math.max(0, ...nodes.filter((n) => n.air === "supply" || n.air === "extract").map((n) => n.depth));
   // Right of the last terminals: room name and «Auslass + cover · flow · Δp», then the storey bands.

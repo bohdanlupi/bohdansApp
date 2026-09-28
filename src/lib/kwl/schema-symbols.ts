@@ -11,7 +11,8 @@
 import type { NetNode } from "./network";
 import type { DuctMaterial } from "./pressure";
 import { findProduct } from "./products";
-import { type AirKind, airColors, type SchemaLayout } from "./schema-layout";
+import { insulationStyles } from "./insulation";
+import { type AirKind, airColors, edgePath, type SchemaLayout } from "./schema-layout";
 
 /** «ink» = foreground, «bg» = background, «muted» = secondary text; or a colour. */
 export type Paint = "ink" | "bg" | "muted" | "none" | `#${string}`;
@@ -277,6 +278,50 @@ function controlSymbol(kind: "control" | "sensor" | "interface", x: number, y: n
 /** Symbol of a network element; `top` = extent above the line (for the label above it). */
 export function nodeSymbol(node: NetNode, air: AirKind, x: number, y: number): { prims: Prim[]; top: number } {
   return drawSymbol(symbolKey(node, air), x, y, airColors[air] as Paint, flowDirection(air), filterLetter(findProduct(node.product)?.name ?? ""));
+}
+
+/** How far a symbol reaches from its centre to the right (dir 1) or left (dir −1), from its primitives. */
+function symbolReach(prims: Prim[], x: number, dir: number): number {
+  const xs = prims.flatMap((p): number[] => {
+    switch (p.t) {
+      case "rect":
+        return [p.x, p.x + p.w];
+      case "line":
+        return [p.x1 - p.sw / 2, p.x1 + p.sw / 2, p.x2 - p.sw / 2, p.x2 + p.sw / 2];
+      case "circle":
+        return [p.cx - p.r, p.cx + p.r];
+      case "polygon":
+        return p.points.split(" ").map((pt) => Number(pt.split(",")[0]));
+      case "path":
+        return [...p.d.matchAll(/[ML](-?[\d.]+),/g)].map((m) => Number(m[1]));
+      default:
+        return [];
+    }
+  });
+  return Math.max(0, ...xs.map((v) => (v - x) * dir));
+}
+
+/**
+ * Insulation bands of the schema as two strokes each: the dotted edges (wide dashed stroke), then the highlighter
+ * fill over its middle. A band ends at the centre of an insulated element and at the outline of any other.
+ */
+export function insulationBands(layout: SchemaLayout) {
+  const byId = new Map(layout.nodes.map((n) => [n.node.id, n]));
+  const reach = (id: string | null, dir: number) => {
+    const n = id ? byId.get(id) : undefined;
+    return n ? symbolReach(nodeSymbol(n.node, n.air, n.x, n.y).prims, n.x, dir) : 0;
+  };
+  const bands = layout.edges.flatMap((e) => {
+    if (!e.insulation) return [];
+    const dir = Math.sign(e.to.x - e.from.x || 1);
+    const trimFrom = e.bandFrom === "outline" ? reach(e.parentId, dir) : 0;
+    const trimTo = e.bandTo === "outline" ? reach(e.nodeId, -dir) : 0;
+    return [{ d: edgePath(e, trimFrom, trimTo), style: insulationStyles[e.insulation] }];
+  });
+  return {
+    edges: bands.map((b) => ({ d: b.d, stroke: b.style.edge, width: b.style.width, dash: "1.2 2.2" })),
+    fills: bands.map((b) => ({ d: b.d, stroke: b.style.fill, width: b.style.width - 2.4 })),
+  };
 }
 
 /** Legend entries of a schema: the symbols of its elements and of the unit with its attachments, in legend order. */

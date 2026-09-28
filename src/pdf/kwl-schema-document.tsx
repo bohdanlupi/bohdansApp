@@ -4,9 +4,9 @@ import type { NetNode } from "@/lib/kwl/network";
 import type { DuctMaterial } from "@/lib/kwl/pressure";
 import { measuredCoverPrefix } from "@/lib/kwl/products";
 import { type InsulationClass, insulationClasses, insulationStyles } from "@/lib/kwl/insulation";
-import { airColors, type AirKind, edgePath, insulationBands, type SchemaLayout } from "@/lib/kwl/schema-layout";
+import { airColors, type AirKind, edgePath, type SchemaLayout } from "@/lib/kwl/schema-layout";
 import type { SchemaRevision } from "@/lib/kwl/schema-plan";
-import { type DeviceExtras, deviceSymbols, drawSymbol, ductLabel, type LegendKey, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import { type DeviceExtras, deviceSymbols, drawSymbol, ductLabel, insulationBands, type LegendKey, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import type { FirmSettings } from "@/lib/supabase/types";
 
 import { winAnsi } from "./kwl-document";
