@@ -364,15 +364,16 @@ export function deviceSymbols(layout: SchemaLayout, name: string, lines: string[
     { t: "rect", x: device.x, y: device.y, w: device.w, h: device.h, fill: "bg", stroke: "ink", sw: 1.5, rx: 4 },
     { t: "text", x: cx, y: device.y + 15, text: name, size: 10.5, anchor: "middle", fill: "ink", bold: true },
     ...heatRecovery(cx, cy),
-    // Fans: supply fan on the supply line (flow to the right), extract fan on the extract line (flow to the left).
+    // Fans at the air outlets of the unit: supply fan on the supply line (flow to the right), extract fan on the
+    // extract line before the exhaust air (flow to the left).
     ...fan(device.x + device.w - 22, airY.supply, 1),
-    ...fan(device.x + device.w - 22, airY.extract, -1),
+    ...fan(device.x + 22, airY.extract, -1),
   ];
-  // Filters at the air inlets of the unit (outdoor air left, extract air before the extract fan), class above.
+  // Filters at the air inlets of the unit (outdoor air left, extract air right), class above.
   if (attachments.filters) {
     for (const [fx, y, dir, f] of [
       [device.x + 34, airY.supply, 1, attachments.filters.supply],
-      [device.x + device.w - 50, airY.extract, -1, attachments.filters.extract],
+      [device.x + device.w - 34, airY.extract, -1, attachments.filters.extract],
     ] as const) {
       prims.push(...drawSymbol("filter", fx, y, "ink", dir, f.letter).prims);
       prims.push({ t: "text", x: fx, y: y - 19, text: f.text, size: 7, anchor: "middle", fill: "ink" });
