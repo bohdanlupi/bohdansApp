@@ -464,11 +464,12 @@ const ductTypes: [RegExp, string][] = [
 ];
 
 /**
- * Short text of a duct above it in the schema: type and nominal size, e.g. «Spiro DN 160», «ComfoTube flat 51»,
- * «2× ComfoTube DN 75»; ducts without product: material and diameter / cross-section.
+ * Short text of an element above it in the schema. Ducts: type and nominal size, e.g. «Spiro DN 160», «ComfoTube
+ * flat 51», «2× ComfoTube DN 75»; without product material and diameter / cross-section. T-Stücke, Reduktionen and
+ * components: see partLabel.
  */
-export function ductLabel(node: NetNode, material: (m: DuctMaterial) => string): string {
-  if (node.type !== "duct") return "";
+export function elementLabel(node: NetNode, material: (m: DuctMaterial) => string): string {
+  if (node.type !== "duct") return partLabel(node);
   const product = findProduct(node.product);
   let text: string;
   if (product) {
@@ -481,6 +482,23 @@ export function ductLabel(node: NetNode, material: (m: DuctMaterial) => string):
     text = [material(node.material), size].filter(Boolean).join(" ");
   }
   return node.count > 1 ? `${node.count}× ${text}` : text;
+}
+
+/**
+ * Short text of a T-Stück, Reduktion or component above it, like the ducts': the product name without the text in
+ * brackets, e.g. «T-Stück 45° DN 125/100», «Reduktion asym. DN 150/100», «Schalldämpfer DN 125 L1000»,
+ * «Lamellhut Ø 160»; without product the element's name. Terminals and distributors have their own texts.
+ */
+function partLabel(node: NetNode): string {
+  if (node.type !== "tee" && node.type !== "reducer" && node.type !== "component") return "";
+  const product = findProduct(node.product);
+  let text = product ? product.name.replace(/\s*\([^)]*\)/g, "") : node.label;
+  const pipeSilencer = /^Rohrschalldämpfer.*L (\d+) mm, DN (\d+)/.exec(text);
+  if (pipeSilencer) text = `Schalldämpfer DN ${pipeSilencer[2]} L${pipeSilencer[1]}`;
+  // Schmidlin: without the version and material after the size.
+  else if (product?.manufacturer === "Schmidlin") text = text.split(",")[0].replace(/^Wetterschutzgitter( eckig| rund)?/, "WSG");
+  text = text.replace(/\basymmetrisch\b/, "asym.").replace(/\bsymmetrisch\b/, "sym.").replace(/^ComfoFit /, "");
+  return text && node.count > 1 ? `${node.count}× ${text}` : text;
 }
 
 /** Short «Auslass + cover» text of a terminal, e.g. «CLD breit + Roma breit». */

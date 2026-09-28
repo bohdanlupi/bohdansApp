@@ -6,7 +6,7 @@ import { measuredCoverPrefix } from "@/lib/kwl/products";
 import { type InsulationClass, insulationClasses, insulationStyles } from "@/lib/kwl/insulation";
 import { airColors, type AirKind, edgePath, type SchemaLayout } from "@/lib/kwl/schema-layout";
 import type { SchemaRevision } from "@/lib/kwl/schema-plan";
-import { type DeviceExtras, deviceSymbols, drawSymbol, ductLabel, insulationBands, type LegendKey, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import { type DeviceExtras, deviceSymbols, drawSymbol, elementLabel, insulationBands, type LegendKey, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import type { FirmSettings } from "@/lib/supabase/types";
 
 import { winAnsi } from "./kwl-document";
@@ -130,7 +130,7 @@ function SchemaDrawing({ layout, labels, info }: { layout: SchemaLayout; labels:
         return (
           <G key={node.id}>
             <PdfPrims prims={prims} />
-            {node.type === "duct" && svgText(x, y - top - 15, ductLabel(node, labels.material), 8, { anchor: "middle" })}
+            {elementLabel(node, labels.material) && svgText(x, y - top - 15, elementLabel(node, labels.material), 8, { anchor: "middle" })}
             {node.type !== "terminal" && svgText(x, y - top - 5, info(node), 8, { anchor: "middle", fill: muted })}
           </G>
         );

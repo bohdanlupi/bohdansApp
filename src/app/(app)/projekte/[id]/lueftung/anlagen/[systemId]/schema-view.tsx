@@ -4,7 +4,7 @@ import type { NetNode } from "@/lib/kwl/network";
 import type { DuctMaterial } from "@/lib/kwl/pressure";
 import { measuredCoverPrefix } from "@/lib/kwl/products";
 import { airColors, edgePath, type SchemaLayout } from "@/lib/kwl/schema-layout";
-import { type DeviceExtras, deviceSymbols, ductLabel, insulationBands, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
+import { type DeviceExtras, deviceSymbols, elementLabel, insulationBands, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import { formatNumber } from "@/lib/number-input";
 
 const paint = (p: Paint | undefined) =>
@@ -124,14 +124,15 @@ export function SchemaView({
       {/* Elements with their flow / pressure drop above the symbol */}
       {layout.nodes.map(({ node, air, x, y }) => {
         const { prims, top } = nodeSymbol(node, air, x, y);
+        const label = elementLabel(node, labels.material);
         return (
           <g key={node.id} className="cursor-pointer" onClick={() => onSelect(node.id)}>
             <circle cx={x} cy={y} r={Math.max(top, 9) + 3} fill="transparent" />
             <SvgPrims prims={prims} />
             {selected === node.id && <circle cx={x} cy={y} r={Math.max(top, 9) + 4} fill="none" strokeDasharray="3 2" className="stroke-brand" strokeWidth={1.5} />}
-            {node.type === "duct" && (
+            {label && (
               <text x={x} y={y - top - 15} textAnchor="middle" className="fill-foreground text-[9px] font-medium">
-                {ductLabel(node, labels.material)}
+                {label}
               </text>
             )}
             {node.type !== "terminal" && (
