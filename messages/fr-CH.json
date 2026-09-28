@@ -1662,6 +1662,23 @@
       "sensor": "Capteur d’ambiance (H humidité, CO2)",
       "interface": "Interface / Option Box",
       "controlLine": "Câble de commande (ComfoNet / 0-10 V)"
+    },
+    "insulation": {
+      "title": "Isolation",
+      "deltaT": "ΔT fluide – ambiance K",
+      "inherited": "hérité {value}",
+      "deltaTHint": "S’applique aussi aux éléments suivants, jusqu’à ce qu’un élément ait sa propre valeur. EN-105 / SIA 382/1 : < 5 K aucune, 5–10 K 30 mm, 10–15 K 60 mm, ≥ 15 K 100 mm.",
+      "fire": "Protection incendie",
+      "fireNone": "pas d’isolation coupe-feu",
+      "none": "aucune",
+      "notInsulated": "Cet élément n’est pas isolé automatiquement ; le ΔT s’applique aux éléments suivants.",
+      "classes": {
+        "30": "Isolation 30 mm",
+        "60": "Isolation 60 mm",
+        "100": "Isolation 100 mm",
+        "EI30": "Isolation coupe-feu EI30",
+        "EI60": "Isolation coupe-feu EI60"
+      }
     }
   },
   "kwlDevice": {

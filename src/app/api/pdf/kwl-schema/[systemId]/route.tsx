@@ -4,6 +4,7 @@ import { createTranslator } from "next-intl";
 import { languageToLocale } from "@/i18n/config";
 import { getCurrentProfile } from "@/lib/auth";
 import { hasOptions, optionsList, schemaExtras } from "@/lib/kwl/attachments";
+import { type InsulationClass, insulationClasses } from "@/lib/kwl/insulation";
 import { evaluateSystem, roomFlows } from "@/lib/kwl/network";
 import { findPhase } from "@/lib/kwl/phases";
 import { findProduct } from "@/lib/kwl/products";
@@ -73,6 +74,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
         material: (m) => s(`materialsShort.${m}`),
         legendTitle: s("plankopf.legend"),
         legend: Object.fromEntries(legendKeys.map((k) => [k, s(`legend.${k}`)])) as Record<(typeof legendKeys)[number], string>,
+        insulation: Object.fromEntries(insulationClasses.map((c) => [c, s(`insulation.classes.${c}`)])) as Record<InsulationClass, string>,
       }}
       info={(node) => {
         const r = nodeResult(node.id);

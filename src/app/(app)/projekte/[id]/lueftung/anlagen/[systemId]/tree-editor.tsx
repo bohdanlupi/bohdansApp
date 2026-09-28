@@ -2,11 +2,12 @@
 
 import { ArrowDown, ArrowUp, CornerDownRight, Plus, Trash2, Ungroup } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { NativeSelect } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { fireClasses, type FireClass, type InsulationClass, insulationStyles, isInsulatable, type NodeInsulation, systemInsulation } from "@/lib/kwl/insulation";
 import { findNode, mapTree, type NetNode, newNode, type NodeResult, type NodeType, type RoomFlow, type SystemData, type SystemResult } from "@/lib/kwl/network";
 import {
   bendAngles,
@@ -129,6 +130,7 @@ export function TreeEditor({
   const [newType, setNewType] = useState<NodeType>("duct");
   const selectedList = selected ? listOf(data, selected) : null;
   const selectedNode = selected && selectedList ? findNode(data[selectedList], selected) : null;
+  const insulation = useMemo(() => systemInsulation(data), [data]);
   const resultOf = (id: string): NodeResult | undefined =>
     result.supply.nodes.get(id) ?? result.extract.nodes.get(id) ?? result.outdoor.nodes.get(id) ?? result.exhaust.nodes.get(id);
 
@@ -217,7 +219,7 @@ export function TreeEditor({
             <ul className="py-1 text-sm">
               {data[key].length === 0 && <li className="px-3 py-1.5 text-muted-foreground">{t("noElements")}</li>}
               {data[key].map((n) => (
-                <TreeRow key={n.id} node={n} depth={0} selected={selected} resultOf={resultOf} rooms={rooms} onSelect={onSelect} />
+                <TreeRow key={n.id} node={n} depth={0} selected={selected} resultOf={resultOf} insulation={insulation} rooms={rooms} onSelect={onSelect} />
               ))}
             </ul>
             {editable && (
@@ -252,6 +254,7 @@ export function TreeEditor({
             list={selectedList}
             diameter={isChain(selectedList) ? chainDiameter(data[selectedList], selectedNode.id) : null}
             result={resultOf(selectedNode.id)}
+            insulation={insulation.get(selectedNode.id)}
             rooms={rooms}
             editable={editable}
             onPatch={(patch) => patchNode(selectedNode.id, patch)}
@@ -301,6 +304,7 @@ function TreeRow({
   depth,
   selected,
   resultOf,
+  insulation,
   rooms,
   onSelect,
 }: {
@@ -308,6 +312,7 @@ function TreeRow({
   depth: number;
   selected: string | null;
   resultOf: (id: string) => NodeResult | undefined;
+  insulation: Map<string, NodeInsulation>;
   rooms: RoomFlow[];
   onSelect: (id: string) => void;
 }) {
@@ -317,6 +322,7 @@ function TreeRow({
   const room = node.type === "terminal" ? rooms.find((x) => x.calcId === node.calcId && x.roomId === node.roomId) : null;
   const tooFast = r?.velocity != null && r.velocityLimit != null && r.velocity > r.velocityLimit;
   const title = [node.label, product?.name, room?.name].filter(Boolean).join(" · ") || t(`types.${node.type}`);
+  const cls = insulation.get(node.id)?.cls;
 
   return (
     <>
@@ -332,6 +338,7 @@ function TreeRow({
             {title}
             {node.type === "duct" && node.length ? ` · ${fmt(node.length, 1)} m${node.count > 1 ? ` · ${node.count}×` : ""}` : ""}
           </span>
+          {cls && <InsulationTag cls={cls} />}
           {r?.source === "none" && node.type !== "tee" && <span className="text-xs text-amber-700 dark:text-amber-400">{t("noData")}</span>}
           <span className="w-16 text-right text-xs tabular-nums">{fmt(r?.flow)}</span>
           <span className={cn("w-14 text-right text-xs tabular-nums", tooFast && "text-destructive")}>{r?.velocity != null ? `${fmt(r.velocity, 1)} m/s` : ""}</span>
@@ -339,7 +346,7 @@ function TreeRow({
         </button>
       </li>
       {node.children.map((c) => (
-        <TreeRow key={c.id} node={c} depth={depth + 1} selected={selected} resultOf={resultOf} rooms={rooms} onSelect={onSelect} />
+        <TreeRow key={c.id} node={c} depth={depth + 1} selected={selected} resultOf={resultOf} insulation={insulation} rooms={rooms} onSelect={onSelect} />
       ))}
     </>
   );
@@ -350,6 +357,7 @@ function NodePanel({
   list,
   diameter,
   result,
+  insulation,
   rooms,
   editable,
   onPatch,
@@ -360,6 +368,7 @@ function NodePanel({
   /** Outdoor / exhaust air: diameter of the adjacent duct (limits the round outer parts). */
   diameter: number | null;
   result: NodeResult | undefined;
+  insulation: NodeInsulation | undefined;
   rooms: RoomFlow[];
   editable: boolean;
   onPatch: (patch: Partial<NetNode>) => void;
@@ -527,6 +536,8 @@ function NodePanel({
         </div>
       )}
 
+      {node.type !== "terminal" && <InsulationFields node={node} insulation={insulation} editable={editable} onPatch={onPatch} />}
+
       {result && (
         <dl className="grid grid-cols-2 gap-x-3 gap-y-1 border-t pt-2 text-sm">
           <dt className="text-muted-foreground">{t("flow")}</dt>
@@ -564,6 +575,70 @@ function NodePanel({
           <dd className="text-right">{t(`sources.${result.source}`)}</dd>
         </dl>
       )}
+    </div>
+  );
+}
+
+/** Short tag of an insulation class in the highlighter colour of the schema. */
+function InsulationTag({ cls }: { cls: InsulationClass }) {
+  return (
+    <span className="shrink-0 rounded px-1 text-[10px] font-medium text-neutral-800" style={{ backgroundColor: insulationStyles[cls].fill }}>
+      {cls.startsWith("EI") ? cls : `${cls} mm`}
+    </span>
+  );
+}
+
+/** ΔT for the insulation (inherited by the following elements) and fire protection by hand; the resulting class. */
+function InsulationFields({
+  node,
+  insulation,
+  editable,
+  onPatch,
+}: {
+  node: NetNode;
+  insulation: NodeInsulation | undefined;
+  editable: boolean;
+  onPatch: (patch: Partial<NetNode>) => void;
+}) {
+  const t = useTranslations("kwlSystem.insulation");
+  const insulatable = isInsulatable(node);
+  const inherited = insulation?.inherited ? insulation.deltaT : null;
+  return (
+    <div className="space-y-2 border-t pt-2">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-sm font-medium">{t("title")}</h4>
+        {insulatable && (insulation?.cls ? <InsulationTag cls={insulation.cls} /> : <span className="text-xs text-muted-foreground">{t("none")}</span>)}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <Label className="text-xs">{t("deltaT")}</Label>
+          <NumberField
+            value={node.deltaT}
+            decimals={1}
+            label={t("deltaT")}
+            placeholder={inherited !== null ? t("inherited", { value: fmt(inherited, 1) }) : undefined}
+            disabled={!editable}
+            onChange={(v) => onPatch({ deltaT: v === null ? null : Math.min(100, Math.max(0, v)) })}
+            className="h-8 rounded-lg"
+          />
+        </div>
+        {insulatable && (
+          <div className="space-y-1">
+            <Label htmlFor="node-fire" className="text-xs">
+              {t("fire")}
+            </Label>
+            <NativeSelect id="node-fire" value={node.fire ?? ""} disabled={!editable} onChange={(e) => onPatch({ fire: (e.target.value || null) as FireClass | null })}>
+              <option value="">{t("fireNone")}</option>
+              {fireClasses.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground">{insulatable ? t("deltaTHint") : t("notInsulated")}</p>
     </div>
   );
 }

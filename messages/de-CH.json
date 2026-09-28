@@ -1662,6 +1662,23 @@
       "sensor": "Raumsensor (H Feuchte, CO2)",
       "interface": "Schnittstelle / Option Box",
       "controlLine": "Steuerleitung (ComfoNet / 0-10 V)"
+    },
+    "insulation": {
+      "title": "Dämmung",
+      "deltaT": "ΔT Medium – Umgebung K",
+      "inherited": "vererbt {value}",
+      "deltaTHint": "Gilt auch für die folgenden Elemente, bis eines einen eigenen Wert hat. EN-105 / SIA 382/1: < 5 K keine, 5–10 K 30 mm, 10–15 K 60 mm, ≥ 15 K 100 mm.",
+      "fire": "Brandschutz",
+      "fireNone": "keine Brandschutzdämmung",
+      "none": "keine",
+      "notInsulated": "Dieses Element wird nicht automatisch gedämmt; ΔT gilt für die folgenden Elemente.",
+      "classes": {
+        "30": "Dämmung 30 mm",
+        "60": "Dämmung 60 mm",
+        "100": "Dämmung 100 mm",
+        "EI30": "Brandschutzdämmung EI30",
+        "EI60": "Brandschutzdämmung EI60"
+      }
     }
   },
   "kwlDevice": {

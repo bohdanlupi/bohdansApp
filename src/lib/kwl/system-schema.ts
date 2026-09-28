@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { NetNode, SystemData } from "./network";
+import { fireClasses } from "./insulation";
 import { deviceOptionsSchema, normalizeOptions } from "./attachments";
 import { ductMaterials, type DuctMaterial } from "./pressure";
 import { currentProductKey, datasheetDevice, findProduct, noBends } from "./products";
@@ -39,6 +40,8 @@ const nodeFields = z.object({
   calcId: z.string().max(40).nullable().catch(null),
   roomId: z.string().max(40).nullable().catch(null),
   flow: num(100000),
+  deltaT: z.number().finite().min(0).max(100).nullable().catch(null),
+  fire: z.enum(fireClasses).nullable().catch(null),
 });
 
 const MAX_DEPTH = 40;

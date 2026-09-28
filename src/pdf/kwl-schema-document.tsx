@@ -3,7 +3,8 @@ import { Circle, Document, G, Image, Line, Page, Path, Polygon, Rect, Svg, Text 
 import type { NetNode } from "@/lib/kwl/network";
 import type { DuctMaterial } from "@/lib/kwl/pressure";
 import { measuredCoverPrefix } from "@/lib/kwl/products";
-import { airColors, type AirKind, type SchemaLayout } from "@/lib/kwl/schema-layout";
+import { type InsulationClass, insulationClasses, insulationStyles } from "@/lib/kwl/insulation";
+import { airColors, type AirKind, edgePath, insulationBands, type SchemaLayout } from "@/lib/kwl/schema-layout";
 import type { SchemaRevision } from "@/lib/kwl/schema-plan";
 import { type DeviceExtras, deviceSymbols, drawSymbol, ductLabel, type LegendKey, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import type { FirmSettings } from "@/lib/supabase/types";
@@ -94,11 +95,14 @@ export type SchemaLabels = {
   material: (m: DuctMaterial) => string;
   legendTitle: string;
   legend: Record<LegendKey, string>;
+  /** Insulation classes for the legend («Dämmung 30 mm», «Brandschutzdämmung EI30»). */
+  insulation: Record<InsulationClass, string>;
 };
 
 /** The schema in its own coordinates (layout units). */
 function SchemaDrawing({ layout, labels, info }: { layout: SchemaLayout; labels: SchemaLabels; info: (node: NetNode) => string }) {
   const { width, device, airY } = layout;
+  const bands = insulationBands(layout);
   return (
     <G>
       {layout.floors.map((f, i) => (
@@ -107,11 +111,15 @@ function SchemaDrawing({ layout, labels, info }: { layout: SchemaLayout; labels:
           {svgText(width - 32, (f.y0 + f.y1) / 2 + 4, f.floor || "–", 10, { anchor: "middle", fill: muted })}
         </G>
       ))}
-      {layout.edges.map((e, i) => {
-        const midX = e.from.x + (e.to.x - e.from.x) / 2;
-        const d = e.from.y === e.to.y ? `M${e.from.x},${e.from.y} H${e.to.x}` : `M${e.from.x},${e.from.y} H${midX} V${e.to.y} H${e.to.x}`;
-        return <Path key={i} d={d} fill="none" stroke={airColors[e.air]} strokeWidth={1.8} />;
-      })}
+      {bands.edges.map((b, i) => (
+        <Path key={`ie${i}`} d={b.d} fill="none" stroke={b.stroke} strokeWidth={b.width} strokeDasharray={b.dash} />
+      ))}
+      {bands.fills.map((b, i) => (
+        <Path key={`if${i}`} d={b.d} fill="none" stroke={b.stroke} strokeWidth={b.width} />
+      ))}
+      {layout.edges.map((e, i) => (
+        <Path key={i} d={edgePath(e)} fill="none" stroke={airColors[e.air]} strokeWidth={1.8} />
+      ))}
       <PdfPrims prims={deviceSymbols(layout, labels.device, labels.deviceLines, labels.attachments)} />
       {svgText(device.x + 6, airY.supply + 28, labels.airShort.outdoor, 9.5, { fill: airColors.outdoor, bold: true })}
       {svgText(device.x + 6, airY.extract + 28, labels.airShort.exhaust, 9.5, { fill: airColors.exhaust, bold: true })}
@@ -142,12 +150,12 @@ function SchemaDrawing({ layout, labels, info }: { layout: SchemaLayout; labels:
   );
 }
 
-/** Legend in the band left of the title block: air types (line colours), then the symbols, in columns. */
-function Legend({ x, y, w, h, keys, labels }: { x: number; y: number; w: number; h: number; keys: LegendKey[]; labels: SchemaLabels }) {
+/** Legend in the band left of the title block: air types (line colours), insulation classes, then the symbols, in columns. */
+function Legend({ x, y, w, h, keys, insulation, labels }: { x: number; y: number; w: number; h: number; keys: LegendKey[]; insulation: InsulationClass[]; labels: SchemaLabels }) {
   const ROW = 17;
   const COL = 190;
   const airs: AirKind[] = ["outdoor", "supply", "extract", "exhaust"];
-  const entries = [...airs.map((a) => ({ air: a })), ...keys.map((k) => ({ key: k }))];
+  const entries = [...airs.map((a) => ({ air: a })), ...insulation.map((c) => ({ insulation: c })), ...keys.map((k) => ({ key: k }))];
   const rows = Math.max(1, Math.floor((h - 26) / ROW));
   const columns = Math.min(Math.ceil(entries.length / rows), Math.max(1, Math.floor(w / COL)));
   return (
@@ -161,6 +169,17 @@ function Legend({ x, y, w, h, keys, labels }: { x: number; y: number; w: number;
             <G key={e.air}>
               <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={airColors[e.air]} strokeWidth={2} />
               {svgText(cx + 40, cy + 3, `${labels.airShort[e.air]}  ${labels.air[e.air]}`, 8)}
+            </G>
+          );
+        }
+        if ("insulation" in e && e.insulation) {
+          const style = insulationStyles[e.insulation];
+          return (
+            <G key={e.insulation}>
+              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={style.edge} strokeWidth={style.width} strokeDasharray="1.2 2.2" />
+              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={style.fill} strokeWidth={style.width - 2.4} />
+              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke="#555555" strokeWidth={1.2} />
+              {svgText(cx + 40, cy + 3, labels.insulation[e.insulation], 8)}
             </G>
           );
         }
@@ -322,7 +341,15 @@ export function KwlSchemaDocument({
           <G transform={`translate(${dx}, ${dy}) scale(${scale})`}>
             <SchemaDrawing layout={layout} labels={labels} info={info} />
           </G>
-          <Legend x={MARGIN + PAD} y={tbY} w={tbX - MARGIN - 2 * PAD} h={TB_H - PAD} keys={legend} labels={labels} />
+          <Legend
+            x={MARGIN + PAD}
+            y={tbY}
+            w={tbX - MARGIN - 2 * PAD}
+            h={TB_H - PAD}
+            keys={legend}
+            insulation={insulationClasses.filter((c) => layout.edges.some((e) => e.insulation === c))}
+            labels={labels}
+          />
           <TitleBlock x={tbX} y={tbY} project={project} system={system} phase={phase} format={format.name} revisions={revisions} firm={firm} labels={plankopf} />
         </Svg>
         {/* Logo in the logo column of the title block (after the drawing, which fills the block white). */}

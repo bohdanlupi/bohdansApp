@@ -24,6 +24,7 @@ import {
   productCurve,
   products,
 } from "./products";
+import { type FireClass, insulationName, isInsulatable, systemInsulation } from "./insulation";
 import { airDensity, ductMaterials, type DuctMaterial, frictionFactor } from "./pressure";
 
 /** «bend» is legacy: bends are counted on the duct (bendCounts); new networks use no bend nodes. */
@@ -61,6 +62,10 @@ export type NetNode = {
   roomId: string | null;
   /** Fixed flow [m³/h] for terminals instead of the room flow (e.g. two terminals in one room). */
   flow: number | null;
+  /** Temperature difference medium – surroundings [K] for the insulation; inherited by the elements after it. */
+  deltaT: number | null;
+  /** Fire protection insulation set by hand (replaces the thermal insulation). */
+  fire: FireClass | null;
   children: NetNode[];
 };
 
@@ -391,6 +396,16 @@ export function comfoSetFor(terminal: NetNode, duct: NetNode | null) {
   return { product, article, pieces: Math.max(1, duct!.count) };
 }
 
+/** Size of a duct for the insulation lines: «ø160» or «400×200», else the product name. */
+function ductSize(n: NetNode, product: Product | null): string {
+  const d = product?.inner?.diameter ?? n.diameter;
+  const w = product?.inner?.width ?? n.width;
+  const h = product?.inner?.height ?? n.height;
+  if (w && h) return `${w}×${h}`;
+  if (d) return `ø${d}`;
+  return product?.name ?? n.label;
+}
+
 export function systemQuantities(data: SystemData): Quantity[] {
   const map = new Map<string, Quantity>();
   const add = (key: string, q: Omit<Quantity, "quantity" | "key">, amount: number) => {
@@ -450,11 +465,32 @@ export function systemQuantities(data: SystemData): Quantity[] {
     } else if ((n.type !== "tee" || n.product) && !(n.type === "terminal" && !n.product && n.cover)) {
       add(n.product ?? `${n.type}-${n.label}`, { chapter, product: n.product, manufacturer: product?.manufacturer ?? null, label, unit: "Stk", articles }, Math.max(1, n.count));
     }
+    addInsulation(n, product);
     const set = n.type === "terminal" ? comfoSetFor(n, parent) : null;
     if (set) {
       add(`comfoset|${set.article.number}`, { chapter: 3, product: set.product.key, manufacturer: set.product.manufacturer, label: set.article.text, unit: "Stk", articles: [set.article.number] }, set.pieces);
     }
     n.children.forEach(walk(side, outer, n));
+  };
+  // Insulation (chapter 6): Leitungen in m, their bends, Reduktionen, T-Stücke and Absperrklappen in pieces, per
+  // size and insulation class.
+  const insulation = systemInsulation(data);
+  const addInsulation = (n: NetNode, product: Product | null) => {
+    const cls = insulation.get(n.id)?.cls;
+    if (!cls || !isInsulatable(n)) return;
+    const name = insulationName(cls);
+    const count = Math.max(1, n.count);
+    const line = (key: string, label: string, unit: Quantity["unit"], amount: number) => {
+      if (amount > 0) add(`insulation|${cls}|${key}`, { chapter: 6, product: null, manufacturer: null, label: `${name} – ${label}`, unit, articles: [] }, amount);
+    };
+    if (n.type === "duct") {
+      const size = ductSize(n, product);
+      line(`duct|${size}`, `Leitung ${size}`, "m", (n.length ?? 0) * count);
+      line(`bend|${size}`, `Bogen ${size}`, "Stk", bendAngles.reduce((sum, a) => sum + n.bendCounts[a], 0) * count);
+    } else {
+      const fallback = n.type === "bend" ? "Bogen" : n.type === "reducer" ? "Reduktion" : n.type === "tee" ? "T-Stück" : "";
+      line(`${n.type}|${n.product ?? n.label}`, product?.name ?? ([fallback, n.label].filter(Boolean).join(" ") || n.type), "Stk", count);
+    }
   };
   // Device with its attachments (one piece each).
   const device = findProduct(data.device);
@@ -505,6 +541,8 @@ export const newNode = (type: NodeType, patch: Partial<NetNode> = {}): NetNode =
   calcId: null,
   roomId: null,
   flow: null,
+  deltaT: null,
+  fire: null,
   children: [],
   ...patch,
 });

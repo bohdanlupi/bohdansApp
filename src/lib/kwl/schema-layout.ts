@@ -6,6 +6,7 @@
 //   [FOL terminal] ◄─ exhaust chain ──┘          └── extract tree ◄── terminals (rooms, by storey)
 
 import { controlParts } from "./attachments";
+import { type InsulationClass, insulationStyles, systemInsulation } from "./insulation";
 import type { NetNode, RoomFlow, SystemData } from "./network";
 
 export type AirKind = "outdoor" | "supply" | "extract" | "exhaust";
@@ -18,7 +19,8 @@ export const airColors: Record<AirKind, string> = {
 };
 
 export type LayoutNode = { node: NetNode; air: AirKind; x: number; y: number; depth: number };
-export type LayoutEdge = { from: { x: number; y: number }; to: { x: number; y: number }; air: AirKind; nodeId: string };
+/** Line into the element `nodeId`; `insulation`: the class of that element (highlighter band). */
+export type LayoutEdge = { from: { x: number; y: number }; to: { x: number; y: number }; air: AirKind; nodeId: string; insulation?: InsulationClass | null };
 export type LayoutLeafLabel = { x: number; y: number; text: string; floor: string; air: AirKind; nodeId: string };
 
 export type SchemaLayout = {
@@ -32,6 +34,25 @@ export type SchemaLayout = {
   labels: LayoutLeafLabel[];
   floors: { air: AirKind; floor: string; y0: number; y1: number }[];
 };
+
+/**
+ * SVG path of a line: straight, or horizontal – vertical – horizontal between two heights. `extend` lengthens the
+ * last piece (insulation bands reach over the symbol of the element).
+ */
+export function edgePath(e: LayoutEdge, extend = 0): string {
+  const endX = e.to.x + Math.sign(e.to.x - e.from.x || 1) * extend;
+  const midX = e.from.x + (e.to.x - e.from.x) / 2;
+  return e.from.y === e.to.y ? `M${e.from.x},${e.from.y} H${endX}` : `M${e.from.x},${e.from.y} H${midX} V${e.to.y} H${endX}`;
+}
+
+/** Insulated lines as two strokes each: the dotted edges (wide dashed stroke), then the highlighter fill over its middle. */
+export function insulationBands(layout: SchemaLayout) {
+  const bands = layout.edges.flatMap((e) => (e.insulation ? [{ d: edgePath(e, 8), style: insulationStyles[e.insulation] }] : []));
+  return {
+    edges: bands.map((b) => ({ d: b.d, stroke: b.style.edge, width: b.style.width, dash: "1.2 2.2" })),
+    fills: bands.map((b) => ({ d: b.d, stroke: b.style.fill, width: b.style.width - 2.4 })),
+  };
+}
 
 // Spacing so that the labels above the symbols («150 m³/h · 8.8 Pa») and the room labels never overlap.
 const DX = 112;
@@ -141,6 +162,9 @@ export function layoutSystem(data: SystemData, rooms: RoomFlow[], roomLabel: (n:
   };
   placeChain(data.outdoor, "outdoor", supplyY);
   placeChain(data.exhaust, "exhaust", extractY);
+
+  const insulation = systemInsulation(data);
+  for (const e of edges) e.insulation = insulation.get(e.nodeId)?.cls ?? null;
 
   const maxDepth = Math.max(0, ...nodes.filter((n) => n.air === "supply" || n.air === "extract").map((n) => n.depth));
   // Right of the last terminals: room name and «Auslass + cover · flow · Δp», then the storey bands.

@@ -3,7 +3,7 @@
 import type { NetNode } from "@/lib/kwl/network";
 import type { DuctMaterial } from "@/lib/kwl/pressure";
 import { measuredCoverPrefix } from "@/lib/kwl/products";
-import { airColors, type SchemaLayout } from "@/lib/kwl/schema-layout";
+import { airColors, edgePath, insulationBands, type SchemaLayout } from "@/lib/kwl/schema-layout";
 import { type DeviceExtras, deviceSymbols, ductLabel, nodeSymbol, type Paint, type Prim, terminalParts } from "@/lib/kwl/schema-symbols";
 import { formatNumber } from "@/lib/number-input";
 
@@ -71,6 +71,7 @@ export function SchemaView({
   onSelect: (id: string) => void;
 }) {
   const { width, height, device, airY } = layout;
+  const bands = insulationBands(layout);
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full text-foreground" style={{ minWidth: Math.min(width, 900) }} role="img" aria-label={labels.device}>
@@ -84,22 +85,26 @@ export function SchemaView({
         </g>
       ))}
 
+      {/* Insulation: highlighter band with dotted edges behind the ducts */}
+      {bands.edges.map((b, i) => (
+        <path key={`ie${i}`} d={b.d} fill="none" stroke={b.stroke} strokeWidth={b.width} strokeDasharray={b.dash} />
+      ))}
+      {bands.fills.map((b, i) => (
+        <path key={`if${i}`} d={b.d} fill="none" stroke={b.stroke} strokeWidth={b.width} />
+      ))}
+
       {/* Ducts */}
-      {layout.edges.map((e, i) => {
-        const midX = e.from.x + (e.to.x - e.from.x) / 2;
-        const d = e.from.y === e.to.y ? `M${e.from.x},${e.from.y} H${e.to.x}` : `M${e.from.x},${e.from.y} H${midX} V${e.to.y} H${e.to.x}`;
-        return (
-          <path
-            key={i}
-            d={d}
-            fill="none"
-            stroke={airColors[e.air]}
-            strokeWidth={highlight.has(e.nodeId) ? 3.2 : 1.8}
-            className="cursor-pointer"
-            onClick={() => onSelect(e.nodeId)}
-          />
-        );
-      })}
+      {layout.edges.map((e, i) => (
+        <path
+          key={i}
+          d={edgePath(e)}
+          fill="none"
+          stroke={airColors[e.air]}
+          strokeWidth={highlight.has(e.nodeId) ? 3.2 : 1.8}
+          className="cursor-pointer"
+          onClick={() => onSelect(e.nodeId)}
+        />
+      ))}
 
       {/* Unit (heat recovery, fans, attachments) and the air types below the lines, inside the unit */}
       <SvgPrims prims={deviceSymbols(layout, labels.device, labels.deviceLines ?? [], labels.attachments ?? { fond: false, clime: false })} />

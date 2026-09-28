@@ -1662,6 +1662,23 @@
       "sensor": "Sensore ambiente (H umidità, CO2)",
       "interface": "Interfaccia / Option Box",
       "controlLine": "Linea di comando (ComfoNet / 0-10 V)"
+    },
+    "insulation": {
+      "title": "Isolamento",
+      "deltaT": "ΔT fluido – ambiente K",
+      "inherited": "ereditato {value}",
+      "deltaTHint": "Vale anche per gli elementi successivi, finché uno non ha un proprio valore. EN-105 / SIA 382/1: < 5 K nessuno, 5–10 K 30 mm, 10–15 K 60 mm, ≥ 15 K 100 mm.",
+      "fire": "Protezione antincendio",
+      "fireNone": "nessun isolamento antincendio",
+      "none": "nessuno",
+      "notInsulated": "Questo elemento non viene isolato automaticamente; il ΔT vale per gli elementi successivi.",
+      "classes": {
+        "30": "Isolamento 30 mm",
+        "60": "Isolamento 60 mm",
+        "100": "Isolamento 100 mm",
+        "EI30": "Isolamento antincendio EI30",
+        "EI60": "Isolamento antincendio EI60"
+      }
     }
   },
   "kwlDevice": {

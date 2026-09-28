@@ -10,6 +10,7 @@ import type { FormMessageKey } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { normalizeOptions, optionsList, schemaExtras } from "@/lib/kwl/attachments";
+import { insulationClasses, insulationStyles } from "@/lib/kwl/insulation";
 import { evaluateSystem, type NetNode, pathTo, roomFlows, type SystemData } from "@/lib/kwl/network";
 import { defaultSystem, starToSystem } from "@/lib/kwl/network-defaults";
 import { filterConceptWarnings } from "@/lib/kwl/evaluate";
@@ -109,6 +110,7 @@ export function SystemEditor({
       }
     });
 
+  const usedInsulation = insulationClasses.filter((c) => layout.edges.some((e) => e.insulation === c));
   const empty = !data.outdoor.length && !data.supply.length && !data.extract.length && !data.exhaust.length;
   const starCalc = calcs.find(
     (c) => data.calcIds.includes(c.id) && (c.data.network.supply.main.length || Object.keys(c.data.network.supply.branches).length),
@@ -302,6 +304,16 @@ export function SystemEditor({
                   onSelect={setSelected}
                 />
               </div>
+              {usedInsulation.length > 0 && (
+                <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  {usedInsulation.map((c) => (
+                    <li key={c} className="flex items-center gap-1.5">
+                      <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyles[c].fill, borderColor: insulationStyles[c].edge }} />
+                      {t(`insulation.classes.${c}`)}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
         </div>
