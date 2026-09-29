@@ -1963,6 +1963,8 @@
       "ueqOverride": "Ueq donnée",
       "result": "Résultat",
       "remove": "Supprimer l’élément",
+      "up": "Monter",
+      "down": "Descendre",
       "hint": "Terrain : B′ = A_G / (0.5 · P_FG) du bâtiment, z = profondeur du haut de l’élément sous le terrain ; Ueq selon l’équation 19 (valable pour 2 m ≤ B′ ≤ 50 m, z ≤ 5 m), sinon saisir Ueq selon SN EN ISO 13370."
     },
     "kinds": {

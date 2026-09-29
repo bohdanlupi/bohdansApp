@@ -1,6 +1,6 @@
 "use client";
 
-import { ListPlus, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ListPlus, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { NativeSelect } from "@/components/form";
@@ -55,6 +55,12 @@ export function HeatBasics({ projectId, initial, editable }: { projectId: string
   const setSite = <K extends keyof HeatSite>(key: K, value: HeatSite[K]) => update((d) => ({ ...d, site: { ...d.site, [key]: value } }));
   const setCatalog = (catalog: Construction[]) => update((d) => ({ ...d, catalog }));
   const setItem = (id: string, patch: Partial<Construction>) => setCatalog(plan.catalog.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  const move = (index: number, delta: number) => {
+    const next = [...plan.catalog];
+    const [item] = next.splice(index, 1);
+    next.splice(index + delta, 0, item);
+    setCatalog(next);
+  };
 
   return (
     <div className="space-y-4">
@@ -141,7 +147,7 @@ export function HeatBasics({ projectId, initial, editable }: { projectId: string
                 </tr>
               </thead>
               <tbody>
-                {plan.catalog.map((c) => {
+                {plan.catalog.map((c, index) => {
                   const v = constructionValue(c);
                   const ground = c.kind === "ground";
                   return (
@@ -172,11 +178,19 @@ export function HeatBasics({ projectId, initial, editable }: { projectId: string
                       <td className="px-1 text-right text-xs whitespace-nowrap tabular-nums">
                         {ground ? (v.value === null ? "–" : `Ueq ${fmt(v.value, 3)} · fe,an ${fmt(v.feAn, 1)}`) : ""}
                       </td>
-                      <td className="w-8 text-right">
+                      <td className="w-24 text-right">
                         {editable && (
-                          <button type="button" className="rounded p-1 text-muted-foreground hover:bg-muted" aria-label={t("catalog.remove")} title={t("catalog.remove")} onClick={() => setCatalog(plan.catalog.filter((x) => x.id !== c.id))}>
-                            <Trash2 className="size-4" />
-                          </button>
+                          <div className="flex justify-end">
+                            <button type="button" className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent" aria-label={t("catalog.up")} title={t("catalog.up")} disabled={index === 0} onClick={() => move(index, -1)}>
+                              <ArrowUp className="size-4" />
+                            </button>
+                            <button type="button" className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent" aria-label={t("catalog.down")} title={t("catalog.down")} disabled={index === plan.catalog.length - 1} onClick={() => move(index, 1)}>
+                              <ArrowDown className="size-4" />
+                            </button>
+                            <button type="button" className="rounded p-1 text-muted-foreground hover:bg-muted" aria-label={t("catalog.remove")} title={t("catalog.remove")} onClick={() => setCatalog(plan.catalog.filter((x) => x.id !== c.id))}>
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
