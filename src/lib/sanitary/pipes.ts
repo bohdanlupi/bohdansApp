@@ -163,16 +163,8 @@ export function nextSize(p: PipeSize): PipeSize {
   return supplySizes("optipress").find((x) => x.od > p.od + 1e-9) ?? p;
 }
 
-/** Highlighter band of an insulation thickness in the schema (fill, dotted edge). */
-export function insulationStyle(mm: number): { fill: string; edge: string } {
-  if (mm <= 20) return { fill: "#cfe8ff", edge: "#3a78c4" };
-  if (mm <= 30) return { fill: "#c4f2b4", edge: "#3f9a2a" };
-  if (mm <= 40) return { fill: "#b8eee6", edge: "#2a9a8a" };
-  if (mm <= 50) return { fill: "#fff0a0", edge: "#b89a1a" };
-  if (mm <= 60) return { fill: "#ffd2a0", edge: "#c4782a" };
-  if (mm <= 80) return { fill: "#ffc4e4", edge: "#c43c8a" };
-  return { fill: "#ffb8b8", edge: "#c43c3c" };
-}
+/** Insulation band in the schema: yellow highlighter with black dotted edges (the thickness is written at the Leitung). */
+export const insulationStyle = { fill: "#ffe94d", edge: "#000000" } as const;
 
 // ---------------------------------------------------------------------------
 // Articles

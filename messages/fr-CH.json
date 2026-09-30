@@ -2224,7 +2224,17 @@
       "house": "Raccordement",
       "meter": "Compteur d'eau",
       "battery": "Batterie de distribution",
-      "softener": "Adoucisseur"
+      "softener": "Adoucisseur",
+      "kw": "EF",
+      "ww": "EC",
+      "zk": "CI",
+      "insulation": "Isolation",
+      "none": "non isolé",
+      "inShared": "dans l'isolation EC",
+      "materials": {
+        "pir": "PIR",
+        "mineralwool": "laine minérale"
+      }
     },
     "tree": {
       "title": "Distribution",
@@ -2394,9 +2404,7 @@
       "pwc": "PWC  Eau potable froide",
       "pwh": "PWH  Eau potable chaude",
       "pwhc": "PWH-C  Circulation",
-      "insulation": "Isolation {mm} mm",
-      "insulationShared": "Isolation {mm} mm, tube contre tube",
-      "sizes": "Diamètres PWC / PWH / PWH-C : Optipress Ø mm, F = Optiflex",
+      "sizes": "Diamètres : Optipress Ø mm, F = Optiflex",
       "symbols": {
         "shutoff": "Vanne d'arrêt (SIA 410 1.26.5 ; Nussbaum 82200)",
         "shutoffDrain": "Vanne d'arrêt avec vidange (SIA 410 1.26.5 / 2.6.7 ; Nussbaum 82202)",
@@ -2414,7 +2422,8 @@
         "battery": "Batterie de distribution",
         "heater": "Chauffe-eau (SIA 410 5.1.19)",
         "regValveThermal": "Vanne de circulation thermostatique (SIA 410 2.6.9 / 1.29.3 ; Nussbaum 36030)"
-      }
+      },
+      "insulationBand": "Isolation (épaisseur indiquée à la conduite)"
     },
     "plankopf": {
       "plan": "Schéma de principe",

@@ -44,6 +44,13 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const plan = parseSchemaPlan(system.schema_plan);
   const result = evaluateSystem(data);
   const schema = layoutSchema(data, result, {
+    kw: s("schemaText.kw"),
+    ww: s("schemaText.ww"),
+    zk: s("schemaText.zk"),
+    insulation: s("schemaText.insulation"),
+    none: s("schemaText.none"),
+    inShared: s("schemaText.inShared"),
+    material: s(`schemaText.materials.${data.settings.insulationMaterial}`),
     strang: s("schemaText.strang"),
     heater: s("schemaText.heater"),
     house: s("schemaText.house"),
@@ -61,7 +68,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
         title: k("legend"),
         media: { pwc: s("legend.pwc"), pwh: s("legend.pwh"), pwhc: s("legend.pwhc") },
         symbols: Object.fromEntries(symbolKeys.map((key) => [key, s(`legend.symbols.${key}`)])) as Record<SymbolKey, string>,
-        insulation: (mm, shared) => (shared ? s("legend.insulationShared", { mm }) : s("legend.insulation", { mm })),
+        insulation: s("legend.insulationBand"),
         sizes: s("legend.sizes"),
       }}
       plankopf={{

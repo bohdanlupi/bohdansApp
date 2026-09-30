@@ -26,12 +26,24 @@ const MEDIA: Medium[] = ["pwc", "pwh", "pwhc"];
 
 const DX = 96; // Verteilleitung section
 const DX2 = 100; // Stockwerkverteilung section
-const RH = 48; // row of a Stockwerkverteilung
+const RH = 84; // row of a Stockwerkverteilung (lines + the text block above them)
+const TEXT_LINE = 9; // line pitch of the Leitung texts
 const LABEL_W = 180; // consumer text
 const LEFT = 64; // storey names
 const LANE = 56;
 
 export type SchemaText = {
+  /**
+   * Leitung texts, e.g. «KW: 28 · 40 mm», «Dämmung: Mineralwolle»; «none»: not insulated, «inShared»: PWH-C inside the
+   * common insulation «Rohr an Rohr».
+   */
+  kw: string;
+  ww: string;
+  zk: string;
+  insulation: string;
+  material: string;
+  none: string;
+  inShared: string;
   strang: string;
   heater: string;
   house: string;
@@ -69,9 +81,9 @@ export type SanitarySchema = {
   bands: SchemaBand[];
   lines: SchemaLine[];
   groups: SchemaGroup[];
-  /** Symbols used (for the legend) and insulation thicknesses. */
+  /** Symbols used (for the legend); whether any line is insulated. */
   used: SymbolKey[];
-  insulation: { mm: number; shared: boolean }[];
+  insulated: boolean;
 };
 
 type Pt = [number, number];
@@ -314,8 +326,8 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
   const floorY = new Map<string, { y0: number; y1: number; row: number }>();
   let y = 36;
   for (const f of floorNames) {
-    const h = 34 + Math.max(1, rowsAt.get(f) ?? 1) * RH + 10;
-    floorY.set(f, { y0: y, y1: y + h, row: y + 34 });
+    const h = 56 + Math.max(1, rowsAt.get(f) ?? 1) * RH;
+    floorY.set(f, { y0: y, y1: y + h, row: y + 56 });
     y += h;
   }
   const floorsBottom = y;
@@ -337,7 +349,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
   const draw = (nodeId: string | null, m: Medium, points: Pt[]) => lines.push({ d: pathD(points), medium: m, nodeId });
   const band = (points: Pt[], mm: number | null, shared: boolean) => {
     if (!mm) return;
-    const style = insulationStyle(mm);
+    const style = insulationStyle;
     bands.push({ d: pathD(points), fill: style.fill, edge: style.edge, width: shared ? 24 : 10, mm, shared });
   };
   const bandsOf = (n: SanNode, paths: Partial<Record<Medium, Pt[]>>) => {
@@ -350,11 +362,24 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
       band(paths.pwh.map(([x1, y1], i) => [(x1 + paths.pwhc![i][0]) / 2, (y1 + paths.pwhc![i][1]) / 2]), r.insulation.shared.mm, true);
     }
   };
-  const sizes = (n: SanNode) => {
+  /** Text of a Leitung: diameter and insulation of each line, then the insulation material. */
+  const lineText = (n: SanNode): string[] => {
     const r = res(n);
-    if (!r) return "";
-    return [r.pwc && sizeText(r.pwc.size), r.pwh && sizeText(r.pwh.size), r.pwhc && sizeText(r.pwhc.size)].filter(Boolean).join(" / ");
+    if (!r) return [];
+    const mm = (v: number | null | undefined) => (v ? `${v} mm` : labels.none);
+    const shared = r.insulation.shared;
+    const out: string[] = [];
+    if (r.pwc) out.push(`${labels.kw}: ${sizeText(r.pwc.size)} · ${mm(r.insulation.pwc)}`);
+    if (r.pwh) out.push(`${labels.ww}: ${sizeText(r.pwh.size)} · ${mm(shared ? shared.mm : r.insulation.pwh)}`);
+    if (r.pwhc) out.push(`${labels.zk}: ${sizeText(r.pwhc.size)} · ${shared ? labels.inShared : mm(r.insulation.pwhc)}`);
+    if (r.insulation.pwc || r.insulation.pwh || r.insulation.pwhc || shared) out.push(`${labels.insulation}: ${labels.material}`);
+    return out;
   };
+  /** Text block whose last line sits at yBottom (lines going upwards); the first line bold when `title` is set. */
+  const textBlock = (nodeId: string, x: number, yBottom: number, lines: string[], anchor: "start" | "middle" | "end", title = false) =>
+    lines.forEach((l, i) =>
+      label(nodeId, x, yBottom - (lines.length - 1 - i) * TEXT_LINE, l, i === 0 && title ? 7.5 : 7, { anchor, muted: !(i === 0 && title), bold: i === 0 && title }),
+    );
   const circuitEnds = new Set(result.circuits.map((c) => c.endId));
 
   /** End of a circuit on a horizontal line: the PWH-C joins the PWH. */
@@ -379,10 +404,9 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
       if (s.drop) dot(s.x0 + SPAN - OFF[m], yFrom + OFF[m], m);
     }
     bandsOf(s.node, paths);
-    const r = res(s.node);
     const mid = s.x1 - DX / 2;
-    label(s.node.id, mid, yL - 16, [s.node.label, s.node.length ? `${fmt1(s.node.length)} m` : ""].filter(Boolean).join(" · "), 7.5, { anchor: "middle", bold: true });
-    label(s.node.id, mid, yL - 6, [sizes(s.node), r?.circ ? `${Math.round(r.circ.flow)} l/h` : ""].filter(Boolean).join(" · "), 7, { anchor: "middle", muted: true });
+    const title = [s.node.label, s.node.length ? `${fmt1(s.node.length)} m` : ""].filter(Boolean).join(" · ");
+    textBlock(s.node.id, mid, yL - 11, [...(title ? [title] : []), ...lineText(s.node)], "middle", !!title);
     if (s.node.shutoff) for (const m of ["pwc", "pwh"] as const) if (carries(s.node, m)) symbol(s.node.id, "shutoff", s.x1 - DX + 18, yL + OFF[m]);
     if (circuitEnds.has(s.node.id)) circulationEnd(s.node, s.x1, yL);
   }
@@ -422,7 +446,9 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
         draw(n.id, m, paths[m]!);
       }
       bandsOf(n, paths);
-      label(n.id, endX - 4, yRow - 4, [sizes(n), n.length ? `${fmt1(n.length)} m` : ""].filter(Boolean).join(" · "), 6.8, { anchor: "end", muted: true });
+      const title = [n.label, n.length ? `${fmt1(n.length)} m` : ""].filter(Boolean).join(" · ");
+      // Above the lines, clear of the Wohnungswasserzähler on them.
+      textBlock(n.id, endX - 4, yRow - 10, [...(title ? [title] : []), ...lineText(n)], "end");
       const x0 = start("pwhc") + 16;
       if (n.meter) ["pwc", "pwh"].forEach((m, i) => carries(n, m as Medium) && symbol(n.id, "meter", x0 + 10 + i * 20, yRow + OFF[m as Medium]));
       if (n.shutoff && !n.meter) ["pwc", "pwh"].forEach((m, i) => carries(n, m as Medium) && symbol(n.id, "shutoff", x0 + 10 + i * 18, yRow + OFF[m as Medium]));
@@ -470,11 +496,11 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
           if (!i && c.from.continues) dot(x, yFrom + OFF[m], m);
         }
         bandsOf(s, paths);
-        const r = res(s);
-        // Section text right of the lines, just above the storey it starts from.
-        const ly = i ? tops[i - 1] - 20 : yL - 148;
-        label(s.id, c.x + SPAN + 10, ly, [s.label && i ? s.label : "", sizes(s), s.length ? `${fmt1(s.length)} m` : ""].filter(Boolean).join(" · "), 7, { muted: true });
-        if (r?.circ) label(s.id, c.x + SPAN + 10, ly + 9, `${Math.round(r.circ.flow)} l/h`, 7, { muted: true });
+        // Section text left of the Strang, below the storey it leads to and above the slab under it (for the foot:
+        // above the valves).
+        const title = [i ? s.label : "", s.length ? `${fmt1(s.length)} m` : ""].filter(Boolean).join(" · ");
+        const lower = i ? tops[i - 1] : yL - 140;
+        textBlock(s.id, c.x - 8, Math.min(lower - 10, y1 + RH - 8), [...(title ? [title] : []), ...lineText(s)], "end");
         if (circuitEnds.has(s.id)) {
           group(s.id, [{ t: "line", x1: c.x + OFF.pwhc, y1: y1 + OFF.pwhc, x2: c.x + OFF.pwh, y2: y1 + OFF.pwhc, stroke: mediumColors.pwhc, sw: 1.6 }]);
           dot(c.x + OFF.pwh, y1 + OFF.pwhc, "pwhc");
@@ -520,7 +546,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
     lines,
     groups,
     used: [...used],
-    insulation: [...new Map(bands.map((b) => [`${b.mm}|${b.shared}`, { mm: b.mm, shared: b.shared }])).values()].sort((a, b) => a.mm - b.mm || Number(a.shared) - Number(b.shared)),
+    insulated: bands.length > 0,
   };
 }
 

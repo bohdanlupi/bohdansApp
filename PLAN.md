@@ -355,6 +355,8 @@ Prinzipschema: Strangschema (schema.ts; symbols after SIA 410 1.26 / 1.27 / 1.29
 Apparateanschluss after SN EN 806-1 as SIA 410 has none; PWC green, PWH red, PWH-C violet), web view at a fixed
 scale (1.3 px per unit), full height, horizontal slider below to move it + plan PDF /api/pdf/sanitary-schema/<id> (Plankopf / revisions as the Lüftung schema; sheet height 297 / 420 /
 594 mm, width a multiple of 210 mm, wide enough for schema and legend).
+Insulation drawn as yellow bands with black dotted edges; each Leitung is labelled «KW / WW / ZK: diameter · insulation»
+and «Dämmung: PIR / Mineralwolle» (no thickness classes in the legend).
 Material list in the editor (no LV insertion yet).
 
 Open / ideas for later:

@@ -27,7 +27,7 @@ const LEGEND_COL = 340;
 const legendRows = Math.max(1, Math.floor((TB_H - PAD - 26) / LEGEND_ROW));
 
 /** Entries of the legend: lines, insulation classes, symbols, the note on the sizes. */
-const legendEntries = (schema: SanitarySchema) => 3 + schema.insulation.length + schema.used.length + 1;
+const legendEntries = (schema: SanitarySchema) => 3 + (schema.insulated ? 1 : 0) + schema.used.length + 1;
 
 /**
  * Sheet [mm] and scale: the lowest height that draws the schema at MIN_SCALE, the width it needs in steps of 210 mm –
@@ -47,7 +47,8 @@ export type SanitaryLegend = {
   title: string;
   media: Record<Medium, string>;
   symbols: Record<SymbolKey, string>;
-  insulation: (mm: number, shared: boolean) => string;
+  /** One entry for the insulation band (the thicknesses are written at the Leitungen). */
+  insulation: string;
   sizes: string;
 };
 
@@ -57,7 +58,7 @@ function Legend({ x, y, w, h, schema, labels }: { x: number; y: number; w: numbe
   const media: Medium[] = ["pwc", "pwh", "pwhc"];
   const entries = [
     ...media.map((m) => ({ medium: m })),
-    ...schema.insulation.map((i) => ({ insulation: i })),
+    ...(schema.insulated ? [{ insulation: true as const }] : []),
     ...schema.used.map((k) => ({ key: k })),
     { note: labels.sizes },
   ];
@@ -78,13 +79,11 @@ function Legend({ x, y, w, h, schema, labels }: { x: number; y: number; w: numbe
           );
         }
         if ("insulation" in e) {
-          const style = insulationStyle(e.insulation.mm);
-          const width = e.insulation.shared ? 14 : 9;
           return (
-            <G key={`${e.insulation.mm}-${e.insulation.shared}`}>
-              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={style.edge} strokeWidth={width} strokeDasharray="1.2 2.2" />
-              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={style.fill} strokeWidth={width - 2.4} />
-              {svgText(cx + 40, cy + 3, labels.insulation(e.insulation.mm, e.insulation.shared), 8)}
+            <G key="insulation">
+              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={insulationStyle.edge} strokeWidth={10} strokeDasharray="1.2 2.2" />
+              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={insulationStyle.fill} strokeWidth={7.6} />
+              {svgText(cx + 40, cy + 3, labels.insulation, 8)}
             </G>
           );
         }

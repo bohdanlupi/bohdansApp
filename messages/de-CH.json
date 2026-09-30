@@ -2224,7 +2224,17 @@
       "house": "Hausanschluss",
       "meter": "Wasserzähler",
       "battery": "Verteilbatterie",
-      "softener": "Enthärtung"
+      "softener": "Enthärtung",
+      "kw": "KW",
+      "ww": "WW",
+      "zk": "ZK",
+      "insulation": "Dämmung",
+      "none": "ungedämmt",
+      "inShared": "in WW-Dämmung",
+      "materials": {
+        "pir": "PIR",
+        "mineralwool": "Mineralwolle"
+      }
     },
     "tree": {
       "title": "Verteilung",
@@ -2394,9 +2404,7 @@
       "pwc": "PWC  Trinkwasser kalt",
       "pwh": "PWH  Trinkwasser warm",
       "pwhc": "PWH-C  Zirkulation",
-      "insulation": "Dämmung {mm} mm",
-      "insulationShared": "Dämmung {mm} mm, Rohr an Rohr",
-      "sizes": "Dimensionen PWC / PWH / PWH-C: Optipress Ø mm, F = Optiflex",
+      "sizes": "Durchmesser: Optipress Ø mm, F = Optiflex",
       "symbols": {
         "shutoff": "Absperrventil (SIA 410 1.26.5; Nussbaum 82200)",
         "shutoffDrain": "Absperrventil mit Entleerung (SIA 410 1.26.5 / 2.6.7; Nussbaum 82202)",
@@ -2414,7 +2422,8 @@
         "battery": "Verteilbatterie",
         "heater": "Wassererwärmer (SIA 410 5.1.19)",
         "regValveThermal": "Zirkulationsventil thermisch (SIA 410 2.6.9 / 1.29.3; Nussbaum 36030)"
-      }
+      },
+      "insulationBand": "Dämmung (Stärke an der Leitung angeschrieben)"
     },
     "plankopf": {
       "plan": "Prinzipschema",

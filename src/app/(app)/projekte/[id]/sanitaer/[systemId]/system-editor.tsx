@@ -50,6 +50,13 @@ export function SanitaryEditor({
 
   const result = useMemo(() => evaluateSystem(data), [data]);
   const schemaText = {
+    kw: t("schemaText.kw"),
+    ww: t("schemaText.ww"),
+    zk: t("schemaText.zk"),
+    insulation: t("schemaText.insulation"),
+    none: t("schemaText.none"),
+    inShared: t("schemaText.inShared"),
+    material: t(`schemaText.materials.${data.settings.insulationMaterial}`),
     strang: t("schemaText.strang"),
     heater: t("schemaText.heater"),
     house: t("schemaText.house"),
@@ -148,15 +155,11 @@ export function SanitaryEditor({
                 <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
               </div>
               <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
-              {schema.insulation.length > 0 && (
-                <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  {schema.insulation.map((i) => (
-                    <li key={`${i.mm}-${i.shared}`} className="flex items-center gap-1.5">
-                      <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyle(i.mm).fill, borderColor: insulationStyle(i.mm).edge }} />
-                      {i.shared ? t("legend.insulationShared", { mm: i.mm }) : t("legend.insulation", { mm: i.mm })}
-                    </li>
-                  ))}
-                </ul>
+              {schema.insulated && (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyle.fill, borderColor: insulationStyle.edge }} />
+                  {t("legend.insulationBand")}
+                </p>
               )}
             </section>
           )}
