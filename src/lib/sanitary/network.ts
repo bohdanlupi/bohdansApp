@@ -66,6 +66,10 @@ export type Central = {
   houseLength: number | null;
   /** Verteilbatterie → start of the Verteilung [m] (part of the developed length of the Verteilleitungen). */
   centralLength: number | null;
+  /** Lengths in the Zentrale for pipes and insulation [m]: Hauseinführung → Verteilbatterie, and Wassererwärmer →
+   * start of the Verteilung (its cold feed, PWH and PWH-C). */
+  trunkLength: number | null;
+  heaterLength: number | null;
   meter: boolean;
   filter: "none" | "fine" | "redfil";
   reducer: boolean;
@@ -103,6 +107,8 @@ export type SanitaryData = { central: Central; settings: Settings; network: SanN
 export const defaultCentral = (): Central => ({
   houseLength: null,
   centralLength: null,
+  trunkLength: null,
+  heaterLength: null,
   meter: true,
   filter: "redfil",
   reducer: false,
@@ -181,7 +187,15 @@ export type SystemResult = {
   /** Developed length of the Verteilleitungen [m] (W3 Tabelle 4.3). */
   distLength: number;
   house: { dn: string | null; lu: number };
-  central: { trunk: Sized | null; feed: Sized | null; supply: Sized | null; hot: Sized | null; ret: PipeSize | null };
+  central: {
+    trunk: Sized | null;
+    feed: Sized | null;
+    supply: Sized | null;
+    hot: Sized | null;
+    ret: PipeSize | null;
+    /** Insulation [mm] of the Zentrale lines: PWC (by setting), PWH and PWH-C (warmgehalten). */
+    insulation: { trunk: number | null; supply: number | null; feed: number | null; hot: number | null; ret: number | null };
+  };
   pump: PumpSuggestion | null;
   circuits: Circuit[];
   warnings: Warning[];
@@ -502,6 +516,29 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
   // SIA 385/1 4.1.1: hot water in the distribution at most 65 °C.
   if (settings.tHot > 65) warnings.push({ kind: "tooHot" });
 
+  // Zentrale: sizes and insulation of its lines (same tables as the Verteilung).
+  function centralLines(): SystemResult["central"] {
+    const trunk = sizeCentral(allLu, largestAll);
+    const supply = sizeCentral(total.cold, total.largestCold);
+    const feed = sizeCentral(total.warm, total.largestWarm);
+    const hot = sizeCentral(total.warm, total.largestWarm);
+    const cold = (s: Sized | null) => (s && settings.pwcInsulation ? insulationThickness("cold", s.size, settings.insulationMaterial) : null);
+    return {
+      trunk,
+      supply,
+      feed,
+      hot,
+      ret,
+      insulation: {
+        trunk: cold(trunk),
+        supply: cold(supply),
+        feed: cold(feed),
+        hot: hot ? insulationThickness("hot", hot.size, settings.insulationMaterial) : null,
+        ret: ret ? insulationThickness("hot", ret, settings.insulationMaterial) : null,
+      },
+    };
+  }
+
   const houseLu = allLu;
   return {
     pipes,
@@ -509,13 +546,7 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
     qd: { cold: peakFlow(total.cold * 0.1, total.largestCold), warm: peakFlow(total.warm * 0.1, total.largestWarm), total: peakFlow(allLu * 0.1, largestAll) },
     distLength,
     house: { dn: houseLu > 0 ? tableSize("5", Math.max(houseLu, 60), Math.max(central.houseLength ?? 10, 10)) : null, lu: houseLu },
-    central: {
-      trunk: sizeCentral(allLu, largestAll),
-      supply: sizeCentral(total.cold, total.largestCold),
-      feed: sizeCentral(total.warm, total.largestWarm),
-      hot: sizeCentral(total.warm, total.largestWarm),
-      ret,
-    },
+    central: centralLines(),
     pump,
     circuits,
     warnings,

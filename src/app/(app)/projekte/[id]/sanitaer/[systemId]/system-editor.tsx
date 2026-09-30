@@ -159,30 +159,34 @@ export function SanitaryEditor({
         </div>
       </div>
 
-      {data.network.length > 0 && (
-        <section className="space-y-2 rounded-xl border p-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-semibold">{t("schema")}</h2>
-            <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
-          </div>
-          <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
-          {schema.insulated && (
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyle.fill, borderColor: insulationStyle.edge }} />
-              {t("legend.insulationBand")}
-            </p>
-          )}
-        </section>
-      )}
-
-      <TreeEditor
-        network={data.network}
-        result={result}
-        selected={selected}
-        editable={editable}
-        onSelect={setSelected}
-        onChange={(fn) => setData((d) => ({ ...d, network: fn(d.network) }))}
-      />
+      {/* Prinzipschema with the Leitungen to its right. */}
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        {data.network.length > 0 && (
+          <section className="min-w-0 space-y-2 rounded-xl border p-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-semibold">{t("schema")}</h2>
+              <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
+            </div>
+            <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
+            {schema.insulated && (
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyle.fill, borderColor: insulationStyle.edge }} />
+                {t("legend.insulationBand")}
+              </p>
+            )}
+          </section>
+        )}
+        <div className={data.network.length > 0 ? "@container min-w-0" : "@container min-w-0 xl:col-span-2"}>
+          <TreeEditor
+            network={data.network}
+            result={result}
+            selected={selected}
+            editable={editable}
+            onSelect={setSelected}
+            onChange={(fn) => setData((d) => ({ ...d, network: fn(d.network) }))}
+          />
+        </div>
+      </div>
       <SanitaryQuantitiesPanel quantities={quantities} systemId={id} projectId={projectId} systemName={name} lvs={lvs} dirty={dirty} editable={editable} />
     </div>
   );
@@ -287,7 +291,7 @@ function CentralForm({ central, result, editable, onChange }: { central: Central
       {label}
     </label>
   );
-  const number = (key: "houseLength" | "centralLength" | "heaterVolume", label: string, decimals = 1) => (
+  const number = (key: "houseLength" | "centralLength" | "trunkLength" | "heaterLength" | "heaterVolume", label: string, decimals = 1) => (
     <div className="space-y-1">
       <Label className="text-xs">{label}</Label>
       <NumberField value={central[key]} decimals={decimals} label={label} disabled={!editable} onChange={(v) => onChange({ [key]: v })} className="h-8 rounded-lg" />
@@ -298,6 +302,8 @@ function CentralForm({ central, result, editable, onChange }: { central: Central
       <div className="grid grid-cols-2 gap-2">
         {number("houseLength", t("houseLength"))}
         {number("centralLength", t("centralLength"))}
+        {number("trunkLength", t("trunkLength"))}
+        {number("heaterLength", t("heaterLength"))}
         <div className="space-y-1">
           <Label htmlFor="central-filter" className="text-xs">
             {t("filter")}

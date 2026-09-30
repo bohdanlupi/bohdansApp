@@ -537,7 +537,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
   }
 
   // --- Zentrale ----------------------------------------------------------------------------------------------------
-  drawCentral(data, result, labels, zentrale, lane0, { symbol, label, draw, dot, group });
+  drawCentral(data, result, labels, zentrale, lane0, { symbol, label, draw, dot, group, band, textBlock });
 
   return {
     width,
@@ -586,14 +586,29 @@ function drawCentral(
     draw: (nodeId: string | null, m: Medium, points: Pt[]) => void;
     dot: (x: number, y: number, m: Medium) => void;
     group: (nodeId: string | null, prims: Prim[]) => void;
+    band: (points: Pt[], mm: number | null, shared: boolean) => void;
+    textBlock: (nodeId: string, x: number, yBottom: number, lines: string[], anchor: "start" | "middle" | "end", title?: boolean) => void;
   },
 ) {
-  const { symbol, label, draw, dot } = api;
+  const { symbol, label, draw, dot, band } = api;
   const c = data.central;
+  const ci = result.central.insulation;
   const Yt = Y + 150;
   const trunk = result.central.trunk?.size;
+  // Text of a Zentrale line like the Leitungen: «KW: 35 · 40 mm», then the insulation material.
+  const mm = (v: number | null) => (v ? `${v} mm` : labels.none);
+  const text = (rows: [string, PipeSize | null | undefined, number | null][]) => {
+    const out = rows.filter(([, size]) => size).map(([k, size, v]) => `${k}: ${sizeText(size)} · ${mm(v)}`);
+    return rows.some(([, size, v]) => size && v) ? [...out, `${labels.insulation}: ${labels.material}`] : out;
+  };
+  const block = (x: number, yTop: number, lines: string[], anchor: "start" | "end") => lines.length && api.textBlock("", x, yTop + (lines.length - 1) * TEXT_LINE, lines, anchor);
+  const line = (m: Medium, points: Pt[], insulation: number | null) => {
+    band(points, insulation, false);
+    draw(null, m, points);
+  };
   // Hausanschluss → Verteilbatterie.
-  draw(null, "pwc", [[LEFT - 20, Yt], [g.xVB, Yt]]);
+  line("pwc", [[LEFT - 20, Yt], [g.xVB, Yt]], ci.trunk);
+  block(g.xVB - 8, Yt - 38, text([[labels.kw, trunk, ci.trunk]]), "end");
   label(null, LEFT - 18, Yt - 22, labels.house, 8.5, { bold: true });
   label(null, LEFT - 18, Yt - 12, [result.house.dn ? `DN ${result.house.dn}` : "", trunk ? `/ ${trunk.od}` : ""].filter(Boolean).join(" "), 7, { muted: true });
   g.trunkItems.forEach((k, i) => {
@@ -606,19 +621,19 @@ function drawCentral(
   api.group(null, [{ t: "rect", x: g.xVB - 3, y: Y - 8, w: 6, h: Yt - Y + 16, fill: "ink" }]);
   label(null, g.xVB - 8, Y + 40, labels.battery, 6.5, { anchor: "end", muted: true });
   // PWC to the Verteilung.
-  draw(null, "pwc", [[g.xVB, Y], [g.x0, Y]]);
+  line("pwc", [[g.xVB, Y], [g.x0, Y]], ci.supply);
   symbol(null, "shutoff", g.xVB + 22, Y);
-  if (result.central.supply) label(null, g.xVB + 50, Y - 6, sizeText(result.central.supply.size), 7, { muted: true });
+  block(g.xVB + 40, Y - 34, text([[labels.kw, result.central.supply?.size, ci.supply]]), "start");
   const hasHot = g.x0 > g.xVB + 60;
   if (!hasHot) return;
   // Cold feed of the heater with the Sicherheitsgruppe.
-  draw(null, "pwc", [[g.xVB, Yt], [g.spX, Yt]]);
+  line("pwc", [[g.xVB, Yt], [g.spX, Yt]], ci.feed);
   g.feedItems.forEach((k, i) => {
     const x = g.xVB + 30 + i * 40;
     symbol(null, k, x, Yt);
     if (k === "softener") label(null, x, Yt + 22, labels.softener, 6.5, { anchor: "middle", muted: true });
   });
-  if (result.central.feed) label(null, g.spX - 14, Yt - 6, sizeText(result.central.feed.size), 7, { anchor: "end", muted: true });
+  block(g.spX - 6, Yt + 32, text([[labels.kw, result.central.feed?.size, ci.feed]]), "end");
   // Wassererwärmer (neutral).
   const top = Y + 48;
   api.group(null, [
@@ -629,14 +644,14 @@ function drawCentral(
   // PWH out of the heater to the Verteilung, PWH-C back through the pump group.
   const xH = g.spX + 30;
   const xC = g.spX + 70;
-  draw(null, "pwh", [[xH, top], [xH, Y + OFF.pwh], [g.x0, Y + OFF.pwh]]);
+  line("pwh", [[xH, top], [xH, Y + OFF.pwh], [g.x0, Y + OFF.pwh]], ci.hot);
   if (c.mixer) {
     symbol(null, "mixer", xH + 20, Y + OFF.pwh);
     draw(null, "pwc", [[xH + 20, Y], [xH + 20, Y + OFF.pwh - 5]]);
     dot(xH + 20, Y, "pwc");
   }
   if (result.pump) {
-    draw(null, "pwhc", [[g.x0, Y + OFF.pwhc], [xC, Y + OFF.pwhc], [xC, top]]);
+    line("pwhc", [[g.x0, Y + OFF.pwhc], [xC, Y + OFF.pwhc], [xC, top]], ci.ret);
     const px = xC + 30;
     symbol(null, "shutoff", px, Y + OFF.pwhc, false, -1);
     symbol(null, "pump", px + 44, Y + OFF.pwhc, false, -1);
@@ -647,6 +662,8 @@ function drawCentral(
     label(null, px + 44, Y + OFF.pwhc + 30, `${Math.round(p.flow)} l/h · ${Math.round(p.head)} mbar`, 7, { anchor: "middle", muted: true });
     label(null, xC + 6, top - 6, `${fmt1(data.settings.tReturn)} °C`, 7, { muted: true });
   }
+  // Warmwasser and Zirkulation between the Wassererwärmer and the Verteilung, below the pump group.
+  block(xC + 30, Y + 70, text([[labels.ww, result.central.hot?.size, ci.hot], ...(result.pump ? [[labels.zk, result.central.ret, ci.ret] as [string, PipeSize | null, number | null]] : [])]), "start");
 }
 
 export { sizeText };

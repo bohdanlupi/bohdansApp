@@ -70,6 +70,8 @@ const centralSchema: z.ZodType<Central> = z
   .object({
     houseLength: num(1000),
     centralLength: num(1000),
+    trunkLength: num(1000),
+    heaterLength: num(1000),
     meter: z.boolean().catch(d.meter),
     filter: z.enum(["none", "fine", "redfil"]).catch(d.filter),
     reducer: z.boolean().catch(d.reducer),

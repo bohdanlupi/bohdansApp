@@ -99,6 +99,20 @@ export function systemQuantities(data: SanitaryData, result: SystemResult): Quan
   // Zentrale.
   const { central } = data;
   const trunk = result.central.trunk?.size ?? null;
+  // Lines of the Zentrale with their lengths: pipe and insulation like the Verteilung.
+  const ci = result.central.insulation;
+  const line = (size: PipeSize | null | undefined, metres: number | null, mm: number | null) => {
+    if (!size || !metres) return;
+    pipe(size, metres);
+    if (mm) insulation(mm, size, metres, false);
+  };
+  line(trunk, central.trunkLength, ci.trunk);
+  line(result.central.supply?.size, central.centralLength, ci.supply);
+  if (result.lu.warm > 0) {
+    line(result.central.feed?.size, central.heaterLength, ci.feed);
+    line(result.central.hot?.size, central.heaterLength, ci.hot);
+    if (result.pump) line(result.central.ret, central.heaterLength, ci.ret);
+  }
   if (trunk) {
     if (central.meter) {
       add({ key: "meter", group: "central", manufacturer: null, article: null, label: "Wasserzähler (Netzbetreiberin)", unit: "Stk" }, 1);

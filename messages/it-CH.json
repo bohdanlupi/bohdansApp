@@ -2372,7 +2372,9 @@
       "reducer": "Riduttore di pressione (11002)",
       "safetyGroup": "Gruppo di sicurezza (81168)",
       "mixer": "Miscelatore termostatico (neutro)",
-      "sizes": "Diametri: condotta principale {trunk}, distribuzione PWC {supply}, alimentazione scaldacqua {feed} (W3 tabella 4.3)."
+      "sizes": "Diametri: condotta principale {trunk}, distribuzione PWC {supply}, alimentazione scaldacqua {feed} (W3 tabella 4.3).",
+      "trunkLength": "Entrata fino alla batteria [m]",
+      "heaterLength": "Scaldacqua fino alla distribuzione [m]"
     },
     "settings": {
       "title": "Ricircolo",

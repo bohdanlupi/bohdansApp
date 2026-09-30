@@ -2372,7 +2372,9 @@
       "reducer": "Druckreduzierventil (11002)",
       "safetyGroup": "Sicherheitsgarnitur (81168)",
       "mixer": "Thermischer Mischer (neutral)",
-      "sizes": "Dimensionen: Hauptleitung {trunk}, PWC Verteilung {supply}, Zuleitung Wassererwärmer {feed} (W3 Tabelle 4.3)."
+      "sizes": "Dimensionen: Hauptleitung {trunk}, PWC Verteilung {supply}, Zuleitung Wassererwärmer {feed} (W3 Tabelle 4.3).",
+      "trunkLength": "Hauseinführung bis Verteilbatterie [m]",
+      "heaterLength": "Wassererwärmer bis Verteilung [m]"
     },
     "settings": {
       "title": "Zirkulation",

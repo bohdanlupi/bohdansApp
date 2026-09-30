@@ -92,7 +92,7 @@ export function TreeEditor({
     });
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
+    <div className="grid gap-4 @4xl:grid-cols-[minmax(0,1fr)_24rem]">
       <section className="rounded-xl border">
         <header className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
           <h3 className="text-sm font-semibold">{t("title")}</h3>
@@ -127,7 +127,7 @@ export function TreeEditor({
         )}
       </section>
 
-      <aside className="space-y-3 xl:sticky xl:top-4 xl:self-start">
+      <aside className="space-y-3 @4xl:sticky @4xl:top-4 @4xl:self-start">
         {node ? (
           <NodePanel
             key={node.id}

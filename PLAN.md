@@ -365,7 +365,10 @@ Material list: Nussbaum pipes / valves, Biral pump, insulation as Meier Tobler s
 kaschiert, PIR swisspor Kisodur PIR Alu glatt; scripts/gen-sanitary-insulation.mjs → insulation-data.ts), shell by
 pipe OD (Rohr an Rohr: fictive pipe one size larger) and thickness, next larger size where missing, +20 % for
 fittings; inserted into an LV per group (Rohre / Armaturen / Zentrale / Dämmung) like the Lüftung quantities.
-Editor order: Zentrale | Zirkulation | Berechnung, Schema, Verteilung, Materialliste.
+Zentrale lines (Hauseinführung → Verteilbatterie, → Verteilung, cold feed, PWH / PWH-C Wassererwärmer → Verteilung) are
+insulated and labelled like the Leitungen; with their lengths (central.trunkLength, centralLength, heaterLength)
+they add pipes and insulation to the material list.
+Editor order: Zentrale | Zirkulation | Berechnung, then Schema | Leitungen side by side, Materialliste.
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

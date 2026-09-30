@@ -2372,7 +2372,9 @@
       "reducer": "Réducteur de pression (11002)",
       "safetyGroup": "Garniture de sécurité (81168)",
       "mixer": "Mitigeur thermostatique (neutre)",
-      "sizes": "Diamètres : conduite principale {trunk}, distribution PWC {supply}, alimentation chauffe-eau {feed} (W3 tableau 4.3)."
+      "sizes": "Diamètres : conduite principale {trunk}, distribution PWC {supply}, alimentation chauffe-eau {feed} (W3 tableau 4.3).",
+      "trunkLength": "Introduction jusqu’à la batterie [m]",
+      "heaterLength": "Chauffe-eau jusqu’à la distribution [m]"
     },
     "settings": {
       "title": "Circulation",
