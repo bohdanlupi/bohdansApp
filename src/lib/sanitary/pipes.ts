@@ -117,7 +117,7 @@ type Row = { od: number; pir: number; mineralwool: number };
 const row = (od: number, pir: number, mineralwool: number): Row => ({ od, pir, mineralwool });
 
 /** Konventionell, by the outer diameter of the pipe: Kaltwasser, Warmwasser and Zirkulation (the same values). */
-const coldRows: Row[] = [15, 18, 22, 28, 35, 42, 54, 64, 76.1, 88.9, 108].map((od) => row(od, 30, 30));
+const coldRows: Row[] = [15, 18, 22, 28, 35, 42, 54, 64, 76.1, 88.9, 108].map((od) => row(od, 30, 40));
 const hotRows: Row[] = [
   row(15, 30, 60),
   row(18, 30, 60),

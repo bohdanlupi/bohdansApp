@@ -347,7 +347,7 @@ Zirkulation: heat-loss method of Original_Zirkulation_Berchnung_RN_fam_260929.xl
 Nussbaum tables); Rohr an Rohr counts PWH steel + Optiflex (user decision; the workbook counts only the Optiflex).
 Verified against the workbook: 429.4 l/h (Excel 429.7), 326.9 mbar (Excel 326.7). Excel bug noted: Dimensionierung!I22
 uses I21 instead of I12. Insulation: LUPI standard Berechnungsvorlagen/Sanitär/Dämmung_Sanitär.xlsx (replaces SIA 385/1 Tabelle 3, which is
-stricter): material PIR or Mineralwolle; konventionell Kaltwasser 30 mm, Warmwasser / Zirkulation by pipe size
+stricter): material PIR or Mineralwolle; konventionell Kaltwasser 30 mm (PIR) / 40 mm (Mineralwolle), Warmwasser / Zirkulation by pipe size
 (PIR 30 … 80, Mineralwolle 60 … 100); Rohr an Rohr one insulation from the table «Rohr an Rohr» by the PWH size (fictive
 pipe one dimension larger), PWH-C none. Insulated: PWH of circulated sections and of the Verteilung, PWH-C, PWC
 Verteil- / Steigleitungen (switchable). Warning above 65 °C (SIA 385/1 4.1.1).
