@@ -2369,9 +2369,13 @@
       "vCirc": "v max. PWH-C [m/s]",
       "dpCheck": "Δp clapet anti-retour [mbar]",
       "dpValve": "Δp organe de réglage ouvert [mbar]",
-      "lambda": "λ isolant à 40 °C [W/(m·K)]",
-      "pwcInsulation": "Isoler la distribution et les colonnes PWC ({mm} mm)",
-      "insulationHint": "Conduites maintenues en température selon SIA 385/1 tableau 3 : conventionnelle, PWH et PWH-C chacune séparément ; tube contre tube, une isolation commune comme pour un PWH d'une dimension plus grande (p. ex. 28 → comme 35), le PWH-C sans isolation propre. Eau froide 30 mm pour λ < 0.03 (PIR), 40 mm pour λ 0.03 … 0.05 (laine minérale)."
+      "pwcInsulation": "Isoler la distribution et les colonnes PWC",
+      "insulationHint": "Épaisseurs selon le standard LUPI (Dämmung_Sanitär.xlsx) : conventionnelle, eau froide, eau chaude et circulation selon le diamètre du tube ; tube contre tube, une isolation commune selon le tableau tube contre tube (diamètre fictif une dimension plus grande), la circulation sans isolation propre.",
+      "material": "Isolant",
+      "materials": {
+        "pir": "PIR (λ < 0.03 W/mK)",
+        "mineralwool": "Laine minérale (λ 0.03 … 0.05 W/mK)"
+      }
     },
     "quantities": {
       "title": "Liste de matériel",
@@ -2416,7 +2420,6 @@
       "plan": "Schéma de principe",
       "trade": "Sanitaire"
     },
-    "moveHorizontal": "Déplacer le schéma latéralement",
-    "moveVertical": "Déplacer le schéma vers le haut / le bas"
+    "moveHorizontal": "Déplacer le schéma latéralement"
   }
 }

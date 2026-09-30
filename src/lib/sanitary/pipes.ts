@@ -4,7 +4,7 @@
 // Inner diameters and roughness from the Nussbaum sheet «Dimensionen» of the Zirkulationsberechnung
 // (Berechnungsvorlagen/Sanitär). Friction per metre with Darcy–Weisbach / Colebrook at the water temperature; at
 // 60 °C this reproduces the Nussbaum R-value tables of that workbook (e.g. 22×1.2 at 430 l/h: 1.1 mbar/m).
-// Insulation thickness after SIA 385/1:2020 Tabelle 3 (stricter than EnDK EN-103 Tabelle 2).
+// Insulation thickness after the LUPI standard (Dämmung_Sanitär.xlsx).
 
 import { type CatalogArticle, type NussbaumFamily, nussbaumArticles } from "./catalog-data";
 
@@ -105,48 +105,63 @@ export function sizeForVelocity(list: PipeSize[], flow: number, limit: number): 
   return list.find((p) => velocity(p, flow) <= limit + 1e-9) ?? list[list.length - 1];
 }
 
-/** Next larger Optipress size (the common insulation «Rohr an Rohr» is one dimension larger than the PWH). */
+// ---------------------------------------------------------------------------
+// Insulation (LUPI standard, Berechnungsvorlagen/Sanitär/Dämmung_Sanitär.xlsx)
+// ---------------------------------------------------------------------------
+
+/** Insulation material: PIR (λ < 0.03 W/(m·K)) or Mineralwolle (λ 0.03 … 0.05). */
+export type InsulationMaterial = "pir" | "mineralwool";
+export const insulationMaterials: InsulationMaterial[] = ["pir", "mineralwool"];
+
+type Row = { od: number; pir: number; mineralwool: number };
+const row = (od: number, pir: number, mineralwool: number): Row => ({ od, pir, mineralwool });
+
+/** Konventionell, by the outer diameter of the pipe: Kaltwasser, Warmwasser and Zirkulation (the same values). */
+const coldRows: Row[] = [15, 18, 22, 28, 35, 42, 54, 64, 76.1, 88.9, 108].map((od) => row(od, 30, 30));
+const hotRows: Row[] = [
+  row(15, 30, 60),
+  row(18, 30, 60),
+  row(22, 40, 60),
+  row(28, 40, 60),
+  row(35, 50, 80),
+  row(42, 60, 80),
+  row(54, 60, 80),
+  row(64, 60, 80),
+  row(76.1, 60, 80),
+  row(88.9, 60, 80),
+  row(108, 80, 100),
+];
+/**
+ * Rohr an Rohr (PWH with the Optiflex PWH-C inside one insulation), by the outer diameter of the PWH: the table gives
+ * the insulation for a fictive pipe one dimension larger (15 → 18 … 88.9 → 108).
+ */
+const rarRows: Row[] = [
+  row(15, 30, 60),
+  row(18, 40, 60),
+  row(22, 40, 60),
+  row(28, 50, 80),
+  row(35, 60, 80),
+  row(42, 60, 80),
+  row(54, 60, 80),
+  row(64, 60, 80),
+  row(76.1, 60, 80),
+  row(88.9, 60, 80),
+];
+
+/** Row for an outer diameter: the next larger one listed, else the largest. */
+const lookup = (rows: Row[], od: number, material: InsulationMaterial) => (rows.find((r) => r.od >= od - 1e-9) ?? rows[rows.length - 1])[material];
+
+export type InsulationUse = "cold" | "hot" | "rar";
+
+/** Insulation thickness [mm] of a PWC / PWH / PWH-C pipe, or of the common insulation «Rohr an Rohr» (by the PWH). */
+export function insulationThickness(use: InsulationUse, p: PipeSize, material: InsulationMaterial): number {
+  return lookup(use === "cold" ? coldRows : use === "hot" ? hotRows : rarRows, p.od, material);
+}
+
+/** Next larger Optipress size: the fictive pipe of the common insulation «Rohr an Rohr». */
 export function nextSize(p: PipeSize): PipeSize {
   return supplySizes("optipress").find((x) => x.od > p.od + 1e-9) ?? p;
 }
-
-// ---------------------------------------------------------------------------
-// Insulation (SIA 385/1:2020 Tabelle 3)
-// ---------------------------------------------------------------------------
-
-/** Outer diameters [mm] of SIA 385/1 Tabelle 3. */
-const insulationOd = [15, 18, 22, 28, 35, 42, 54, 64, 76.1, 88.9, 108];
-/** Minimum thickness [mm] per λ of the insulation at 40 °C [W/(m·K)] (rows) and outer diameter (columns). */
-const insulationTable: [number, number[]][] = [
-  [0.01, [5, 6, 7, 8, 9, 10, 12, 14, 16, 17, 20]],
-  [0.015, [10, 10, 12, 14, 16, 18, 20, 24, 26, 29, 33]],
-  [0.02, [17, 18, 20, 23, 26, 28, 32, 36, 39, 43, 48]],
-  [0.025, [26, 28, 30, 34, 38, 40, 46, 50, 55, 60, 66]],
-  [0.03, [40, 42, 45, 49, 53, 57, 63, 68, 74, 80, 88]],
-  [0.035, [58, 60, 63, 68, 72, 77, 85, 90, 97, 104, 113]],
-  [0.04, [70, 70, 75, 79, 84, 89, 97, 100, 110, 118, 128]],
-  [0.045, [70, 70, 75, 79, 84, 89, 97, 100, 110, 118, 128]],
-  [0.05, [70, 70, 75, 79, 84, 89, 97, 100, 110, 118, 128]],
-];
-
-/**
- * Minimum insulation of a warmgehaltene Leitung (PWH with Zirkulation, PWH-C) after SIA 385/1 5.3.2: the next larger
- * outer diameter of Tabelle 3 (5.3.2.2), interpolated between the λ rows (5.3.2.3), rounded up to whole mm. «Rohr an
- * Rohr»: the sum of both outer diameters (5.3.2.4).
- */
-export function insulationThickness(od: number, lambda: number): number {
-  const col = insulationOd.findIndex((d) => d >= od - 1e-9);
-  const c = col >= 0 ? col : insulationOd.length - 1;
-  const l = Math.min(0.05, Math.max(0.01, lambda));
-  const i = insulationTable.findIndex(([x]) => x >= l - 1e-9);
-  const [l1, r1] = insulationTable[Math.max(0, i - 1)];
-  const [l2, r2] = insulationTable[i];
-  const t = l2 > l1 ? (l - l1) / (l2 - l1) : 0;
-  return Math.ceil(r1[c] + (r2[c] - r1[c]) * t - 1e-9);
-}
-
-/** Insulation of cold water pipes [mm]: 30 mm with λ < 0.03 W/(m·K) (PIR), else 40 mm (Mineralwolle). */
-export const pwcInsulationThickness = (lambda: number) => (lambda < 0.03 - 1e-9 ? 30 : 40);
 
 /** Highlighter band of an insulation thickness in the schema (fill, dotted edge). */
 export function insulationStyle(mm: number): { fill: string; edge: string } {

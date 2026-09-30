@@ -15,7 +15,7 @@ import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { biralPumps } from "@/lib/sanitary/catalog-data";
 import { exampleNetwork } from "@/lib/sanitary/defaults";
 import { type Central, evaluateSystem, findNode, type SanitaryData, type Settings, type SystemResult, type Warning } from "@/lib/sanitary/network";
-import { insulationStyle } from "@/lib/sanitary/pipes";
+import { insulationMaterials, insulationStyle } from "@/lib/sanitary/pipes";
 import { systemQuantities } from "@/lib/sanitary/quantities";
 import { layoutSchema } from "@/lib/sanitary/schema";
 
@@ -387,10 +387,10 @@ function CentralForm({ central, result, editable, onChange }: { central: Central
 
 function SettingsForm({ settings, editable, onChange }: { settings: Settings; editable: boolean; onChange: (p: Partial<Settings>) => void }) {
   const t = useTranslations("sanitary.settings");
-  const number = (key: "tHot" | "tReturn" | "lossConventional" | "lossRar" | "dpCheck" | "dpValve" | "vCirc" | "lambda", label: string, decimals: number) => (
+  const number = (key: "tHot" | "tReturn" | "lossConventional" | "lossRar" | "dpCheck" | "dpValve" | "vCirc", label: string, decimals: number) => (
     <div className="space-y-1">
       <Label className="text-xs">{label}</Label>
-      <NumberField value={settings[key]} decimals={decimals} label={label} disabled={!editable} onChange={(v) => v !== null && onChange({ [key]: key === "lambda" ? Math.min(0.05, Math.max(0.01, v)) : v })} className="h-8 rounded-lg" />
+      <NumberField value={settings[key]} decimals={decimals} label={label} disabled={!editable} onChange={(v) => v !== null && onChange({ [key]: v })} className="h-8 rounded-lg" />
     </div>
   );
   return (
@@ -414,11 +414,22 @@ function SettingsForm({ settings, editable, onChange }: { settings: Settings; ed
         {number("vCirc", t("vCirc"), 2)}
         {number("dpCheck", t("dpCheck"), 0)}
         {number("dpValve", t("dpValve"), 0)}
-        {number("lambda", t("lambda"), 3)}
+        <div className="space-y-1">
+          <Label htmlFor="settings-material" className="text-xs">
+            {t("material")}
+          </Label>
+          <NativeSelect id="settings-material" value={settings.insulationMaterial} disabled={!editable} onChange={(e) => onChange({ insulationMaterial: e.target.value as Settings["insulationMaterial"] })}>
+            {insulationMaterials.map((m) => (
+              <option key={m} value={m}>
+                {t(`materials.${m}`)}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={settings.pwcInsulation} disabled={!editable} onChange={(e) => onChange({ pwcInsulation: e.target.checked })} className="size-4 accent-brand" />
-        {t("pwcInsulation", { mm: settings.lambda < 0.03 ? 30 : 40 })}
+        {t("pwcInsulation")}
       </label>
       <p className="text-xs text-muted-foreground">{t("insulationHint")}</p>
     </Section>

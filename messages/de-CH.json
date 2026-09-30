@@ -2369,9 +2369,13 @@
       "vCirc": "v max. PWH-C [m/s]",
       "dpCheck": "Δp Rückflussverhinderer [mbar]",
       "dpValve": "Δp Regulierorgan offen [mbar]",
-      "lambda": "λ Dämmstoff bei 40 °C [W/(m·K)]",
-      "pwcInsulation": "PWC Verteil- und Steigleitungen dämmen ({mm} mm)",
-      "insulationHint": "Warmgehaltene Leitungen nach SIA 385/1 Tabelle 3: konventionell PWH und PWH-C je einzeln; Rohr an Rohr eine gemeinsame Dämmung wie für eine PWH eine Dimension grösser (z. B. 28 → wie 35), die PWH-C ohne eigene Dämmung. Kaltwasser 30 mm bei λ < 0.03 (PIR), 40 mm bei λ 0.03 … 0.05 (Mineralwolle)."
+      "pwcInsulation": "PWC Verteil- und Steigleitungen dämmen",
+      "insulationHint": "Dämmstärken nach LUPI-Standard (Dämmung_Sanitär.xlsx): konventionell Kaltwasser, Warmwasser und Zirkulation je nach Rohrdimension; Rohr an Rohr eine gemeinsame Dämmung nach der Tabelle Rohr an Rohr (fiktive Rohrdimension eine grösser), die Zirkulation ohne eigene Dämmung.",
+      "material": "Dämmstoff",
+      "materials": {
+        "pir": "PIR (λ < 0.03 W/mK)",
+        "mineralwool": "Mineralwolle (λ 0.03 … 0.05 W/mK)"
+      }
     },
     "quantities": {
       "title": "Materialliste",
@@ -2416,7 +2420,6 @@
       "plan": "Prinzipschema",
       "trade": "Sanitär"
     },
-    "moveHorizontal": "Schema seitlich verschieben",
-    "moveVertical": "Schema nach oben / unten verschieben"
+    "moveHorizontal": "Schema seitlich verschieben"
   }
 }

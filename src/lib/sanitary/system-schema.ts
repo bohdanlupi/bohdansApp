@@ -93,19 +93,25 @@ const settingsSchema: z.ZodType<Settings> = z
     dpCheck: range(0, 2000, s.dpCheck),
     dpValve: range(0, 2000, s.dpValve),
     vCirc: range(0.1, 2, s.vCirc),
-    // Older data: EN-103 classes «low» (≤ 0.03) / «high» (> 0.03).
-    lambda: z.preprocess((v) => (v === "low" ? 0.03 : v === "high" ? 0.035 : v), range(0.01, 0.05, s.lambda)),
+    insulationMaterial: z.enum(["pir", "mineralwool"]).catch(s.insulationMaterial),
     // Older data: a thickness in mm (> 0 = insulated).
     pwcInsulation: z.preprocess((v) => (typeof v === "number" ? v > 0 : v), z.boolean()).catch(s.pwcInsulation),
     pump: z.string().max(20).nullable().catch(null),
   })
   .catch(defaultSettings());
 
+/** Older data: a λ value instead of the material (below 0.03 W/(m·K) = PIR). */
+function withMaterial(raw: unknown) {
+  const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  if (o.insulationMaterial === undefined && typeof o.lambda === "number") return { ...o, insulationMaterial: o.lambda < 0.03 ? "pir" : "mineralwool" };
+  return o;
+}
+
 export function parseSanitaryData(value: unknown): SanitaryData {
   const v = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
   return {
     central: centralSchema.parse(v.central ?? {}),
-    settings: settingsSchema.parse(v.settings ?? {}),
+    settings: settingsSchema.parse(withMaterial(v.settings)),
     network: parseNodes(v.network, 0, { left: MAX_NODES }),
     notes: typeof v.notes === "string" ? v.notes.slice(0, 4000) : "",
   };

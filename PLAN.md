@@ -346,14 +346,14 @@ Zirkulation: heat-loss method of Original_Zirkulation_Berchnung_RN_fam_260929.xl
 + 85 mbar RV + 105 mbar Regulierorgan); R by Darcy–Weisbach / Colebrook at the mean water temperature (matches the
 Nussbaum tables); Rohr an Rohr counts PWH steel + Optiflex (user decision; the workbook counts only the Optiflex).
 Verified against the workbook: 429.4 l/h (Excel 429.7), 326.9 mbar (Excel 326.7). Excel bug noted: Dimensionierung!I22
-uses I21 instead of I12. Insulation after SIA 385/1:2020 Tabelle 3 (outer diameter × λ at 40 °C, default 0.035,
-interpolated) for PWH-C, circulated PWH and PWH in the Verteilung. User rules: konventionell PWH and PWH-C each on
-their own; Rohr an Rohr one insulation sized as for a PWH one dimension larger (28 → as 35), PWH-C none of its own;
-PWC Verteil- / Steigleitungen 30 mm with λ < 0.03 (PIR), 40 mm with λ 0.03 … 0.05 (Mineralwolle), switchable.
-Warning above 65 °C (SIA 385/1 4.1.1).
+uses I21 instead of I12. Insulation: LUPI standard Berechnungsvorlagen/Sanitär/Dämmung_Sanitär.xlsx (replaces SIA 385/1 Tabelle 3, which is
+stricter): material PIR or Mineralwolle; konventionell Kaltwasser 30 mm, Warmwasser / Zirkulation by pipe size
+(PIR 30 … 80, Mineralwolle 60 … 100); Rohr an Rohr one insulation from the table «Rohr an Rohr» by the PWH size (fictive
+pipe one dimension larger), PWH-C none. Insulated: PWH of circulated sections and of the Verteilung, PWH-C, PWC
+Verteil- / Steigleitungen (switchable). Warning above 65 °C (SIA 385/1 4.1.1).
 Prinzipschema: Strangschema (schema.ts; symbols after SIA 410 1.26 / 1.27 / 1.29 / 2.6 / 5, Wasserzähler and
 Apparateanschluss after SN EN 806-1 as SIA 410 has none; PWC green, PWH red, PWH-C violet), web view at a fixed
-readable scale (1.75 px per unit) with sliders below and right to move it + plan PDF /api/pdf/sanitary-schema/<id> (Plankopf / revisions as the Lüftung schema; sheet height 297 / 420 /
+scale (1.3 px per unit), full height, horizontal slider below to move it + plan PDF /api/pdf/sanitary-schema/<id> (Plankopf / revisions as the Lüftung schema; sheet height 297 / 420 /
 594 mm, width a multiple of 210 mm, wide enough for schema and legend).
 Material list in the editor (no LV insertion yet).
 

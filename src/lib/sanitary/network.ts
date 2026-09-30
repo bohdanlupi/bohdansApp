@@ -14,8 +14,8 @@ import { type BiralPump, biralPumps } from "./catalog-data";
 import {
   findSize,
   frictionPerMetre,
+  type InsulationMaterial,
   insulationThickness,
-  pwcInsulationThickness,
   nextSize,
   type PipeSize,
   type PipeSystem,
@@ -90,12 +90,9 @@ export type Settings = {
   dpValve: number;
   /** Max. velocity of the PWH-C when sized automatically [m/s]. */
   vCirc: number;
-  /** λ of the insulation at 40 °C [W/(m·K)] for SIA 385/1 Tabelle 3. */
-  lambda: number;
-  /**
-   * Insulate the PWC Verteil- und Steigleitungen: SIA 385/1 3.1.4 asks that cold water stays below 25 °C; LUPI
-   * standard 30 mm with λ < 0.03 W/(m·K) (PIR), 40 mm with λ 0.03 … 0.05 (Mineralwolle).
-   */
+  /** Insulation material of the thickness tables (Dämmung_Sanitär.xlsx): PIR or Mineralwolle. */
+  insulationMaterial: InsulationMaterial;
+  /** Insulate the PWC Verteil- und Steigleitungen (SIA 385/1 3.1.4: cold water max. 25 °C). */
   pwcInsulation: boolean;
   /** Biral article number chosen by hand (null = suggestion). */
   pump: string | null;
@@ -125,7 +122,7 @@ export const defaultSettings = (): Settings => ({
   dpCheck: 85,
   dpValve: 105,
   vCirc: 0.5,
-  lambda: 0.035,
+  insulationMaterial: "mineralwool",
   pwcInsulation: true,
   pump: null,
 });
@@ -429,18 +426,18 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
       circ = { heatLoss: ownLoss(n), flow, rPwh, rPwhc, dp, cumulative: before + dp };
     }
 
-    // Insulation after SIA 385/1: all warmgehaltene parts (PWH of circulated sections, PWH-C; 5.3.1.1) and the PWH of
-    // the Verteilung from the heater (EnDK EN-103 9.1 d) with Tabelle 3. Konventionell: PWH and PWH-C each on their
-    // own. Rohr an Rohr: one insulation around both, sized as for a PWH one dimension larger (e.g. 28 → as 35); the
-    // PWH-C gets none of its own. PWC Verteil- und Steigleitungen: 30 mm (λ < 0.03) or 40 mm (λ 0.03 … 0.05).
-    // Ausstossleitungen stay without (5.4).
+    // Insulation after the LUPI standard (Dämmung_Sanitär.xlsx): PWH of circulated sections and of the Verteilung
+    // from the heater, PWH-C (SIA 385/1 5.3.1.1 warmgehaltene Teile, EnDK EN-103 9.1 d). Konventionell: PWH and PWH-C
+    // each by their own size. Rohr an Rohr: one insulation by the PWH size from the table «Rohr an Rohr» (= a fictive
+    // PWH one dimension larger), the PWH-C none of its own. PWC Verteil- und Steigleitungen by setting.
+    // Ausstossleitungen stay without (SIA 385/1 5.4).
     const insulated = circulated.has(n.id) || role === "distribution";
     const shared = circulated.has(n.id) && n.circulation === "rar" && pwh && pwhc ? nextSize(pwh.size) : null;
     const insulation: PipeResult["insulation"] = {
-      pwc: pwc && settings.pwcInsulation && role === "distribution" ? pwcInsulationThickness(settings.lambda) : null,
-      pwh: pwh && insulated && !shared ? insulationThickness(pwh.size.od, settings.lambda) : null,
-      pwhc: pwhc && !shared ? insulationThickness(pwhc.size.od, settings.lambda) : null,
-      shared: shared ? { mm: insulationThickness(shared.od, settings.lambda), size: shared } : null,
+      pwc: pwc && settings.pwcInsulation && role === "distribution" ? insulationThickness("cold", pwc.size, settings.insulationMaterial) : null,
+      pwh: pwh && insulated && !shared ? insulationThickness("hot", pwh.size, settings.insulationMaterial) : null,
+      pwhc: pwhc && !shared ? insulationThickness("hot", pwhc.size, settings.insulationMaterial) : null,
+      shared: shared && pwh ? { mm: insulationThickness("rar", pwh.size, settings.insulationMaterial), size: shared } : null,
     };
 
     const isFoot = n.riser && !parentRiser;
