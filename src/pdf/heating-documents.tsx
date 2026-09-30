@@ -68,11 +68,8 @@ export function HeatLoadDocument({ firm, logo, t, pageLabel, projectLabel, dateL
     [s("site.altitudeCorrection"), `${n(r.altitudeCorrection, 2)} K`],
     [s("site.inertiaCorrection"), `${n(r.inertia, 2)} K (${s(`inertia.${site.inertia}`)})`],
     [s("site.thetaE0"), `${n(r.thetaE0, 0)} °C`],
-    // Geschosse with their own Gebäudeträgheit.
-    ...result.floors.map((f, i): [string, string] => {
-      const entry = data.floorInertia[i];
-      return [s("floorInertia.pdfRow", { floor: f.floor || "-" }), `${n(f.inertia, 2)} K (${s(`inertia.${entry.inertia}`)}), θe,0 ${n(f.thetaE0, 0)} °C`];
-    }),
+    // Rooms with their own Gebäudeträgheit (their θe,0 is in the room list).
+    ...(data.rooms.some((room) => room.inertia) ? [[s("roomInertia.pdfRow"), s("roomInertia.pdfValue", { count: data.rooms.filter((room) => room.inertia).length })] as [string, string]] : []),
     [s("site.thetaMean"), `${n(r.thetaMean, 1)} °C`],
     [s("site.rhoCp"), `${n(r.rhoCp, 4)} Wh/m³K`],
     [s("site.airtight"), s(`airtight.${site.airtight}`)],
@@ -83,9 +80,10 @@ export function HeatLoadDocument({ firm, logo, t, pageLabel, projectLabel, dateL
   const heated = data.rooms.map((room, i) => ({ room, res: result.rooms[i] }));
   const columns: Column[] = [
     { label: s("room.number"), width: 38 },
-    { label: s("room.name"), width: 110 },
+    { label: s("room.name"), width: 96 },
     { label: s("room.floor"), width: 30 },
     { label: "θ [°C]", width: 34, align: "right" },
+    { label: "θe,0 [°C]", width: 38, align: "right" },
     { label: "A [m²]", width: 40, align: "right" },
     { label: "Φ_T [W]", width: 44, align: "right" },
     { label: "Φ_V [W]", width: 44, align: "right" },
@@ -96,8 +94,8 @@ export function HeatLoadDocument({ firm, logo, t, pageLabel, projectLabel, dateL
   ];
   const rows = heated.map(({ room, res }) =>
     room.kind === "passive"
-      ? [room.number, `${room.name} (${s("kinds.passive")})`, room.floor, n(res.passiveTemp, 1), n(res.area, 1), "", "", "", "", "", ""]
-      : [room.number, room.name, room.floor, n(room.thetaInt, 1), n(res.area, 1), n(res.phiTotal), n(res.phiV), n(res.gains), n(res.phiHL), n(res.specific, 1), n(res.nMin, 2)],
+      ? [room.number, `${room.name} (${s("kinds.passive")})`, room.floor, n(res.passiveTemp, 1), n(res.thetaE0, 0), n(res.area, 1), "", "", "", "", "", ""]
+      : [room.number, room.name, room.floor, n(room.thetaInt, 1), n(res.thetaE0, 0), n(res.area, 1), n(res.phiTotal), n(res.phiV), n(res.gains), n(res.phiHL), n(res.specific, 1), n(res.nMin, 2)],
   );
   const elementColumns: Column[] = [
     { label: s("el.construction"), width: 120 },

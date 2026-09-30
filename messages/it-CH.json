@@ -2113,12 +2113,11 @@
       "buildingHint": "Il carico termico dell’edificio serve al dimensionamento del generatore secondo SIA 384/1; i carichi dei locali al dimensionamento dell’emissione.",
       "roomTotal": "Trasmissione (n_min {nMin} h⁻¹, q_v {qv} m³/h)"
     },
-    "floorInertia": {
-      "title": "Inerzia dell’edificio per piano",
-      "hint": "Ogni piano riprende l’inerzia del progetto ({project}) o ne riceve una propria, p. es. un piano interrato massiccio sotto una costruzione in legno. θe,0 vale allora per piano.",
+    "roomInertia": {
       "project": "come il progetto: {value}",
-      "perFloor": "diversa per piano",
-      "pdfRow": "Inerzia {floor}"
+      "perRoom": "diversa per locale",
+      "pdfRow": "Locali con inerzia propria",
+      "pdfValue": "{count} (θe,0 per locale nella lista dei locali)"
     }
   },
   "floorHeating": {

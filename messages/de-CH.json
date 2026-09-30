@@ -2113,12 +2113,11 @@
       "buildingHint": "Die Norm-Heizlast des Gebäudes ist Grundlage der Erzeugerbemessung nach SIA 384/1; die Raumheizlasten dienen der Bemessung der Wärmeabgabe.",
       "roomTotal": "Transmission (n_min {nMin} h⁻¹, q_v {qv} m³/h)"
     },
-    "floorInertia": {
-      "title": "Gebäudeträgheit je Geschoss",
-      "hint": "Jedes Geschoss übernimmt die Gebäudeträgheit des Projekts ({project}) oder erhält eine eigene, z. B. ein massives Untergeschoss unter einem Holzbau. θe,0 gilt dann je Geschoss.",
+    "roomInertia": {
       "project": "wie Projekt: {value}",
-      "perFloor": "je Geschoss unterschiedlich",
-      "pdfRow": "Gebäudeträgheit {floor}"
+      "perRoom": "je Raum unterschiedlich",
+      "pdfRow": "Räume mit eigener Gebäudeträgheit",
+      "pdfValue": "{count} (θe,0 je Raum in der Raumliste)"
     }
   },
   "floorHeating": {

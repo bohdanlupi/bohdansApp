@@ -329,9 +329,9 @@ notices, strands with throttling, Prinzipschema (landscape, src/pdf/kwl-system-d
 react-pdf primitives), elements per air type, quantities. WinAnsi only: winAnsi() replaces Δ, ζ, ≤, ≥, →.
 Old star networks (data.network, pressure.ts) are only kept for the «Sternnetz übernehmen» conversion.
 
-Wärmebedarf: Gebäudeträgheit per Geschoss (heating_calcs.data.floorInertia; floors without an entry use the project
-site inertia); θe,0 is computed per room from its floor (RoomResult.thetaE0), also for Anhang A and the floor
-heating link; listed in the settings of the calculation and in the PDF basics.
+Wärmebedarf: Gebäudeträgheit per room (HeatRoom.inertia / tau / inertiaManual; null = the project site inertia);
+θe,0 is computed per room (RoomResult.thetaE0), also for Anhang A and the floor heating link; set in the room
+details, θe,0 per room in the PDF room list.
 
 Sanitär (2026-09-30, project tab «Sanitär», table sanitary_systems, src/lib/sanitary/): Trinkwasseranlagen with
 Zentrale (Hausanschluss, Wasserzähler, Filter / Redfil, DRV, Enthärtung, Verteilbatterie, Sicherheitsgarnitur,

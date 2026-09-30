@@ -96,20 +96,15 @@ const roomSchema = z.object({
   standing: z.boolean().catch(false),
   emission: z.enum(keys(emissionSystems)).catch("radiators"),
   gains: num(0, 1000000),
-  elements: lenientArray(elementSchema, 200),
-});
-
-/** Gebäudeträgheit of a Geschoss (overrides the inertia of the project site for its rooms). */
-const floorInertiaSchema = z.object({
-  floor: z.string().max(20),
-  inertia: z.enum(inertiaModes),
+  /** Own Gebäudeträgheit of the room; null = the project's. */
+  inertia: z.enum(inertiaModes).nullable().catch(null),
   tau: num(0, 10000),
   inertiaManual: num(-3, 0),
+  elements: lenientArray(elementSchema, 200),
 });
 
 export const heatLoadSchema = z.object({
   concept: z.enum(ventilationConcepts).catch("natural"),
-  floorInertia: lenientArray(floorInertiaSchema, 50),
   fiz: num(0, 1),
   rooms: lenientArray(roomSchema, 500),
   notes: text(20000),

@@ -18,7 +18,6 @@ import {
   emissionSystems,
   evaluateHeatLoad,
   f1Table4,
-  type FloorInertia,
   type HeatLoadData,
   type HeatRoom,
   type HeatSite,
@@ -127,6 +126,9 @@ export function HeatEditor({
       standing: false,
       emission: last?.emission ?? "surface",
       gains: null,
+      inertia: last?.inertia ?? null,
+      tau: last?.tau ?? null,
+      inertiaManual: last?.inertiaManual ?? null,
       elements: [],
     };
     set("rooms", [...data.rooms, room]);
@@ -202,7 +204,7 @@ export function HeatEditor({
           label={t("result.thetaE0")}
           value={thetaE0Text}
           unit="°C"
-          hint={s.thetaE0 === null ? t("result.noStation") : roomThetas.length > 1 ? t("floorInertia.perFloor") : undefined}
+          hint={s.thetaE0 === null ? t("result.noStation") : roomThetas.length > 1 ? t("roomInertia.perRoom") : undefined}
           tone={s.thetaE0 === null ? "warn" : undefined}
         />
         <Result label={t("result.phiT")} value={fmt(result.phiT)} unit="W" />
@@ -231,14 +233,6 @@ export function HeatEditor({
             <p className="text-xs text-muted-foreground">{t("fizHint", { min: fmt(result.fizRange[0], 1), max: fmt(result.fizRange[1], 1) })}</p>
           </div>
         </div>
-        <FloorInertiaFields
-          rooms={data.rooms}
-          value={data.floorInertia}
-          site={site}
-          result={result}
-          editable={editable}
-          onChange={(floorInertia) => set("floorInertia", floorInertia)}
-        />
         {catalog.length === 0 && <p className="text-sm text-amber-700 dark:text-amber-400">{t("noCatalog")}</p>}
       </Section>
 
@@ -361,6 +355,7 @@ export function HeatEditor({
                               rooms={data.rooms}
                               result={r}
                               catalog={catalog}
+                              site={site}
                               editable={editable}
                               onChange={(patch) => setRoom(room.id, patch)}
                             />
@@ -396,6 +391,7 @@ function RoomDetail({
   rooms,
   result,
   catalog,
+  site,
   editable,
   onChange,
 }: {
@@ -403,6 +399,7 @@ function RoomDetail({
   rooms: HeatRoom[];
   result: ReturnType<typeof evaluateHeatLoad>["rooms"][number];
   catalog: Construction[];
+  site: HeatSite;
   editable: boolean;
   onChange: (patch: Partial<HeatRoom>) => void;
 }) {
@@ -410,6 +407,7 @@ function RoomDetail({
   const setElement = (id: string, patch: Partial<RoomElement>) => onChange({ elements: room.elements.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
   const others = rooms.filter((r) => r.id !== room.id);
   const high = (room.height ?? 0) >= 4;
+  const projectInertia = t(`inertia.${site.inertia}`);
 
   return (
     <div className="space-y-3">
@@ -440,6 +438,43 @@ function RoomDetail({
             ))}
           </NativeSelect>
         </label>
+        <label className="space-y-1">
+          <span className="block text-xs text-muted-foreground">{t("site.inertia")}</span>
+          <NativeSelect
+            value={room.inertia ?? ""}
+            disabled={!editable}
+            className="h-7 text-xs"
+            onChange={(e) => onChange({ inertia: (e.target.value || null) as HeatRoom["inertia"] })}
+          >
+            <option value="">{t("roomInertia.project", { value: projectInertia })}</option>
+            {inertiaModes.map((m) => (
+              <option key={m} value={m}>
+                {t(`inertia.${m}`)}
+              </option>
+            ))}
+          </NativeSelect>
+        </label>
+        {room.inertia === "tau" && (
+          <label className="space-y-1">
+            <span className="block text-xs text-muted-foreground">{t("site.tau")}</span>
+            <NumberField value={room.tau} decimals={0} label={t("site.tau")} disabled={!editable} onChange={(v) => onChange({ tau: v })} className="w-20" />
+          </label>
+        )}
+        {room.inertia === "manual" && (
+          <label className="space-y-1">
+            <span className="block text-xs text-muted-foreground">{t("site.inertiaManual")}</span>
+            <NumberField
+              value={room.inertiaManual}
+              decimals={1}
+              negative
+              label={t("site.inertiaManual")}
+              disabled={!editable}
+              onChange={(v) => onChange({ inertiaManual: v === null ? null : Math.min(0, Math.max(-3, v)) })}
+              className="w-20"
+            />
+          </label>
+        )}
+        <p className="pb-1 text-xs text-muted-foreground">θe,0 {result.thetaE0 === null ? "–" : `${fmt(result.thetaE0, 0)} °C`}</p>
         {high && (
           <label className="flex items-center gap-2 pb-1 text-xs">
             <input type="checkbox" checked={room.standing} disabled={!editable} onChange={(e) => onChange({ standing: e.target.checked })} />
@@ -631,96 +666,3 @@ function RoomDetail({
   );
 }
 
-/**
- * Gebäudeträgheit per Geschoss: each floor of the calculation takes the inertia of the project, or its own one
- * (Tabelle 7, Gl. 15 with τ, or a manual Δθe,τ); θe,0 then follows per floor.
- */
-function FloorInertiaFields({
-  rooms,
-  value,
-  site,
-  result,
-  editable,
-  onChange,
-}: {
-  rooms: HeatRoom[];
-  value: FloorInertia[];
-  site: HeatSite;
-  result: ReturnType<typeof evaluateHeatLoad>;
-  editable: boolean;
-  onChange: (value: FloorInertia[]) => void;
-}) {
-  const t = useTranslations("heatLoad");
-  // Floors of the rooms in their order, plus floors that still have an entry but no room any more.
-  const floors = [...new Set([...rooms.map((r) => r.floor.trim()), ...value.map((f) => f.floor)])];
-  if (!floors.length) return null;
-  const entryOf = (floor: string) => value.find((f) => f.floor === floor) ?? null;
-  const patch = (floor: string, next: Partial<FloorInertia> | null) => {
-    const rest = value.filter((f) => f.floor !== floor);
-    if (next === null) onChange(rest);
-    else onChange([...rest, { floor, inertia: "medium", tau: null, inertiaManual: null, ...entryOf(floor), ...next }]);
-  };
-  const thetaOf = (floor: string) => result.rooms.find((_, i) => rooms[i]?.floor.trim() === floor)?.thetaE0 ?? null;
-  return (
-    <div className="space-y-2 border-t pt-3">
-      <div>
-        <h3 className="text-sm font-medium">{t("floorInertia.title")}</h3>
-        <p className="text-xs text-muted-foreground">{t("floorInertia.hint", { project: t(`inertia.${site.inertia}`) })}</p>
-      </div>
-      <table className="text-sm">
-        <thead className="text-xs text-muted-foreground">
-          <tr className="text-left">
-            <th className="py-1 pr-3 font-medium">{t("room.floor")}</th>
-            <th className="py-1 pr-3 font-medium">{t("site.inertia")}</th>
-            <th className="py-1 pr-3 font-medium" />
-            <th className="py-1 text-right font-medium">θe,0</th>
-          </tr>
-        </thead>
-        <tbody>
-          {floors.map((floor) => {
-            const entry = entryOf(floor);
-            const theta = thetaOf(floor);
-            return (
-              <tr key={floor || "-"} className="border-t">
-                <td className="py-1 pr-3 font-medium">{floor || "–"}</td>
-                <td className="py-1 pr-3">
-                  <NativeSelect
-                    aria-label={`${t("site.inertia")} ${floor}`}
-                    value={entry?.inertia ?? ""}
-                    disabled={!editable}
-                    onChange={(e) => patch(floor, e.target.value ? { inertia: e.target.value as FloorInertia["inertia"] } : null)}
-                    className="h-7 min-w-52"
-                  >
-                    <option value="">{t("floorInertia.project", { value: t(`inertia.${site.inertia}`) })}</option>
-                    {inertiaModes.map((m) => (
-                      <option key={m} value={m}>
-                        {t(`inertia.${m}`)}
-                      </option>
-                    ))}
-                  </NativeSelect>
-                </td>
-                <td className="w-32 py-1 pr-3">
-                  {entry?.inertia === "tau" && (
-                    <NumberField value={entry.tau} decimals={0} label={t("site.tau")} placeholder="τ [h]" disabled={!editable} onChange={(v) => patch(floor, { tau: v })} />
-                  )}
-                  {entry?.inertia === "manual" && (
-                    <NumberField
-                      value={entry.inertiaManual}
-                      decimals={1}
-                      negative
-                      label={t("site.inertiaManual")}
-                      placeholder="Δθe,τ [K]"
-                      disabled={!editable}
-                      onChange={(v) => patch(floor, { inertiaManual: v === null ? null : Math.min(0, Math.max(-3, v)) })}
-                    />
-                  )}
-                </td>
-                <td className="py-1 text-right tabular-nums">{theta === null ? "–" : `${fmt(theta, 0)} °C`}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
