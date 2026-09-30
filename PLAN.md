@@ -368,7 +368,8 @@ fittings; inserted into an LV per group (Rohre / Armaturen / Zentrale / Dämmung
 Zentrale lines (Hauseinführung → Verteilbatterie, → Verteilung, cold feed, PWH / PWH-C Wassererwärmer → Verteilung) are
 insulated and labelled like the Leitungen; with their lengths (central.trunkLength, centralLength, heaterLength)
 they add pipes and insulation to the material list.
-Editor order: Zentrale | Zirkulation | Berechnung, then Schema | Leitungen side by side, Materialliste.
+Editor order: Zentrale | Zirkulation | Berechnung; Schema with the Verteilung below it and the element panel (Leitung)
+to the right; Materialliste.
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

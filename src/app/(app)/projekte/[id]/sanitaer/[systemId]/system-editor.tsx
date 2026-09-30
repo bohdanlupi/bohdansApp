@@ -159,34 +159,32 @@ export function SanitaryEditor({
         </div>
       </div>
 
-      {/* Prinzipschema with the Leitungen to its right. */}
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        {data.network.length > 0 && (
-          <section className="min-w-0 space-y-2 rounded-xl border p-3">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="font-semibold">{t("schema")}</h2>
-              <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
-            </div>
-            <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
-            {schema.insulated && (
-              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyle.fill, borderColor: insulationStyle.edge }} />
-                {t("legend.insulationBand")}
-              </p>
-            )}
-          </section>
-        )}
-        <div className={data.network.length > 0 ? "@container min-w-0" : "@container min-w-0 xl:col-span-2"}>
-          <TreeEditor
-            network={data.network}
-            result={result}
-            selected={selected}
-            editable={editable}
-            onSelect={setSelected}
-            onChange={(fn) => setData((d) => ({ ...d, network: fn(d.network) }))}
-          />
-        </div>
-      </div>
+      {/* Prinzipschema with the Verteilung below it and the element panel («Leitung») to their right. */}
+      <TreeEditor
+        network={data.network}
+        result={result}
+        selected={selected}
+        editable={editable}
+        onSelect={setSelected}
+        onChange={(fn) => setData((d) => ({ ...d, network: fn(d.network) }))}
+        top={
+          data.network.length > 0 && (
+            <section className="min-w-0 space-y-2 rounded-xl border p-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="font-semibold">{t("schema")}</h2>
+                <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
+              </div>
+              <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
+              {schema.insulated && (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyle.fill, borderColor: insulationStyle.edge }} />
+                  {t("legend.insulationBand")}
+                </p>
+              )}
+            </section>
+          )
+        }
+      />
       <SanitaryQuantitiesPanel quantities={quantities} systemId={id} projectId={projectId} systemName={name} lvs={lvs} dirty={dirty} editable={editable} />
     </div>
   );

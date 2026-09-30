@@ -37,6 +37,7 @@ export function TreeEditor({
   editable,
   onSelect,
   onChange,
+  top,
 }: {
   network: SanNode[];
   result: SystemResult;
@@ -44,6 +45,8 @@ export function TreeEditor({
   editable: boolean;
   onSelect: (id: string | null) => void;
   onChange: (fn: (roots: SanNode[]) => SanNode[]) => void;
+  /** Shown above the Verteilung list, left of the element panel (the Prinzipschema). */
+  top?: React.ReactNode;
 }) {
   const t = useTranslations("sanitary.tree");
   const node = selected ? findNode(network, selected) : null;
@@ -92,42 +95,45 @@ export function TreeEditor({
     });
 
   return (
-    <div className="grid gap-4 @4xl:grid-cols-[minmax(0,1fr)_24rem]">
-      <section className="rounded-xl border">
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
-          <h3 className="text-sm font-semibold">{t("title")}</h3>
-          <span className="flex gap-3 text-xs text-muted-foreground">
-            {(["pwc", "pwh", "pwhc"] as const).map((m) => (
-              <span key={m} className="flex items-center gap-1">
-                <span className="inline-block h-1 w-4 rounded" style={{ backgroundColor: mediumColors[m] }} />
-                {m.toUpperCase().replace("PWHC", "PWH-C")}
-              </span>
-            ))}
-          </span>
-        </header>
-        <div className="flex border-b px-3 py-1 text-[11px] text-muted-foreground">
-          <span className="flex-1">{t("element")}</span>
-          <span className="w-24 text-right">{t("sizes")}</span>
-          <span className="w-16 text-right">LU</span>
-          <span className="w-16 text-right">{t("circulation")}</span>
-        </div>
-        <ul className="py-1 text-sm">
-          {network.length === 0 && <li className="px-3 py-1.5 text-muted-foreground">{t("empty")}</li>}
-          {network.map((n) => (
-            <Row key={n.id} node={n} depth={0} result={result} selected={selected} onSelect={onSelect} />
-          ))}
-        </ul>
-        {editable && (
-          <div className="border-t px-3 py-1.5">
-            <Button variant="ghost" size="sm" onClick={() => addChild(null, newNode("pipe", { label: "" }))}>
-              <Plus />
-              {t("addRoot")}
-            </Button>
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_26rem]">
+      <div className="min-w-0 space-y-4">
+        {top}
+        <section className="rounded-xl border">
+          <header className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
+            <h3 className="text-sm font-semibold">{t("title")}</h3>
+            <span className="flex gap-3 text-xs text-muted-foreground">
+              {(["pwc", "pwh", "pwhc"] as const).map((m) => (
+                <span key={m} className="flex items-center gap-1">
+                  <span className="inline-block h-1 w-4 rounded" style={{ backgroundColor: mediumColors[m] }} />
+                  {m.toUpperCase().replace("PWHC", "PWH-C")}
+                </span>
+              ))}
+            </span>
+          </header>
+          <div className="flex border-b px-3 py-1 text-[11px] text-muted-foreground">
+            <span className="flex-1">{t("element")}</span>
+            <span className="w-24 text-right">{t("sizes")}</span>
+            <span className="w-16 text-right">LU</span>
+            <span className="w-16 text-right">{t("circulation")}</span>
           </div>
-        )}
-      </section>
+          <ul className="py-1 text-sm">
+            {network.length === 0 && <li className="px-3 py-1.5 text-muted-foreground">{t("empty")}</li>}
+            {network.map((n) => (
+              <Row key={n.id} node={n} depth={0} result={result} selected={selected} onSelect={onSelect} />
+            ))}
+          </ul>
+          {editable && (
+            <div className="border-t px-3 py-1.5">
+              <Button variant="ghost" size="sm" onClick={() => addChild(null, newNode("pipe", { label: "" }))}>
+                <Plus />
+                {t("addRoot")}
+              </Button>
+            </div>
+          )}
+        </section>
+      </div>
 
-      <aside className="space-y-3 @4xl:sticky @4xl:top-4 @4xl:self-start">
+      <aside className="space-y-3 xl:sticky xl:top-4 xl:self-start">
         {node ? (
           <NodePanel
             key={node.id}
