@@ -1,14 +1,16 @@
 // Material list of a Sanitäranlage: Nussbaum pipes [m], valves [Stk] by size, the Biral pump, the neutral parts
-// (Wasserzähler of the utility, Wassererwärmer, thermischer Mischer) and the insulation by thickness and size.
+// (Wasserzähler of the utility, Wassererwärmer, thermischer Mischer) and the insulation as Meier Tobler pipe shells –
+// Mineralwolle: ROHHE r.Heat A Alu kaschiert, PIR: swisspor Kisodur PIR Alu (glatt) – with 20 % for the fittings.
 
 import { type NussbaumFamily, nussbaumArticles } from "./catalog-data";
+import { type InsulationShell, insulationShells } from "./insulation-data";
 import type { SanitaryData, SanNode, SystemResult } from "./network";
-import { articleFor, type PipeSize, pipeArticle } from "./pipes";
+import { articleFor, type InsulationMaterial, type PipeSize, pipeArticle } from "./pipes";
 
 export type QuantityLine = {
   key: string;
   group: "pipes" | "valves" | "central" | "insulation";
-  manufacturer: "Nussbaum" | "Biral" | null;
+  manufacturer: "Nussbaum" | "Biral" | "Meier Tobler" | null;
   article: string | null;
   label: string;
   unit: "m" | "Stk";
@@ -40,11 +42,15 @@ export function systemQuantities(data: SanitaryData, result: SystemResult): Quan
     const a = pipeArticle(size);
     add({ key: `pipe|${size.key}`, group: "pipes", manufacturer: "Nussbaum", article: a?.number ?? null, label: a?.text ?? size.label, unit: "m" }, metres);
   };
-  const insulation = (mm: number, size: PipeSize, metres: number, shared: boolean) =>
-    add(
-      { key: `ins|${mm}|${size.key}|${shared}`, group: "insulation", manufacturer: null, article: null, label: `Dämmung ${mm} mm – ${size.label}${shared ? " (Rohr an Rohr)" : ""}`, unit: "m" },
-      metres,
-    );
+  // Insulation: the shell of the material for the pipe (Rohr an Rohr: the fictive pipe one size larger) and thickness,
+  // +20 % for bends, T-pieces and valves; without a fitting shell an R-position naming the insulation.
+  const material = data.settings.insulationMaterial;
+  const insulation = (mm: number, size: PipeSize, metres: number, shared: boolean) => {
+    const shell = insulationShell(material, size.od, mm);
+    const amount = metres * (1 + INSULATION_ALLOWANCE);
+    if (shell) add({ key: `ins|${shell.number}`, group: "insulation", manufacturer: "Meier Tobler", article: shell.number, label: shell.text, unit: "m" }, amount);
+    else add({ key: `ins|${mm}|${size.key}|${shared}`, group: "insulation", manufacturer: null, article: null, label: `Dämmung ${mm} mm – ${size.label}${shared ? " (Rohr an Rohr)" : ""}`, unit: "m" }, amount);
+  };
 
   const walk = (n: SanNode) => {
     const r = result.pipes.get(n.id);
@@ -142,6 +148,17 @@ const batteryValves = nussbaumArticles["82232"]
   })
   .filter((x): x is NonNullable<typeof x> => !!x)
   .sort((a, b) => a.trunk - b.trunk || a.outlet - b.outlet);
+
+/** Allowance on the insulation lengths for the fittings (bends, T-pieces, valves). */
+export const INSULATION_ALLOWANCE = 0.2;
+
+/**
+ * Meier Tobler shell for a pipe outer diameter and thickness: the smallest inner diameter that fits the pipe (76 / 89
+ * for 76.1 / 88.9); where the thickness does not come in that size, the next larger size of that thickness.
+ */
+export function insulationShell(material: InsulationMaterial, od: number, mm: number): InsulationShell | null {
+  return insulationShells.filter((s) => s.material === material && s.mm === mm && s.od >= od - 0.6).sort((a, b) => a.od - b.od)[0] ?? null;
+}
 
 /** Batterieventil for a trunk and outlet size: the smallest trunk ≥ the size with that outlet, else the closest. */
 function batteryValve(trunk: number, outlet: number) {

@@ -361,7 +361,11 @@ scale (1.3 px per unit), full height, horizontal slider below to move it + plan 
 594 mm, width a multiple of 210 mm, wide enough for schema and legend).
 Insulation drawn as yellow bands with black dotted edges; each Leitung is labelled «KW / WW / ZK: diameter · insulation»
 and «Dämmung: PIR / Mineralwolle» (no thickness classes in the legend).
-Material list in the editor (no LV insertion yet).
+Material list: Nussbaum pipes / valves, Biral pump, insulation as Meier Tobler shells (Mineralwolle ROHHE r.Heat A Alu
+kaschiert, PIR swisspor Kisodur PIR Alu glatt; scripts/gen-sanitary-insulation.mjs → insulation-data.ts), shell by
+pipe OD (Rohr an Rohr: fictive pipe one size larger) and thickness, next larger size where missing, +20 % for
+fittings; inserted into an LV per group (Rohre / Armaturen / Zentrale / Dämmung) like the Lüftung quantities.
+Editor order: Zentrale | Zirkulation | Berechnung, Schema, Verteilung, Materialliste.
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

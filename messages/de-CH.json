@@ -2395,7 +2395,7 @@
     },
     "quantities": {
       "title": "Materialliste",
-      "description": "Rohre, Armaturen und Dämmung aus dem Netz, Artikel aus dem IGH-Katalog.",
+      "description": "Rohre und Armaturen von Nussbaum, Pumpe von Biral, Dämmung von Meier Tobler (Mineralwolle: ROHHE Rohrschalen Alu kaschiert, PIR: swisspor Kisodur PIR Alu glatt). Jede Gruppe kann in ein Kapitel eines LV übernommen werden.",
       "article": "Artikel",
       "text": "Bezeichnung",
       "quantity": "Menge",
@@ -2404,7 +2404,19 @@
         "valves": "Armaturen Stränge und Stockwerke",
         "central": "Zentrale",
         "insulation": "Dämmung"
-      }
+      },
+      "insulationAllowance": "inkl. 20 % für Formstücke",
+      "chapter": "Kapitel",
+      "newGroupOption": "– neue Gruppe –",
+      "rPosition": "R-Position",
+      "noLv": "Das Projekt hat noch kein Leistungsverzeichnis.",
+      "toLvs": "Zu den Leistungsverzeichnissen",
+      "targetLv": "Leistungsverzeichnis",
+      "groupTitle": "Titel der neuen Gruppe",
+      "lvGroup": "Sanitär – {name}",
+      "insertIntoLv": "Ins LV übernehmen",
+      "inserted": "{count} Positionen ins LV übernommen.",
+      "saveFirst": "Zuerst speichern."
     },
     "legend": {
       "pwc": "PWC  Trinkwasser kalt",

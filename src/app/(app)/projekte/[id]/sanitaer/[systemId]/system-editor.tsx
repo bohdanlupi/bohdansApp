@@ -19,8 +19,10 @@ import { insulationMaterials, insulationStyle } from "@/lib/sanitary/pipes";
 import { systemQuantities } from "@/lib/sanitary/quantities";
 import { layoutSchema } from "@/lib/sanitary/schema";
 
+import type { LvWithChapters } from "../../lueftung/anlagen/[systemId]/quantities-panel";
 import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
 import { deleteSanitarySystem, saveSanitarySchemaPlan, saveSanitarySystem } from "../actions";
+import { SanitaryQuantitiesPanel } from "./quantities-panel";
 import { SanitarySchemaView } from "./schema-view";
 import { TreeEditor } from "./tree-editor";
 
@@ -30,6 +32,7 @@ export function SanitaryEditor({
   initialName,
   initialData,
   schemaPlan,
+  lvs,
   editable,
 }: {
   id: string;
@@ -37,6 +40,7 @@ export function SanitaryEditor({
   initialName: string;
   initialData: SanitaryData;
   schemaPlan: SchemaPlan;
+  lvs: LvWithChapters[];
   editable: boolean;
 }) {
   const t = useTranslations("sanitary");
@@ -146,77 +150,40 @@ export function SanitaryEditor({
         </Notice>
       )}
 
-      <div className="space-y-4 ultra:grid ultra:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ultra:items-start ultra:gap-6 ultra:space-y-0">
-        <div className="flex flex-col gap-4 ultra:sticky ultra:top-4 ultra:max-h-[calc(100vh-2rem)] ultra:overflow-y-auto">
-          {data.network.length > 0 && (
-            <section className="space-y-2 rounded-xl border p-3">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="font-semibold">{t("schema")}</h2>
-                <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
-              </div>
-              <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
-              {schema.insulated && (
-                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyle.fill, borderColor: insulationStyle.edge }} />
-                  {t("legend.insulationBand")}
-                </p>
-              )}
-            </section>
-          )}
+      {/* Zentrale, Zirkulation and Berechnung together above the Schema. */}
+      <div className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        <CentralForm central={data.central} result={result} editable={editable} onChange={setCentral} />
+        <SettingsForm settings={data.settings} editable={editable} onChange={setSettings} />
+        <div className="lg:col-span-2 2xl:col-span-1">
           <ResultsPanel data={data} result={result} editable={editable} onPump={(pump) => setSettings({ pump })} />
         </div>
-        <div className="space-y-4">
-          <TreeEditor
-            network={data.network}
-            result={result}
-            selected={selected}
-            editable={editable}
-            onSelect={setSelected}
-            onChange={(fn) => setData((d) => ({ ...d, network: fn(d.network) }))}
-          />
-          <div className="grid gap-4 lg:grid-cols-2">
-            <CentralForm central={data.central} result={result} editable={editable} onChange={setCentral} />
-            <SettingsForm settings={data.settings} editable={editable} onChange={setSettings} />
-          </div>
-          <Section title={t("quantities.title")} description={t("quantities.description")}>
-            {quantities.length === 0 ? (
-              <p className="text-sm text-muted-foreground">–</p>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
-                    <th className="py-1 font-normal">{t("quantities.article")}</th>
-                    <th className="py-1 font-normal">{t("quantities.text")}</th>
-                    <th className="py-1 text-right font-normal">{t("quantities.quantity")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(["pipes", "valves", "central", "insulation"] as const).map((g) => {
-                    const rows = quantities.filter((q) => q.group === g);
-                    if (!rows.length) return null;
-                    return [
-                      <tr key={g}>
-                        <td colSpan={3} className="pt-3 pb-1 text-xs font-semibold">
-                          {t(`quantities.groups.${g}`)}
-                        </td>
-                      </tr>,
-                      ...rows.map((q) => (
-                        <tr key={q.key} className="border-b last:border-0">
-                          <td className="py-1 pr-3 whitespace-nowrap text-xs tabular-nums text-muted-foreground">{q.article ? `${q.manufacturer} ${q.article}` : ""}</td>
-                          <td className="py-1 pr-3">{q.label}</td>
-                          <td className="py-1 text-right whitespace-nowrap tabular-nums">
-                            {fmt(q.quantity, q.unit === "m" ? 1 : 0)} {q.unit}
-                          </td>
-                        </tr>
-                      )),
-                    ];
-                  })}
-                </tbody>
-              </table>
-            )}
-          </Section>
-        </div>
       </div>
+
+      {data.network.length > 0 && (
+        <section className="space-y-2 rounded-xl border p-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-semibold">{t("schema")}</h2>
+            <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
+          </div>
+          <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
+          {schema.insulated && (
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="inline-block h-2.5 w-6 rounded-sm border border-dotted" style={{ backgroundColor: insulationStyle.fill, borderColor: insulationStyle.edge }} />
+              {t("legend.insulationBand")}
+            </p>
+          )}
+        </section>
+      )}
+
+      <TreeEditor
+        network={data.network}
+        result={result}
+        selected={selected}
+        editable={editable}
+        onSelect={setSelected}
+        onChange={(fn) => setData((d) => ({ ...d, network: fn(d.network) }))}
+      />
+      <SanitaryQuantitiesPanel quantities={quantities} systemId={id} projectId={projectId} systemName={name} lvs={lvs} dirty={dirty} editable={editable} />
     </div>
   );
 }

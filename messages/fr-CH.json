@@ -2395,7 +2395,7 @@
     },
     "quantities": {
       "title": "Liste de matériel",
-      "description": "Tubes, robinetterie et isolation du réseau, articles du catalogue IGH.",
+      "description": "Tubes et robinetterie Nussbaum, pompe Biral, isolation Meier Tobler (laine minérale : coquilles ROHHE alu, PIR : swisspor Kisodur PIR alu lisse). Chaque groupe peut être repris dans un chapitre d’un descriptif.",
       "article": "Article",
       "text": "Désignation",
       "quantity": "Quantité",
@@ -2404,7 +2404,19 @@
         "valves": "Robinetterie colonnes et étages",
         "central": "Centrale",
         "insulation": "Isolation"
-      }
+      },
+      "insulationAllowance": "y c. 20 % pour les raccords",
+      "chapter": "Chapitre",
+      "newGroupOption": "– nouveau groupe –",
+      "rPosition": "Position R",
+      "noLv": "Le projet n’a pas encore de descriptif.",
+      "toLvs": "Vers les descriptifs",
+      "targetLv": "Descriptif",
+      "groupTitle": "Titre du nouveau groupe",
+      "lvGroup": "Sanitaire – {name}",
+      "insertIntoLv": "Reprendre dans le descriptif",
+      "inserted": "{count} positions reprises dans le descriptif.",
+      "saveFirst": "Enregistrer d’abord."
     },
     "legend": {
       "pwc": "PWC  Eau potable froide",

@@ -2395,7 +2395,7 @@
     },
     "quantities": {
       "title": "Lista del materiale",
-      "description": "Tubi, rubinetteria e isolamento dalla rete, articoli dal catalogo IGH.",
+      "description": "Tubi e rubinetteria Nussbaum, pompa Biral, isolamento Meier Tobler (lana minerale: coppelle ROHHE alu, PIR: swisspor Kisodur PIR alu liscio). Ogni gruppo può essere ripreso in un capitolo di un capitolato.",
       "article": "Articolo",
       "text": "Designazione",
       "quantity": "Quantità",
@@ -2404,7 +2404,19 @@
         "valves": "Rubinetteria colonne e piani",
         "central": "Centrale",
         "insulation": "Isolamento"
-      }
+      },
+      "insulationAllowance": "incl. 20 % per i raccordi",
+      "chapter": "Capitolo",
+      "newGroupOption": "– nuovo gruppo –",
+      "rPosition": "Posizione R",
+      "noLv": "Il progetto non ha ancora un capitolato.",
+      "toLvs": "Ai capitolati",
+      "targetLv": "Capitolato",
+      "groupTitle": "Titolo del nuovo gruppo",
+      "lvGroup": "Sanitario – {name}",
+      "insertIntoLv": "Riprendere nel capitolato",
+      "inserted": "{count} posizioni riprese nel capitolato.",
+      "saveFirst": "Salvare prima."
     },
     "legend": {
       "pwc": "PWC  Acqua potabile fredda",
