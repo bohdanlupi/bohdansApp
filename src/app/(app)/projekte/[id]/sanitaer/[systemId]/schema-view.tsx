@@ -1,19 +1,23 @@
 "use client";
 
-import { ZoomIn } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { mediumColors, type SanitarySchema } from "@/lib/sanitary/schema";
 
 import { SvgPrims } from "../../lueftung/anlagen/[systemId]/schema-view";
 
-const ZOOM_MIN = 100;
-const ZOOM_MAX = 400;
+/**
+ * Pixels per schema unit: the element names (8 units) come out at 14 px like the text of the page, the smaller
+ * sizes and lengths (7 units) at about 12 px.
+ */
+const SCALE = 1.75;
+/** Height of the visible window [px]. */
+const VIEW_HEIGHT = 560;
 
 /**
- * Prinzipschema (Strangschema) in the editor; clicking a line or symbol selects its element. The slider enlarges the
- * drawing (and its texts) beyond the width of the panel; the panel then scrolls.
+ * Prinzipschema (Strangschema) in the editor, drawn at a fixed readable size in a window; the slider below moves the
+ * view sideways, the one on the right up and down. Clicking a line or symbol selects its element.
  */
 export function SanitarySchemaView({
   schema,
@@ -27,29 +31,36 @@ export function SanitarySchemaView({
   onSelect: (id: string) => void;
 }) {
   const t = useTranslations("sanitary");
-  const [zoom, setZoom] = useState(ZOOM_MIN);
+  const frame = useRef<HTMLDivElement>(null);
+  const [viewWidth, setViewWidth] = useState(0);
+  const width = schema.width * SCALE;
+  const height = schema.height * SCALE;
+  const viewHeight = Math.min(VIEW_HEIGHT, height);
+  const maxX = Math.max(0, width - viewWidth);
+  const maxY = Math.max(0, height - viewHeight);
+  const [x, setX] = useState(0);
+  // Start at the bottom: the Zentrale and the Verteilleitung.
+  const [y, setY] = useState(Number.POSITIVE_INFINITY);
+  const posX = Math.min(x, maxX);
+  const posY = Math.min(y, maxY);
+
+  useEffect(() => {
+    const el = frame.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setViewWidth(entry.contentRect.width));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="space-y-2">
-      <label className="flex items-center gap-2 text-xs text-muted-foreground">
-        <ZoomIn className="size-4" />
-        <span>{t("zoom")}</span>
-        <input
-          type="range"
-          min={ZOOM_MIN}
-          max={ZOOM_MAX}
-          step={10}
-          value={zoom}
-          onChange={(e) => setZoom(Number(e.target.value))}
-          className="w-48 accent-brand"
-          aria-label={t("zoom")}
-        />
-        <span className="w-10 tabular-nums">{zoom} %</span>
-      </label>
-      <div className="max-h-[75vh] overflow-auto">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+      <div ref={frame} className="relative overflow-hidden rounded-lg border bg-background" style={{ height: viewHeight }}>
         <svg
           viewBox={`0 0 ${schema.width} ${schema.height}`}
-          className="text-foreground"
-          style={{ width: `${zoom}%`, minWidth: Math.min(schema.width, 1000) * (zoom / 100) }}
+          width={width}
+          height={height}
+          className="absolute top-0 left-0 max-w-none text-foreground"
+          style={{ transform: `translate(${-posX}px, ${-posY}px)` }}
           role="img"
           aria-label={label}
         >
@@ -77,6 +88,28 @@ export function SanitarySchemaView({
           ))}
         </svg>
       </div>
+      {/* Vertical slider: top of the range = top of the schema. */}
+      <input
+        type="range"
+        min={0}
+        max={Math.round(maxY)}
+        value={Math.round(posY)}
+        disabled={maxY <= 0}
+        onChange={(e) => setY(Number(e.target.value))}
+        aria-label={t("moveVertical")}
+        className="w-4 accent-brand disabled:opacity-40"
+        style={{ writingMode: "vertical-lr", height: viewHeight }}
+      />
+      <input
+        type="range"
+        min={0}
+        max={Math.round(maxX)}
+        value={Math.round(posX)}
+        disabled={maxX <= 0}
+        onChange={(e) => setX(Number(e.target.value))}
+        aria-label={t("moveHorizontal")}
+        className="w-full accent-brand disabled:opacity-40"
+      />
     </div>
   );
 }

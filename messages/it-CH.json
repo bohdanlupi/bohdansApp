@@ -2370,8 +2370,8 @@
       "dpCheck": "Δp valvola di ritegno [mbar]",
       "dpValve": "Δp organo di regolazione aperto [mbar]",
       "lambda": "λ isolante a 40 °C [W/(m·K)]",
-      "pwcInsulation": "Isolamento PWC distribuzione / colonne [mm]",
-      "insulationHint": "Condotte mantenute in temperatura (PWH con ricircolo, PWH-C, PWH dallo scaldacqua) secondo SIA 385/1 tabella 3; tubo accanto a tubo con la somma dei due diametri esterni. L'acqua fredda deve restare al massimo a 25 °C (SIA 385/1 3.1.4) – la norma non indica uno spessore, il valore è un'ipotesi di progetto."
+      "pwcInsulation": "Isolare distribuzione e colonne PWC ({mm} mm)",
+      "insulationHint": "Condotte mantenute in temperatura secondo SIA 385/1 tabella 3: convenzionale, PWH e PWH-C ciascuna separatamente; tubo accanto a tubo, un isolamento comune come per un PWH di una dimensione maggiore (p. es. 28 → come 35), il PWH-C senza isolamento proprio. Acqua fredda 30 mm con λ < 0.03 (PIR), 40 mm con λ 0.03 … 0.05 (lana minerale)."
     },
     "quantities": {
       "title": "Lista del materiale",
@@ -2416,6 +2416,7 @@
       "plan": "Schema di principio",
       "trade": "Sanitario"
     },
-    "zoom": "Dimensione"
+    "moveHorizontal": "Spostare lo schema lateralmente",
+    "moveVertical": "Spostare lo schema in alto / in basso"
   }
 }

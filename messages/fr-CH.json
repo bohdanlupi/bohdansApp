@@ -2370,8 +2370,8 @@
       "dpCheck": "Δp clapet anti-retour [mbar]",
       "dpValve": "Δp organe de réglage ouvert [mbar]",
       "lambda": "λ isolant à 40 °C [W/(m·K)]",
-      "pwcInsulation": "Isolation PWC distribution / colonnes [mm]",
-      "insulationHint": "Conduites maintenues en température (PWH avec circulation, PWH-C, PWH depuis le chauffe-eau) selon SIA 385/1 tableau 3 ; tube contre tube avec la somme des deux diamètres extérieurs. L'eau froide doit rester au plus à 25 °C (SIA 385/1 3.1.4) – la norme ne fixe pas d'épaisseur, la valeur est une hypothèse de planification."
+      "pwcInsulation": "Isoler la distribution et les colonnes PWC ({mm} mm)",
+      "insulationHint": "Conduites maintenues en température selon SIA 385/1 tableau 3 : conventionnelle, PWH et PWH-C chacune séparément ; tube contre tube, une isolation commune comme pour un PWH d'une dimension plus grande (p. ex. 28 → comme 35), le PWH-C sans isolation propre. Eau froide 30 mm pour λ < 0.03 (PIR), 40 mm pour λ 0.03 … 0.05 (laine minérale)."
     },
     "quantities": {
       "title": "Liste de matériel",
@@ -2416,6 +2416,7 @@
       "plan": "Schéma de principe",
       "trade": "Sanitaire"
     },
-    "zoom": "Taille"
+    "moveHorizontal": "Déplacer le schéma latéralement",
+    "moveVertical": "Déplacer le schéma vers le haut / le bas"
   }
 }

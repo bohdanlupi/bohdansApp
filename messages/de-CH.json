@@ -2370,8 +2370,8 @@
       "dpCheck": "Δp Rückflussverhinderer [mbar]",
       "dpValve": "Δp Regulierorgan offen [mbar]",
       "lambda": "λ Dämmstoff bei 40 °C [W/(m·K)]",
-      "pwcInsulation": "Dämmung PWC Verteil- / Steigleitungen [mm]",
-      "insulationHint": "Warmgehaltene Leitungen (PWH mit Zirkulation, PWH-C, PWH ab Wassererwärmer) nach SIA 385/1 Tabelle 3; Rohr an Rohr mit der Summe beider Aussendurchmesser. Kaltwasser darf höchstens 25 °C erreichen (SIA 385/1 3.1.4) – die Norm nennt keine Dämmdicke, der Wert ist eine Planungsvorgabe."
+      "pwcInsulation": "PWC Verteil- und Steigleitungen dämmen ({mm} mm)",
+      "insulationHint": "Warmgehaltene Leitungen nach SIA 385/1 Tabelle 3: konventionell PWH und PWH-C je einzeln; Rohr an Rohr eine gemeinsame Dämmung wie für eine PWH eine Dimension grösser (z. B. 28 → wie 35), die PWH-C ohne eigene Dämmung. Kaltwasser 30 mm bei λ < 0.03 (PIR), 40 mm bei λ 0.03 … 0.05 (Mineralwolle)."
     },
     "quantities": {
       "title": "Materialliste",
@@ -2416,6 +2416,7 @@
       "plan": "Prinzipschema",
       "trade": "Sanitär"
     },
-    "zoom": "Grösse"
+    "moveHorizontal": "Schema seitlich verschieben",
+    "moveVertical": "Schema nach oben / unten verschieben"
   }
 }

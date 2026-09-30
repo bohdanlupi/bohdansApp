@@ -145,6 +145,9 @@ export function insulationThickness(od: number, lambda: number): number {
   return Math.ceil(r1[c] + (r2[c] - r1[c]) * t - 1e-9);
 }
 
+/** Insulation of cold water pipes [mm]: 30 mm with λ < 0.03 W/(m·K) (PIR), else 40 mm (Mineralwolle). */
+export const pwcInsulationThickness = (lambda: number) => (lambda < 0.03 - 1e-9 ? 30 : 40);
+
 /** Highlighter band of an insulation thickness in the schema (fill, dotted edge). */
 export function insulationStyle(mm: number): { fill: string; edge: string } {
   if (mm <= 20) return { fill: "#cfe8ff", edge: "#3a78c4" };
