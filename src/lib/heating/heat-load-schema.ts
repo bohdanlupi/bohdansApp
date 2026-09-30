@@ -99,8 +99,17 @@ const roomSchema = z.object({
   elements: lenientArray(elementSchema, 200),
 });
 
+/** Gebäudeträgheit of a Geschoss (overrides the inertia of the project site for its rooms). */
+const floorInertiaSchema = z.object({
+  floor: z.string().max(20),
+  inertia: z.enum(inertiaModes),
+  tau: num(0, 10000),
+  inertiaManual: num(-3, 0),
+});
+
 export const heatLoadSchema = z.object({
   concept: z.enum(ventilationConcepts).catch("natural"),
+  floorInertia: lenientArray(floorInertiaSchema, 50),
   fiz: num(0, 1),
   rooms: lenientArray(roomSchema, 500),
   notes: text(20000),

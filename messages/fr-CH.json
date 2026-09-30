@@ -2112,6 +2112,13 @@
       "gains": "Apports",
       "buildingHint": "La charge thermique du bâtiment sert au dimensionnement du générateur selon SIA 384/1 ; les charges des pièces au dimensionnement de l’émission.",
       "roomTotal": "Transmission (n_min {nMin} h⁻¹, q_v {qv} m³/h)"
+    },
+    "floorInertia": {
+      "title": "Inertie du bâtiment par étage",
+      "hint": "Chaque étage reprend l’inertie du projet ({project}) ou reçoit la sienne, p. ex. un sous-sol massif sous une construction en bois. θe,0 s’applique alors par étage.",
+      "project": "comme le projet : {value}",
+      "perFloor": "différente selon l’étage",
+      "pdfRow": "Inertie {floor}"
     }
   },
   "floorHeating": {

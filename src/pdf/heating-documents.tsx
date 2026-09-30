@@ -68,6 +68,11 @@ export function HeatLoadDocument({ firm, logo, t, pageLabel, projectLabel, dateL
     [s("site.altitudeCorrection"), `${n(r.altitudeCorrection, 2)} K`],
     [s("site.inertiaCorrection"), `${n(r.inertia, 2)} K (${s(`inertia.${site.inertia}`)})`],
     [s("site.thetaE0"), `${n(r.thetaE0, 0)} °C`],
+    // Geschosse with their own Gebäudeträgheit.
+    ...result.floors.map((f, i): [string, string] => {
+      const entry = data.floorInertia[i];
+      return [s("floorInertia.pdfRow", { floor: f.floor || "-" }), `${n(f.inertia, 2)} K (${s(`inertia.${entry.inertia}`)}), θe,0 ${n(f.thetaE0, 0)} °C`];
+    }),
     [s("site.thetaMean"), `${n(r.thetaMean, 1)} °C`],
     [s("site.rhoCp"), `${n(r.rhoCp, 4)} Wh/m³K`],
     [s("site.airtight"), s(`airtight.${site.airtight}`)],

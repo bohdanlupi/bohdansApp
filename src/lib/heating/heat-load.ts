@@ -144,8 +144,20 @@ export type HeatRoom = {
   elements: RoomElement[];
 };
 
+/**
+ * Gebäudeträgheit of one Geschoss of a calculation (floors of the building can differ, e.g. a massive basement under a
+ * timber building); floors without an entry take the inertia of the project site.
+ */
+export type FloorInertia = {
+  floor: string;
+  inertia: InertiaMode;
+  tau: number | null;
+  inertiaManual: number | null;
+};
+
 export type HeatLoadData = {
   concept: VentilationConcept;
+  floorInertia: FloorInertia[];
   /** Simultaneity f_i-z of the ventilation losses; null = default of Tabelle 6. */
   fiz: number | null;
   rooms: HeatRoom[];
@@ -223,6 +235,12 @@ export function evaluateSite(site: HeatSite): SiteResult {
   };
 }
 
+/** Site with the inertia of a Geschoss, when the calculation sets one for it. */
+export function floorSite(site: HeatSite, data: Pick<HeatLoadData, "floorInertia">, floor: string): HeatSite {
+  const entry = data.floorInertia.find((f) => f.floor === floor.trim());
+  return entry ? { ...site, inertia: entry.inertia, tau: entry.tau, inertiaManual: entry.inertiaManual } : site;
+}
+
 export type ConstructionResult = { value: number | null; feAn: number };
 
 /** Value used per element: U, Ueq (Gl. 19 unless given) with f_e,an, ψ or χ. */
@@ -251,6 +269,9 @@ export type ElementWarning = "noConstruction" | "noValue" | "noNeighbour" | "noH
 
 export type RoomResult = {
   id: string;
+  /** Inertia correction Δθe,τ [K] and θe,0 [°C] of the room's Geschoss. */
+  inertia: number;
+  thetaE0: number | null;
   thetaInt: number | null;
   area: number;
   volume: number;
@@ -274,6 +295,8 @@ export type RoomResult = {
 
 export type HeatLoadResult = {
   site: SiteResult;
+  /** Geschosse with their own Gebäudeträgheit: Δθe,τ [K] and θe,0 [°C]. */
+  floors: { floor: string; inertia: number; thetaE0: number | null }[];
   rooms: RoomResult[];
   fiz: number;
   fizRange: [number, number];
@@ -313,11 +336,21 @@ export function evaluateHeatLoad(data: HeatLoadData, site: HeatSite, catalog: Co
   const byId = new Map(catalog.map((c) => [c.id, c]));
   const values = new Map(catalog.map((c) => [c.id, constructionValue(c)]));
   const roomsById = new Map(data.rooms.map((r) => [r.id, r]));
-  const thetaE0 = s.thetaE0;
+  // Norm outdoor temperature per Geschoss: the inertia of the floor when the calculation sets one (Gl. 14 per floor).
+  const floorSites = new Map<string, SiteResult>();
+  const siteOf = (floor: string) => {
+    let r = floorSites.get(floor);
+    if (!r) {
+      r = data.floorInertia.some((f) => f.floor === floor.trim()) ? evaluateSite(floorSite(site, data, floor)) : s;
+      floorSites.set(floor, r);
+    }
+    return r;
+  };
 
   // Anhang A: temperature of the non-actively heated rooms from their elements (f1 = 1, ventilation neglected).
   const passiveTemps = new Map<string, number | null>();
   for (const room of data.rooms.filter((r) => r.kind === "passive")) {
+    const thetaE0 = siteOf(room.floor).thetaE0;
     let sumH = 0;
     let sumHTheta = 0;
     for (const e of room.elements) {
@@ -350,6 +383,8 @@ export function evaluateHeatLoad(data: HeatLoadData, site: HeatSite, catalog: Co
     const area = room.area ?? 0;
     const volume = room.volume ?? area * (room.height ?? 0);
     const high = (room.height ?? 0) >= 4;
+    const floor = siteOf(room.floor);
+    const thetaE0 = floor.thetaE0;
     const thetaInt = room.kind === "passive" ? (passiveTemps.get(room.id) ?? null) : room.thetaInt;
     const hT = zeroParts();
     const phiT = zeroParts();
@@ -421,6 +456,8 @@ export function evaluateHeatLoad(data: HeatLoadData, site: HeatSite, catalog: Co
     const phiHL = room.kind === "passive" ? 0 : phiTotal + phiV - gains;
     return {
       id: room.id,
+      inertia: floor.inertia,
+      thetaE0,
       thetaInt,
       area,
       volume,
@@ -451,6 +488,10 @@ export function evaluateHeatLoad(data: HeatLoadData, site: HeatSite, catalog: Co
   const area = sum((r) => r.area);
   return {
     site: s,
+    floors: data.floorInertia.map((f) => {
+      const r = siteOf(f.floor);
+      return { floor: f.floor, inertia: r.inertia, thetaE0: r.thetaE0 };
+    }),
     rooms,
     fiz,
     fizRange: sim.range,

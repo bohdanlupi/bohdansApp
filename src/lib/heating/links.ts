@@ -18,8 +18,8 @@ export function linkedRooms(calcs: { id: string; name: string; data: HeatLoadDat
         if (!e.heatedSurface) return;
         const er = r.elements[k];
         floorPhi += er.phi;
-        if (below === null && r.thetaInt !== null && result.site.thetaE0 !== null && er.f1 !== null)
-          below = er.thetaX ?? r.thetaInt - er.f1 * (r.thetaInt - result.site.thetaE0);
+        if (below === null && r.thetaInt !== null && r.thetaE0 !== null && er.f1 !== null)
+          below = er.thetaX ?? r.thetaInt - er.f1 * (r.thetaInt - r.thetaE0);
       });
       map.set(`${calc.id}:${room.id}`, {
         name: [room.number, room.name].filter(Boolean).join(" "),
