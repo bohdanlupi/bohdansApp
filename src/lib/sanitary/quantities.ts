@@ -3,6 +3,7 @@
 // Mineralwolle: ROHHE r.Heat A Alu kaschiert, PIR: swisspor Kisodur PIR Alu (glatt) – with 20 % for the fittings.
 
 import { type NussbaumFamily, nussbaumArticles } from "./catalog-data";
+import { systemFittings } from "./fittings";
 import { type InsulationShell, insulationShells } from "./insulation-data";
 import type { SanitaryData, SanNode, SystemResult } from "./network";
 import { articleFor, type InsulationMaterial, type PipeSize, pipeArticle } from "./pipes";
@@ -92,6 +93,11 @@ export function systemQuantities(data: SanitaryData, result: SystemResult): Quan
     n.children.forEach(walk);
   };
   data.network.forEach(walk);
+
+  // Fittings of the Leitungen (Bogen, T-Stücke, Reduktionen, Übergänge, Muffen, Verteiler) under «Rohre».
+  for (const f of systemFittings(data, result)) {
+    add({ key: f.key, group: "pipes", manufacturer: f.article ? "Nussbaum" : null, article: f.article, label: f.label, unit: "Stk" }, f.count);
+  }
 
   // Circuits that end outside a Strang get their own Regulierventil, Rückflussverhinderer and Absperrung.
   for (const c of result.circuits) {

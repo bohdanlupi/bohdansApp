@@ -2292,7 +2292,9 @@
         "thermal": "thermostatique automatique (Nussbaum 36030)",
         "manual": "vanne de réglage manuelle (Nussbaum 24026)"
       },
-      "appliancesHint": "Points de soutirage selon SSIGE W3 tableau 3 (valeurs de charge froid / chaud)."
+      "appliancesHint": "Points de soutirage selon SSIGE W3 tableau 3 (valeurs de charge froid / chaud).",
+      "bends90": "Coudes 90° [pce]",
+      "bends45": "Coudes 45° [pce]"
     },
     "appliances": {
       "wc": "WC à réservoir (1 / –)",

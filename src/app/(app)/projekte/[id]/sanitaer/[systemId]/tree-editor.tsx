@@ -296,6 +296,22 @@ function NodePanel({
               </NativeSelect>
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            {(["bends90", "bends45"] as const).map((key) => (
+              <div key={key} className="space-y-1">
+                <Label className="text-xs">{t(`node.${key}`)}</Label>
+                <NumberField
+                  value={node[key] || null}
+                  decimals={0}
+                  label={t(`node.${key}`)}
+                  placeholder="0"
+                  disabled={!editable}
+                  onChange={(v) => onPatch({ [key]: Math.min(999, Math.max(0, Math.round(v ?? 0))) })}
+                  className="h-8 rounded-lg"
+                />
+              </div>
+            ))}
+          </div>
           <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
             {check("riser", t("node.riser"))}
             {check("shutoff", t("node.shutoff"))}

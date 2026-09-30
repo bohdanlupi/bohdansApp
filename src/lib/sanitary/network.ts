@@ -57,6 +57,9 @@ export type SanNode = {
   shutoff: boolean;
   /** Regulierventil of the Zirkulation at the foot of a Strang. */
   regValve: RegValve;
+  /** Bogen 90° / 45° of the Leitung (each of its lines PWC / PWH / PWH-C gets them in its size). */
+  bends90: number;
+  bends45: number;
   appliances: Appliances;
   children: SanNode[];
 };
@@ -235,6 +238,8 @@ export const newNode = (type: SanNode["type"], patch: Partial<SanNode> = {}): Sa
   meter: false,
   shutoff: false,
   regValve: "thermal",
+  bends90: 0,
+  bends45: 0,
   appliances: {},
   children: [],
   ...patch,

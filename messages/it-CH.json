@@ -2292,7 +2292,9 @@
         "thermal": "termostatica automatica (Nussbaum 36030)",
         "manual": "valvola di regolazione manuale (Nussbaum 24026)"
       },
-      "appliancesHint": "Punti di prelievo secondo SSIGA W3 tabella 3 (valori di carico freddo / caldo)."
+      "appliancesHint": "Punti di prelievo secondo SSIGA W3 tabella 3 (valori di carico freddo / caldo).",
+      "bends90": "Curve 90° [pz]",
+      "bends45": "Curve 45° [pz]"
     },
     "appliances": {
       "wc": "WC con cassetta (1 / –)",

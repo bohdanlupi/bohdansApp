@@ -2292,7 +2292,9 @@
         "thermal": "thermisch selbsttätig (Nussbaum 36030)",
         "manual": "Regulierventil von Hand (Nussbaum 24026)"
       },
-      "appliancesHint": "Entnahmestellen nach SVGW W3 Tabelle 3 (Belastungswerte kalt / warm)."
+      "appliancesHint": "Entnahmestellen nach SVGW W3 Tabelle 3 (Belastungswerte kalt / warm).",
+      "bends90": "Bogen 90° [Stk]",
+      "bends45": "Bogen 45° [Stk]"
     },
     "appliances": {
       "wc": "WC Spülkasten (1 / –)",

@@ -372,6 +372,10 @@ fittings; inserted into an LV per group (Rohre / Armaturen / Zentrale / Dämmung
 Zentrale lines (Hauseinführung → Verteilbatterie, → Verteilung, cold feed, PWH / PWH-C Wassererwärmer → Verteilung) are
 insulated and labelled like the Leitungen; with their lengths (central.trunkLength, centralLength, heaterLength)
 they add pipes and insulation to the material list.
+Fittings (fittings.ts, material list «Rohre», not in Δp): Bogen 90° / 45° entered per Leitung for all its lines;
+T-Stücke at branches (reduced where Nussbaum has them, else equal T + Reduktion) and where the PWH-C joins the PWH;
+Reduktionen; Übergänge Aquaplus → Flowpress (84234); Muffen per 6 m bar; Flowpress-Verteiler 2/3/4-fach per
+Apparategruppe for PWC and PWH with Verteileranschluss (84250) or Aquaplus-Übergang ¾ (80033).
 Editor order: Zentrale | Zirkulation | Berechnung; Schema with the Verteilung below it and the element panel (Leitung)
 to the right; Materialliste.
 

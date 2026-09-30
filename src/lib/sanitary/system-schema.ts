@@ -34,6 +34,8 @@ const nodeFields = z.object({
   meter: z.boolean().catch(false),
   shutoff: z.boolean().catch(false),
   regValve: z.enum(["thermal", "manual"]).catch("thermal"),
+  bends90: z.number().int().min(0).max(999).catch(0),
+  bends45: z.number().int().min(0).max(999).catch(0),
   appliances: z
     .record(z.string(), z.unknown())
     .catch({})

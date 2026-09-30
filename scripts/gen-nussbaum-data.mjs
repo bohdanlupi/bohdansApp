@@ -39,6 +39,23 @@ const families = {
   "19053": "Wasserenthärter Aquapro-Vita",
   "67100": "Rohbauset, für Messkapsel Koax",
   "81018": "Optipress-Aquaplus-Temperaturmessstelle, für gedämmte Leitungen",
+  // Fittings of the material list (Rohre): bends, T-pieces, reducers, couplings, transitions, manifolds.
+  "80000": "Optipress-Aquaplus-Bogen 90°",
+  "80003": "Optipress-Aquaplus-Bogen 45°",
+  "80010": "Optipress-Aquaplus-T-Stück",
+  "81010": "Optipress-Aquaplus-T-Stück",
+  "80020": "Optipress-Aquaplus-Muffe",
+  "80021": "Optipress-Aquaplus-Reduktion, mit Einsteckende",
+  "81021": "Optipress-Aquaplus-Reduktion, mit Einsteckende",
+  "80033": "Optipress-Aquaplus-Übergang, mit Innengewinde",
+  "84240": "Optiflex-Flowpress-Bogen 90°",
+  "84241": "Optiflex-Flowpress-Bogen 45°",
+  "84242": "Optiflex-Flowpress-T-Stück",
+  "84236": "Optiflex-Flowpress-Kupplung",
+  "84234": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus",
+  "84250": "Optiflex-Flowpress-Verteileranschluss",
+  "84260": "Optiflex-Flowpress-Verteiler, 2-fach",
+  "84261": "Optiflex-Flowpress-Verteiler, 3-/4-fach",
 };
 
 async function catalogId(pattern) {

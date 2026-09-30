@@ -13,13 +13,29 @@ export const nussbaumFamilies = {
   "24026": "Regulierventil, mit Innengewinde",
   "36030": "Zirkulationsventil, mit Durchflussregulierung selbstständig",
   "67100": "Rohbauset, für Messkapsel Koax",
+  "80000": "Optipress-Aquaplus-Bogen 90°",
+  "80003": "Optipress-Aquaplus-Bogen 45°",
+  "80010": "Optipress-Aquaplus-T-Stück",
+  "80020": "Optipress-Aquaplus-Muffe",
+  "80021": "Optipress-Aquaplus-Reduktion, mit Einsteckende",
+  "80033": "Optipress-Aquaplus-Übergang, mit Innengewinde",
+  "81010": "Optipress-Aquaplus-T-Stück",
   "81018": "Optipress-Aquaplus-Temperaturmessstelle, für gedämmte Leitungen",
+  "81021": "Optipress-Aquaplus-Reduktion, mit Einsteckende",
   "81082": "Optipress-Edelstahlrohr 1.4521, Stange à 6 m",
   "81163": "Optipress-A-Rückflussverhinderer EA",
   "81168": "OP-A-Absperr-Sicherheitsgarnitur SW, zu Stand-Wassererwärmer",
   "82200": "Optipress-Aquaplus-Schrägsitzventil",
   "82202": "Optipress-Aquaplus-Schrägsitzventil, mit Entleerventil",
   "82232": "Optipress-Aquaplus-Batterieventil, mit Optipress-A-Anschlussverschraubung",
+  "84234": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus",
+  "84236": "Optiflex-Flowpress-Kupplung",
+  "84240": "Optiflex-Flowpress-Bogen 90°",
+  "84241": "Optiflex-Flowpress-Bogen 45°",
+  "84242": "Optiflex-Flowpress-T-Stück",
+  "84250": "Optiflex-Flowpress-Verteileranschluss",
+  "84260": "Optiflex-Flowpress-Verteiler, 2-fach",
+  "84261": "Optiflex-Flowpress-Verteiler, 3-/4-fach",
   "86510": "Optiflex-Flowpress-Schrägsitzventil",
   "87153": "Optiflex-Flowpress-Rohr formstabil"
 } as const;
@@ -220,6 +236,760 @@ export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
       "text": "Rohbauset, für Messkapsel Koax, ¾"
     }
   ],
+  "80000": [
+    {
+      "number": "80000.22",
+      "size": "15",
+      "text": "Optipress-Aquaplus-Bogen 90°, 15"
+    },
+    {
+      "number": "80000.23",
+      "size": "18",
+      "text": "Optipress-Aquaplus-Bogen 90°, 18"
+    },
+    {
+      "number": "80000.24",
+      "size": "22",
+      "text": "Optipress-Aquaplus-Bogen 90°, 22"
+    },
+    {
+      "number": "80000.25",
+      "size": "28",
+      "text": "Optipress-Aquaplus-Bogen 90°, 28"
+    },
+    {
+      "number": "80000.26",
+      "size": "35",
+      "text": "Optipress-Aquaplus-Bogen 90°, 35"
+    },
+    {
+      "number": "80000.27",
+      "size": "42",
+      "text": "Optipress-Aquaplus-Bogen 90°, 42"
+    },
+    {
+      "number": "80000.28",
+      "size": "54",
+      "text": "Optipress-Aquaplus-Bogen 90°, 54"
+    },
+    {
+      "number": "80000.70",
+      "size": "64",
+      "text": "Optipress-Aquaplus-Bogen 90°, 64"
+    },
+    {
+      "number": "80000.71",
+      "size": "76.1",
+      "text": "Optipress-Aquaplus-Bogen 90°, 76.1"
+    },
+    {
+      "number": "80000.72",
+      "size": "88.9",
+      "text": "Optipress-Aquaplus-Bogen 90°, 88.9"
+    },
+    {
+      "number": "80000.73",
+      "size": "108",
+      "text": "Optipress-Aquaplus-Bogen 90°, 108"
+    }
+  ],
+  "80003": [
+    {
+      "number": "80003.22",
+      "size": "15",
+      "text": "Optipress-Aquaplus-Bogen 45°, 15"
+    },
+    {
+      "number": "80003.23",
+      "size": "18",
+      "text": "Optipress-Aquaplus-Bogen 45°, 18"
+    },
+    {
+      "number": "80003.24",
+      "size": "22",
+      "text": "Optipress-Aquaplus-Bogen 45°, 22"
+    },
+    {
+      "number": "80003.25",
+      "size": "28",
+      "text": "Optipress-Aquaplus-Bogen 45°, 28"
+    },
+    {
+      "number": "80003.26",
+      "size": "35",
+      "text": "Optipress-Aquaplus-Bogen 45°, 35"
+    },
+    {
+      "number": "80003.27",
+      "size": "42",
+      "text": "Optipress-Aquaplus-Bogen 45°, 42"
+    },
+    {
+      "number": "80003.28",
+      "size": "54",
+      "text": "Optipress-Aquaplus-Bogen 45°, 54"
+    },
+    {
+      "number": "80003.70",
+      "size": "64",
+      "text": "Optipress-Aquaplus-Bogen 45°, 64"
+    },
+    {
+      "number": "80003.71",
+      "size": "76.1",
+      "text": "Optipress-Aquaplus-Bogen 45°, 76.1"
+    },
+    {
+      "number": "80003.72",
+      "size": "88.9",
+      "text": "Optipress-Aquaplus-Bogen 45°, 88.9"
+    },
+    {
+      "number": "80003.73",
+      "size": "108",
+      "text": "Optipress-Aquaplus-Bogen 45°, 108"
+    }
+  ],
+  "80010": [
+    {
+      "number": "80010.22",
+      "size": "15",
+      "text": "Optipress-Aquaplus-T-Stück, 15"
+    },
+    {
+      "number": "80010.23",
+      "size": "18",
+      "text": "Optipress-Aquaplus-T-Stück, 18"
+    },
+    {
+      "number": "80010.24",
+      "size": "22",
+      "text": "Optipress-Aquaplus-T-Stück, 22"
+    },
+    {
+      "number": "80010.25",
+      "size": "28",
+      "text": "Optipress-Aquaplus-T-Stück, 28"
+    },
+    {
+      "number": "80010.26",
+      "size": "35",
+      "text": "Optipress-Aquaplus-T-Stück, 35"
+    },
+    {
+      "number": "80010.27",
+      "size": "42",
+      "text": "Optipress-Aquaplus-T-Stück, 42"
+    },
+    {
+      "number": "80010.28",
+      "size": "54",
+      "text": "Optipress-Aquaplus-T-Stück, 54"
+    },
+    {
+      "number": "80010.32",
+      "size": "18 x 15 x 15",
+      "text": "Optipress-Aquaplus-T-Stück, 18 x 15 x 15"
+    },
+    {
+      "number": "80010.33",
+      "size": "18 x 15 x 18",
+      "text": "Optipress-Aquaplus-T-Stück, 18 x 15 x 18"
+    },
+    {
+      "number": "80010.34",
+      "size": "22 x 15 x 15",
+      "text": "Optipress-Aquaplus-T-Stück, 22 x 15 x 15"
+    },
+    {
+      "number": "80010.36",
+      "size": "22 x 15 x 22",
+      "text": "Optipress-Aquaplus-T-Stück, 22 x 15 x 22"
+    },
+    {
+      "number": "80010.37",
+      "size": "22 x 18 x 22",
+      "text": "Optipress-Aquaplus-T-Stück, 22 x 18 x 22"
+    },
+    {
+      "number": "80010.38",
+      "size": "22 x 18 x 18",
+      "text": "Optipress-Aquaplus-T-Stück, 22 x 18 x 18"
+    },
+    {
+      "number": "80010.39",
+      "size": "28 x 15 x 28",
+      "text": "Optipress-Aquaplus-T-Stück, 28 x 15 x 28"
+    },
+    {
+      "number": "80010.40",
+      "size": "22 x 22 x 15",
+      "text": "Optipress-Aquaplus-T-Stück, 22 x 22 x 15"
+    },
+    {
+      "number": "80010.41",
+      "size": "28 x 22 x 28",
+      "text": "Optipress-Aquaplus-T-Stück, 28 x 22 x 28"
+    },
+    {
+      "number": "80010.42",
+      "size": "22 x 22 x 18",
+      "text": "Optipress-Aquaplus-T-Stück, 22 x 22 x 18"
+    },
+    {
+      "number": "80010.43",
+      "size": "35 x 22 x 35",
+      "text": "Optipress-Aquaplus-T-Stück, 35 x 22 x 35"
+    },
+    {
+      "number": "80010.44",
+      "size": "22 x 15 x 18",
+      "text": "Optipress-Aquaplus-T-Stück, 22 x 15 x 18"
+    },
+    {
+      "number": "80010.45",
+      "size": "35 x 28 x 35",
+      "text": "Optipress-Aquaplus-T-Stück, 35 x 28 x 35"
+    },
+    {
+      "number": "80010.46",
+      "size": "22 x 28 x 22",
+      "text": "Optipress-Aquaplus-T-Stück, 22 x 28 x 22"
+    },
+    {
+      "number": "80010.47",
+      "size": "42 x 28 x 42",
+      "text": "Optipress-Aquaplus-T-Stück, 42 x 28 x 42"
+    },
+    {
+      "number": "80010.48",
+      "size": "42 x 35 x 42",
+      "text": "Optipress-Aquaplus-T-Stück, 42 x 35 x 42"
+    },
+    {
+      "number": "80010.50",
+      "size": "54 x 42 x 54",
+      "text": "Optipress-Aquaplus-T-Stück, 54 x 42 x 54"
+    },
+    {
+      "number": "80010.51",
+      "size": "28 x 28 x 15",
+      "text": "Optipress-Aquaplus-T-Stück, 28 x 28 x 15"
+    },
+    {
+      "number": "80010.52",
+      "size": "28 x 28 x 18",
+      "text": "Optipress-Aquaplus-T-Stück, 28 x 28 x 18"
+    },
+    {
+      "number": "80010.53",
+      "size": "35 x 22 x 28",
+      "text": "Optipress-Aquaplus-T-Stück, 35 x 22 x 28"
+    },
+    {
+      "number": "80010.54",
+      "size": "35 x 28 x 28",
+      "text": "Optipress-Aquaplus-T-Stück, 35 x 28 x 28"
+    },
+    {
+      "number": "80010.55",
+      "size": "28 x 18 x 28",
+      "text": "Optipress-Aquaplus-T-Stück, 28 x 18 x 28"
+    },
+    {
+      "number": "80010.56",
+      "size": "28 x 22 x 22",
+      "text": "Optipress-Aquaplus-T-Stück, 28 x 22 x 22"
+    },
+    {
+      "number": "80010.57",
+      "size": "28 x 28 x 22",
+      "text": "Optipress-Aquaplus-T-Stück, 28 x 28 x 22"
+    },
+    {
+      "number": "80010.58",
+      "size": "42 x 15 x 42",
+      "text": "Optipress-Aquaplus-T-Stück, 42 x 15 x 42"
+    },
+    {
+      "number": "80010.60",
+      "size": "64",
+      "text": "Optipress-Aquaplus-T-Stück, 64"
+    },
+    {
+      "number": "80010.61",
+      "size": "76.1",
+      "text": "Optipress-Aquaplus-T-Stück, 76.1"
+    },
+    {
+      "number": "80010.62",
+      "size": "88.9",
+      "text": "Optipress-Aquaplus-T-Stück, 88.9"
+    },
+    {
+      "number": "80010.63",
+      "size": "108",
+      "text": "Optipress-Aquaplus-T-Stück, 108"
+    },
+    {
+      "number": "80010.65",
+      "size": "35 x 15 x 35",
+      "text": "Optipress-Aquaplus-T-Stück, 35 x 15 x 35"
+    },
+    {
+      "number": "80010.66",
+      "size": "35 x 18 x 35",
+      "text": "Optipress-Aquaplus-T-Stück, 35 x 18 x 35"
+    },
+    {
+      "number": "80010.69",
+      "size": "42 x 18 x 42",
+      "text": "Optipress-Aquaplus-T-Stück, 42 x 18 x 42"
+    },
+    {
+      "number": "80010.70",
+      "size": "54 x 22 x 54",
+      "text": "Optipress-Aquaplus-T-Stück, 54 x 22 x 54"
+    },
+    {
+      "number": "80010.71",
+      "size": "54 x 28 x 54",
+      "text": "Optipress-Aquaplus-T-Stück, 54 x 28 x 54"
+    },
+    {
+      "number": "80010.72",
+      "size": "54 x 35 x 54",
+      "text": "Optipress-Aquaplus-T-Stück, 54 x 35 x 54"
+    },
+    {
+      "number": "80010.73",
+      "size": "42 x 22 x 42",
+      "text": "Optipress-Aquaplus-T-Stück, 42 x 22 x 42"
+    },
+    {
+      "number": "80010.74",
+      "size": "64 x 22 x 64",
+      "text": "Optipress-Aquaplus-T-Stück, 64 x 22 x 64"
+    },
+    {
+      "number": "80010.75",
+      "size": "64 x 28 x 64",
+      "text": "Optipress-Aquaplus-T-Stück, 64 x 28 x 64"
+    },
+    {
+      "number": "80010.76",
+      "size": "64 x 35 x 64",
+      "text": "Optipress-Aquaplus-T-Stück, 64 x 35 x 64"
+    },
+    {
+      "number": "80010.77",
+      "size": "64 x 42 x 64",
+      "text": "Optipress-Aquaplus-T-Stück, 64 x 42 x 64"
+    },
+    {
+      "number": "80010.78",
+      "size": "64 x 54 x 64",
+      "text": "Optipress-Aquaplus-T-Stück, 64 x 54 x 64"
+    },
+    {
+      "number": "80010.79",
+      "size": "76.1x22x76.1",
+      "text": "Optipress-Aquaplus-T-Stück, 76.1x22x76.1"
+    },
+    {
+      "number": "80010.80",
+      "size": "76.1x28x76.1",
+      "text": "Optipress-Aquaplus-T-Stück, 76.1x28x76.1"
+    },
+    {
+      "number": "80010.81",
+      "size": "76.1x35x76.1",
+      "text": "Optipress-Aquaplus-T-Stück, 76.1x35x76.1"
+    },
+    {
+      "number": "80010.82",
+      "size": "76.1x42x76.1",
+      "text": "Optipress-Aquaplus-T-Stück, 76.1x42x76.1"
+    },
+    {
+      "number": "80010.83",
+      "size": "76.1x54x76.1",
+      "text": "Optipress-Aquaplus-T-Stück, 76.1x54x76.1"
+    },
+    {
+      "number": "80010.85",
+      "size": "88.9x22x88.9",
+      "text": "Optipress-Aquaplus-T-Stück, 88.9x22x88.9"
+    },
+    {
+      "number": "80010.86",
+      "size": "88.9x28x88.9",
+      "text": "Optipress-Aquaplus-T-Stück, 88.9x28x88.9"
+    },
+    {
+      "number": "80010.87",
+      "size": "88.9x35x88.9",
+      "text": "Optipress-Aquaplus-T-Stück, 88.9x35x88.9"
+    },
+    {
+      "number": "80010.88",
+      "size": "88.9x42x88.9",
+      "text": "Optipress-Aquaplus-T-Stück, 88.9x42x88.9"
+    },
+    {
+      "number": "80010.89",
+      "size": "88.9x54x88.9",
+      "text": "Optipress-Aquaplus-T-Stück, 88.9x54x88.9"
+    },
+    {
+      "number": "80010.91",
+      "size": "88.9x76.1x88.9",
+      "text": "Optipress-Aquaplus-T-Stück, 88.9x76.1x88.9"
+    },
+    {
+      "number": "80010.92",
+      "size": "108x22x108",
+      "text": "Optipress-Aquaplus-T-Stück, 108x22x108"
+    },
+    {
+      "number": "80010.93",
+      "size": "108x28x108",
+      "text": "Optipress-Aquaplus-T-Stück, 108x28x108"
+    },
+    {
+      "number": "80010.94",
+      "size": "108x35x108",
+      "text": "Optipress-Aquaplus-T-Stück, 108x35x108"
+    },
+    {
+      "number": "80010.95",
+      "size": "108x42x108",
+      "text": "Optipress-Aquaplus-T-Stück, 108x42x108"
+    },
+    {
+      "number": "80010.96",
+      "size": "108x54x108",
+      "text": "Optipress-Aquaplus-T-Stück, 108x54x108"
+    },
+    {
+      "number": "80010.98",
+      "size": "108x76.1x108",
+      "text": "Optipress-Aquaplus-T-Stück, 108x76.1x108"
+    },
+    {
+      "number": "80010.99",
+      "size": "108x88.9x108",
+      "text": "Optipress-Aquaplus-T-Stück, 108x88.9x108"
+    }
+  ],
+  "80020": [
+    {
+      "number": "80020.22",
+      "size": "15",
+      "text": "Optipress-Aquaplus-Muffe, 15"
+    },
+    {
+      "number": "80020.23",
+      "size": "18",
+      "text": "Optipress-Aquaplus-Muffe, 18"
+    },
+    {
+      "number": "80020.24",
+      "size": "22",
+      "text": "Optipress-Aquaplus-Muffe, 22"
+    },
+    {
+      "number": "80020.25",
+      "size": "28",
+      "text": "Optipress-Aquaplus-Muffe, 28"
+    },
+    {
+      "number": "80020.26",
+      "size": "35",
+      "text": "Optipress-Aquaplus-Muffe, 35"
+    },
+    {
+      "number": "80020.27",
+      "size": "42",
+      "text": "Optipress-Aquaplus-Muffe, 42"
+    },
+    {
+      "number": "80020.28",
+      "size": "54",
+      "text": "Optipress-Aquaplus-Muffe, 54"
+    },
+    {
+      "number": "80020.70",
+      "size": "64",
+      "text": "Optipress-Aquaplus-Muffe, 64"
+    },
+    {
+      "number": "80020.71",
+      "size": "76.1",
+      "text": "Optipress-Aquaplus-Muffe, 76.1"
+    },
+    {
+      "number": "80020.72",
+      "size": "88.9",
+      "text": "Optipress-Aquaplus-Muffe, 88.9"
+    },
+    {
+      "number": "80020.73",
+      "size": "108",
+      "text": "Optipress-Aquaplus-Muffe, 108"
+    }
+  ],
+  "80021": [
+    {
+      "number": "80021.24",
+      "size": "18 x 15",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 18 x 15"
+    },
+    {
+      "number": "80021.26",
+      "size": "22 x 15",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 22 x 15"
+    },
+    {
+      "number": "80021.27",
+      "size": "22 x 18",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 22 x 18"
+    },
+    {
+      "number": "80021.29",
+      "size": "28 x 15",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 28 x 15"
+    },
+    {
+      "number": "80021.30",
+      "size": "28 x 18",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 28 x 18"
+    },
+    {
+      "number": "80021.31",
+      "size": "28 x 22",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 28 x 22"
+    },
+    {
+      "number": "80021.32",
+      "size": "35 x 18",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 35 x 18"
+    },
+    {
+      "number": "80021.33",
+      "size": "35 x 22",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 35 x 22"
+    },
+    {
+      "number": "80021.34",
+      "size": "35 x 28",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 35 x 28"
+    },
+    {
+      "number": "80021.36",
+      "size": "42 x 22",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 42 x 22"
+    },
+    {
+      "number": "80021.37",
+      "size": "42 x 28",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 42 x 28"
+    },
+    {
+      "number": "80021.38",
+      "size": "42 x 35",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 42 x 35"
+    },
+    {
+      "number": "80021.39",
+      "size": "54 x 28",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 54 x 28"
+    },
+    {
+      "number": "80021.40",
+      "size": "54 x 35",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 54 x 35"
+    },
+    {
+      "number": "80021.41",
+      "size": "54 x 42",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 54 x 42"
+    },
+    {
+      "number": "80021.70",
+      "size": "76.1 x 42",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 76.1 x 42"
+    },
+    {
+      "number": "80021.71",
+      "size": "64 x 54",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 64 x 54"
+    },
+    {
+      "number": "80021.72",
+      "size": "76.1 x 54",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 76.1 x 54"
+    },
+    {
+      "number": "80021.73",
+      "size": "76.1 x 64",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 76.1 x 64"
+    },
+    {
+      "number": "80021.74",
+      "size": "88.9 x 54",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 88.9 x 54"
+    },
+    {
+      "number": "80021.75",
+      "size": "88.9 x 64",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 88.9 x 64"
+    },
+    {
+      "number": "80021.76",
+      "size": "88.9 x 76.1",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 88.9 x 76.1"
+    },
+    {
+      "number": "80021.77",
+      "size": "108 x 54",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 108 x 54"
+    },
+    {
+      "number": "80021.78",
+      "size": "108 x 64",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 108 x 64"
+    },
+    {
+      "number": "80021.79",
+      "size": "108 x 76.1",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 108 x 76.1"
+    },
+    {
+      "number": "80021.80",
+      "size": "108 x 88.9",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 108 x 88.9"
+    }
+  ],
+  "80033": [
+    {
+      "number": "80033.22",
+      "size": "15 x ½",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 15 x ½"
+    },
+    {
+      "number": "80033.23",
+      "size": "18 x ½",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 18 x ½"
+    },
+    {
+      "number": "80033.24",
+      "size": "18 x ¾",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 18 x ¾"
+    },
+    {
+      "number": "80033.25",
+      "size": "22 x ¾",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 22 x ¾"
+    },
+    {
+      "number": "80033.26",
+      "size": "22 x 1",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 22 x 1"
+    },
+    {
+      "number": "80033.27",
+      "size": "28 x ¾",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 28 x ¾"
+    },
+    {
+      "number": "80033.28",
+      "size": "28 x 1¼",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 28 x 1¼"
+    },
+    {
+      "number": "80033.29",
+      "size": "28 x 1",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 28 x 1"
+    },
+    {
+      "number": "80033.30",
+      "size": "35 x 1",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 35 x 1"
+    },
+    {
+      "number": "80033.31",
+      "size": "35 x 1¼",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 35 x 1¼"
+    },
+    {
+      "number": "80033.32",
+      "size": "35 x 1½",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 35 x 1½"
+    },
+    {
+      "number": "80033.33",
+      "size": "42 x 1½",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 42 x 1½"
+    },
+    {
+      "number": "80033.34",
+      "size": "42 x 1¼",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 42 x 1¼"
+    },
+    {
+      "number": "80033.35",
+      "size": "54 x 2",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 54 x 2"
+    },
+    {
+      "number": "80033.36",
+      "size": "15 x ¾",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 15 x ¾"
+    },
+    {
+      "number": "80033.37",
+      "size": "22 x ½",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 22 x ½"
+    },
+    {
+      "number": "80033.38",
+      "size": "54 x 1½",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 54 x 1½"
+    },
+    {
+      "number": "80033.70",
+      "size": "64 x 2½",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 64 x 2½"
+    },
+    {
+      "number": "80033.71",
+      "size": "76.1 x 2½",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 76.1 x 2½"
+    },
+    {
+      "number": "80033.72",
+      "size": "88.9 x 3",
+      "text": "Optipress-Aquaplus-Übergang, mit Innengewinde, 88.9 x 3"
+    }
+  ],
+  "81010": [
+    {
+      "number": "81010.43",
+      "size": "42 x 35 x 35",
+      "text": "Optipress-Aquaplus-T-Stück, 42 x 35 x 35"
+    },
+    {
+      "number": "81010.51",
+      "size": "18 x 22 x 18",
+      "text": "Optipress-Aquaplus-T-Stück, 18 x 22 x 18"
+    },
+    {
+      "number": "81010.56",
+      "size": "15 x 18 x 15",
+      "text": "Optipress-Aquaplus-T-Stück, 15 x 18 x 15"
+    }
+  ],
   "81018": [
     {
       "number": "81018.24",
@@ -265,6 +1035,23 @@ export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
       "number": "81018.73",
       "size": "108",
       "text": "Optipress-Aquaplus-Temperaturmessstelle, für gedämmte Leitungen, 108"
+    }
+  ],
+  "81021": [
+    {
+      "number": "81021.20",
+      "size": "15 x 12",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 15 x 12"
+    },
+    {
+      "number": "81021.21",
+      "size": "18 x 12",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 18 x 12"
+    },
+    {
+      "number": "81021.37",
+      "size": "54 x 22",
+      "text": "Optipress-Aquaplus-Reduktion, mit Einsteckende, 54 x 22"
     }
   ],
   "81082": [
@@ -532,6 +1319,432 @@ export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
       "number": "82232.34",
       "size": "54 x 54",
       "text": "Optipress-Aquaplus-Batterieventil, mit Optipress-A-Anschlussverschraubung, 54 x 54"
+    }
+  ],
+  "84234": [
+    {
+      "number": "84234.11",
+      "size": "16x3.8 x 15",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, für 1-LU-Rohr, 16x3.8 x 15"
+    },
+    {
+      "number": "84234.21",
+      "size": "16 x 15",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, 16 x 15"
+    },
+    {
+      "number": "84234.22",
+      "size": "16 x 18",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, 16 x 18"
+    },
+    {
+      "number": "84234.23",
+      "size": "20 x 18",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, 20 x 18"
+    },
+    {
+      "number": "84234.24",
+      "size": "20 x 22",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, 20 x 22"
+    },
+    {
+      "number": "84234.25",
+      "size": "25 x 22",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, 25 x 22"
+    },
+    {
+      "number": "84234.26",
+      "size": "32 x 28",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, 32 x 28"
+    },
+    {
+      "number": "84234.27",
+      "size": "40 x 35",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, 40 x 35"
+    },
+    {
+      "number": "84234.28",
+      "size": "50 x 42",
+      "text": "Optiflex-Flowpress-Übergang, auf Optipress-Aquaplus, 50 x 42"
+    }
+  ],
+  "84236": [
+    {
+      "number": "84236.11",
+      "size": "16x3.8",
+      "text": "Optiflex-Flowpress-Kupplung, für 1-LU-Rohr, 16x3.8"
+    },
+    {
+      "number": "84236.12",
+      "size": "16x3.8 x 16x2.2",
+      "text": "Optiflex-Flowpress-Kupplung, für 1-LU-Rohr, 16x3.8 x 16x2.2"
+    },
+    {
+      "number": "84236.21",
+      "size": "16",
+      "text": "Optiflex-Flowpress-Kupplung, 16"
+    },
+    {
+      "number": "84236.22",
+      "size": "20",
+      "text": "Optiflex-Flowpress-Kupplung, 20"
+    },
+    {
+      "number": "84236.23",
+      "size": "20 x 16",
+      "text": "Optiflex-Flowpress-Kupplung, 20 x 16"
+    },
+    {
+      "number": "84236.24",
+      "size": "25",
+      "text": "Optiflex-Flowpress-Kupplung, 25"
+    },
+    {
+      "number": "84236.25",
+      "size": "25 x 16",
+      "text": "Optiflex-Flowpress-Kupplung, 25 x 16"
+    },
+    {
+      "number": "84236.26",
+      "size": "25 x 20",
+      "text": "Optiflex-Flowpress-Kupplung, 25 x 20"
+    },
+    {
+      "number": "84236.27",
+      "size": "32",
+      "text": "Optiflex-Flowpress-Kupplung, 32"
+    },
+    {
+      "number": "84236.28",
+      "size": "32 x 20",
+      "text": "Optiflex-Flowpress-Kupplung, 32 x 20"
+    },
+    {
+      "number": "84236.29",
+      "size": "32 x 25",
+      "text": "Optiflex-Flowpress-Kupplung, 32 x 25"
+    },
+    {
+      "number": "84236.30",
+      "size": "40",
+      "text": "Optiflex-Flowpress-Kupplung, 40"
+    },
+    {
+      "number": "84236.31",
+      "size": "40 x 32",
+      "text": "Optiflex-Flowpress-Kupplung, 40 x 32"
+    },
+    {
+      "number": "84236.32",
+      "size": "50",
+      "text": "Optiflex-Flowpress-Kupplung, 50"
+    },
+    {
+      "number": "84236.33",
+      "size": "50 x 40",
+      "text": "Optiflex-Flowpress-Kupplung, 50 x 40"
+    },
+    {
+      "number": "84236.34",
+      "size": "63",
+      "text": "Optiflex-Flowpress-Kupplung, 63"
+    },
+    {
+      "number": "84236.35",
+      "size": "63 x 50",
+      "text": "Optiflex-Flowpress-Kupplung, 63 x 50"
+    }
+  ],
+  "84240": [
+    {
+      "number": "84240.11",
+      "size": "16x3.8",
+      "text": "Optiflex-Flowpress-Bogen 90°, für 1-LU-Rohr, 16x3.8"
+    },
+    {
+      "number": "84240.21",
+      "size": "16",
+      "text": "Optiflex-Flowpress-Bogen 90°, 16"
+    },
+    {
+      "number": "84240.22",
+      "size": "20",
+      "text": "Optiflex-Flowpress-Bogen 90°, 20"
+    },
+    {
+      "number": "84240.23",
+      "size": "25",
+      "text": "Optiflex-Flowpress-Bogen 90°, 25"
+    },
+    {
+      "number": "84240.24",
+      "size": "32",
+      "text": "Optiflex-Flowpress-Bogen 90°, 32"
+    },
+    {
+      "number": "84240.25",
+      "size": "40",
+      "text": "Optiflex-Flowpress-Bogen 90°, 40"
+    },
+    {
+      "number": "84240.26",
+      "size": "50",
+      "text": "Optiflex-Flowpress-Bogen 90°, 50"
+    },
+    {
+      "number": "84240.27",
+      "size": "63",
+      "text": "Optiflex-Flowpress-Bogen 90°, 63"
+    }
+  ],
+  "84241": [
+    {
+      "number": "84241.21",
+      "size": "25",
+      "text": "Optiflex-Flowpress-Bogen 45°, 25"
+    },
+    {
+      "number": "84241.22",
+      "size": "32",
+      "text": "Optiflex-Flowpress-Bogen 45°, 32"
+    },
+    {
+      "number": "84241.23",
+      "size": "40",
+      "text": "Optiflex-Flowpress-Bogen 45°, 40"
+    },
+    {
+      "number": "84241.24",
+      "size": "50",
+      "text": "Optiflex-Flowpress-Bogen 45°, 50"
+    },
+    {
+      "number": "84241.25",
+      "size": "63",
+      "text": "Optiflex-Flowpress-Bogen 45°, 63"
+    }
+  ],
+  "84242": [
+    {
+      "number": "84242.11",
+      "size": "16 x 16x3.8 x 16",
+      "text": "Optiflex-Flowpress-T-Stück, für 1-LU-Rohr, 16 x 16x3.8 x 16"
+    },
+    {
+      "number": "84242.21",
+      "size": "16",
+      "text": "Optiflex-Flowpress-T-Stück, 16"
+    },
+    {
+      "number": "84242.22",
+      "size": "16 x 20 x 16",
+      "text": "Optiflex-Flowpress-T-Stück, 16 x 20 x 16"
+    },
+    {
+      "number": "84242.23",
+      "size": "20 x 16 x 16",
+      "text": "Optiflex-Flowpress-T-Stück, 20 x 16 x 16"
+    },
+    {
+      "number": "84242.24",
+      "size": "20 x 16 x 20",
+      "text": "Optiflex-Flowpress-T-Stück, 20 x 16 x 20"
+    },
+    {
+      "number": "84242.25",
+      "size": "20 x 20 x 16",
+      "text": "Optiflex-Flowpress-T-Stück, 20 x 20 x 16"
+    },
+    {
+      "number": "84242.26",
+      "size": "20",
+      "text": "Optiflex-Flowpress-T-Stück, 20"
+    },
+    {
+      "number": "84242.27",
+      "size": "25 x 16 x 16",
+      "text": "Optiflex-Flowpress-T-Stück, 25 x 16 x 16"
+    },
+    {
+      "number": "84242.28",
+      "size": "25 x 16 x 20",
+      "text": "Optiflex-Flowpress-T-Stück, 25 x 16 x 20"
+    },
+    {
+      "number": "84242.29",
+      "size": "25 x 16 x 25",
+      "text": "Optiflex-Flowpress-T-Stück, 25 x 16 x 25"
+    },
+    {
+      "number": "84242.30",
+      "size": "25 x 20 x 20",
+      "text": "Optiflex-Flowpress-T-Stück, 25 x 20 x 20"
+    },
+    {
+      "number": "84242.31",
+      "size": "25 x 20 x 25",
+      "text": "Optiflex-Flowpress-T-Stück, 25 x 20 x 25"
+    },
+    {
+      "number": "84242.32",
+      "size": "25 x 25 x 16",
+      "text": "Optiflex-Flowpress-T-Stück, 25 x 25 x 16"
+    },
+    {
+      "number": "84242.33",
+      "size": "25",
+      "text": "Optiflex-Flowpress-T-Stück, 25"
+    },
+    {
+      "number": "84242.34",
+      "size": "32 x 16 x 25",
+      "text": "Optiflex-Flowpress-T-Stück, 32 x 16 x 25"
+    },
+    {
+      "number": "84242.35",
+      "size": "32 x 16 x 32",
+      "text": "Optiflex-Flowpress-T-Stück, 32 x 16 x 32"
+    },
+    {
+      "number": "84242.36",
+      "size": "32 x 20 x 20",
+      "text": "Optiflex-Flowpress-T-Stück, 32 x 20 x 20"
+    },
+    {
+      "number": "84242.37",
+      "size": "32 x 20 x 32",
+      "text": "Optiflex-Flowpress-T-Stück, 32 x 20 x 32"
+    },
+    {
+      "number": "84242.38",
+      "size": "32 x 25 x 25",
+      "text": "Optiflex-Flowpress-T-Stück, 32 x 25 x 25"
+    },
+    {
+      "number": "84242.39",
+      "size": "32 x 25 x 32",
+      "text": "Optiflex-Flowpress-T-Stück, 32 x 25 x 32"
+    },
+    {
+      "number": "84242.40",
+      "size": "32",
+      "text": "Optiflex-Flowpress-T-Stück, 32"
+    },
+    {
+      "number": "84242.41",
+      "size": "40 x 20 x 40",
+      "text": "Optiflex-Flowpress-T-Stück, 40 x 20 x 40"
+    },
+    {
+      "number": "84242.42",
+      "size": "40 x 25 x 32",
+      "text": "Optiflex-Flowpress-T-Stück, 40 x 25 x 32"
+    },
+    {
+      "number": "84242.43",
+      "size": "40 x 25 x 40",
+      "text": "Optiflex-Flowpress-T-Stück, 40 x 25 x 40"
+    },
+    {
+      "number": "84242.44",
+      "size": "40 x 32 x 32",
+      "text": "Optiflex-Flowpress-T-Stück, 40 x 32 x 32"
+    },
+    {
+      "number": "84242.45",
+      "size": "40 x 32 x 40",
+      "text": "Optiflex-Flowpress-T-Stück, 40 x 32 x 40"
+    },
+    {
+      "number": "84242.46",
+      "size": "40",
+      "text": "Optiflex-Flowpress-T-Stück, 40"
+    },
+    {
+      "number": "84242.47",
+      "size": "50",
+      "text": "Optiflex-Flowpress-T-Stück, 50"
+    },
+    {
+      "number": "84242.48",
+      "size": "50 x 25 x 50",
+      "text": "Optiflex-Flowpress-T-Stück, 50 x 25 x 50"
+    },
+    {
+      "number": "84242.49",
+      "size": "50 x 32 x 50",
+      "text": "Optiflex-Flowpress-T-Stück, 50 x 32 x 50"
+    },
+    {
+      "number": "84242.50",
+      "size": "50 x 40 x 50",
+      "text": "Optiflex-Flowpress-T-Stück, 50 x 40 x 50"
+    },
+    {
+      "number": "84242.51",
+      "size": "63",
+      "text": "Optiflex-Flowpress-T-Stück, 63"
+    },
+    {
+      "number": "84242.52",
+      "size": "63 x 25 x 63",
+      "text": "Optiflex-Flowpress-T-Stück, 63 x 25 x 63"
+    },
+    {
+      "number": "84242.53",
+      "size": "63 x 32 x 63",
+      "text": "Optiflex-Flowpress-T-Stück, 63 x 32 x 63"
+    },
+    {
+      "number": "84242.54",
+      "size": "63 x 40 x 63",
+      "text": "Optiflex-Flowpress-T-Stück, 63 x 40 x 63"
+    },
+    {
+      "number": "84242.55",
+      "size": "63 x 50 x 63",
+      "text": "Optiflex-Flowpress-T-Stück, 63 x 50 x 63"
+    }
+  ],
+  "84250": [
+    {
+      "number": "84250.11",
+      "size": "¾ x 16x3.8",
+      "text": "Optiflex-Flowpress-Verteileranschluss, für 1-LU-Rohr, ¾ x 16x3.8"
+    },
+    {
+      "number": "84250.21",
+      "size": "¾ x 16",
+      "text": "Optiflex-Flowpress-Verteileranschluss, ¾ x 16"
+    },
+    {
+      "number": "84250.22",
+      "size": "¾ x 20",
+      "text": "Optiflex-Flowpress-Verteileranschluss, ¾ x 20"
+    },
+    {
+      "number": "84250.23",
+      "size": "¾ x 25",
+      "text": "Optiflex-Flowpress-Verteileranschluss, ¾ x 25"
+    }
+  ],
+  "84260": [
+    {
+      "number": "84260.21",
+      "size": "16 x ¾ x 2",
+      "text": "Optiflex-Flowpress-Verteiler, 2-fach, mit Pressanschluss, 16 x ¾ x 2"
+    }
+  ],
+  "84261": [
+    {
+      "number": "84261.21",
+      "size": "16 x ¾ x 3",
+      "text": "Optiflex-Flowpress-Verteiler, 3-fach, mit Pressanschluss, 16 x ¾ x 3"
+    },
+    {
+      "number": "84261.22",
+      "size": "16 x ¾ x 4",
+      "text": "Optiflex-Flowpress-Verteiler, 4-fach, mit Pressanschluss, 16 x ¾ x 4"
     }
   ],
   "86510": [
