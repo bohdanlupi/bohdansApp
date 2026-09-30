@@ -329,6 +329,29 @@ notices, strands with throttling, Prinzipschema (landscape, src/pdf/kwl-system-d
 react-pdf primitives), elements per air type, quantities. WinAnsi only: winAnsi() replaces Δ, ζ, ≤, ≥, →.
 Old star networks (data.network, pressure.ts) are only kept for the «Sternnetz übernehmen» conversion.
 
+Sanitär (2026-09-30, project tab «Sanitär», table sanitary_systems, src/lib/sanitary/): Trinkwasseranlagen with
+Zentrale (Hausanschluss, Wasserzähler, Filter / Redfil, DRV, Enthärtung, Verteilbatterie, Sicherheitsgarnitur,
+Wassererwärmer neutral, thermischer Mischer neutral) and a free tree of pipe sections carrying PWC and / or PWH, with
+PWH-C «konventionell» (separate Optipress return) or «Rohr an Rohr» (Optiflex return along the steel PWH, one
+insulation one size larger); Steigstrang sections (riser) and Apparategruppen (outlets of W3 Tabelle 3).
+User decisions: all components Nussbaum (IGH catalogue, scripts/gen-nussbaum-data.mjs → catalog-data.ts), pump Biral
+(CompAX / ModulA BLUE, suggested by the type head – no curves in IGH), Wassererwärmer always neutral; per Strang
+Absperrventil mit Entleerung on PWC / PWH / PWH-C, Rückflussverhinderer, Regulierventil 36030 (thermal) or 24026
+(manual) per Strang.
+Sizing PWC / PWH: SVGW W3 2013 (Berechnungsvorlagen/Sanitär/SVGW Richtlinie W3.pdf) Tabellen 4.1 / 4.2 / 4.3 by
+LU and developed length (floor groups / Verteilleitungen, «mit Wasserzähler»), else by Q_D (Diagramm 1:
+0.459·Q_T^0.353, 0.598·Q_T^0.257 with a 0.5 l/s outlet) and the velocity limits 2.1.3; Hausanschluss Tabelle 5.
+Zirkulation: heat-loss method of Original_Zirkulation_Berchnung_RN_fam_260929.xlsm (0.12 kWh/(m·d) ×2 L konventionell,
+0.15 × L Rohr an Rohr, split by the heat losses behind each branch, +20 % Formstücke, pump head = longest circuit
++ 85 mbar RV + 105 mbar Regulierorgan); R by Darcy–Weisbach / Colebrook at the mean water temperature (matches the
+Nussbaum tables); Rohr an Rohr counts PWH steel + Optiflex (user decision; the workbook counts only the Optiflex).
+Verified against the workbook: 429.4 l/h (Excel 429.7), 326.9 mbar (Excel 326.7). Excel bug noted: Dimensionierung!I22
+uses I21 instead of I12. Insulation EnDK EN-103 Tabelle 2 (λ > / ≤ 0.03) for PWH-C, circulated PWH and PWH in the
+Verteilung; PWC by setting.
+Prinzipschema: Strangschema (schema.ts, symbols SN EN 806-1 from W3 Anhang 4; PWC green, PWH red, PWH-C violet),
+web view + plan PDF /api/pdf/sanitary-schema/<id> (same sheet / Plankopf / revisions as the Lüftung schema).
+Material list in the editor (no LV insertion yet).
+
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete
   them (Einstellungen → Kostenpläne); eBKP-H element names were entered from memory.

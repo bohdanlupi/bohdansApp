@@ -143,7 +143,8 @@
       "lvs": "Capitolati",
       "costPlan": "Piano dei costi",
       "heating": "Riscaldamento",
-      "ventilation": "Ventilazione"
+      "ventilation": "Ventilazione",
+      "sanitary": "Sanitario"
     }
   },
   "addresses": {
@@ -2194,5 +2195,225 @@
       "ringLength": "Lunghezza del circuito oltre il massimo"
     },
     "pdfTitle": "Riscaldamento a pavimento"
+  },
+  "sanitary": {
+    "title": "Impianti sanitari",
+    "description": "Impianto di acqua potabile con centrale, distribuzione, colonne e gruppi di apparecchi: diametri secondo SSIGA W3, calcolo del ricircolo con il metodo delle perdite termiche (Nussbaum), pompa di ricircolo e schema di principio. Componenti Nussbaum, pompa Biral, scaldacqua neutro.",
+    "new": "Nuovo impianto",
+    "name": "Nome",
+    "create": "Crea",
+    "defaultName": "Impianto sanitario {n}",
+    "emptyTitle": "Ancora nessun impianto sanitario",
+    "emptyText": "Create un impianto e inserite distribuzione, colonne e gruppi di apparecchi.",
+    "delete": "Elimina",
+    "deleteTitle": "Eliminare l'impianto?",
+    "deleteText": "«{name}» sarà eliminato con tutta la rete.",
+    "save": "Salva",
+    "saved": "Salvato",
+    "schema": "Schema di principio",
+    "schemaHint": "Un clic su una condotta o un simbolo seleziona l'elemento.",
+    "emptyNetwork": "La rete è ancora vuota. Aggiungete una condotta o iniziate con un esempio.",
+    "createExample": "Crea rete di esempio",
+    "example": {
+      "section": "TS {n}",
+      "apartment": "App. {floor} · colonna {n}"
+    },
+    "schemaText": {
+      "strang": "Colonna",
+      "heater": "Scaldacqua",
+      "house": "Allacciamento",
+      "meter": "Contatore dell'acqua",
+      "battery": "Batteria di distribuzione",
+      "softener": "Addolcitore"
+    },
+    "tree": {
+      "title": "Distribuzione",
+      "element": "Elemento",
+      "sizes": "PWC/PWH/C",
+      "circulation": "Ricircolo",
+      "empty": "Ancora nessuna condotta.",
+      "addRoot": "Condotta dalla centrale",
+      "addPipe": "Aggiungi condotta",
+      "addConsumer": "Aggiungi gruppo di apparecchi",
+      "insertAfter": "Inserisci dopo",
+      "insertAfterHint": "Nuova condotta tra questo elemento e le sue diramazioni",
+      "up": "Su",
+      "down": "Giù",
+      "removeElement": "Rimuovi elemento",
+      "removeElementHint": "Rimuovere solo questo elemento, le diramazioni restano",
+      "removeBranch": "Elimina ramo",
+      "selectHint": "Scegliete un elemento nella lista o nello schema.",
+      "consumer": "Gruppo di apparecchi",
+      "riser": "Colonna",
+      "floorPipe": "Piano",
+      "distPipe": "Condotta di distribuzione",
+      "pipe": "Condotta",
+      "strangNo": "Colonna {n}"
+    },
+    "node": {
+      "label": "Designazione",
+      "floor": "Piano",
+      "length": "Lunghezza [m]",
+      "role": "Tabella W3",
+      "roles": {
+        "auto": "automatico",
+        "distribution": "Condotta di distribuzione (4.3)",
+        "floor": "Distribuzione di piano (4.1 / 4.2)"
+      },
+      "riser": "Colonna montante",
+      "shutoff": "Valvole d'arresto",
+      "meter": "Contatore d'appartamento",
+      "system": "Sistema di tubi",
+      "circulation": "Ricircolo",
+      "circulations": {
+        "none": "nessuno",
+        "conventional": "convenzionale",
+        "rar": "tubo accanto a tubo"
+      },
+      "auto": "automatico",
+      "regValve": "Valvola di regolazione ricircolo",
+      "regValves": {
+        "thermal": "termostatica automatica (Nussbaum 36030)",
+        "manual": "valvola di regolazione manuale (Nussbaum 24026)"
+      },
+      "appliancesHint": "Punti di prelievo secondo SSIGA W3 tabella 3 (valori di carico freddo / caldo)."
+    },
+    "appliances": {
+      "wc": "WC con cassetta (1 / –)",
+      "basin": "Lavabo, bidet (1 / 1)",
+      "dishwasher": "Lavastoviglie (1 / –)",
+      "washer": "Lavatrice (2 / –)",
+      "balcony": "Rubinetto balcone (2 / –)",
+      "shower": "Doccia, lavello, vuotatoio (2 / 2)",
+      "urinal": "Orinatoio automatico (3 / –)",
+      "bathtub": "Vasca da bagno (3 / 3)",
+      "garden": "Giardino / garage (5 / –)"
+    },
+    "results": {
+      "title": "Calcolo",
+      "lu": "LU freddo / caldo",
+      "qd": "Portata di punta",
+      "houseDn": "Allacciamento",
+      "houseHint": "W3 tabella 5",
+      "distLength": "Lunghezza condotte di distribuzione",
+      "distHint": "sviluppata, per la tabella 4.3",
+      "heatLoss": "Perdita termica ricircolo",
+      "pumpFlow": "Portata della pompa",
+      "critical": "Circuito più lungo",
+      "head": "Prevalenza",
+      "headHint": "+ valvola di ritegno {check} + organo di regolazione {valve} mbar",
+      "pump": "Pompa di ricircolo (Biral)",
+      "pumpAuto": "Proposta: {name}",
+      "pumpHint": "Proposta secondo la prevalenza del tipo; verificare la portata nella scheda tecnica Biral.",
+      "circuit": "Circuito di ricircolo",
+      "circFlow": "Portata",
+      "throttle": "Da strozzare",
+      "criticalCircuit": "determinante",
+      "strang": "Colonna",
+      "sources": {
+        "table": "W3 tab. {table}",
+        "velocity": "secondo la velocità",
+        "manual": "manuale",
+        "none": "senza carico"
+      },
+      "sharedInsulation": "comune {mm} mm (su {size})",
+      "sectionLoss": "Perdita termica",
+      "cumulative": "Δp dallo scaldacqua",
+      "insulation": "Isolamento",
+      "luTotal": "Valore di carico: {cold} LU freddo / {warm} LU caldo"
+    },
+    "warnings": {
+      "fast": "{element}: {medium} {v} m/s oltre {limit} m/s (W3 2.1.3).",
+      "tableExceeded": "{element}: {medium} fuori dalla tabella W3, dimensionato secondo la velocità.",
+      "circulationGap": "{element}: ricircolo senza ricircolo a monte – non calcolato.",
+      "deltaT": "Differenza di temperatura mandata / ritorno {value} K – W3 ammette al massimo 5 K.",
+      "temperature": "UFSP: produzione di acqua calda almeno 60 °C, distribuzione almeno 55 °C.",
+      "noConsumers": "Ancora nessun gruppo di apparecchi con punti di prelievo.",
+      "pumpHead": "La pompa scelta non raggiunge la prevalenza di {head} mbar."
+    },
+    "central": {
+      "title": "Centrale",
+      "description": "Dall'allacciamento alla batteria di distribuzione e allo scaldacqua. Tutta la rubinetteria Nussbaum, scaldacqua neutro.",
+      "houseLength": "Condotta di allacciamento [m]",
+      "centralLength": "Batteria fino alla distribuzione [m]",
+      "filter": "Filtro",
+      "filters": {
+        "none": "nessuno",
+        "fine": "Filtro fine a controlavaggio (18102)",
+        "redfil": "Redfil con riduttore di pressione (12102)"
+      },
+      "softener": "Addolcitore (Aquapro-Vita)",
+      "softeners": {
+        "none": "nessuno",
+        "heater": "solo scaldacqua",
+        "all": "tutto l'impianto"
+      },
+      "heaterLabel": "Scaldacqua",
+      "heaterPlaceholder": "Scaldacqua",
+      "heaterVolume": "Contenuto [l]",
+      "meter": "Contatore dell'azienda",
+      "reducer": "Riduttore di pressione (11002)",
+      "safetyGroup": "Gruppo di sicurezza (81168)",
+      "mixer": "Miscelatore termostatico (neutro)",
+      "sizes": "Diametri: condotta principale {trunk}, distribuzione PWC {supply}, alimentazione scaldacqua {feed} (W3 tabella 4.3)."
+    },
+    "settings": {
+      "title": "Ricircolo",
+      "description": "Parametri del calcolo del ricircolo (valori del modello Nussbaum).",
+      "tHot": "Acqua calda [°C]",
+      "tReturn": "Ritorno [°C]",
+      "lossConventional": "q' convenzionale [kWh/(m·g)]",
+      "lossRar": "q' tubo accanto a tubo [kWh/(m·g)]",
+      "allowance": "Supplemento raccordi [%]",
+      "vCirc": "v max. PWH-C [m/s]",
+      "dpCheck": "Δp valvola di ritegno [mbar]",
+      "dpValve": "Δp organo di regolazione aperto [mbar]",
+      "lambda": "Isolante (EN-103)",
+      "lambdaHigh": "λ > 0.03 W/mK",
+      "lambdaLow": "λ ≤ 0.03 W/mK",
+      "pwcInsulation": "Isolamento PWC [mm]"
+    },
+    "quantities": {
+      "title": "Lista del materiale",
+      "description": "Tubi, rubinetteria e isolamento dalla rete, articoli dal catalogo IGH.",
+      "article": "Articolo",
+      "text": "Designazione",
+      "quantity": "Quantità",
+      "groups": {
+        "pipes": "Tubi",
+        "valves": "Rubinetteria colonne e piani",
+        "central": "Centrale",
+        "insulation": "Isolamento"
+      }
+    },
+    "legend": {
+      "pwc": "PWC  Acqua potabile fredda",
+      "pwh": "PWH  Acqua potabile calda",
+      "pwhc": "PWH-C  Ricircolo",
+      "insulation": "Isolamento {mm} mm",
+      "insulationShared": "Isolamento {mm} mm, tubo accanto a tubo",
+      "sizes": "Diametri PWC / PWH / PWH-C: Optipress Ø mm, F = Optiflex",
+      "symbols": {
+        "shutoff": "Valvola d'arresto (Nussbaum 82200)",
+        "shutoffDrain": "Valvola d'arresto con scarico (Nussbaum 82202)",
+        "check": "Valvola di ritegno (Nussbaum 81163)",
+        "regValve": "Valvola di regolazione ricircolo (Nussbaum 36030 / 24026)",
+        "meter": "Contatore dell'acqua",
+        "filter": "Filtro fine (Nussbaum 18102)",
+        "redfil": "Redfil, riduttore di pressione con filtro (Nussbaum 12102)",
+        "reducer": "Riduttore di pressione (Nussbaum 11002)",
+        "safety": "Gruppo di sicurezza (Nussbaum 81168)",
+        "pump": "Pompa di ricircolo (Biral)",
+        "mixer": "Miscelatore termostatico",
+        "softener": "Addolcitore (Nussbaum Aquapro-Vita)",
+        "consumer": "Gruppo di apparecchi",
+        "battery": "Batteria di distribuzione",
+        "heater": "Scaldacqua"
+      }
+    },
+    "plankopf": {
+      "plan": "Schema di principio",
+      "trade": "Sanitario"
+    }
   }
 }

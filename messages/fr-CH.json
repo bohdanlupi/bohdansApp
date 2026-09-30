@@ -143,7 +143,8 @@
       "lvs": "Descriptifs",
       "costPlan": "Plan des coûts",
       "heating": "Chauffage",
-      "ventilation": "Ventilation"
+      "ventilation": "Ventilation",
+      "sanitary": "Sanitaire"
     }
   },
   "addresses": {
@@ -2194,5 +2195,225 @@
       "ringLength": "Longueur de circuit supérieure au maximum"
     },
     "pdfTitle": "Chauffage au sol"
+  },
+  "sanitary": {
+    "title": "Installations sanitaires",
+    "description": "Installation d'eau potable avec centrale, distribution, colonnes et groupes d'appareils : diamètres selon SSIGE W3, calcul de la circulation par la méthode des pertes thermiques (Nussbaum), pompe de circulation et schéma de principe. Composants Nussbaum, pompe Biral, chauffe-eau neutre.",
+    "new": "Nouvelle installation",
+    "name": "Nom",
+    "create": "Créer",
+    "defaultName": "Installation sanitaire {n}",
+    "emptyTitle": "Pas encore d'installation sanitaire",
+    "emptyText": "Créez une installation et saisissez la distribution, les colonnes et les groupes d'appareils.",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer l'installation ?",
+    "deleteText": "«{name}» sera supprimée avec tout le réseau.",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "schema": "Schéma de principe",
+    "schemaHint": "Un clic sur une conduite ou un symbole sélectionne l'élément.",
+    "emptyNetwork": "Le réseau est encore vide. Ajoutez une conduite ou commencez par un exemple.",
+    "createExample": "Créer un réseau exemple",
+    "example": {
+      "section": "TS {n}",
+      "apartment": "App. {floor} · colonne {n}"
+    },
+    "schemaText": {
+      "strang": "Colonne",
+      "heater": "Chauffe-eau",
+      "house": "Raccordement",
+      "meter": "Compteur d'eau",
+      "battery": "Batterie de distribution",
+      "softener": "Adoucisseur"
+    },
+    "tree": {
+      "title": "Distribution",
+      "element": "Élément",
+      "sizes": "PWC/PWH/C",
+      "circulation": "Circulation",
+      "empty": "Pas encore de conduites.",
+      "addRoot": "Conduite depuis la centrale",
+      "addPipe": "Ajouter une conduite",
+      "addConsumer": "Ajouter un groupe d'appareils",
+      "insertAfter": "Insérer après",
+      "insertAfterHint": "Nouvelle conduite entre cet élément et ses départs",
+      "up": "Vers le haut",
+      "down": "Vers le bas",
+      "removeElement": "Retirer l'élément",
+      "removeElementHint": "Retirer seulement cet élément, les départs restent",
+      "removeBranch": "Supprimer la branche",
+      "selectHint": "Choisissez un élément dans la liste ou le schéma.",
+      "consumer": "Groupe d'appareils",
+      "riser": "Colonne",
+      "floorPipe": "Étage",
+      "distPipe": "Conduite de distribution",
+      "pipe": "Conduite",
+      "strangNo": "Colonne {n}"
+    },
+    "node": {
+      "label": "Désignation",
+      "floor": "Étage",
+      "length": "Longueur [m]",
+      "role": "Tableau W3",
+      "roles": {
+        "auto": "automatique",
+        "distribution": "Conduite de distribution (4.3)",
+        "floor": "Distribution d'étage (4.1 / 4.2)"
+      },
+      "riser": "Colonne montante",
+      "shutoff": "Vannes d'arrêt",
+      "meter": "Compteur d'appartement",
+      "system": "Système de tubes",
+      "circulation": "Circulation",
+      "circulations": {
+        "none": "aucune",
+        "conventional": "conventionnelle",
+        "rar": "tube contre tube"
+      },
+      "auto": "automatique",
+      "regValve": "Vanne de réglage circulation",
+      "regValves": {
+        "thermal": "thermostatique automatique (Nussbaum 36030)",
+        "manual": "vanne de réglage manuelle (Nussbaum 24026)"
+      },
+      "appliancesHint": "Points de soutirage selon SSIGE W3 tableau 3 (valeurs de charge froid / chaud)."
+    },
+    "appliances": {
+      "wc": "WC à réservoir (1 / –)",
+      "basin": "Lavabo, bidet (1 / 1)",
+      "dishwasher": "Lave-vaisselle (1 / –)",
+      "washer": "Lave-linge (2 / –)",
+      "balcony": "Robinet de balcon (2 / –)",
+      "shower": "Douche, évier, vidoir (2 / 2)",
+      "urinal": "Urinoir automatique (3 / –)",
+      "bathtub": "Baignoire (3 / 3)",
+      "garden": "Jardin / garage (5 / –)"
+    },
+    "results": {
+      "title": "Calcul",
+      "lu": "LU froid / chaud",
+      "qd": "Débit de pointe",
+      "houseDn": "Raccordement",
+      "houseHint": "W3 tableau 5",
+      "distLength": "Longueur des conduites de distribution",
+      "distHint": "développée, pour le tableau 4.3",
+      "heatLoss": "Perte thermique circulation",
+      "pumpFlow": "Débit de la pompe",
+      "critical": "Circuit le plus long",
+      "head": "Hauteur manométrique",
+      "headHint": "+ clapet {check} + organe de réglage {valve} mbar",
+      "pump": "Pompe de circulation (Biral)",
+      "pumpAuto": "Proposition : {name}",
+      "pumpHint": "Proposition selon la hauteur du type ; vérifier le débit dans la fiche technique Biral.",
+      "circuit": "Circuit de circulation",
+      "circFlow": "Débit",
+      "throttle": "À réduire",
+      "criticalCircuit": "déterminant",
+      "strang": "Colonne",
+      "sources": {
+        "table": "W3 tab. {table}",
+        "velocity": "selon la vitesse",
+        "manual": "manuel",
+        "none": "sans charge"
+      },
+      "sharedInsulation": "commune {mm} mm (sur {size})",
+      "sectionLoss": "Perte thermique",
+      "cumulative": "Δp depuis le chauffe-eau",
+      "insulation": "Isolation",
+      "luTotal": "Valeur de charge : {cold} LU froid / {warm} LU chaud"
+    },
+    "warnings": {
+      "fast": "{element} : {medium} {v} m/s au-dessus de {limit} m/s (W3 2.1.3).",
+      "tableExceeded": "{element} : {medium} hors du tableau W3, dimensionné selon la vitesse.",
+      "circulationGap": "{element} : circulation sans circulation en amont – non calculée.",
+      "deltaT": "Différence de température départ / retour {value} K – W3 admet au plus 5 K.",
+      "temperature": "OFSP : production d'eau chaude au moins 60 °C, distribution au moins 55 °C.",
+      "noConsumers": "Pas encore de groupes d'appareils avec des points de soutirage.",
+      "pumpHead": "La pompe choisie n'atteint pas la hauteur de {head} mbar."
+    },
+    "central": {
+      "title": "Centrale",
+      "description": "Du raccordement à la batterie de distribution et au chauffe-eau. Toutes les robinetteries Nussbaum, chauffe-eau neutre.",
+      "houseLength": "Conduite de raccordement [m]",
+      "centralLength": "Batterie jusqu'à la distribution [m]",
+      "filter": "Filtre",
+      "filters": {
+        "none": "aucun",
+        "fine": "Filtre fin à rinçage (18102)",
+        "redfil": "Redfil avec réducteur de pression (12102)"
+      },
+      "softener": "Adoucisseur (Aquapro-Vita)",
+      "softeners": {
+        "none": "aucun",
+        "heater": "chauffe-eau seulement",
+        "all": "toute l'installation"
+      },
+      "heaterLabel": "Chauffe-eau",
+      "heaterPlaceholder": "Chauffe-eau",
+      "heaterVolume": "Contenance [l]",
+      "meter": "Compteur du distributeur",
+      "reducer": "Réducteur de pression (11002)",
+      "safetyGroup": "Garniture de sécurité (81168)",
+      "mixer": "Mitigeur thermostatique (neutre)",
+      "sizes": "Diamètres : conduite principale {trunk}, distribution PWC {supply}, alimentation chauffe-eau {feed} (W3 tableau 4.3)."
+    },
+    "settings": {
+      "title": "Circulation",
+      "description": "Paramètres du calcul de la circulation (valeurs du modèle Nussbaum).",
+      "tHot": "Eau chaude [°C]",
+      "tReturn": "Retour [°C]",
+      "lossConventional": "q' conventionnelle [kWh/(m·j)]",
+      "lossRar": "q' tube contre tube [kWh/(m·j)]",
+      "allowance": "Supplément raccords [%]",
+      "vCirc": "v max. PWH-C [m/s]",
+      "dpCheck": "Δp clapet anti-retour [mbar]",
+      "dpValve": "Δp organe de réglage ouvert [mbar]",
+      "lambda": "Isolant (EN-103)",
+      "lambdaHigh": "λ > 0.03 W/mK",
+      "lambdaLow": "λ ≤ 0.03 W/mK",
+      "pwcInsulation": "Isolation PWC [mm]"
+    },
+    "quantities": {
+      "title": "Liste de matériel",
+      "description": "Tubes, robinetterie et isolation du réseau, articles du catalogue IGH.",
+      "article": "Article",
+      "text": "Désignation",
+      "quantity": "Quantité",
+      "groups": {
+        "pipes": "Tubes",
+        "valves": "Robinetterie colonnes et étages",
+        "central": "Centrale",
+        "insulation": "Isolation"
+      }
+    },
+    "legend": {
+      "pwc": "PWC  Eau potable froide",
+      "pwh": "PWH  Eau potable chaude",
+      "pwhc": "PWH-C  Circulation",
+      "insulation": "Isolation {mm} mm",
+      "insulationShared": "Isolation {mm} mm, tube contre tube",
+      "sizes": "Diamètres PWC / PWH / PWH-C : Optipress Ø mm, F = Optiflex",
+      "symbols": {
+        "shutoff": "Vanne d'arrêt (Nussbaum 82200)",
+        "shutoffDrain": "Vanne d'arrêt avec vidange (Nussbaum 82202)",
+        "check": "Clapet anti-retour (Nussbaum 81163)",
+        "regValve": "Vanne de réglage de circulation (Nussbaum 36030 / 24026)",
+        "meter": "Compteur d'eau",
+        "filter": "Filtre fin (Nussbaum 18102)",
+        "redfil": "Redfil, réducteur de pression avec filtre (Nussbaum 12102)",
+        "reducer": "Réducteur de pression (Nussbaum 11002)",
+        "safety": "Garniture de sécurité (Nussbaum 81168)",
+        "pump": "Pompe de circulation (Biral)",
+        "mixer": "Mitigeur thermostatique",
+        "softener": "Adoucisseur (Nussbaum Aquapro-Vita)",
+        "consumer": "Groupe d'appareils",
+        "battery": "Batterie de distribution",
+        "heater": "Chauffe-eau"
+      }
+    },
+    "plankopf": {
+      "plan": "Schéma de principe",
+      "trade": "Sanitaire"
+    }
   }
 }

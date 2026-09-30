@@ -27,6 +27,8 @@ export function SchemaPrintButton({
   plan,
   editable,
   dirty,
+  url = `/api/pdf/kwl-schema/${systemId}`,
+  save = saveSchemaPlan,
 }: {
   systemId: string;
   projectId: string;
@@ -34,6 +36,9 @@ export function SchemaPrintButton({
   editable: boolean;
   /** Unsaved network changes: the PDF shows the saved state, so saving comes first. */
   dirty: boolean;
+  /** PDF of the plan and the action storing the title block (defaults: the Lüftungsanlage). */
+  url?: string;
+  save?: typeof saveSchemaPlan;
 }) {
   const t = useTranslations("kwlSystem");
   const tCommon = useTranslations("common");
@@ -45,7 +50,6 @@ export function SchemaPrintButton({
   const [newRevision, setNewRevision] = useState(plan.revisions.length === 0);
   const [comment, setComment] = useState("");
   const [pending, startTransition] = useTransition();
-  const url = `/api/pdf/kwl-schema/${systemId}`;
 
   if (!editable) {
     return (
@@ -60,7 +64,7 @@ export function SchemaPrintButton({
     // Opened right away (inside the click), so pop-up blockers let it through; the PDF loads once saved.
     const tab = window.open("", "_blank");
     startTransition(async () => {
-      const res = await saveSchemaPlan(systemId, projectId, { phase: phase || null, comment: newRevision ? comment.trim() : null });
+      const res = await save(systemId, projectId, { phase: phase || null, comment: newRevision ? comment.trim() : null });
       if (res.error) {
         tab?.close();
         toast.error(tForms(res.error as FormMessageKey));

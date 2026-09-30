@@ -31,11 +31,11 @@ const formats = [
   { name: "A0", w: 3370.39, h: 2383.94 },
 ] as const;
 /** Frame distance from the sheet edge and padding inside the frame [pt]. */
-const MARGIN = 14;
-const PAD = 12;
+export const MARGIN = 14;
+export const PAD = 12;
 /** Title block of the template (same physical size on every format) [pt]. */
-const TB_W = 566;
-const TB_H = 213;
+export const TB_W = 566;
+export const TB_H = 213;
 /** Smallest scale of the schema that keeps its smallest texts (7.5–8 units) readable on paper (≈ 6 pt). */
 const MIN_SCALE = 0.75;
 const MAX_SCALE = 1.3;
@@ -51,7 +51,7 @@ export function schemaSheet(layout: { width: number; height: number }) {
   return { format, scale: fit(format) };
 }
 
-function PdfPrims({ prims }: { prims: Prim[] }) {
+export function PdfPrims({ prims }: { prims: Prim[] }) {
   return (
     <G>
       {prims.map((p, i) => {
@@ -78,7 +78,7 @@ function PdfPrims({ prims }: { prims: Prim[] }) {
   );
 }
 
-const svgText = (x: number, y: number, value: string, size: number, opts: { anchor?: "start" | "middle" | "end"; fill?: string; bold?: boolean } = {}) => (
+export const svgText = (x: number, y: number, value: string, size: number, opts: { anchor?: "start" | "middle" | "end"; fill?: string; bold?: boolean } = {}) => (
   <Text x={x} y={y} textAnchor={opts.anchor ?? "start"} fill={opts.fill ?? ink} style={{ fontSize: size, fontFamily: opts.bold ? "Helvetica-Bold" : "Helvetica" }}>
     {winAnsi(value)}
   </Text>
@@ -213,7 +213,7 @@ export type PlankopfLabels = {
 };
 
 /** Title block after the LUPI template (A3: 566 × 213 pt, bottom right inside the frame). */
-function TitleBlock({
+export function TitleBlock({
   x,
   y,
   project,
