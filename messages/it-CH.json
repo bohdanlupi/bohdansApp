@@ -2329,7 +2329,8 @@
       "deltaT": "Differenza di temperatura mandata / ritorno {value} K – W3 ammette al massimo 5 K.",
       "temperature": "UFSP: produzione di acqua calda almeno 60 °C, distribuzione almeno 55 °C.",
       "noConsumers": "Ancora nessun gruppo di apparecchi con punti di prelievo.",
-      "pumpHead": "La pompa scelta non raggiunge la prevalenza di {head} mbar."
+      "pumpHead": "La pompa scelta non raggiunge la prevalenza di {head} mbar.",
+      "tooHot": "SIA 385/1 4.1.1: acqua calda nella distribuzione al massimo 65 °C."
     },
     "central": {
       "title": "Centrale",
@@ -2368,10 +2369,9 @@
       "vCirc": "v max. PWH-C [m/s]",
       "dpCheck": "Δp valvola di ritegno [mbar]",
       "dpValve": "Δp organo di regolazione aperto [mbar]",
-      "lambda": "Isolante (EN-103)",
-      "lambdaHigh": "λ > 0.03 W/mK",
-      "lambdaLow": "λ ≤ 0.03 W/mK",
-      "pwcInsulation": "Isolamento PWC [mm]"
+      "lambda": "λ isolante a 40 °C [W/(m·K)]",
+      "pwcInsulation": "Isolamento PWC distribuzione / colonne [mm]",
+      "insulationHint": "Condotte mantenute in temperatura (PWH con ricircolo, PWH-C, PWH dallo scaldacqua) secondo SIA 385/1 tabella 3; tubo accanto a tubo con la somma dei due diametri esterni. L'acqua fredda deve restare al massimo a 25 °C (SIA 385/1 3.1.4) – la norma non indica uno spessore, il valore è un'ipotesi di progetto."
     },
     "quantities": {
       "title": "Lista del materiale",
@@ -2394,26 +2394,28 @@
       "insulationShared": "Isolamento {mm} mm, tubo accanto a tubo",
       "sizes": "Diametri PWC / PWH / PWH-C: Optipress Ø mm, F = Optiflex",
       "symbols": {
-        "shutoff": "Valvola d'arresto (Nussbaum 82200)",
-        "shutoffDrain": "Valvola d'arresto con scarico (Nussbaum 82202)",
-        "check": "Valvola di ritegno (Nussbaum 81163)",
-        "regValve": "Valvola di regolazione ricircolo (Nussbaum 36030 / 24026)",
-        "meter": "Contatore dell'acqua",
-        "filter": "Filtro fine (Nussbaum 18102)",
-        "redfil": "Redfil, riduttore di pressione con filtro (Nussbaum 12102)",
-        "reducer": "Riduttore di pressione (Nussbaum 11002)",
-        "safety": "Gruppo di sicurezza (Nussbaum 81168)",
-        "pump": "Pompa di ricircolo (Biral)",
-        "mixer": "Miscelatore termostatico",
-        "softener": "Addolcitore (Nussbaum Aquapro-Vita)",
-        "consumer": "Gruppo di apparecchi",
+        "shutoff": "Valvola d'arresto (SIA 410 1.26.5; Nussbaum 82200)",
+        "shutoffDrain": "Valvola d'arresto con scarico (SIA 410 1.26.5 / 2.6.7; Nussbaum 82202)",
+        "check": "Valvola di ritegno (SIA 410 1.26.9; Nussbaum 81163)",
+        "regValve": "Valvola di regolazione (SIA 410 2.6.9; Nussbaum 24026)",
+        "meter": "Contatore dell'acqua (SN EN 806-1)",
+        "filter": "Filtro (SIA 410 1.26.19; Nussbaum 18102)",
+        "redfil": "Redfil, riduttore di pressione con filtro (SIA 410 1.26.8 / 1.26.19; Nussbaum 12102)",
+        "reducer": "Riduttore di pressione (SIA 410 1.26.8; Nussbaum 11002)",
+        "safety": "Valvola di sicurezza con imbuto (SIA 410 1.26.10; Nussbaum 81168)",
+        "pump": "Pompa di ricircolo (SIA 410 1.27.3; Biral)",
+        "mixer": "Miscelatore termostatico (SIA 410 5.2.10)",
+        "softener": "Addolcitore (SIA 410 1.27.1; Nussbaum Aquapro-Vita)",
+        "consumer": "Gruppo di apparecchi (SN EN 806-1)",
         "battery": "Batteria di distribuzione",
-        "heater": "Scaldacqua"
+        "heater": "Scaldacqua (SIA 410 5.1.19)",
+        "regValveThermal": "Valvola di ricircolo termostatica (SIA 410 2.6.9 / 1.29.3; Nussbaum 36030)"
       }
     },
     "plankopf": {
       "plan": "Schema di principio",
       "trade": "Sanitario"
-    }
+    },
+    "zoom": "Dimensione"
   }
 }

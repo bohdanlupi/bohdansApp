@@ -346,10 +346,14 @@ Zirkulation: heat-loss method of Original_Zirkulation_Berchnung_RN_fam_260929.xl
 + 85 mbar RV + 105 mbar Regulierorgan); R by Darcy–Weisbach / Colebrook at the mean water temperature (matches the
 Nussbaum tables); Rohr an Rohr counts PWH steel + Optiflex (user decision; the workbook counts only the Optiflex).
 Verified against the workbook: 429.4 l/h (Excel 429.7), 326.9 mbar (Excel 326.7). Excel bug noted: Dimensionierung!I22
-uses I21 instead of I12. Insulation EnDK EN-103 Tabelle 2 (λ > / ≤ 0.03) for PWH-C, circulated PWH and PWH in the
-Verteilung; PWC by setting.
-Prinzipschema: Strangschema (schema.ts, symbols SN EN 806-1 from W3 Anhang 4; PWC green, PWH red, PWH-C violet),
-web view + plan PDF /api/pdf/sanitary-schema/<id> (same sheet / Plankopf / revisions as the Lüftung schema).
+uses I21 instead of I12. Insulation after SIA 385/1:2020 Tabelle 3 (outer diameter × λ at 40 °C, default 0.035,
+interpolated) for PWH-C, circulated PWH and PWH in the Verteilung; Rohr an Rohr with the sum of both outer diameters
+(5.3.2.4), shell one size larger. PWC Verteil- / Steigleitungen: setting, default 13 mm (SIA 385/1 3.1.4 only asks for
+≤ 25 °C, no thickness). Warning above 65 °C (4.1.1).
+Prinzipschema: Strangschema (schema.ts; symbols after SIA 410 1.26 / 1.27 / 1.29 / 2.6 / 5, Wasserzähler and
+Apparateanschluss after SN EN 806-1 as SIA 410 has none; PWC green, PWH red, PWH-C violet), web view with zoom
+slider + plan PDF /api/pdf/sanitary-schema/<id> (Plankopf / revisions as the Lüftung schema; sheet height 297 / 420 /
+594 mm, width a multiple of 210 mm, wide enough for schema and legend).
 Material list in the editor (no LV insertion yet).
 
 Open / ideas for later:

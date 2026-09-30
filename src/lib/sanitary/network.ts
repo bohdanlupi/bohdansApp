@@ -14,7 +14,6 @@ import { type BiralPump, biralPumps } from "./catalog-data";
 import {
   findSize,
   frictionPerMetre,
-  type InsulationLambda,
   insulationThickness,
   nextSize,
   type PipeSize,
@@ -90,8 +89,12 @@ export type Settings = {
   dpValve: number;
   /** Max. velocity of the PWH-C when sized automatically [m/s]. */
   vCirc: number;
-  lambda: InsulationLambda;
-  /** Insulation of the PWC Verteil- / Steigleitungen [mm] (0 = none). */
+  /** λ of the insulation at 40 °C [W/(m·K)] for SIA 385/1 Tabelle 3. */
+  lambda: number;
+  /**
+   * Insulation of the PWC Verteil- und Steigleitungen [mm] (0 = none): SIA 385/1 3.1.4 asks that cold water is not
+   * warmed by parallel hot pipes (max. 25 °C) but gives no thickness – a planning value.
+   */
   pwcInsulation: number;
   /** Biral article number chosen by hand (null = suggestion). */
   pump: string | null;
@@ -121,8 +124,8 @@ export const defaultSettings = (): Settings => ({
   dpCheck: 85,
   dpValve: 105,
   vCirc: 0.5,
-  lambda: "high",
-  pwcInsulation: 0,
+  lambda: 0.035,
+  pwcInsulation: 13,
   pump: null,
 });
 
@@ -191,6 +194,7 @@ export type Warning =
   | { kind: "circulationGap"; id: string }
   | { kind: "deltaT"; value: number }
   | { kind: "temperature" }
+  | { kind: "tooHot" }
   | { kind: "noConsumers" }
   | { kind: "pumpHead"; head: number }
   | { kind: "tableExceeded"; id: string; medium: Medium };
@@ -424,14 +428,17 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
       circ = { heatLoss: ownLoss(n), flow, rPwh, rPwhc, dp, cumulative: before + dp };
     }
 
-    // Insulation: PWH of circulated sections and of the Verteilung (EN-103 9.1 c, d); PWH-C always; PWC by setting.
+    // Insulation after SIA 385/1: all warmgehaltene parts (PWH of circulated sections, PWH-C; 5.3.1.1) and the PWH of
+    // the Verteilung from the heater (EnDK EN-103 9.1 d) with Tabelle 3; «Rohr an Rohr» one insulation around both,
+    // thickness for the sum of both outer diameters (5.3.2.4), the shell one size larger than the PWH. PWC Verteil- und
+    // Steigleitungen by setting (3.1.4, no thickness in the standard). Ausstossleitungen stay without (5.4).
     const insulated = circulated.has(n.id) || role === "distribution";
-    const shared = circulated.has(n.id) && n.circulation === "rar" && pwh ? nextSize(pwh.size) : null;
+    const shared = circulated.has(n.id) && n.circulation === "rar" && pwh && pwhc ? nextSize(pwh.size) : null;
     const insulation: PipeResult["insulation"] = {
       pwc: pwc && settings.pwcInsulation > 0 && role === "distribution" ? settings.pwcInsulation : null,
-      pwh: pwh && insulated && !shared ? insulationThickness(pwh.size, settings.lambda) : null,
-      pwhc: pwhc && !shared ? insulationThickness(pwhc.size, settings.lambda) : null,
-      shared: shared ? { mm: insulationThickness(shared, settings.lambda), size: shared } : null,
+      pwh: pwh && insulated && !shared ? insulationThickness(pwh.size.od, settings.lambda) : null,
+      pwhc: pwhc && !shared ? insulationThickness(pwhc.size.od, settings.lambda) : null,
+      shared: shared && pwh && pwhc ? { mm: insulationThickness(pwh.size.od + pwhc.size.od, settings.lambda), size: shared } : null,
     };
 
     const isFoot = n.riser && !parentRiser;
@@ -493,6 +500,8 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
 
   if (deltaT > 5) warnings.push({ kind: "deltaT", value: deltaT });
   if (settings.tHot < 60 || settings.tReturn < 55) warnings.push({ kind: "temperature" });
+  // SIA 385/1 4.1.1: hot water in the distribution at most 65 °C.
+  if (settings.tHot > 65) warnings.push({ kind: "tooHot" });
 
   const houseLu = allLu;
   return {

@@ -2329,7 +2329,8 @@
       "deltaT": "Temperaturdifferenz Austritt / Rücklauf {value} K – W3 erlaubt höchstens 5 K.",
       "temperature": "BAG: Wassererwärmung mindestens 60 °C, Verteilleitung mindestens 55 °C.",
       "noConsumers": "Noch keine Apparategruppen mit Entnahmestellen.",
-      "pumpHead": "Die gewählte Pumpe erreicht die Förderhöhe von {head} mbar nicht."
+      "pumpHead": "Die gewählte Pumpe erreicht die Förderhöhe von {head} mbar nicht.",
+      "tooHot": "SIA 385/1 4.1.1: Warmwasser in der Verteilung höchstens 65 °C."
     },
     "central": {
       "title": "Zentrale",
@@ -2368,10 +2369,9 @@
       "vCirc": "v max. PWH-C [m/s]",
       "dpCheck": "Δp Rückflussverhinderer [mbar]",
       "dpValve": "Δp Regulierorgan offen [mbar]",
-      "lambda": "Dämmstoff (EN-103)",
-      "lambdaHigh": "λ > 0.03 W/mK",
-      "lambdaLow": "λ ≤ 0.03 W/mK",
-      "pwcInsulation": "Dämmung PWC [mm]"
+      "lambda": "λ Dämmstoff bei 40 °C [W/(m·K)]",
+      "pwcInsulation": "Dämmung PWC Verteil- / Steigleitungen [mm]",
+      "insulationHint": "Warmgehaltene Leitungen (PWH mit Zirkulation, PWH-C, PWH ab Wassererwärmer) nach SIA 385/1 Tabelle 3; Rohr an Rohr mit der Summe beider Aussendurchmesser. Kaltwasser darf höchstens 25 °C erreichen (SIA 385/1 3.1.4) – die Norm nennt keine Dämmdicke, der Wert ist eine Planungsvorgabe."
     },
     "quantities": {
       "title": "Materialliste",
@@ -2394,26 +2394,28 @@
       "insulationShared": "Dämmung {mm} mm, Rohr an Rohr",
       "sizes": "Dimensionen PWC / PWH / PWH-C: Optipress Ø mm, F = Optiflex",
       "symbols": {
-        "shutoff": "Absperrventil (Nussbaum 82200)",
-        "shutoffDrain": "Absperrventil mit Entleerung (Nussbaum 82202)",
-        "check": "Rückflussverhinderer (Nussbaum 81163)",
-        "regValve": "Zirkulationsregelventil (Nussbaum 36030 / 24026)",
-        "meter": "Wasserzähler",
-        "filter": "Feinfilter (Nussbaum 18102)",
-        "redfil": "Redfil, Druckminderer mit Filter (Nussbaum 12102)",
-        "reducer": "Druckreduzierventil (Nussbaum 11002)",
-        "safety": "Sicherheitsgarnitur (Nussbaum 81168)",
-        "pump": "Zirkulationspumpe (Biral)",
-        "mixer": "Thermischer Mischer",
-        "softener": "Enthärtung (Nussbaum Aquapro-Vita)",
-        "consumer": "Apparategruppe",
+        "shutoff": "Absperrventil (SIA 410 1.26.5; Nussbaum 82200)",
+        "shutoffDrain": "Absperrventil mit Entleerung (SIA 410 1.26.5 / 2.6.7; Nussbaum 82202)",
+        "check": "Rückflussverhinderer (SIA 410 1.26.9; Nussbaum 81163)",
+        "regValve": "Regulierventil (SIA 410 2.6.9; Nussbaum 24026)",
+        "meter": "Wasserzähler (SN EN 806-1)",
+        "filter": "Filter (SIA 410 1.26.19; Nussbaum 18102)",
+        "redfil": "Redfil, Druckreduzierventil mit Filter (SIA 410 1.26.8 / 1.26.19; Nussbaum 12102)",
+        "reducer": "Druckreduzierventil (SIA 410 1.26.8; Nussbaum 11002)",
+        "safety": "Sicherheitsventil mit Trichter (SIA 410 1.26.10; Nussbaum 81168)",
+        "pump": "Zirkulationspumpe (SIA 410 1.27.3; Biral)",
+        "mixer": "Thermostatischer Mischer (SIA 410 5.2.10)",
+        "softener": "Enthärtung (SIA 410 1.27.1; Nussbaum Aquapro-Vita)",
+        "consumer": "Apparategruppe (SN EN 806-1)",
         "battery": "Verteilbatterie",
-        "heater": "Wassererwärmer"
+        "heater": "Wassererwärmer (SIA 410 5.1.19)",
+        "regValveThermal": "Zirkulationsventil thermisch (SIA 410 2.6.9 / 1.29.3; Nussbaum 36030)"
       }
     },
     "plankopf": {
       "plan": "Prinzipschema",
       "trade": "Sanitär"
-    }
+    },
+    "zoom": "Grösse"
   }
 }

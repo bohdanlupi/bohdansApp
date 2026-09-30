@@ -5,8 +5,9 @@
 //   Verteilleitung ═══════╧════════════╧═══════════                     PWC / PWH / PWH-C as three parallel lines
 //   Zentrale: Hausanschluss → Wasserzähler → Filter → Verteilbatterie → Sicherheitsgruppe → Wassererwärmer → pump
 //
-// Symbols after SN EN 806-1 (SVGW W3 Anhang 4); colours: PWC green, PWH red, PWH-C violet. The Wassererwärmer is
-// neutral, all other parts are Nussbaum (pump Biral). Insulation as highlighter bands behind the lines; «Rohr an
+// Symbols after SIA 410 (chapters 1, 2.6, 5); Wasserzähler and Apparateanschluss, which SIA 410 lacks, after SN EN
+// 806-1 (SVGW W3 Anhang 4). Colours: PWC green, PWH red, PWH-C violet. The Wassererwärmer is neutral, all other parts
+// are Nussbaum (pump Biral). Insulation as highlighter bands behind the lines; «Rohr an
 // Rohr» as one band around PWH and PWH-C.
 
 import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
@@ -45,6 +46,7 @@ export type SymbolKey =
   | "shutoffDrain"
   | "check"
   | "regValve"
+  | "regValveThermal"
   | "meter"
   | "filter"
   | "redfil"
@@ -77,7 +79,12 @@ const pathD = (pts: Pt[]) => pts.map(([x, y], i) => `${i ? "L" : "M"}${round(x)}
 const round = (v: number) => Math.round(v * 10) / 10;
 
 // ---------------------------------------------------------------------------
-// Symbols (SN EN 806-1), drawn along a line: horizontal (flow dir ±1) or vertical (upwards)
+// Symbols, drawn along a line: horizontal (flow dir ±1) or vertical (upwards)
+//   SIA 410 1.26.5 Ventil (Absperrventil)            2.6.7 Entleerhahn            1.26.9 Rückflussverhinderer
+//   2.6.9 Drosselventil (Regulierventil)             1.29.3 thermischer Antrieb   1.26.8 Druckreduzierventil
+//   1.26.19 Filter                                    1.26.10 Sicherheitsventil mit Federbelastung, 1.26.16 Trichter
+//   1.27.3 Pumpe          1.27.1 Apparat (Enthärtung)  5.1.19 Wassererwärmer        5.2.10 thermostatischer Mischer
+//   SN EN 806-1: Wasserzähler, Apparate- und Armaturenanschluss mit Absperrung (not in SIA 410)
 // ---------------------------------------------------------------------------
 
 /** Maps local coordinates (u along the line, v across) to the sheet. */
@@ -88,80 +95,107 @@ const pts = (list: Pt[]) => list.map(([a, b]) => `${round(a)},${round(b)}`).join
 
 export function drawSymbol(key: SymbolKey, x: number, y: number, vertical = false, dir = 1, color: Paint = "ink"): Prim[] {
   const f = frame(x, y, vertical, dir);
+  // Side for parts off the line: above a horizontal line, right of a vertical one (clear of the line next to it).
+  const a = vertical ? 1 : -1;
   const poly = (list: Pt[], fill: Paint = "bg", sw = 1): Prim => ({ t: "polygon", points: pts(list.map(([u, v]) => f(u, v))), fill, stroke: "ink", sw });
-  const line = (u1: number, v1: number, u2: number, v2: number, sw = 1, stroke: Paint = "ink"): Prim => {
+  const line = (u1: number, v1: number, u2: number, v2: number, sw = 1): Prim => {
     const [x1, y1] = f(u1, v1);
     const [x2, y2] = f(u2, v2);
-    return { t: "line", x1, y1, x2, y2, stroke, sw };
+    return { t: "line", x1, y1, x2, y2, stroke: "ink", sw };
   };
   const rect = (u: number, v: number, w: number, h: number, fill: Paint = "bg"): Prim => {
     const [ax, ay] = f(u, v);
     const [bx, by] = f(u + w, v + h);
     return { t: "rect", x: Math.min(ax, bx), y: Math.min(ay, by), w: Math.abs(bx - ax), h: Math.abs(by - ay), fill, stroke: "ink", sw: 1 };
   };
+  const circle = (u: number, v: number, r: number, fill: Paint): Prim => {
+    const [cx, cy] = f(u, v);
+    return fill === "ink" ? { t: "circle", cx, cy, r, fill } : { t: "circle", cx, cy, r, fill, stroke: "ink", sw: 1 };
+  };
   const text = (u: number, v: number, s: string, size = 6): Prim => {
     const [tx, ty] = f(u, v);
     return { t: "text", x: tx, y: ty + size * 0.35, text: s, size, anchor: "middle", fill: "ink", bold: true };
   };
-  const side = vertical ? -1 : 1;
-  const bowtie = (fill: Paint = "bg") => [poly([[-7, -5], [0, 0], [-7, 5]], fill), poly([[7, -5], [0, 0], [7, 5]], fill), line(-7, -5, -7, 5), line(7, -5, 7, 5)];
+  const dashed = (u1: number, v1: number, u2: number, v2: number): Prim => ({ ...line(u1, v1, u2, v2, 0.8), dash: "2 1.5" }) as Prim;
+  // 1.26.1 Absperrorgan: two triangles tip to tip around u0; `fillIn` / `fillOut`: the triangle before / after it.
+  const bowtie = (u0 = 0, fillIn: Paint = "bg", fillOut: Paint = "bg", w = 7, h = 5, sw = 1) => [
+    poly([[u0 - w, -h], [u0, 0], [u0 - w, h]], fillIn, sw),
+    poly([[u0 + w, -h], [u0, 0], [u0 + w, h]], fillOut, sw),
+  ];
+  // 2.6.9 Drosselventil: the arrow into the valve.
+  const throttle = () => [...bowtie(), line(-13, 0, -4, 0, 0.9), poly([[-2.5, 0], [-6, -2], [-6, 2]], "ink", 0.4)];
   switch (key) {
     case "shutoff":
-      return bowtie();
+      // 1.26.5 Ventil: Absperrorgan with the dot of the seat.
+      return [...bowtie(), circle(0, 0, 1.6, "ink")];
     case "shutoffDrain":
-      // Absperrventil with Entleerventil: the outlet arrow below the valve.
-      return [...bowtie(), line(0, 0, 0, 9, 0.8), poly([[0, 13], [-2.5, 8.5], [2.5, 8.5]], "ink", 0.5)];
+      // 1.26.5 Ventil with an Entleerhahn (2.6.7) on a short branch: small Absperrorgan and the hose end.
+      return [
+        ...bowtie(),
+        circle(0, 0, 1.6, "ink"),
+        line(0, 0, 0, 4 * a, 0.8),
+        poly([[-2.8, 4 * a], [0, 7.5 * a], [2.8, 4 * a]], "bg", 0.8),
+        poly([[-2.8, 11 * a], [0, 7.5 * a], [2.8, 11 * a]], "bg", 0.8),
+        line(-3, 12.5 * a, 3, 12.5 * a, 1),
+      ];
     case "check":
-      // Rückflussverhinderer: filled triangle in flow direction against a bar.
-      return [poly([[-5, -5], [4, 0], [-5, 5]], "ink"), line(4.5, -5.5, 4.5, 5.5, 1.2)];
+      // 1.26.9 Rückflussverhinderer: the downstream triangle filled.
+      return bowtie(0, "bg", "ink");
     case "regValve":
-      // Zirkulationsregelventil: valve with the filled triangle above.
-      // Vertical lines: the triangle on the right, clear of the line next to it.
-      return [...bowtie(), poly([[-5, -12 * side], [5, -12 * side], [0, -2 * side]], "ink")];
+      // 2.6.9 Drosselventil: Regulierventil set by hand.
+      return throttle();
+    case "regValveThermal":
+      // Drosselventil with thermischem Antrieb (1.29.3): thermostatic Zirkulationsventil.
+      return [...throttle(), line(0, 0, 0, 6 * a, 0.9), rect(-4.5, 6 * a, 9, 7 * a), line(-2.5, 9.5 * a, 2.5, 9.5 * a, 0.7)];
     case "meter":
       return [rect(-7, -6, 14, 12), line(-7, -2.5, 7, -2.5, 0.7), text(0, 2, "m³", 4.8)];
     case "filter":
-      return [rect(-6, -9, 12, 18), { ...line(0, -7, 0, 7, 0.8), dash: "2 1.5" } as Prim];
+      // 1.26.19 Filter (Schmutzfänger).
+      return [rect(-6, -8, 12, 16), dashed(0, -6.5, 0, 6.5)];
     case "reducer":
-      return [...bowtie(), line(0, -4, 0, -13, 0.8), poly([[0, -3.5], [-2, -7.5], [2, -7.5]], "ink", 0.4), line(-3, -13, 3, -13, 0.8)];
+      // 1.26.8 Druckreduzierventil: Absperrorgan in a filled box.
+      return [rect(-8, -6, 16, 12, "ink"), ...bowtie(0, "bg", "bg", 5, 4, 0.6)];
     case "redfil":
-      // Druckminderer mit Filter (Redfil): the reducing valve with the filter cup below.
-      return [...bowtie(), line(0, -4, 0, -13, 0.8), poly([[0, -3.5], [-2, -7.5], [2, -7.5]], "ink", 0.4), line(-3, -13, 3, -13, 0.8), rect(-5, 5, 10, 12), { ...line(0, 7, 0, 15, 0.7), dash: "2 1.5" } as Prim];
+      // Redfil: Druckreduzierventil (1.26.8) and Filter (1.26.19) in one fitting.
+      return [rect(-15, -6, 16, 12, "ink"), ...bowtie(-7, "bg", "bg", 5, 4, 0.6), rect(1, -8, 12, 16), dashed(7, -6.5, 7, 6.5)];
     case "safety":
-      // Sicherheitsventil federbelastet, on a short branch above the line, with the funnel.
+      // 1.26.10 Sicherheitsventil mit Federbelastung (angle valve, spring on top) on a branch; blow-off into a
+      // Trichter (1.26.16).
       return [
-        line(0, 0, 0, -8, 1),
-        poly([[-4, -8], [4, -8], [0, -14]], "bg"),
-        poly([[-4, -20], [4, -20], [0, -14]], "bg"),
-        line(0, -20, 3, -24, 0.8),
-        line(3, -24, -3, -26, 0.8),
-        line(-3, -26, 3, -28, 0.8),
-        line(4, -14, 10, -14, 0.8),
-        line(10, -14, 10, -8, 0.8),
-        poly([[7, -8], [13, -8], [10, -4]], "bg", 0.7),
+        line(0, 0, 0, 6 * a),
+        poly([[-4, 6 * a], [4, 6 * a], [0, 12 * a]]),
+        poly([[6, 8 * a], [6, 16 * a], [0, 12 * a]]),
+        line(0, 12 * a, 0, 15 * a, 0.8),
+        line(0, 15 * a, 2.5, 16.5 * a, 0.8),
+        line(2.5, 16.5 * a, -2.5, 18.5 * a, 0.8),
+        line(-2.5, 18.5 * a, 2.5, 20.5 * a, 0.8),
+        line(6, 12 * a, 11, 12 * a, 0.8),
+        line(11, 12 * a, 11, 5 * a, 0.8),
+        line(8, 8 * a, 11, 5 * a, 0.8),
+        line(14, 8 * a, 11, 5 * a, 0.8),
       ];
-    case "pump": {
-      const [cx, cy] = f(0, 0);
-      return [{ t: "circle", cx, cy, r: 8, fill: "bg", stroke: "ink", sw: 1.1 }, line(-5.5, -5.8, 8, 0, 1), line(-5.5, 5.8, 8, 0, 1)];
-    }
-    case "mixer": {
-      const [cx, cy] = f(0, 0);
-      return [{ t: "circle", cx, cy, r: 5, fill: "ink" }];
-    }
+    case "pump":
+      // 1.27.3 Pumpe: circle with the filled triangle pointing in the flow direction.
+      return [circle(0, 0, 8, "bg"), poly([[0, -8], [8, 0], [0, 8]], "ink", 0.5)];
+    case "mixer":
+      // 5.2.10 Thermostatischer Mischer.
+      return [circle(0, 0, 5, "ink")];
     case "softener":
-      return [rect(-10, -9, 20, 18), text(0, 0, "E", 8)];
+      // 1.27.1 Apparat ohne rotierende Teile, with its designation.
+      return [rect(-9, -9, 18, 18), text(0, 0, "E", 8)];
     case "consumer": {
-      // Apparate- und Armaturenanschluss mit Absperrung: circle, lower half filled.
+      // SN EN 806-1 Apparate- und Armaturenanschluss mit Absperrung: circle, lower half filled.
       const [cx, cy] = f(0, 0);
       return [
         { t: "circle", cx, cy, r: 4.5, fill: "bg", stroke: "ink", sw: 1 },
-        { t: "path", d: `M${cx - 4.5},${cy} A4.5,4.5 0 0 0 ${cx + 4.5},${cy} Z`, fill: color === "ink" ? "ink" : color },
+        { t: "path", d: `M${cx - 4.5},${cy} A4.5,4.5 0 0 0 ${cx + 4.5},${cy} Z`, fill: color },
       ];
     }
     case "battery":
       return [rect(-3, -8, 6, 16, "ink")];
     case "heater":
-      return [rect(-12, -14, 24, 28), text(0, 0, "WE", 7)];
+      // 5.1.19 Wassererwärmer (Ansicht): rectangle.
+      return [rect(-9, -13, 18, 26), text(0, 0, "WE", 6)];
   }
 }
 
@@ -451,7 +485,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
       for (const m of mediaOf(foot)) symbol(foot.id, "shutoffDrain", c.x + OFF[m], yL - 28 - OFF[m] * 1.5, true);
       if (fr?.pwhc) {
         symbol(foot.id, "check", c.x + OFF.pwhc, yL - 96, true, -1);
-        symbol(foot.id, "regValve", c.x + OFF.pwhc, yL - 122, true);
+        symbol(foot.id, foot.regValve === "manual" ? "regValve" : "regValveThermal", c.x + OFF.pwhc, yL - 122, true, -1);
         label(foot.id, c.x + SPAN + 16, yL - 118, foot.regValve === "manual" ? "24026" : "36030", 6.5, { muted: true });
       }
       label(foot.id, c.x + 10, tops[tops.length - 1] - 14, foot.label || `${labels.strang} ${fr?.strang ?? ""}`, 8.5, { anchor: "middle", bold: true });
@@ -562,7 +596,7 @@ function drawCentral(
   // Wassererwärmer (neutral).
   const top = Y + 48;
   api.group(null, [
-    { t: "rect", x: g.spX, y: top, w: 90, h: Yt + 20 - top, rx: 6, fill: "bg", stroke: "ink", sw: 1.4 },
+    { t: "rect", x: g.spX, y: top, w: 90, h: Yt + 20 - top, fill: "bg", stroke: "ink", sw: 1.4 },
     { t: "text", x: g.spX + 45, y: top + 34, text: c.heaterLabel || labels.heater, size: 8.5, anchor: "middle", fill: "ink", bold: true },
     { t: "text", x: g.spX + 45, y: top + 48, text: [c.heaterVolume ? `${c.heaterVolume} l` : "", `${fmt1(data.settings.tHot)} °C`].filter(Boolean).join(" · "), size: 7.5, anchor: "middle", fill: "muted" },
   ]);

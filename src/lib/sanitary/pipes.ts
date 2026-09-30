@@ -4,7 +4,7 @@
 // Inner diameters and roughness from the Nussbaum sheet «Dimensionen» of the Zirkulationsberechnung
 // (Berechnungsvorlagen/Sanitär). Friction per metre with Darcy–Weisbach / Colebrook at the water temperature; at
 // 60 °C this reproduces the Nussbaum R-value tables of that workbook (e.g. 22×1.2 at 430 l/h: 1.1 mbar/m).
-// Insulation thickness after EnDK Vollzugshilfe EN-103 (2020) Tabelle 2.
+// Insulation thickness after SIA 385/1:2020 Tabelle 3 (stricter than EnDK EN-103 Tabelle 2).
 
 import { type CatalogArticle, type NussbaumFamily, nussbaumArticles } from "./catalog-data";
 
@@ -18,7 +18,7 @@ export type PipeSize = {
   label: string;
   od: number;
   di: number;
-  /** Nominal size DN for the insulation table. */
+  /** Nominal size DN (matches Optiflex to the threaded / Optipress articles). */
   dn: number;
   family: NussbaumFamily;
 };
@@ -111,25 +111,38 @@ export function nextSize(p: PipeSize): PipeSize {
 }
 
 // ---------------------------------------------------------------------------
-// Insulation (EN-103 Tabelle 2)
+// Insulation (SIA 385/1:2020 Tabelle 3)
 // ---------------------------------------------------------------------------
 
-/** λ of the insulation material: «low» ≤ 0.03 W/mK, «high» > 0.03 … 0.05 W/mK. */
-export type InsulationLambda = "low" | "high";
-
-const insulationRows: { maxDn: number; high: number; low: number }[] = [
-  { maxDn: 15, high: 40, low: 30 },
-  { maxDn: 32, high: 50, low: 40 },
-  { maxDn: 50, high: 60, low: 50 },
-  { maxDn: 80, high: 80, low: 60 },
-  { maxDn: 150, high: 100, low: 80 },
-  { maxDn: 200, high: 120, low: 80 },
+/** Outer diameters [mm] of SIA 385/1 Tabelle 3. */
+const insulationOd = [15, 18, 22, 28, 35, 42, 54, 64, 76.1, 88.9, 108];
+/** Minimum thickness [mm] per λ of the insulation at 40 °C [W/(m·K)] (rows) and outer diameter (columns). */
+const insulationTable: [number, number[]][] = [
+  [0.01, [5, 6, 7, 8, 9, 10, 12, 14, 16, 17, 20]],
+  [0.015, [10, 10, 12, 14, 16, 18, 20, 24, 26, 29, 33]],
+  [0.02, [17, 18, 20, 23, 26, 28, 32, 36, 39, 43, 48]],
+  [0.025, [26, 28, 30, 34, 38, 40, 46, 50, 55, 60, 66]],
+  [0.03, [40, 42, 45, 49, 53, 57, 63, 68, 74, 80, 88]],
+  [0.035, [58, 60, 63, 68, 72, 77, 85, 90, 97, 104, 113]],
+  [0.04, [70, 70, 75, 79, 84, 89, 97, 100, 110, 118, 128]],
+  [0.045, [70, 70, 75, 79, 84, 89, 97, 100, 110, 118, 128]],
+  [0.05, [70, 70, 75, 79, 84, 89, 97, 100, 110, 118, 128]],
 ];
 
-/** Minimum insulation thickness [mm] of a PWH / PWH-C pipe. */
-export function insulationThickness(p: PipeSize, lambda: InsulationLambda): number {
-  const row = insulationRows.find((r) => p.dn <= r.maxDn) ?? insulationRows[insulationRows.length - 1];
-  return row[lambda];
+/**
+ * Minimum insulation of a warmgehaltene Leitung (PWH with Zirkulation, PWH-C) after SIA 385/1 5.3.2: the next larger
+ * outer diameter of Tabelle 3 (5.3.2.2), interpolated between the λ rows (5.3.2.3), rounded up to whole mm. «Rohr an
+ * Rohr»: the sum of both outer diameters (5.3.2.4).
+ */
+export function insulationThickness(od: number, lambda: number): number {
+  const col = insulationOd.findIndex((d) => d >= od - 1e-9);
+  const c = col >= 0 ? col : insulationOd.length - 1;
+  const l = Math.min(0.05, Math.max(0.01, lambda));
+  const i = insulationTable.findIndex(([x]) => x >= l - 1e-9);
+  const [l1, r1] = insulationTable[Math.max(0, i - 1)];
+  const [l2, r2] = insulationTable[i];
+  const t = l2 > l1 ? (l - l1) / (l2 - l1) : 0;
+  return Math.ceil(r1[c] + (r2[c] - r1[c]) * t - 1e-9);
 }
 
 /** Highlighter band of an insulation thickness in the schema (fill, dotted edge). */

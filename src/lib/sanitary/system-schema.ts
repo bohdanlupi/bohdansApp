@@ -93,7 +93,8 @@ const settingsSchema: z.ZodType<Settings> = z
     dpCheck: range(0, 2000, s.dpCheck),
     dpValve: range(0, 2000, s.dpValve),
     vCirc: range(0.1, 2, s.vCirc),
-    lambda: z.enum(["low", "high"]).catch(s.lambda),
+    // Older data: EN-103 classes «low» (≤ 0.03) / «high» (> 0.03).
+    lambda: z.preprocess((v) => (v === "low" ? 0.03 : v === "high" ? 0.035 : v), range(0.01, 0.05, s.lambda)),
     pwcInsulation: range(0, 200, s.pwcInsulation),
     pump: z.string().max(20).nullable().catch(null),
   })

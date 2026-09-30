@@ -147,9 +147,7 @@ export function SanitaryEditor({
                 <h2 className="font-semibold">{t("schema")}</h2>
                 <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
               </div>
-              <div className="overflow-x-auto">
-                <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
-              </div>
+              <SanitarySchemaView schema={schema} selected={selected} label={name} onSelect={setSelected} />
               {schema.insulation.length > 0 && (
                 <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   {schema.insulation.map((i) => (
@@ -389,10 +387,10 @@ function CentralForm({ central, result, editable, onChange }: { central: Central
 
 function SettingsForm({ settings, editable, onChange }: { settings: Settings; editable: boolean; onChange: (p: Partial<Settings>) => void }) {
   const t = useTranslations("sanitary.settings");
-  const number = (key: "tHot" | "tReturn" | "lossConventional" | "lossRar" | "dpCheck" | "dpValve" | "vCirc" | "pwcInsulation", label: string, decimals: number) => (
+  const number = (key: "tHot" | "tReturn" | "lossConventional" | "lossRar" | "dpCheck" | "dpValve" | "vCirc" | "pwcInsulation" | "lambda", label: string, decimals: number) => (
     <div className="space-y-1">
       <Label className="text-xs">{label}</Label>
-      <NumberField value={settings[key]} decimals={decimals} label={label} disabled={!editable} onChange={(v) => v !== null && onChange({ [key]: v })} className="h-8 rounded-lg" />
+      <NumberField value={settings[key]} decimals={decimals} label={label} disabled={!editable} onChange={(v) => v !== null && onChange({ [key]: key === "lambda" ? Math.min(0.05, Math.max(0.01, v)) : v })} className="h-8 rounded-lg" />
     </div>
   );
   return (
@@ -416,17 +414,10 @@ function SettingsForm({ settings, editable, onChange }: { settings: Settings; ed
         {number("vCirc", t("vCirc"), 2)}
         {number("dpCheck", t("dpCheck"), 0)}
         {number("dpValve", t("dpValve"), 0)}
-        <div className="space-y-1">
-          <Label htmlFor="settings-lambda" className="text-xs">
-            {t("lambda")}
-          </Label>
-          <NativeSelect id="settings-lambda" value={settings.lambda} disabled={!editable} onChange={(e) => onChange({ lambda: e.target.value as Settings["lambda"] })}>
-            <option value="high">{t("lambdaHigh")}</option>
-            <option value="low">{t("lambdaLow")}</option>
-          </NativeSelect>
-        </div>
+        {number("lambda", t("lambda"), 3)}
         {number("pwcInsulation", t("pwcInsulation"), 0)}
       </div>
+      <p className="text-xs text-muted-foreground">{t("insulationHint")}</p>
     </Section>
   );
 }

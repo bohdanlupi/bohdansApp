@@ -264,7 +264,8 @@ export function TitleBlock({
       {/* Plan type | format | trade */}
       {svgText(R + 5, y2 + 16, labels.plan, 12.5)}
       {line(R + 119, y2, R + 119, y3)}
-      {svgText(R + 145, y2 + 16, format, 12.5, { anchor: "middle" })}
+      {/* «A3» … or a free sheet «420 × 1050» (mm), smaller to fit the cell. */}
+      {svgText(R + 145, y2 + 16, format, format.length > 4 ? 7.5 : 12.5, { anchor: "middle" })}
       {svgText(R + 175, y2 + 16, labels.trade, 12.5, { fill: blue })}
       {line(R, y3, x + TB_W, y3)}
       {/* Revision list */}
