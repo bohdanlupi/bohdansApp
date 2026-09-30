@@ -2236,7 +2236,7 @@
       "zk": "ZK",
       "insulation": "Dämmung",
       "none": "ungedämmt",
-      "inShared": "in WW-Dämmung",
+      "inShared": "in WW",
       "materials": {
         "pir": "PIR",
         "mineralwool": "Mineralwolle"

@@ -2236,7 +2236,7 @@
       "zk": "RC",
       "insulation": "Isolamento",
       "none": "non isolato",
-      "inShared": "nell'isolamento AC",
+      "inShared": "in AC",
       "materials": {
         "pir": "PIR",
         "mineralwool": "lana minerale"

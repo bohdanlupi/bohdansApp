@@ -223,6 +223,7 @@ export function TitleBlock({
   revisions,
   firm,
   labels,
+  tradeColor = blue,
 }: {
   x: number;
   y: number;
@@ -233,6 +234,8 @@ export function TitleBlock({
   revisions: SchemaRevision[];
   firm: FirmSettings;
   labels: PlankopfLabels;
+  /** Colour of the trade in the title block (Lüftung blue, Sanitär the green of the LUPI logo). */
+  tradeColor?: string;
 }) {
   const L = 226; // logo column
   const R = x + L; // right part
@@ -266,7 +269,7 @@ export function TitleBlock({
       {line(R + 119, y2, R + 119, y3)}
       {/* «A3» … or a free sheet «420 × 1050» (mm), smaller to fit the cell. */}
       {svgText(R + 145, y2 + 16, format, format.length > 4 ? 7.5 : 12.5, { anchor: "middle" })}
-      {svgText(R + 175, y2 + 16, labels.trade, 12.5, { fill: blue })}
+      {svgText(R + 175, y2 + 16, labels.trade, 12.5, { fill: tradeColor })}
       {line(R, y3, x + TB_W, y3)}
       {/* Revision list */}
       {[labels.index, labels.initials, labels.date, labels.comment].map((h, i) => (

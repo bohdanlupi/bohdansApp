@@ -15,6 +15,8 @@ import type { LogoSource } from "./letterhead";
 // 210 mm (folds to A4).
 
 const ink = "#111111";
+/** Green of the «I» in the LUPI logo (public/brand/logo.png), the colour of the trade Sanitär in the title block. */
+const SANITARY_GREEN = "#008001";
 const MM = 72 / 25.4;
 const HEIGHTS = [297, 420, 594];
 const WIDTH_STEP = 210;
@@ -154,7 +156,7 @@ export function SanitarySchemaDocument({
             ))}
           </G>
           <Legend x={MARGIN + PAD} y={tbY} w={tbX - MARGIN - 2 * PAD} h={TB_H - PAD} schema={schema} labels={legend} />
-          <TitleBlock x={tbX} y={tbY} project={project} system={system} phase={phase} format={sheet.name} revisions={revisions} firm={firm} labels={plankopf} />
+          <TitleBlock x={tbX} y={tbY} project={project} system={system} phase={phase} format={sheet.name} revisions={revisions} firm={firm} labels={plankopf} tradeColor={SANITARY_GREEN} />
         </Svg>
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
         {logo && <Image src={logo} style={{ position: "absolute", left: tbX + 10, top: tbY + 80, width: 200, height: 68, objectFit: "contain", objectPosition: "left" }} />}

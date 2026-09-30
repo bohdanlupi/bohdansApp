@@ -2236,7 +2236,7 @@
       "zk": "CI",
       "insulation": "Isolation",
       "none": "non isolé",
-      "inShared": "dans l'isolation EC",
+      "inShared": "dans EC",
       "materials": {
         "pir": "PIR",
         "mineralwool": "laine minérale"
