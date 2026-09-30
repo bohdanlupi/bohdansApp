@@ -166,7 +166,7 @@ export function nextSize(p: PipeSize): PipeSize {
 }
 
 /** Insulation band in the schema: yellow highlighter with black dotted edges (the thickness is written at the Leitung). */
-export const insulationStyle = { fill: "#b3a336", edge: "#000000" } as const;
+export const insulationStyle = { fill: "#fff082", edge: "#000000" } as const;
 
 // ---------------------------------------------------------------------------
 // Articles
