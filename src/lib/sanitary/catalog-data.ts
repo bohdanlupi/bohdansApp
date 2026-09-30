@@ -6,6 +6,7 @@ export type CatalogArticle = { number: string; size: string | null; text: string
 export const nussbaumFamilies = {
   "11002": "Druckreduzierventil mit OP-A-Verschraubung",
   "12102": "Redfil rückspülbar, mit Optipress-A-Anschlussverschraubung",
+  "15101": "Rückflussverhinderer EA (Gewinde, für Optiflex-Flowpress mit Übergängen)",
   "18102": "Feinfilter rückspülbar, mit Optipress-A-Anschlussverschraubung",
   "19051": "Wasserenthärter Aquapro-Vita Compact",
   "19053": "Wasserenthärter Aquapro-Vita",
@@ -19,7 +20,7 @@ export const nussbaumFamilies = {
   "82200": "Optipress-Aquaplus-Schrägsitzventil",
   "82202": "Optipress-Aquaplus-Schrägsitzventil, mit Entleerventil",
   "82232": "Optipress-Aquaplus-Batterieventil, mit Optipress-A-Anschlussverschraubung",
-  "87123": "Optiflex-Rohr PE-RT flexibel, für 1-LU-Apparat",
+  "86510": "Optiflex-Flowpress-Schrägsitzventil",
   "87153": "Optiflex-Flowpress-Rohr formstabil"
 } as const;
 
@@ -83,6 +84,43 @@ export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
       "number": "12102.28",
       "size": "54",
       "text": "Redfil rückspülbar, mit Optipress-A-Anschlussverschraubung, 54"
+    }
+  ],
+  "15101": [
+    {
+      "number": "15101.04",
+      "size": "½",
+      "text": "Rückflussverhinderer EA, ½"
+    },
+    {
+      "number": "15101.05",
+      "size": "¾",
+      "text": "Rückflussverhinderer EA, ¾"
+    },
+    {
+      "number": "15101.06",
+      "size": "1",
+      "text": "Rückflussverhinderer EA, 1"
+    },
+    {
+      "number": "15101.07",
+      "size": "1¼",
+      "text": "Rückflussverhinderer EA, 1¼"
+    },
+    {
+      "number": "15101.08",
+      "size": "1½",
+      "text": "Rückflussverhinderer EA, 1½"
+    },
+    {
+      "number": "15101.09",
+      "size": "2",
+      "text": "Rückflussverhinderer EA, 2"
+    },
+    {
+      "number": "15101.10",
+      "size": "2½",
+      "text": "Rückflussverhinderer EA, 2½"
     }
   ],
   "18102": [
@@ -496,11 +534,41 @@ export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
       "text": "Optipress-Aquaplus-Batterieventil, mit Optipress-A-Anschlussverschraubung, 54 x 54"
     }
   ],
-  "87123": [
+  "86510": [
     {
-      "number": "87123.21",
+      "number": "86510.22",
       "size": "16",
-      "text": "Optiflex-Rohr PE-RT flexibel, für 1-LU-Apparat, 16"
+      "text": "Optiflex-Flowpress-Schrägsitzventil, 16"
+    },
+    {
+      "number": "86510.23",
+      "size": "20",
+      "text": "Optiflex-Flowpress-Schrägsitzventil, 20"
+    },
+    {
+      "number": "86510.24",
+      "size": "25",
+      "text": "Optiflex-Flowpress-Schrägsitzventil, 25"
+    },
+    {
+      "number": "86510.25",
+      "size": "32",
+      "text": "Optiflex-Flowpress-Schrägsitzventil, 32"
+    },
+    {
+      "number": "86510.26",
+      "size": "40",
+      "text": "Optiflex-Flowpress-Schrägsitzventil, 40"
+    },
+    {
+      "number": "86510.27",
+      "size": "50",
+      "text": "Optiflex-Flowpress-Schrägsitzventil, 50"
+    },
+    {
+      "number": "86510.28",
+      "size": "63",
+      "text": "Optiflex-Flowpress-Schrägsitzventil, 63"
     }
   ],
   "87153": [

@@ -1,5 +1,5 @@
 // Generates src/lib/sanitary/catalog-data.ts from the IGH catalogues in the database: the Nussbaum articles the
-// Sanitär module uses (Optipress / Optiflex pipes, valves of the Stränge and the Zentrale, water treatment) and the
+// Sanitär module uses (Optipress-Aquaplus / Optiflex-Flowpress pipes and valves, Zentrale, water treatment) and the
 // Biral hot-water circulation pumps (CompAX BLUE, ModulA BLUE). Each article gets its size as printed at the end of
 // the catalogue text («…, 22», «…, ¾», «…, 16x3.8»).
 // Usage (needs .env): node --env-file=.env scripts/gen-nussbaum-data.mjs
@@ -23,10 +23,11 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 const families = {
   "81082": "Optipress-Edelstahlrohr 1.4521, Stange à 6 m",
   "87153": "Optiflex-Flowpress-Rohr formstabil",
-  "87123": "Optiflex-Rohr PE-RT flexibel, für 1-LU-Apparat",
   "82200": "Optipress-Aquaplus-Schrägsitzventil",
   "82202": "Optipress-Aquaplus-Schrägsitzventil, mit Entleerventil",
   "81163": "Optipress-A-Rückflussverhinderer EA",
+  "86510": "Optiflex-Flowpress-Schrägsitzventil",
+  "15101": "Rückflussverhinderer EA (Gewinde, für Optiflex-Flowpress mit Übergängen)",
   "36030": "Zirkulationsventil, mit Durchflussregulierung selbstständig",
   "24026": "Regulierventil, mit Innengewinde",
   "82232": "Optipress-Aquaplus-Batterieventil, mit Optipress-A-Anschlussverschraubung",

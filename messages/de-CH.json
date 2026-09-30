@@ -2424,7 +2424,7 @@
       "pwc": "PWC  Trinkwasser kalt",
       "pwh": "PWH  Trinkwasser warm",
       "pwhc": "PWH-C  Zirkulation",
-      "sizes": "Durchmesser: Optipress Ø mm, F = Optiflex",
+      "sizes": "Dimensionen: NW = Optipress-Aquaplus, Pex = Optiflex-Flowpress (Aussendurchmesser mm)",
       "symbols": {
         "shutoff": "Absperrventil (SIA 410 1.26.5; Nussbaum 82200)",
         "shutoffDrain": "Absperrventil mit Entleerung (SIA 410 1.26.5 / 2.6.7; Nussbaum 82202)",

@@ -2424,7 +2424,7 @@
       "pwc": "PWC  Acqua potabile fredda",
       "pwh": "PWH  Acqua potabile calda",
       "pwhc": "PWH-C  Ricircolo",
-      "sizes": "Diametri: Optipress Ø mm, F = Optiflex",
+      "sizes": "Diametri: NW = Optipress-Aquaplus, Pex = Optiflex-Flowpress (diametro esterno mm)",
       "symbols": {
         "shutoff": "Valvola d'arresto (SIA 410 1.26.5; Nussbaum 82200)",
         "shutoffDrain": "Valvola d'arresto con scarico (SIA 410 1.26.5 / 2.6.7; Nussbaum 82202)",

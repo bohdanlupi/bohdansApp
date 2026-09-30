@@ -15,7 +15,7 @@ import { floorOrder } from "@/lib/kwl/schema-layout";
 
 import type { Medium, SanitaryData, SanNode, SystemResult } from "./network";
 import { consumerLu } from "./network";
-import { insulationStyle, type PipeSize } from "./pipes";
+import { insulationStyle, type PipeSize, sizeText } from "./pipes";
 
 export const mediumColors: Record<Medium, `#${string}`> = { pwc: "#00a651", pwh: "#e3001b", pwhc: "#9b30d9" };
 /** Offset of each line from the first one (PWC) [units]. */
@@ -221,8 +221,6 @@ type From = { x: number; lane: number; continues: boolean };
 type Column = { x: number; lane: number; from: From; chain: SanNode[]; hangs: Hang[]; width: number };
 type Seg = { node: SanNode; lane: number; x0: number; x1: number; drop: boolean; from: From };
 
-/** Size text of a line: Optipress by its outer diameter, Optiflex with «F» (PE-RT 1-LU pipe «F16x3.8»). */
-const sizeText = (s: PipeSize | null | undefined) => (!s ? "" : s.system === "optiflex" ? (s.key === "of-16x3.8" ? "F16x3.8" : `F${s.od}`) : `${s.od}`);
 const fmt1 = (v: number) => (Math.round(v * 10) / 10).toString().replace(".", ",");
 
 export function layoutSchema(data: SanitaryData, result: SystemResult, labels: SchemaText): SanitarySchema {
@@ -508,7 +506,8 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
       });
       // Foot of the Strang: Absperrventile mit Entleerung, Rückflussverhinderer and Regulierventil on the PWH-C.
       const fr = res(foot);
-      for (const m of mediaOf(foot)) symbol(foot.id, "shutoffDrain", c.x + OFF[m], yL - 28 - OFF[m] * 1.5, true);
+      // Optiflex-Flowpress lines: Schrägsitzventil without Entleerung (Flowpress has none with it).
+      for (const m of mediaOf(foot)) symbol(foot.id, fr?.[m]?.size.system === "optiflex" ? "shutoff" : "shutoffDrain", c.x + OFF[m], yL - 28 - OFF[m] * 1.5, true);
       if (fr?.pwhc) {
         symbol(foot.id, "check", c.x + OFF.pwhc, yL - 96, true, -1);
         symbol(foot.id, foot.regValve === "manual" ? "regValve" : "regValveThermal", c.x + OFF.pwhc, yL - 122, true, -1);
@@ -601,16 +600,27 @@ function drawCentral(
     const out = rows.filter(([, size]) => size).map(([k, size, v]) => `${k}: ${sizeText(size)} · ${mm(v)}`);
     return rows.some(([, size, v]) => size && v) ? [...out, `${labels.insulation}: ${labels.material}`] : out;
   };
-  const block = (x: number, yTop: number, lines: string[], anchor: "start" | "end") => lines.length && api.textBlock("", x, yTop + (lines.length - 1) * TEXT_LINE, lines, anchor);
+  // Text block with the length of the line on top (when entered).
+  const block = (x: number, yTop: number, length: number | null, rows: string[], anchor: "start" | "end") => {
+    const lines = [...(length ? [`${fmt1(length)} m`] : []), ...rows];
+    if (lines.length) api.textBlock("", x, yTop + (lines.length - 1) * TEXT_LINE, lines, anchor);
+  };
   const line = (m: Medium, points: Pt[], insulation: number | null) => {
     band(points, insulation, false);
     draw(null, m, points);
   };
   // Hausanschluss → Verteilbatterie.
   line("pwc", [[LEFT - 20, Yt], [g.xVB, Yt]], ci.trunk);
-  block(g.xVB - 8, Yt - 38, text([[labels.kw, trunk, ci.trunk]]), "end");
+  block(g.xVB - 8, Yt - 47, c.trunkLength, text([[labels.kw, trunk, ci.trunk]]), "end");
   label(null, LEFT - 18, Yt - 22, labels.house, 8.5, { bold: true });
-  label(null, LEFT - 18, Yt - 12, [result.house.dn ? `DN ${result.house.dn}` : "", trunk ? `/ ${trunk.od}` : ""].filter(Boolean).join(" "), 7, { muted: true });
+  label(
+    null,
+    LEFT - 18,
+    Yt - 12,
+    [[result.house.dn ? `DN ${result.house.dn}` : "", sizeText(trunk)].filter(Boolean).join(" / "), c.houseLength ? `${fmt1(c.houseLength)} m` : ""].filter(Boolean).join(" · "),
+    7,
+    { muted: true },
+  );
   g.trunkItems.forEach((k, i) => {
     const x = LEFT + 60 + i * 46;
     symbol(null, k, x, Yt);
@@ -623,7 +633,7 @@ function drawCentral(
   // PWC to the Verteilung.
   line("pwc", [[g.xVB, Y], [g.x0, Y]], ci.supply);
   symbol(null, "shutoff", g.xVB + 22, Y);
-  block(g.xVB + 40, Y - 34, text([[labels.kw, result.central.supply?.size, ci.supply]]), "start");
+  block(g.xVB + 40, Y - 43, c.centralLength, text([[labels.kw, result.central.supply?.size, ci.supply]]), "start");
   const hasHot = g.x0 > g.xVB + 60;
   if (!hasHot) return;
   // Cold feed of the heater with the Sicherheitsgruppe.
@@ -633,7 +643,7 @@ function drawCentral(
     symbol(null, k, x, Yt);
     if (k === "softener") label(null, x, Yt + 22, labels.softener, 6.5, { anchor: "middle", muted: true });
   });
-  block(g.spX - 6, Yt + 32, text([[labels.kw, result.central.feed?.size, ci.feed]]), "end");
+  block(g.spX - 6, Yt + 32, c.heaterLength, text([[labels.kw, result.central.feed?.size, ci.feed]]), "end");
   // Wassererwärmer (neutral).
   const top = Y + 48;
   api.group(null, [
@@ -663,7 +673,7 @@ function drawCentral(
     label(null, xC + 6, top - 6, `${fmt1(data.settings.tReturn)} °C`, 7, { muted: true });
   }
   // Warmwasser and Zirkulation between the Wassererwärmer and the Verteilung, below the pump group.
-  block(xC + 30, Y + 70, text([[labels.ww, result.central.hot?.size, ci.hot], ...(result.pump ? [[labels.zk, result.central.ret, ci.ret] as [string, PipeSize | null, number | null]] : [])]), "start");
+  block(xC + 30, Y + 70, c.heaterLength, text([[labels.ww, result.central.hot?.size, ci.hot], ...(result.pump ? [[labels.zk, result.central.ret, ci.ret] as [string, PipeSize | null, number | null]] : [])]), "start");
 }
 
-export { sizeText };
+export { sizeText } from "./pipes";

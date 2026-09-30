@@ -15,7 +15,7 @@ import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { biralPumps } from "@/lib/sanitary/catalog-data";
 import { exampleNetwork } from "@/lib/sanitary/defaults";
 import { type Central, evaluateSystem, findNode, type SanitaryData, type Settings, type SystemResult, type Warning } from "@/lib/sanitary/network";
-import { insulationMaterials, insulationStyle } from "@/lib/sanitary/pipes";
+import { insulationMaterials, insulationStyle, sizeText } from "@/lib/sanitary/pipes";
 import { systemQuantities } from "@/lib/sanitary/quantities";
 import { layoutSchema } from "@/lib/sanitary/schema";
 
@@ -350,9 +350,9 @@ function CentralForm({ central, result, editable, onChange }: { central: Central
       </div>
       <p className="text-xs text-muted-foreground">
         {t("sizes", {
-          trunk: result.central.trunk?.size.label ?? "–",
-          supply: result.central.supply?.size.label ?? "–",
-          feed: result.central.feed?.size.label ?? "–",
+          trunk: sizeText(result.central.trunk?.size) || "–",
+          supply: sizeText(result.central.supply?.size) || "–",
+          feed: sizeText(result.central.feed?.size) || "–",
         })}
       </p>
     </Section>

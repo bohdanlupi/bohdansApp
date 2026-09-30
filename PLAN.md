@@ -338,6 +338,10 @@ Zentrale (Hausanschluss, Wasserzähler, Filter / Redfil, DRV, Enthärtung, Verte
 Wassererwärmer neutral, thermischer Mischer neutral) and a free tree of pipe sections carrying PWC and / or PWH, with
 PWH-C «konventionell» (separate Optipress return) or «Rohr an Rohr» (Optiflex return along the steel PWH, one
 insulation one size larger); Steigstrang sections (riser) and Apparategruppen (outlets of W3 Tabelle 3).
+Optiflex lines use only Optiflex-Flowpress parts (pipes 87153, Schrägsitzventil 86510; no Flowpress RV / Entleerung, so
+the threaded RV 15101 and no drain); the PE-RT 1-LU pipe is gone, Rohr an Rohr returns are Flowpress 16–32.
+Dimensions are written «NW 22» (Optipress-Aquaplus) and «Pex 16» (Optiflex-Flowpress); the Zentrale texts carry the
+entered lengths.
 User decisions: all components Nussbaum (IGH catalogue, scripts/gen-nussbaum-data.mjs → catalog-data.ts), pump Biral
 (CompAX / ModulA BLUE, suggested by the type head – no curves in IGH), Wassererwärmer always neutral; per Strang
 Absperrventil mit Entleerung on PWC / PWH / PWH-C, Rückflussverhinderer, Regulierventil 36030 (thermal) or 24026

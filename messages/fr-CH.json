@@ -2424,7 +2424,7 @@
       "pwc": "PWC  Eau potable froide",
       "pwh": "PWH  Eau potable chaude",
       "pwhc": "PWH-C  Circulation",
-      "sizes": "Diamètres : Optipress Ø mm, F = Optiflex",
+      "sizes": "Diamètres : NW = Optipress-Aquaplus, Pex = Optiflex-Flowpress (diamètre extérieur mm)",
       "symbols": {
         "shutoff": "Vanne d'arrêt (SIA 410 1.26.5 ; Nussbaum 82200)",
         "shutoffDrain": "Vanne d'arrêt avec vidange (SIA 410 1.26.5 / 2.6.7 ; Nussbaum 82202)",

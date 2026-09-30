@@ -1,6 +1,6 @@
 // Nussbaum pipe systems of the Sanitär module and their hydraulics:
 //   Optipress (Edelstahlrohr 1.4521 with Optipress-Aquaplus fittings) – PWC, PWH and the separate PWH-C
-//   Optiflex (Flowpress formstabil, PE-RT for 1-LU outlets)              – floor pipes and the PWH-C «Rohr an Rohr»
+//   Optiflex-Flowpress (formstabil, with its own valves)               – floor pipes and the PWH-C «Rohr an Rohr»
 // Inner diameters and roughness from the Nussbaum sheet «Dimensionen» of the Zirkulationsberechnung
 // (Berechnungsvorlagen/Sanitär). Friction per metre with Darcy–Weisbach / Colebrook at the water temperature; at
 // 60 °C this reproduces the Nussbaum R-value tables of that workbook (e.g. 22×1.2 at 430 l/h: 1.1 mbar/m).
@@ -11,7 +11,7 @@ import { type CatalogArticle, type NussbaumFamily, nussbaumArticles } from "./ca
 export type PipeSystem = "optipress" | "optiflex";
 
 export type PipeSize = {
-  /** Key saved in the network, e.g. «op-22», «of-16», «of-16x3.8». */
+  /** Key saved in the network, e.g. «op-22», «of-16». */
   key: string;
   system: PipeSystem;
   /** Outer diameter × wall [mm] as printed, e.g. «22×1.2». */
@@ -55,17 +55,19 @@ export const pipeSizes: PipeSize[] = [
   op(76.1, 2, 72.1, 65),
   op(88.9, 2, 84.9, 80),
   op(108, 2, 104, 100),
-  of("of-16x3.8", 16, 3.8, 8.4, 10, "87123"),
   of("of-16", 16, 2.2, 11.6, 12),
   of("of-20", 20, 2.8, 14.4, 15),
   of("of-25", 25, 2.7, 19.6, 20),
   of("of-32", 32, 3.2, 25.6, 25),
 ];
 
-/** Pipes for PWC / PWH (the 1-LU PE-RT pipe only as Zirkulation «Rohr an Rohr»). */
-export const supplySizes = (system: PipeSystem) => pipeSizes.filter((p) => p.system === system && p.key !== "of-16x3.8");
-/** PWH-C «Rohr an Rohr»: Optiflex along the steel PWH. */
-export const rarReturnSizes = () => pipeSizes.filter((p) => p.system === "optiflex");
+/** Pipes of a system for PWC / PWH. */
+export const supplySizes = (system: PipeSystem) => pipeSizes.filter((p) => p.system === system);
+/** PWH-C «Rohr an Rohr»: Optiflex-Flowpress along the steel PWH. */
+export const rarReturnSizes = () => supplySizes("optiflex");
+
+/** Dimension as written in the schema and lists: «NW 22» (Optipress-Aquaplus), «Pex 16» (Optiflex-Flowpress). */
+export const sizeText = (s: PipeSize | null | undefined) => (!s ? "" : s.system === "optiflex" ? `Pex ${s.od}` : `NW ${s.od}`);
 export const findSize = (key: string | null | undefined) => pipeSizes.find((p) => p.key === key) ?? null;
 /** Size of a system by its outer diameter as written in the W3 tables («15», «22», «16»). */
 export const sizeByOd = (system: PipeSystem, od: string) => supplySizes(system).find((p) => String(p.od) === od) ?? null;
@@ -181,7 +183,8 @@ export function articleFor(family: NussbaumFamily, p: PipeSize | null): CatalogA
   const list = nussbaumArticles[family] ?? [];
   if (!list.length) return null;
   if (!p) return list[0];
-  const od = p.system === "optiflex" ? (pipeSizes.find((x) => x.system === "optipress" && x.dn >= p.dn)?.od ?? p.od) : p.od;
+  // Optiflex pipes: Flowpress articles by the Optiflex diameter, other (threaded) articles by the matching steel size.
+  const od = p.system === "optiflex" && !flowpressFamilies.has(family) ? (pipeSizes.find((x) => x.system === "optipress" && x.dn >= p.dn)?.od ?? p.od) : p.od;
   const first = (s: string | null) => (s ? Number.parseFloat(s) : Number.NaN);
   const exact = list.find((a) => first(a.size) === od) ?? list.find((a) => (a.size ?? "").includes(`(${threadOf(od)})`) || a.size === threadOf(od));
   if (exact) return exact;
@@ -190,3 +193,6 @@ export function articleFor(family: NussbaumFamily, p: PipeSize | null): CatalogA
 }
 
 export const pipeArticle = (p: PipeSize) => articleFor(p.family, p);
+
+/** Nussbaum families sized by the Optiflex diameter (16, 20, 25 …). */
+const flowpressFamilies = new Set<NussbaumFamily>(["87153", "86510"]);

@@ -26,6 +26,14 @@ export const strangValves = {
   manual: "24026",
 } as const satisfies Record<string, NussbaumFamily>;
 
+/**
+ * Valves by the pipe system of the line: Optipress-Aquaplus, or on Optiflex lines only Optiflex-Flowpress (its
+ * Schrägsitzventil; Flowpress has none with Entleerung and no Rückflussverhinderer, so the threaded 15101 EA with
+ * Flowpress transitions).
+ */
+const valveFor = (kind: "shutoffDrain" | "shutoff" | "check", size: PipeSize): NussbaumFamily =>
+  size.system === "optiflex" ? (kind === "check" ? "15101" : "86510") : strangValves[kind];
+
 export function systemQuantities(data: SanitaryData, result: SystemResult): QuantityLine[] {
   const map = new Map<string, QuantityLine>();
   const add = (line: Omit<QuantityLine, "quantity">, amount: number) => {
@@ -65,16 +73,16 @@ export function systemQuantities(data: SanitaryData, result: SystemResult): Quan
       if (r.insulation.shared) insulation(r.insulation.shared.mm, r.insulation.shared.size, length, true);
       if (r.strang !== null) {
         // Foot of a Strang: Absperrventil mit Entleerung on PWC / PWH / PWH-C, Rückflussverhinderer and Regulierventil.
-        if (r.pwc) nussbaum("valves", strangValves.shutoffDrain, r.pwc.size, 1);
-        if (r.pwh) nussbaum("valves", strangValves.shutoffDrain, r.pwh.size, 1);
+        if (r.pwc) nussbaum("valves", valveFor("shutoffDrain", r.pwc.size), r.pwc.size, 1);
+        if (r.pwh) nussbaum("valves", valveFor("shutoffDrain", r.pwh.size), r.pwh.size, 1);
         if (r.pwhc) {
-          nussbaum("valves", strangValves.shutoffDrain, r.pwhc.size, 1);
-          nussbaum("valves", strangValves.check, r.pwhc.size, 1);
+          nussbaum("valves", valveFor("shutoffDrain", r.pwhc.size), r.pwhc.size, 1);
+          nussbaum("valves", valveFor("check", r.pwhc.size), r.pwhc.size, 1);
           nussbaum("valves", n.regValve === "manual" ? strangValves.manual : strangValves.thermal, r.pwhc.size, 1);
         }
       } else if (n.shutoff) {
-        if (r.pwc) nussbaum("valves", strangValves.shutoff, r.pwc.size, 1);
-        if (r.pwh) nussbaum("valves", strangValves.shutoff, r.pwh.size, 1);
+        if (r.pwc) nussbaum("valves", valveFor("shutoff", r.pwc.size), r.pwc.size, 1);
+        if (r.pwh) nussbaum("valves", valveFor("shutoff", r.pwh.size), r.pwh.size, 1);
       }
       if (n.meter) {
         if (r.pwc) nussbaum("valves", "67100", null, 1);
@@ -91,8 +99,8 @@ export function systemQuantities(data: SanitaryData, result: SystemResult): Quan
     const r = result.pipes.get(c.endId);
     const node = findIn(data.network, c.endId);
     if (!r?.pwhc || !node) continue;
-    nussbaum("valves", strangValves.shutoff, r.pwhc.size, 1);
-    nussbaum("valves", strangValves.check, r.pwhc.size, 1);
+    nussbaum("valves", valveFor("shutoff", r.pwhc.size), r.pwhc.size, 1);
+    nussbaum("valves", valveFor("check", r.pwhc.size), r.pwhc.size, 1);
     nussbaum("valves", node.regValve === "manual" ? strangValves.manual : strangValves.thermal, r.pwhc.size, 1);
   }
 

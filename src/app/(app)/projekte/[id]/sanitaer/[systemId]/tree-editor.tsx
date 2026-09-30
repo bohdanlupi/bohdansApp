@@ -112,7 +112,7 @@ export function TreeEditor({
           </header>
           <div className="flex border-b px-3 py-1 text-[11px] text-muted-foreground">
             <span className="flex-1">{t("element")}</span>
-            <span className="w-24 text-right">{t("sizes")}</span>
+            <span className="w-36 text-right">{t("sizes")}</span>
             <span className="w-16 text-right">LU</span>
             <span className="w-16 text-right">{t("circulation")}</span>
           </div>
@@ -212,7 +212,7 @@ function Row({ node, depth, result, selected, onSelect }: { node: SanNode; depth
             {title || "–"}
             {node.type === "pipe" && node.length ? ` · ${fmt(node.length, 1)} m` : ""}
           </span>
-          <span className="w-24 text-right text-xs tabular-nums">{r ? [r.pwc, r.pwh, r.pwhc].map((s) => (s ? sizeText(s.size) : null)).filter(Boolean).join("/") : ""}</span>
+          <span className="w-36 text-right text-xs tabular-nums">{r ? [r.pwc, r.pwh, r.pwhc].map((s) => (s ? sizeText(s.size) : null)).filter(Boolean).join(" / ") : ""}</span>
           <span className="w-16 text-right text-xs tabular-nums">{lu ? `${lu.cold}/${lu.warm}` : ""}</span>
           <span className="w-16 text-right text-xs tabular-nums">{r?.circ ? `${fmt(r.circ.flow)} l/h` : ""}</span>
         </button>
@@ -315,7 +315,7 @@ function NodePanel({
                 onChange={(e) => onPatch({ system: e.target.value as SanNode["system"], sizePwc: null, sizePwh: null })}
               >
                 <option value="optipress">Optipress-Aquaplus</option>
-                <option value="optiflex">Optiflex</option>
+                <option value="optiflex">Optiflex-Flowpress</option>
               </NativeSelect>
             </div>
             <div className="space-y-1">
@@ -391,11 +391,11 @@ function SizeSelect({
       <NativeSelect value={current && options.includes(current) ? current.key : ""} disabled={!editable} onChange={(e) => onChange(e.target.value || null)}>
         <option value="">
           {t("auto")}
-          {auto && !current ? ` (${auto.label})` : ""}
+          {auto && !current ? ` (${sizeText(auto)})` : ""}
         </option>
         {options.map((s) => (
           <option key={s.key} value={s.key}>
-            {s.label}
+            {sizeText(s)}
           </option>
         ))}
       </NativeSelect>
@@ -417,7 +417,7 @@ function PipeDetails({ result }: { result: PipeResult }) {
     const source = s.source === "table" ? t("results.sources.table", { table: s.table ?? "" }) : t(`results.sources.${s.source}`);
     return (
       <>
-        {line(`${medium.toUpperCase()} · ${source}`, `${s.size.label} · ${fmt(s.flow, 2)} l/s · ${fmt(s.velocity, 2)} m/s`, s.velocity > s.limit ? "bad" : undefined)}
+        {line(`${medium.toUpperCase()} · ${source}`, `${sizeText(s.size)} · ${fmt(s.flow, 2)} l/s · ${fmt(s.velocity, 2)} m/s`, s.velocity > s.limit ? "bad" : undefined)}
       </>
     );
   };
@@ -426,14 +426,14 @@ function PipeDetails({ result }: { result: PipeResult }) {
     ins.pwc ? `PWC ${ins.pwc} mm` : "",
     ins.pwh ? `PWH ${ins.pwh} mm` : "",
     ins.pwhc ? `PWH-C ${ins.pwhc} mm` : "",
-    ins.shared ? t("results.sharedInsulation", { mm: ins.shared.mm, size: ins.shared.size.label }) : "",
+    ins.shared ? t("results.sharedInsulation", { mm: ins.shared.mm, size: sizeText(ins.shared.size) }) : "",
   ].filter(Boolean);
   return (
     <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t pt-2 text-xs">
       {line("LU", `${result.lu.cold} / ${result.lu.warm}`)}
       {sized("pwc")}
       {sized("pwh")}
-      {result.pwhc && line(`PWH-C · ${t(`results.sources.${result.pwhc.source}`)}`, `${result.pwhc.size.label} · ${fmt(result.pwhc.velocity, 2)} m/s`)}
+      {result.pwhc && line(`PWH-C · ${t(`results.sources.${result.pwhc.source}`)}`, `${sizeText(result.pwhc.size)} · ${fmt(result.pwhc.velocity, 2)} m/s`)}
       {result.circ && (
         <>
           {line(t("results.sectionLoss"), `${fmt(result.circ.heatLoss, 3)} kWh/d`)}
