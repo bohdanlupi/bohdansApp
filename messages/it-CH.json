@@ -1997,7 +1997,7 @@
     "result": {
       "thetaE0": "θe,0",
       "noStation": "Scegliere la stazione",
-      "phiT": "Σ trasmissione (senza vicini)",
+      "phiT": "Σ trasmissione (tutti i locali)",
       "phiV": "Ventilazione × f_i-z {fiz}",
       "building": "Carico termico dell’edificio Φ_HL,b",
       "specific": "specifico",
@@ -2106,8 +2106,8 @@
     "pdfBuilding": "Edificio (equazione 13)",
     "pdfElements": "Elementi per locale",
     "pdfDoc": {
-      "phiT": "Σ trasmissione esterno, non riscaldato, terreno",
-      "phiTNeighbours": "Σ trasmissione verso vicini riscaldati (solo locali)",
+      "phiT": "Σ trasmissione di tutti i locali",
+      "phiTNeighbours": "di cui verso vicini riscaldati",
       "phiV": "Ventilazione",
       "gains": "Apporti",
       "buildingHint": "Il carico termico dell’edificio serve al dimensionamento del generatore secondo SIA 384/1; i carichi dei locali al dimensionamento dell’emissione.",

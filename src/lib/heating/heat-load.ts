@@ -292,7 +292,7 @@ export type HeatLoadResult = {
   rooms: RoomResult[];
   fiz: number;
   fizRange: [number, number];
-  /** Σ(Φ_T,ie + Φ_T,iu + Φ_T,iG), ΣΦ_T,in (info), ΣΦ_V, ΣΦ_g. */
+  /** ΣΦ_T of all rooms (incl. heated neighbours), of which ΣΦ_T,in (info), ΣΦ_V, ΣΦ_g. */
   phiT: number;
   phiTNeighbours: number;
   phiV: number;
@@ -475,7 +475,8 @@ export function evaluateHeatLoad(data: HeatLoadData, site: HeatSite, catalog: Co
   const sim = simultaneity(data.concept, heated.length);
   const fiz = data.fiz === null ? sim.value : Math.min(Math.max(data.fiz, sim.range[0]), sim.range[1]);
   const sum = (pick: (r: RoomResult) => number) => heated.reduce((acc, r) => acc + pick(r), 0);
-  const phiT = sum((r) => r.phiT.outside + r.phiT.unheated + r.phiT.ground);
+  // Transmission is not reduced: all room transmission losses count, only Φ_V gets f_i-z.
+  const phiT = sum((r) => r.phiTotal);
   const phiV = sum((r) => r.phiV);
   const gains = sum((r) => r.gains);
   const building = phiT + fiz * phiV - gains;

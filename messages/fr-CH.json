@@ -1997,7 +1997,7 @@
     "result": {
       "thetaE0": "θe,0",
       "noStation": "Choisir la station",
-      "phiT": "Σ transmission (sans voisins)",
+      "phiT": "Σ transmission (toutes les pièces)",
       "phiV": "Ventilation × f_i-z {fiz}",
       "building": "Charge thermique du bâtiment Φ_HL,b",
       "specific": "spécifique",
@@ -2106,8 +2106,8 @@
     "pdfBuilding": "Bâtiment (équation 13)",
     "pdfElements": "Éléments par pièce",
     "pdfDoc": {
-      "phiT": "Σ transmission extérieur, non chauffé, terrain",
-      "phiTNeighbours": "Σ transmission vers voisins chauffés (pièces seulement)",
+      "phiT": "Σ transmission de toutes les pièces",
+      "phiTNeighbours": "dont vers voisins chauffés",
       "phiV": "Ventilation",
       "gains": "Apports",
       "buildingHint": "La charge thermique du bâtiment sert au dimensionnement du générateur selon SIA 384/1 ; les charges des pièces au dimensionnement de l’émission.",
