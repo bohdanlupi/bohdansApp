@@ -14,7 +14,11 @@ export const circuitTypes = ["throttle", "diverting", "mixing", "injection3", "i
 /** Verteiler with differential pressure (Hauptpumpe) or without (drucklos, decoupled by bypass or Speicher). */
 export const distributorTypes = ["pressurized", "unpressurized"] as const;
 
+/** Connection of the Wassererwärmer: Umschaltventil in the main, separately at a generator, at a Heizgruppe. */
+export const hotWaterConnections = ["diverter", "generator", "group"] as const;
+
 export type CircuitType = (typeof circuitTypes)[number];
+export type HotWaterConnection = (typeof hotWaterConnections)[number];
 export type DistributorType = (typeof distributorTypes)[number];
 
 const set = <T extends readonly [string, ...string[]]>(values: T) =>
@@ -47,6 +51,15 @@ export const plantSchema = z.object({
   /** Wassererwärmer charged by the Anlage (Umschaltventil in the supply). */
   hotWater: z.boolean().catch(false),
   hotWaterVolume: num(0, 100000),
+  /**
+   * How the Wassererwärmer is loaded: Umschaltventil in the supply main, separately at a generator with its own
+   * Ladepumpe, or as the consumer of a Heizgruppe (WW-Ladegruppe on the Verteiler).
+   */
+  hotWaterConnection: z.enum(hotWaterConnections).catch("diverter"),
+  /** Generator of the separate connection (null = the first one). */
+  hotWaterGenerator: z.enum(generatorTypes).nullable().catch(null),
+  /** Id of the Heizgruppe loading the Wassererwärmer. */
+  hotWaterGroup: z.string().max(64).nullable().catch(null),
   /** Energy storage (technischer Speicher) present. */
   storage: z.boolean().catch(false),
   storageVolume: num(0, 1000000),

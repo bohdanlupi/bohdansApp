@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { buildGenerationSchema, generationLabels } from "@/lib/heating/generation-schema";
 import { emitterTypes, generatorTypes, type HeatingParams, type HeatingPlan } from "@/lib/heating/plan-schema";
-import { circuitMismatch, circuitTypes, distributorTypes, type HeatingGroup, type PlantData } from "@/lib/heating/plant-schema";
+import { circuitMismatch, circuitTypes, distributorTypes, hotWaterConnections,type HeatingGroup, type PlantData } from "@/lib/heating/plant-schema";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { formatNumber } from "@/lib/number-input";
 
@@ -101,7 +101,39 @@ export function GenerationEditor({
       <div className="grid gap-4 lg:grid-cols-2">
         <Section title={`2 · ${tg("sectors.hotWater")}`}>
           <Toggle label={tg("hotWater")} checked={d.hotWater} editable={editable} onChange={(v) => setPlant({ hotWater: v })} />
-          {d.hotWater && <NumberParam label={tg("volume")} value={d.hotWaterVolume} editable={editable} onChange={(v) => setPlant({ hotWaterVolume: v })} />}
+          {d.hotWater && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <NumberParam label={tg("volume")} value={d.hotWaterVolume} editable={editable} onChange={(v) => setPlant({ hotWaterVolume: v })} />
+              <OptionField label={tg("hotWaterConnection")} value={d.hotWaterConnection} options={hotWaterConnections} optionLabel={(v) => tg(`hotWaterConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterConnection: v })} />
+              {d.hotWaterConnection === "generator" && d.generators.length > 1 && (
+                <OptionField
+                  label={tg("hotWaterGenerator")}
+                  value={d.hotWaterGenerator && d.generators.includes(d.hotWaterGenerator) ? d.hotWaterGenerator : d.generators[0]}
+                  options={d.generators}
+                  optionLabel={o("generators")}
+                  editable={editable}
+                  onChange={(v) => setPlant({ hotWaterGenerator: v })}
+                />
+              )}
+              {d.hotWaterConnection === "group" && (
+                <div className="space-y-1.5">
+                  <label htmlFor="ww-group" className="text-sm font-medium">
+                    {tg("hotWaterGroup")}
+                  </label>
+                  <NativeSelect id="ww-group" value={d.hotWaterGroup ?? ""} disabled={!editable} onChange={(e) => setPlant({ hotWaterGroup: e.target.value || null })}>
+                    <option value="">–</option>
+                    {d.groups.map((g, i) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name || `${tg("schema.group")} ${i + 1}`}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                </div>
+              )}
+            </div>
+          )}
+          {d.hotWater && d.hotWaterConnection === "generator" && d.generators.length === 0 && <Notice>{tg("hotWaterNoGenerator")}</Notice>}
+          {d.hotWater && d.hotWaterConnection === "group" && !d.groups.some((g) => g.id === d.hotWaterGroup) && <Notice>{tg("hotWaterNoGroup")}</Notice>}
         </Section>
         <Section title={`3 · ${tg("sectors.storage")}`}>
           <Toggle label={t("storageToggle")} checked={d.storage} editable={editable} onChange={(v) => setPlant({ storage: v })} />

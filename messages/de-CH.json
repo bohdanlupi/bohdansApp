@@ -1938,7 +1938,7 @@
         "supply": "VL",
         "return": "RL"
       },
-      "hotWater": "Wassererwärmer wird von der Anlage geladen (Umschaltventil)",
+      "hotWater": "Wassererwärmer wird von der Anlage geladen",
       "volume": "Volumen [l]",
       "distributor": "Verteiler",
       "distributors": {
@@ -2008,7 +2008,17 @@
       "plankopf": {
         "plan": "Prinzipschema",
         "trade": "Heizung"
-      }
+      },
+      "hotWaterConnection": "Anschluss",
+      "hotWaterConnections": {
+        "diverter": "Umschaltventil im Vorlauf",
+        "generator": "Separat am Wärmeerzeuger (Ladepumpe)",
+        "group": "An einer Heizgruppe (WW-Ladegruppe)"
+      },
+      "hotWaterGenerator": "Wärmeerzeuger",
+      "hotWaterGroup": "Heizgruppe",
+      "hotWaterNoGenerator": "Wähle unter Wärmequelle zuerst einen Wärmeerzeuger.",
+      "hotWaterNoGroup": "Wähle die Heizgruppe, die den Wassererwärmer lädt (unter Verteiler und Heizgruppen anlegen)."
     }
   },
   "heatLoad": {

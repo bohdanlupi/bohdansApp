@@ -1938,7 +1938,7 @@
         "supply": "M",
         "return": "R"
       },
-      "hotWater": "Scaldacqua caricato dall’impianto (valvola deviatrice)",
+      "hotWater": "Scaldacqua caricato dall’impianto",
       "volume": "Volume [l]",
       "distributor": "Distributore",
       "distributors": {
@@ -2008,7 +2008,17 @@
       "plankopf": {
         "plan": "Schema di principio",
         "trade": "Riscaldamento"
-      }
+      },
+      "hotWaterConnection": "Allacciamento",
+      "hotWaterConnections": {
+        "diverter": "Valvola deviatrice sulla mandata",
+        "generator": "Separato sul generatore (pompa di carico)",
+        "group": "Su un gruppo (gruppo di carico ACS)"
+      },
+      "hotWaterGenerator": "Generatore di calore",
+      "hotWaterGroup": "Gruppo",
+      "hotWaterNoGenerator": "Scegli prima un generatore sotto Fonte di calore.",
+      "hotWaterNoGroup": "Scegli il gruppo che carica lo scaldacqua (da creare sotto Distributore e gruppi)."
     }
   },
   "heatLoad": {

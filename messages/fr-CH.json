@@ -1938,7 +1938,7 @@
         "supply": "D",
         "return": "R"
       },
-      "hotWater": "Chauffe-eau chargé par l’installation (vanne d’inversion)",
+      "hotWater": "Chauffe-eau chargé par l’installation",
       "volume": "Volume [l]",
       "distributor": "Distributeur",
       "distributors": {
@@ -2008,7 +2008,17 @@
       "plankopf": {
         "plan": "Schéma de principe",
         "trade": "Chauffage"
-      }
+      },
+      "hotWaterConnection": "Raccordement",
+      "hotWaterConnections": {
+        "diverter": "Vanne d’inversion sur le départ",
+        "generator": "Séparé sur le producteur (pompe de charge)",
+        "group": "Sur un groupe (groupe de charge ECS)"
+      },
+      "hotWaterGenerator": "Producteur de chaleur",
+      "hotWaterGroup": "Groupe",
+      "hotWaterNoGenerator": "Choisis d’abord un producteur sous Source de chaleur.",
+      "hotWaterNoGroup": "Choisis le groupe qui charge le chauffe-eau (à créer sous Distributeur et groupes)."
     }
   },
   "heatLoad": {
