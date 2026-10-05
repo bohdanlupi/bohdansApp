@@ -245,8 +245,8 @@ export function drawSymbol(key: SymbolKey, x: number, y: number, dir: Dir = "rig
       // 1.28.11 Direktanzeige-Instrument T on a short stub.
       return [g.line(0, 0, 0, 6 * s, 0.8), g.circle(0, 11 * s, 5, "bg", 0.8), g.line(-3.5, 14.5 * s, 3.5, 7.5 * s, 0.7), g.text(5.5, 17 * s, "T", 4.5)];
     case "sensor":
-      // 1.28.2 Messfühler Temperatur: element in the pipe, line to the controller.
-      return [g.line(0, 2.6 * s, 0, 13 * s, 0.8), g.circle(0, 0, 2.6, "bg", 0.8)];
+      // 1.28.2 Messfühler Temperatur: the stem touches the pipe, the sensing element (circle) at its end.
+      return [g.line(0, 0, 0, 10 * s, 0.8), g.circle(0, 12.6 * s, 2.6, "bg", 0.8)];
     case "heatMeter":
       // 1.210.3 Wärmezähler mit elektronischem Zählwerk: Volumenstromzähler in the pipe, Rechenwerk beside it.
       return [
@@ -625,17 +625,19 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
     text(cx, 63, group.emitter ? labels.emitters[group.emitter] : "", 6.5, { muted: true });
     text(cx, 74, [power, temps].filter(Boolean).join(" · "), 6.5, { muted: true });
     text(cx, YRD + 18, labels.circuits[group.circuit], 6.5, { muted: true });
-    // Absperrungen and thermometers near the Verteiler.
+    // Absperrungen at the Verteiler.
     sym("ball", a, 312, "up");
     sym("ball", b, 312, "down");
-    sym("thermometer", a, 290, "up", { side: sideOf("up", "left") });
-    sym("thermometer", b, 290, "down", { side: sideOf("down", "right") });
-    // Vorlauffühler after the valve / pump.
-    sym("sensor", a, 140, "up", { side: sideOf("up", "left") });
+    // After the pump (consumer side): Vorlauffühler, thermometers and Absperrungen in VL and RL.
+    sym("sensor", a, 164, "up", { side: sideOf("up", "left") });
+    sym("thermometer", a, 144, "up", { side: sideOf("up", "left") });
+    sym("thermometer", b, 144, "down", { side: sideOf("down", "right") });
+    sym("ball", a, 122, "up");
+    sym("ball", b, 122, "down");
     if (group.heatMeter) {
-      sym("heatMeter", b, 150, "down", { side: sideOf("down", "left") });
-      // Temperature probe of the meter in the supply, wired to the Rechenwerk.
-      add(ln(a + 2, 150, b - 20.5, 150, 0.6, "1.5 1.2"), { t: "circle", cx: a, cy: 150, r: 2, fill: "bg", stroke: "ink", sw: 0.7 });
+      // Wärmezähler between the Mischventil and the Verteiler: meter in the RL, probe in the VL wired to the Rechenwerk.
+      sym("heatMeter", b, 288, "down", { side: sideOf("down", "left") });
+      add(ln(a + 2, 288, b - 20.5, 288, 0.6, "1.5 1.2"), { t: "circle", cx: a, cy: 288, r: 2, fill: "bg", stroke: "ink", sw: 0.7 });
     }
     const bypass = (y: number) => {
       pipe("vl", [[a, y], [b, y]]);
