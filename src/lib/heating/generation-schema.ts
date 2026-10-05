@@ -385,12 +385,17 @@ const TITLE_Y = 22;
 const GROUP_W = 104;
 const GROUP_LEG = 36; // VL leg → RL leg of a group
 
-const PROBE_PITCH = 26; // probes at a Sondenverteiler
+const PROBE_PITCH = 30; // probes at a Sondenverteiler
+const DUPLEX = 16; // legs of a Duplex-Sonde
+const Y_VESSEL = YMR + 150; // tee of the Ausdehnungsgefässe (Heizung and Solekreis)
 
 /** Width of the column of a generator (the source side lies left of the generator, with the Sondenverteiler). */
 function genWidth(g: GeneratorType | null, data: PlantData) {
-  if (g === "hpBrine" && data.ews.distributor !== "none") return (data.ews.distributor === "inside" ? 248 : 272) + (Math.min(data.ews.probes, 4) - 1) * PROBE_PITCH;
-  return g === "hpWater" ? 270 : g === "hpBrine" || g === "district" ? 190 : 120;
+  if (g === "hpBrine") {
+    const extra = data.ews.distributor === "none" ? 0 : (Math.min(data.ews.probes, 4) - 1) * PROBE_PITCH;
+    return (data.ews.distributor === "outside" ? 290 : 250) + extra;
+  }
+  return g === "hpWater" ? 270 : g === "district" ? 190 : 120;
 }
 /** Height of the generator symbol standing on the ground. */
 const genHeight = (g: GeneratorType | null) => (g === "district" ? 44 : g === "hpAir" || g === "hpBrine" || g === "hpWater" ? 72 : 60);
@@ -435,9 +440,11 @@ export function buildGenerationSchema(
 
   // --- 1 Wärmequelle ------------------------------------------------------------------------------------------
   // Generators stand on the ground; their legs rise to the mains, which run over all sectors.
-  // A Sondenverteiler im Technikraum lies at the height of the mains, so its Sole/Wasser-WP is drawn first (left of them).
-  const insideFirst = (u: (typeof data.generators)[number]) => (u.type === "hpBrine" && data.ews.distributor === "inside" ? 0 : 1);
-  const gens = data.generators.length ? [...data.generators].sort((a, b) => insideFirst(a) - insideFirst(b)) : [null];
+  // A Sondenverteiler im Technikraum lies at the height of the mains, so its Sole/Wasser-WP is drawn first (left of them);
+  // the generator with the separate Warmwasser connection last, so its lines pass no other generator.
+  const wwGenId = data.hotWater && data.hotWaterConnection === "generator" ? (data.hotWaterGenerator ?? data.generators[0]?.id) : undefined;
+  const order = (u: (typeof data.generators)[number]) => (u.type === "hpBrine" && data.ews.distributor === "inside" ? 0 : u.id === wwGenId ? 2 : 1);
+  const gens = data.generators.length ? [...data.generators].sort((a, b) => order(a) - order(b)) : [null];
   const x0 = 24;
   const ews = data.generators.some((g) => g.type === "hpBrine") ? evaluateEws(data, opts.ews ?? emptyEwsContext) : null;
   const safety = evaluateSafety(data, ews);
@@ -490,20 +497,15 @@ export function buildGenerationSchema(
     colX += w;
   }
   pipe("vl", [[firstLeg, YMV], [sourceRight, YMV]]);
-  // Druckausdehnungsgefäss on the Rücklauf to the generators (suction side), plombierte Absperrung (HE301-01 3.2.2).
+  // Druckausdehnungsgefäss on the Rücklauf to the generators (suction side), plombierte Absperrung (HE301-01 3.2.2):
+  // mirror image of the one of the Solekreis, at the same height.
   {
-    const xm = sourceRight - 72;
-    pipe("rl", [[xm, YMR], [xm, YMR + 34]]);
-    dot(xm, YMR, "rl");
-    sym("capValve", xm, YMR + 13, "down");
-    sym("drain", xm, YMR + 27, "down", { side: sideOf("down", "right") });
-    sym("expansion", xm, YMR + 34, "right", { side: sideOf("right", "below") });
-    const [first, ...rest] = labels.doNotClose.split(" ");
-    text(xm + 12, YMR + 9, first, 5.5, { anchor: "start", bold: true });
-    text(xm + 12, YMR + 16, rest.join(" "), 5.5, { anchor: "start", bold: true });
+    const xd = sourceRight - 72;
+    const xm = xd + 30;
+    pipe("rl", [[xd, YMR], [xd, Y_VESSEL], [xm, Y_VESSEL]]);
+    dot(xd, YMR, "rl");
     const v = safety.vessel;
-    text(xm, YMR + 72, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, 6.5, { bold: true });
-    if (v.vn !== null) text(xm, YMR + 82, `p0 ${v.p0.toFixed(1)} bar`, 6.5, { muted: true });
+    expansionVessel("rl", xm, -1, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, v.vn !== null ? `p0 ${v.p0.toFixed(1)} bar` : "");
   }
   pipe("rl", [[sourceRight, YMR], [firstLeg + 32, YMR]]);
   text(x0, TITLE_Y, labels.sectors.source.toUpperCase(), 8, { anchor: "start", bold: true });
@@ -553,10 +555,50 @@ export function buildGenerationSchema(
     text(mid, G + 14, name, 7.5, { bold: true });
   }
 
-  /** Bottom of a probe: RL half (down) from x, VL half (up) to x + 2r. */
-  function uBend(x: number, y: number, r: number): Prim[] {
+  /**
+   * Ausdehnungsgefäss connected from below: the branch comes along the tee line at Y_VESSEL to xm and rises through
+   * the plombierte Absperrung (Kappenventil) and the Entleerung (on the side `drainSide`) into the vessel.
+   */
+  function expansionVessel(kind: PipeKind, xm: number, drainSide: 1 | -1, name: string, sub = "") {
+    const y = Y_VESSEL;
+    pipe(kind, [[xm, y], [xm, y - 34]]);
+    sym("capValve", xm, y - 13, "up");
+    sym("drain", xm, y - 27, "up", { side: sideOf("up", drainSide > 0 ? "right" : "left") });
+    sym("expansion", xm, y - 34, "right", { side: sideOf("right", "above") });
+    const [first, ...rest] = labels.doNotClose.split(" ");
+    text(xm, y + 10, first, 5.5, { bold: true });
+    text(xm, y + 17, rest.join(" "), 5.5, { bold: true });
+    text(xm, sub ? y - 72 : y - 62, name, 6.5, { bold: true });
+    if (sub) text(xm, y - 62, sub, 6.5, { muted: true });
+  }
+
+  /** Bottom of a U-tube from x (kind kl, down) to x + 2r (kind kr, up). */
+  function uBend(x: number, y: number, r: number, kl: PipeKind, kr: PipeKind): Prim[] {
     const arc = (x1: number, y1: number, x2: number, y2: number, kind: PipeKind): Prim => ({ t: "path", d: `M${x1},${y1} A${r},${r} 0 0 0 ${x2},${y2}`, fill: "none", stroke: pipeColors[kind], sw: 1.6 });
-    return [arc(x, y, x + r, y + r, "brineR"), arc(x + r, y + r, x + 2 * r, y, "brine")];
+    return [arc(x, y, x + r, y + r, kl), arc(x + r, y + r, x + 2 * r, y, kr)];
+  }
+
+  /** Duplex-Sonde in its borehole from the ground: each leg (xl and xl + DUPLEX) splits into the two U-tubes. */
+  function duplex(xl: number, kl: PipeKind, kr: PipeKind) {
+    used.add("ews");
+    const xr = xl + DUPLEX;
+    const yt = G + 12;
+    const yb = G + 60;
+    pipe(kl, [[xl, G], [xl, yb]]);
+    pipe(kl, [[xl, yt], [xl + 5, yt], [xl + 5, yb]]);
+    pipe(kr, [[xr, yb], [xr, G]]);
+    pipe(kr, [[xr - 5, yb], [xr - 5, yt], [xr, yt]]);
+    dot(xl, yt, kl);
+    dot(xr, yt, kr);
+    add(...uBend(xl, yb, DUPLEX / 2, kl, kr), ...uBend(xl + 5, yb, DUPLEX / 2 - 5, kl, kr));
+    for (const x of [xl - 5, xr + 5]) add({ t: "line", x1: x, y1: G, x2: x, y2: yb + DUPLEX / 2 + 5, stroke: "muted", sw: 0.6, dash: "2 2" });
+  }
+
+  /** Label of the Erdwärmesonden centred at x below them. */
+  function probesLabel(x: number) {
+    const y = G + 60 + DUPLEX / 2 + 18;
+    text(x, y, labels.boreholes, 7, { bold: true });
+    if (ews?.length) text(x, y + 10, `${data.ews.probes} × ${Math.ceil(ews.length)} m`, 6.5, { muted: true });
   }
 
   /** Probes drawn at a Sondenverteiler (at most 4; the label gives the number). */
@@ -565,118 +607,92 @@ export function buildGenerationSchema(
   }
 
   /**
-   * Sondenverteiler (Verteiler at yV, Sammler at yS) with the probes below it, the first probe at x = `left`. The
-   * pipes of the upper bar pass behind the lower one. Returns the right end of the bars.
+   * Sondenverteiler (Verteiler at yV, Sammler at yS) with the Duplex-Sonden below it, the first one at x = `left`.
+   * The pipes of the upper bar pass behind the lower one. Returns the right end of the bars.
    */
   function drawProbes(left: number, yV: number, yS: number) {
-    used.add("ews");
     used.add("distributor");
     const n = probeCount();
-    const r = 6;
     for (let i = 0; i < n; i++) {
       const px = left + i * PROBE_PITCH;
-      pipe("brineR", [[px, yV], [px, G + 50]]);
-      pipe("brine", [[px + 2 * r, G + 50], [px + 2 * r, yS]]);
-      add(...uBend(px, G + 50, r));
+      pipe("brineR", [[px, yV], [px, G]]);
+      pipe("brine", [[px + DUPLEX, G], [px + DUPLEX, yS]]);
+      duplex(px, "brineR", "brine");
       // Drosselventil on the RL Abgang (to the probe), Absperrung on the VL Abgang (back from it).
       const yValve = Math.max(yV, yS) + 18;
       sym("regValve", px, yValve, "down");
-      sym("ball", px + 2 * r, yValve, "up");
+      sym("ball", px + DUPLEX, yValve, "up");
     }
     const x1 = left - 8;
-    const x2 = left + (n - 1) * PROBE_PITCH + 2 * r + 8;
+    const x2 = left + (n - 1) * PROBE_PITCH + DUPLEX + 8;
     for (const y of [yV, yS]) add(rect(x1, y - 3.5, x2 - x1, 7, "bg", 1.2));
     // Entleerungen at the end of the bars.
     for (const y of [yV, yS]) sym("drain", x1, y, "up", { side: sideOf("up", "left") });
     text((x1 + x2) / 2, Math.min(yV, yS) - 8, labels.distributor, 6.5, { bold: true });
-    const mid = left + ((n - 1) * PROBE_PITCH) / 2 + r;
-    text(mid, G + 50 + r + 14, labels.boreholes, 7, { bold: true });
-    if (ews?.length) text(mid, G + 50 + r + 24, `${data.ews.probes} × ${Math.ceil(ews.length)} m`, 6.5, { muted: true });
+    probesLabel(left + ((n - 1) * PROBE_PITCH + DUPLEX) / 2);
     return x2;
   }
 
-  /**
-   * Sole circuit to the Erdwärmesonden (below the ground), or Zwischenkreis to a Platten-WT on the ground with the
-   * Brunnen below it. The lines leave the evaporator, rise over the source side and drop to it, so the fittings sit on
-   * the long vertical runs.
-   */
+  /** Sole circuit to the Erdwärmesonden, or Zwischenkreis to a Platten-WT on the ground with the Brunnen below it. */
   function drawSourceLoop(g: "hpBrine" | "hpWater", gx: number, top: number) {
-    const wide = g === "hpWater";
-    const dist = wide ? "none" : data.ews.distributor;
     const xb = gx - 34; // back to the evaporator
     const xa = xb - 30; // to the source (cooled)
-    const yA = YMR + 50; // crossings over the source side
-    const yB = yA + 12;
-    const yLow = wide ? G - 44 : G; // top of the Platten-WT / the ground
-    const yT = yA + 100; // tee of the Ausdehnungsgefäss
-    if (dist === "inside") {
-      // Verteiler in the Technikraum at the height of the mains: the lines rise straight from the evaporator to it.
-      const yS = YMV + 2; // Sammler (back to the WP)
-      const yV = YMR - 2; // Verteiler (to the probes)
-      const right = drawProbes(xa - 74 - (probeCount() - 1) * PROBE_PITCH, yV, yS);
-      pipe("brineR", [[gx, top + 16], [xa, top + 16], [xa, yV], [right, yV]]);
-      pipe("brine", [[right, yS], [xb, yS], [xb, top + 8], [gx, top + 8]]);
+    if (g === "hpBrine") {
+      // The lines rise straight from the evaporator. In all variants the same sequence at the same heights:
+      // Ausdehnungsgefäss, Absperrungen with Entleerungen below them, Solepumpe between them and the WP.
+      const dist = data.ews.distributor;
+      const yS = dist === "inside" ? YMV + 2 : YMR + 10; // VL back from the probes
+      const yV = dist === "inside" ? YMR - 2 : YMR + 22; // RL to the probes
+      const back: Pt[] = [[xb, yS], [xb, top + 8], [gx, top + 8]];
+      const out: Pt[] = [[gx, top + 16], [xa, top + 16], [xa, yV]];
+      const xl = xa - 76; // legs over the source side: VL at xl, RL at xl + DUPLEX
+      if (dist === "inside") {
+        // Verteiler in the Technikraum at the height of the mains.
+        const right = drawProbes(xa - 80 - (probeCount() - 1) * PROBE_PITCH, yV, yS);
+        pipe("brineR", [...out, [right, yV]]);
+        pipe("brine", [[right, yS], ...back]);
+      } else if (dist === "outside") {
+        // Verteiler outside the building at the height of the WP: the legs drop to it through the wall.
+        const ySo = top + 12;
+        const yVo = top + 34;
+        const xw = xl - 16;
+        add(rect(xw - 4, YBALL - 10, 8, G - YBALL + 10, "bg", 1));
+        for (let y = YBALL - 6; y < G; y += 8) add(ln(xw - 4, Math.min(y + 8, G), xw + 4, y, 0.5));
+        const right = drawProbes(xw - 38 - (probeCount() - 1) * PROBE_PITCH, yVo, ySo);
+        pipe("brineR", [...out, [xl + DUPLEX, yV], [xl + DUPLEX, yVo], [right, yVo]]);
+        pipe("brine", [[right, ySo], [xl, ySo], [xl, yS], ...back]);
+      } else {
+        // One Duplex-Sonde straight below the legs.
+        pipe("brineR", [...out, [xl + DUPLEX, yV], [xl + DUPLEX, G]]);
+        pipe("brine", [[xl, G], [xl, yS], ...back]);
+        duplex(xl, "brine", "brineR");
+        probesLabel(xl + DUPLEX / 2);
+      }
       sym("ball", xa, YBALL, "up");
       sym("ball", xb, YBALL, "down");
       sym("drain", xa, YBALL + 14, "up", { side: sideOf("up", "left") });
       sym("drain", xb, YBALL + 14, "down", { side: sideOf("down", "left") });
       sym("pump", xb, YPUMP, "down");
-    } else if (dist === "outside") {
-      // Verteiler outside the building at the height of the WP, the lines pass through the wall.
-      const yV = top + 12;
-      const yS = top + 34;
-      const xw = xa - 64; // wall, left of the Ausdehnungsgefäss
-      add(rect(xw - 4, yA - 20, 8, G - yA + 20, "bg", 1));
-      for (let y = yA - 16; y < G; y += 8) add(ln(xw - 4, Math.min(y + 8, G), xw + 4, y, 0.5));
-      const right = drawProbes(xw - 34 - (probeCount() - 1) * PROBE_PITCH, yV, yS);
-      pipe("brineR", [[gx, top + 8], [gx - 12, top + 8], [gx - 12, yA], [xa, yA], [xa, yV], [right, yV]]);
-      pipe("brine", [[right, yS], [xb, yS], [xb, yB], [gx - 22, yB], [gx - 22, top + 16], [gx, top + 16]]);
-      // Absperrungen next to the wall, the Solepumpe between them and the WP.
-      sym("ball", xa, yT + 16, "down");
-      sym("ball", xb, yT + 16, "up");
-      // Entleerungen below the Absperrungen, just past the bends towards the wall.
-      sym("drain", xa - 14, yV, "left", { side: sideOf("left", "below") });
-      sym("drain", xb - 14, yS, "left", { side: sideOf("left", "below") });
-      sym("pump", xb, YPUMP, "up");
-    } else {
-      pipe("brineR", [[gx, top + 8], [gx - 12, top + 8], [gx - 12, yA], [xa, yA], [xa, yLow]]);
-      pipe("brine", [[xb, yLow], [xb, yB], [gx - 22, yB], [gx - 22, top + 16], [gx, top + 16]]);
+      pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
+      dot(xa, Y_VESSEL, "brineR");
+      const v = safety.brine;
+      expansionVessel("brineR", xa - 30, 1, v && v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel);
+      return;
     }
-    if (dist === "none") {
-      sym("ball", xa, yA + 26, "down");
-      sym("drain", xa, yA + 40, "down", { side: sideOf("down", "left") });
-    }
-    // Ausdehnungsgefäss connected from below: branch to the left, rising through the plombierte Absperrung
-    // (Kappenventil) and the Entleerung into the vessel.
-    {
-      const xm = xa - 30;
-      pipe("brineR", [[xa, yT], [xm, yT], [xm, yT - 34]]);
-      dot(xa, yT, "brineR");
-      sym("capValve", xm, yT - 13, "up");
-      sym("drain", xm, yT - 27, "up", { side: sideOf("up", "right") });
-      sym("expansion", xm, yT - 34, "right", { side: sideOf("right", "above") });
-      const [first, ...rest] = labels.doNotClose.split(" ");
-      text(xm, yT + 10, first, 5.5, { bold: true });
-      text(xm, yT + 17, rest.join(" "), 5.5, { bold: true });
-      if (g === "hpBrine" && safety.brine) {
-        const v = safety.brine;
-        text(xm, yT - 62, v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel, 6.5, { bold: true });
-      }
-    }
-    if (dist !== "none") return;
+    // Zwischenkreis: the lines leave the evaporator, rise over the source side and drop to the Platten-WT.
+    const yA = YMR + 50;
+    const yB = yA + 12;
+    const yLow = G - 44;
+    pipe("brineR", [[gx, top + 8], [gx - 12, top + 8], [gx - 12, yA], [xa, yA], [xa, yLow]]);
+    pipe("brine", [[xb, yLow], [xb, yB], [gx - 22, yB], [gx - 22, top + 16], [gx, top + 16]]);
+    sym("ball", xa, yA + 26, "down");
+    sym("drain", xa, yA + 40, "down", { side: sideOf("down", "left") });
+    pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
+    dot(xa, Y_VESSEL, "brineR");
+    expansionVessel("brineR", xa - 30, 1, labels.vessel);
     sym("ball", xb, yB + 20, "up");
     sym("drain", xb, yB + 34, "up", { side: sideOf("up", "left") });
     sym("pump", xb, yB + 62, "up");
-    if (!wide) {
-      // Erdwärmesonden: U-loop below the ground line.
-      used.add("ews");
-      pipe("brineR", [[xa, G], [xa, G + 60]]);
-      pipe("brine", [[xb, G + 60], [xb, G]]);
-      add(...uBend(xa, G + 60, (xb - xa) / 2));
-      text((xa + xb) / 2, G + 60 + (xb - xa) / 2 + 14, labels.boreholes, 7, { bold: true });
-      if (ews?.length) text((xa + xb) / 2, G + 60 + (xb - xa) / 2 + 24, `${data.ews.probes} × ${Math.ceil(ews.length)} m`, 6.5, { muted: true });
-      return;
-    }
     // Zwischenkreis → Platten-WT (on the ground) → Grundwasser: Förderbrunnen (Unterwasserpumpe), Rückgabebrunnen.
     used.add("plateHx");
     used.add("well");
@@ -731,10 +747,11 @@ export function buildGenerationSchema(
     } else if (ww === "generator" && wwGen) {
       // Own pair from the side of the generator, below the mains: Ladepumpe, Rückflussverhinderer, Absperrungen.
       const { gx, top: gTop } = wwGen;
-      const yV = 284;
-      const yR = 296;
-      pipe("vl", [[gx + 44, gTop + 12], [gx + 52, gTop + 12], [gx + 52, yV], [xw, yV], [xw, yIn], [xT + 4, yIn]]);
-      pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 60, yR], [gx + 60, gTop + 28], [gx + 44, gTop + 28]]);
+      // Over the Ausdehnungsgefäss of the Heizung (below the Entleerungen of the generator legs).
+      const yV = YMR + 56;
+      const yR = YMR + 66;
+      pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn], [xT + 4, yIn]]);
+      pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
       sym("ball", xw, 298, "down");
       sym("pump", xw, 316, "down");
       sym("check", xw, 338, "down");
