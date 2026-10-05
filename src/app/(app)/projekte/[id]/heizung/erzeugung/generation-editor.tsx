@@ -1,0 +1,231 @@
+"use client";
+
+import { Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useMemo } from "react";
+
+import { NativeSelect } from "@/components/form";
+import { NumberField, Notice, Section } from "@/components/planning/fields";
+import { Fact, NumberParam, OptionField, SaveIndicator, Toggle } from "@/components/planning/plan-ui";
+import { usePlan } from "@/components/planning/use-plan";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { buildGenerationSchema, generationLabels } from "@/lib/heating/generation-schema";
+import { emitterTypes, generatorTypes, type HeatingParams, type HeatingPlan } from "@/lib/heating/plan-schema";
+import { circuitMismatch, circuitTypes, distributorTypes, type HeatingGroup, type PlantData } from "@/lib/heating/plant-schema";
+import type { SchemaPlan } from "@/lib/kwl/schema-plan";
+import { formatNumber } from "@/lib/number-input";
+
+import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
+import { saveHeatingPlan, saveHeatingPlant, saveHeatingSchemaPlan } from "../actions";
+import { GenerationSchemaView } from "./generation-schema-view";
+
+/**
+ * 242 Wärmeerzeugung: the building data of the project (for the checklists) and the chosen Anlage in four sectors –
+ * Wärmequelle, Warmwasser, Energiespeicher, Verteiler with the Heizgruppen – with its Prinzipschema drawn live below.
+ * Both save automatically (the building into heating_plans, the Anlage into heating_plants).
+ */
+export function GenerationEditor({
+  projectId,
+  initialPlan,
+  plant,
+  power,
+  editable,
+}: {
+  projectId: string;
+  initialPlan: HeatingPlan;
+  plant: { id: string; name: string; data: PlantData; schemaPlan: SchemaPlan };
+  /** Building heat load of all calculations [kW], null without calculation. */
+  power: number | null;
+  editable: boolean;
+}) {
+  const t = useTranslations("heatingPlan");
+  const tg = useTranslations("heatingPlan.generation");
+  const building = usePlan(projectId, initialPlan, editable, saveHeatingPlan);
+  const savePlant = useCallback((pid: string, data: unknown) => saveHeatingPlant(plant.id, pid, plant.name, data), [plant.id, plant.name]);
+  const anlage = usePlan(projectId, plant.data, editable, savePlant);
+  const p = building.plan.params;
+  const d = anlage.plan;
+  const setParam = <K extends keyof HeatingParams>(key: K, value: HeatingParams[K]) => building.update((x) => ({ ...x, params: { ...x.params, [key]: value } }));
+  const setPlant = (patch: Partial<PlantData>) => anlage.update((x) => ({ ...x, ...patch }));
+  const setGroup = (id: string, patch: Partial<HeatingGroup>) => anlage.update((x) => ({ ...x, groups: x.groups.map((g) => (g.id === id ? { ...g, ...patch } : g)) }));
+  const o = (group: string) => (value: string) => t(`options.${group}.${value}` as never);
+  const status = building.status !== "saved" ? building.status : anlage.status;
+
+  const labels = useMemo(() => generationLabels((key) => tg(key as never)), [tg]);
+  const schema = useMemo(() => buildGenerationSchema(d, labels), [d, labels]);
+  const mismatched = d.groups.filter((g) => circuitMismatch(g.circuit, d.distributor));
+
+  return (
+    <div className="space-y-4">
+      {editable && (
+        <div className="flex justify-end">
+          <SaveIndicator status={status} />
+        </div>
+      )}
+      <Section title={t("system.building")} description={t("system.buildingHint")}>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <OptionField label={t("params.buildingType")} value={p.buildingType} options={["efh", "mfh", "nonResidential"] as const} optionLabel={o("buildingType")} editable={editable} onChange={(v) => setParam("buildingType", v)} />
+          <OptionField label={t("params.construction")} value={p.construction} options={["new", "renovation", "replacement"] as const} optionLabel={o("construction")} editable={editable} onChange={(v) => setParam("construction", v)} />
+          <OptionField label={t("params.standard")} value={p.standard} options={["standard", "minergie"] as const} optionLabel={o("standard")} editable={editable} onChange={(v) => setParam("standard", v)} />
+          <NumberParam label={t("params.energyArea")} value={p.energyArea} editable={editable} onChange={(v) => setParam("energyArea", v)} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Toggle label={t("params.multiUnit")} checked={p.multiUnit} editable={editable} onChange={(v) => setParam("multiUnit", v)} />
+          <Fact label={t("system.power")} value={power !== null ? `${formatNumber(power, 1)} kW` : t("system.powerNone")} />
+        </div>
+      </Section>
+
+      <Section title={`1 · ${tg("sectors.source")}`} description={t("system.generatorsHint")}>
+        <div className="grid gap-6 md:grid-cols-2">
+          <fieldset className="space-y-2">
+            <legend className="mb-1 text-sm font-medium">{t("system.generators")}</legend>
+            {generatorTypes.map((g) => (
+              <Toggle
+                key={g}
+                label={o("generators")(g)}
+                checked={d.generators.includes(g)}
+                editable={editable}
+                onChange={(on) => setPlant({ generators: generatorTypes.filter((x) => (x === g ? on : d.generators.includes(x))) })}
+              />
+            ))}
+          </fieldset>
+          <fieldset className="space-y-2">
+            <legend className="mb-1 text-sm font-medium">{t("system.more")}</legend>
+            <Toggle label={t("system.cooling")} checked={d.cooling} editable={editable} onChange={(v) => setPlant({ cooling: v })} />
+          </fieldset>
+        </div>
+      </Section>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Section title={`2 · ${tg("sectors.hotWater")}`}>
+          <Toggle label={tg("hotWater")} checked={d.hotWater} editable={editable} onChange={(v) => setPlant({ hotWater: v })} />
+          {d.hotWater && <NumberParam label={tg("volume")} value={d.hotWaterVolume} editable={editable} onChange={(v) => setPlant({ hotWaterVolume: v })} />}
+        </Section>
+        <Section title={`3 · ${tg("sectors.storage")}`}>
+          <Toggle label={t("storageToggle")} checked={d.storage} editable={editable} onChange={(v) => setPlant({ storage: v })} />
+          {d.storage && <NumberParam label={tg("volume")} value={d.storageVolume} editable={editable} onChange={(v) => setPlant({ storageVolume: v })} />}
+        </Section>
+      </div>
+
+      <Section
+        title={`4 · ${tg("sectors.distribution")}`}
+        actions={
+          editable && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                anlage.update((x) => ({
+                  ...x,
+                  groups: [...x.groups, { id: crypto.randomUUID(), name: "", circuit: x.distributor === "pressurized" ? "injection3" : "mixing", emitter: null, power: null, supplyTemp: null, returnTemp: null, heatMeter: false }],
+                }))
+              }
+            >
+              <Plus /> {tg("addGroup")}
+            </Button>
+          )
+        }
+      >
+        <div className="max-w-sm">
+          <OptionField label={tg("distributor")} value={d.distributor} options={distributorTypes} optionLabel={(v) => tg(`distributors.${v}`)} editable={editable} onChange={(v) => setPlant({ distributor: v })} hint={tg(`distributorHint.${d.distributor}`)} />
+        </div>
+        {d.groups.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{tg("noGroups")}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[56rem] text-sm">
+              <thead className="text-left text-xs text-muted-foreground">
+                <tr>
+                  <th className="py-1 pr-2 font-medium">{tg("columns.name")}</th>
+                  <th className="py-1 pr-2 font-medium">{tg("columns.circuit")}</th>
+                  <th className="py-1 pr-2 font-medium">{tg("columns.emitter")}</th>
+                  <th className="w-20 py-1 pr-2 text-right font-medium">{tg("columns.power")}</th>
+                  <th className="w-16 py-1 pr-2 text-right font-medium">{tg("columns.supply")}</th>
+                  <th className="w-16 py-1 pr-2 text-right font-medium">{tg("columns.return")}</th>
+                  <th className="py-1 pr-2 text-center font-medium">{tg("columns.heatMeter")}</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {d.groups.map((g, i) => (
+                  <tr key={g.id} className="border-t">
+                    <td className="py-1.5 pr-2">
+                      <Input value={g.name} maxLength={80} disabled={!editable} placeholder={`${tg("schema.group")} ${i + 1}`} aria-label={tg("columns.name")} onChange={(e) => setGroup(g.id, { name: e.target.value })} className="h-8 bg-field" />
+                    </td>
+                    <td className="py-1.5 pr-2">
+                      <NativeSelect value={g.circuit} disabled={!editable} aria-label={tg("columns.circuit")} onChange={(e) => setGroup(g.id, { circuit: e.target.value as HeatingGroup["circuit"] })}>
+                        {circuitTypes.map((c) => (
+                          <option key={c} value={c}>
+                            {tg(`circuits.${c}`)}
+                          </option>
+                        ))}
+                      </NativeSelect>
+                    </td>
+                    <td className="py-1.5 pr-2">
+                      <NativeSelect value={g.emitter ?? ""} disabled={!editable} aria-label={tg("columns.emitter")} onChange={(e) => setGroup(g.id, { emitter: (e.target.value || null) as HeatingGroup["emitter"] })}>
+                        <option value="">–</option>
+                        {emitterTypes.map((x) => (
+                          <option key={x} value={x}>
+                            {o("emitters")(x)}
+                          </option>
+                        ))}
+                      </NativeSelect>
+                    </td>
+                    <td className="py-1.5 pr-2">
+                      <NumberField value={g.power} decimals={1} label={tg("columns.power")} disabled={!editable} onChange={(v) => setGroup(g.id, { power: v })} className="h-8 rounded-lg" />
+                    </td>
+                    <td className="py-1.5 pr-2">
+                      <NumberField value={g.supplyTemp} decimals={0} label={tg("columns.supply")} disabled={!editable} onChange={(v) => setGroup(g.id, { supplyTemp: v })} className="h-8 rounded-lg" />
+                    </td>
+                    <td className="py-1.5 pr-2">
+                      <NumberField value={g.returnTemp} decimals={0} label={tg("columns.return")} disabled={!editable} onChange={(v) => setGroup(g.id, { returnTemp: v })} className="h-8 rounded-lg" />
+                    </td>
+                    <td className="py-1.5 pr-2 text-center">
+                      <input type="checkbox" checked={g.heatMeter} disabled={!editable} aria-label={tg("columns.heatMeter")} onChange={(e) => setGroup(g.id, { heatMeter: e.target.checked })} />
+                    </td>
+                    <td className="py-1.5 text-right">
+                      {editable && (
+                        <Button size="icon" variant="ghost" aria-label={tg("removeGroup")} onClick={() => anlage.update((x) => ({ ...x, groups: x.groups.filter((y) => y.id !== g.id) }))}>
+                          <Trash2 />
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {mismatched.length > 0 && (
+          <Notice>
+            {tg(`mismatch.${d.distributor}`, { groups: mismatched.map((g) => g.name || `${tg("schema.group")} ${d.groups.indexOf(g) + 1}`).join(", ") })}
+          </Notice>
+        )}
+      </Section>
+
+      <Section
+        title={tg("schemaTitle")}
+        description={tg("schemaHint")}
+        actions={
+          <SchemaPrintButton
+            systemId={plant.id}
+            projectId={projectId}
+            plan={plant.schemaPlan}
+            editable={editable}
+            dirty={anlage.status !== "saved"}
+            url={`/api/pdf/heating-schema/${plant.id}`}
+            save={saveHeatingSchemaPlan}
+          />
+        }
+      >
+        <GenerationSchemaView schema={schema} label={tg("schemaTitle")} />
+      </Section>
+
+      <Section title={t("system.notes")}>
+        <Textarea id="plant-notes" aria-label={t("system.notes")} value={d.notes} maxLength={4000} disabled={!editable} onChange={(e) => setPlant({ notes: e.target.value })} className="min-h-24 bg-field" />
+      </Section>
+    </div>
+  );
+}

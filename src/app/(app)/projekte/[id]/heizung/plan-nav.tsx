@@ -6,14 +6,8 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
-/** Subchapters of 242 Wärmeerzeugung and 243 Wärmeverteilung: path below /heizung and message key. */
-export const generationChapters = [
-  ["erzeugung/system", "system"],
-  ["erzeugung/warmwasser", "hotWater"],
-  ["erzeugung/speicher", "storage"],
-  ["erzeugung/gruppen", "groups"],
-  ["erzeugung/schema", "schemaGeneration"],
-] as const;
+/** 242 Wärmeerzeugung (one page) and the subchapters of 243 Wärmeverteilung: path below /heizung and message key. */
+export const generationChapter = ["erzeugung", "generationTitle"] as const;
 export const distributionChapters = [
   ["verteilung/waermebedarf", "heatDemand"],
   ["verteilung/fussbodenheizung", "floorHeating"],
@@ -81,7 +75,7 @@ export function HeatingNav({
         ),
       )}
       {heading(t("chapters.generation"))}
-      {generationChapters.map(chapter)}
+      {chapter(generationChapter)}
       {heading(t("chapters.distribution"))}
       {distributionChapters.map(chapter)}
     </nav>

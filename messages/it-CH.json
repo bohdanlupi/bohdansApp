@@ -1838,12 +1838,8 @@
     "systemsNav": "Dimensionamento",
     "chapters": {
       "generation": "242 Produzione di calore",
+      "generationTitle": "Produzione di calore",
       "distribution": "243 Distribuzione di calore",
-      "system": "Sistema",
-      "hotWater": "Acqua calda",
-      "storage": "Accumulatore di energia",
-      "groups": "Gruppi",
-      "schemaGeneration": "Schema di principio produzione",
       "heatDemand": "Fabbisogno di calore SIA 384/2",
       "floorHeating": "Riscaldamento a pavimento",
       "radiators": "Radiatori",
@@ -1879,14 +1875,140 @@
     "storageToggle": "Accumulatore di energia presente",
     "placeholder": {
       "title": "In arrivo",
-      "hotWater": "Fabbisogno e accumulatore d’acqua calda (SIA 385/2), potenza per la produzione d’acqua calda, protezione dalla legionella.",
-      "storage": "Accumulatore tecnico / volano: volume, interruzioni, allacciamento.",
-      "groups": "Gruppi di riscaldamento: emissione, potenza, temperature di mandata e ritorno, curva di riscaldamento, circolatore, valvola miscelatrice.",
-      "schemaGeneration": "Schema di principio della produzione con cartiglio e legenda.",
       "radiators": "Dimensionamento dei radiatori per locale dal fabbisogno di calore.",
       "safety": "Espansione, valvola di sicurezza e altri dispositivi di sicurezza (SSIGA HE301-01, SIA 384/1).",
       "schemaDistribution": "Schema di principio della distribuzione (gruppi, collettori, locali) con cartiglio e legenda.",
       "text": "Questo capitolo sarà elaborato prossimamente."
+    },
+    "generation": {
+      "sectors": {
+        "source": "Fonte di calore",
+        "hotWater": "Acqua calda",
+        "storage": "Accumulatore di energia",
+        "distribution": "Distributore e gruppi"
+      },
+      "short": {
+        "hpAir": "PdC aria/acqua",
+        "hpBrine": "PdC salamoia/acqua",
+        "hpWater": "PdC acqua/acqua",
+        "pellets": "Caldaia a pellet",
+        "logWood": "Caldaia a legna",
+        "district": "Teleriscaldamento",
+        "gasOil": "Caldaia gas/olio"
+      },
+      "emitterShort": {
+        "floor": "Riscaldamento a pavimento",
+        "radiators": "Radiatori",
+        "tabs": "TABS",
+        "air": "Aerotermi"
+      },
+      "circuits": {
+        "throttle": "Circuito a strozzamento",
+        "diverting": "Circuito deviatore",
+        "mixing": "Circuito miscelatore",
+        "injection3": "Circuito a iniezione con valvola a 3 vie",
+        "injection2": "Circuito a iniezione con valvola a 2 vie"
+      },
+      "circuitShort": {
+        "throttle": "Strozzamento",
+        "diverting": "Deviazione",
+        "mixing": "Miscelazione",
+        "injection3": "Iniezione 3 vie",
+        "injection2": "Iniezione 2 vie"
+      },
+      "schema": {
+        "noGenerator": "Scegliere il generatore",
+        "boreholes": "Sonde geotermiche",
+        "supplyWell": "Pozzo di captazione",
+        "returnWell": "Pozzo di restituzione",
+        "intermediate": "Circuito intermedio",
+        "districtPrimary": "Teleriscaldamento (primario)",
+        "waterHeater": "Scaldacqua",
+        "noHotWater": "nessuno scaldacqua",
+        "storage": "Accumulatore tecnico",
+        "noStorage": "nessun accumulatore",
+        "mainPump": "Pompa principale",
+        "pressurized": "Distributore con pressione",
+        "unpressurized": "Distributore senza pressione",
+        "bypass": "Bypass",
+        "group": "Gruppo",
+        "noGroups": "ancora nessun gruppo",
+        "cold": "AF",
+        "hot": "AC",
+        "supply": "M",
+        "return": "R"
+      },
+      "hotWater": "Scaldacqua caricato dall’impianto (valvola deviatrice)",
+      "volume": "Volume [l]",
+      "distributor": "Distributore",
+      "distributors": {
+        "pressurized": "Con pressione",
+        "unpressurized": "Senza pressione"
+      },
+      "distributorHint": {
+        "pressurized": "Con pompa principale; per circuiti a strozzamento, deviatori e a iniezione.",
+        "unpressurized": "Senza pressione differenziale (disaccoppiato da bypass o accumulatore); per circuiti miscelatori con pompa di gruppo."
+      },
+      "addGroup": "Aggiungi gruppo",
+      "removeGroup": "Rimuovi gruppo",
+      "noGroups": "Ancora nessun gruppo. Aggiungi i gruppi del distributore.",
+      "columns": {
+        "name": "Gruppo",
+        "circuit": "Circuito",
+        "emitter": "Emissione",
+        "power": "Potenza [kW]",
+        "supply": "M [°C]",
+        "return": "R [°C]",
+        "heatMeter": "Contatore di calore"
+      },
+      "mismatch": {
+        "pressurized": "I circuiti miscelatori vanno su un distributore senza pressione (la pressione differenziale disturba la miscelazione): {groups}.",
+        "unpressurized": "I circuiti a strozzamento, deviatori e a iniezione richiedono un distributore con pressione: {groups}."
+      },
+      "schemaTitle": "Schema di principio produzione di calore",
+      "schemaHint": "Disegnato dai dati sopra; simboli secondo SIA 410.",
+      "moveHorizontal": "Spostare lo schema lateralmente",
+      "legendTitle": "Legenda",
+      "legendHint": "«~» = composto per analogia da simboli della SIA 410 (non contenuto nella norma).",
+      "pipes": {
+        "vl": "Mandata acqua di riscaldamento",
+        "rl": "Ritorno acqua di riscaldamento",
+        "brine": "Salamoia / circuito intermedio mandata",
+        "brineR": "Salamoia / circuito intermedio ritorno",
+        "gw": "Acqua di falda captazione",
+        "gwR": "Acqua di falda restituzione",
+        "pwc": "Acqua fredda",
+        "pwh": "Acqua calda"
+      },
+      "legend": {
+        "ball": "Rubinetto a sfera",
+        "check": "Valvola di ritegno",
+        "regValve": "Valvola di regolazione",
+        "valve2": "Valvola a 2 vie motorizzata",
+        "valve3": "Valvola a 3 vie motorizzata",
+        "pump": "Circolatore",
+        "thermometer": "Termometro",
+        "sensor": "Sonda di temperatura",
+        "heatMeter": "Contatore di calore",
+        "expansion": "Vaso d’espansione a membrana",
+        "boilerSolid": "Caldaia combustibile solido",
+        "boilerGasOil": "Caldaia olio / gas",
+        "hpAir": "PdC aria/acqua",
+        "hpWater": "PdC salamoia o acqua/acqua",
+        "plateHx": "Scambiatore a piastre",
+        "storage": "Accumulatore tecnico",
+        "waterHeater": "Scaldacqua con scambiatore",
+        "ews": "Sonda geotermica",
+        "well": "Pozzo con pompa sommersa",
+        "floor": "Riscaldamento a pavimento / TABS",
+        "radiator": "Radiatore",
+        "register": "Batteria / aerotermo",
+        "apparatus": "Apparecchio (generale)"
+      },
+      "plankopf": {
+        "plan": "Schema di principio",
+        "trade": "Riscaldamento"
+      }
     }
   },
   "heatLoad": {

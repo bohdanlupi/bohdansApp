@@ -10,6 +10,7 @@ import { emptyFloorSystem, parseFloorSystem } from "@/lib/heating/floor-schema";
 import { emptyHeatLoad, parseHeatLoad } from "@/lib/heating/heat-load-schema";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
 import { emptyPlant, parsePlant } from "@/lib/heating/plant-schema";
+import { initialsOf, nextRevisionIndex, parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -35,7 +36,7 @@ export async function saveHeatingPlan(projectId: string, data: unknown): Promise
 // Wärmeerzeugungsanlagen (242)
 // ---------------------------------------------------------------------------
 
-/** Creates an Anlage and opens its System page. */
+/** Creates an Anlage and opens its Wärmeerzeugung page. */
 export async function createHeatingPlant(_prev: FormState, formData: FormData): Promise<FormState> {
   await assertRole("admin", "planer");
   const projectId = z.uuid().safeParse(formData.get("project_id"));
@@ -59,7 +60,7 @@ export async function createHeatingPlant(_prev: FormState, formData: FormData): 
   if (error || !data) return { error: "saveFailed" };
 
   revalidatePath(`/projekte/${projectId.data}/heizung`, "layout");
-  redirect(`/projekte/${projectId.data}/heizung/erzeugung/system?anlage=${data.id}`);
+  redirect(`/projekte/${projectId.data}/heizung/erzeugung?anlage=${data.id}`);
 }
 
 /** Saves name and inputs of an Anlage. */
@@ -80,6 +81,44 @@ export async function saveHeatingPlant(id: string, projectId: string, name: stri
   return {};
 }
 
+const schemaPrintSchema = z.object({
+  phase: z.string().regex(/^\d{2}$/).nullable(),
+  comment: z.string().trim().max(80).nullable(),
+});
+
+/** Print dialog of the Prinzipschema Wärmeerzeugung: SIA phase of the title block and, with a comment, a new revision. */
+export async function saveHeatingSchemaPlan(plantId: string, projectId: string, input: { phase: string | null; comment: string | null }): Promise<{ error?: string }> {
+  const profile = await assertRole("admin", "planer");
+  const parsed = schemaPrintSchema.safeParse(input);
+  if (!ids.safeParse([plantId, projectId]).success || !parsed.success) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  const { data: plant } = await supabase.from("heating_plants").select("schema_plan").eq("id", plantId).eq("project_id", projectId).maybeSingle();
+  if (!plant) return { error: "invalidInput" };
+  const plan = parseSchemaPlan(plant.schema_plan);
+  const revisions =
+    parsed.data.comment !== null
+      ? [
+          ...plan.revisions,
+          {
+            index: nextRevisionIndex(plan.revisions),
+            initials: initialsOf(profile.full_name, profile.email),
+            date: new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Zurich" }),
+            comment: parsed.data.comment,
+          },
+        ]
+      : plan.revisions;
+  const { error } = await supabase
+    .from("heating_plants")
+    .update({ schema_plan: { phase: parsed.data.phase, revisions } as unknown as Json })
+    .eq("id", plantId)
+    .eq("project_id", projectId);
+  if (error) return { error: "saveFailed" };
+
+  revalidatePath(`/projekte/${projectId}/heizung`, "layout");
+  return {};
+}
+
 /** Deletes an Anlage; floor heating systems assigned to it become unassigned. */
 export async function deleteHeatingPlant(id: string, projectId: string): Promise<FormState> {
   await assertRole("admin", "planer");
@@ -90,7 +129,7 @@ export async function deleteHeatingPlant(id: string, projectId: string): Promise
   if (error) return { error: "deleteFailed" };
 
   revalidatePath(`/projekte/${projectId}/heizung`, "layout");
-  redirect(`/projekte/${projectId}/heizung/erzeugung/system`);
+  redirect(`/projekte/${projectId}/heizung/erzeugung`);
 }
 
 // ---------------------------------------------------------------------------

@@ -3,8 +3,9 @@ import type { PlantData } from "./plant-schema";
 
 /**
  * Parameters that filter the SIA 108 checklists, taken from the chapters: generators, cooling and storage from the
- * Anlagen (242), floor heating from the floor heating systems (243), power from the heat load calculations; the
- * building data (type, construction, standard, EBF, several units) from 242 System (heating_plans.params).
+ * Anlagen (242), emitters from their Heizgruppen and the floor heating systems (243), power from the heat load
+ * calculations; the building data (type, construction, standard, EBF, several units) from 242 Wärmeerzeugung
+ * (heating_plans.params).
  */
 export function effectiveHeatingParams(
   building: HeatingParams,
@@ -14,7 +15,8 @@ export function effectiveHeatingParams(
   heatLoads: number[],
 ): HeatingParams {
   const generators = [...new Set(plants.flatMap((p) => p.data.generators))] as GeneratorType[];
-  const emitters: EmitterType[] = floorSystems > 0 ? ["floor"] : [];
+  const fromGroups = plants.flatMap((p) => p.data.groups.flatMap((g) => (g.emitter ? [g.emitter] : [])));
+  const emitters = [...new Set<EmitterType>([...(floorSystems > 0 ? ["floor" as const] : []), ...fromGroups])];
   const total = heatLoads.reduce((s, w) => s + w, 0);
   return {
     ...building,

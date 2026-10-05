@@ -117,7 +117,7 @@ can read everything; write access by role.
 /projekte/[id]/kostenplan      BKP / KV
 /projekte/[id]/heizung         redirects to the first checklist (31); checklist PDF /api/pdf/heating-plan/[id]
 /projekte/[id]/heizung/[31…61] SIA 108 phase: checklists (SIA 384/1, 384/2, 384/6, 384/7, EN-103, HE301 refs)
-/projekte/[id]/heizung/erzeugung/{system,warmwasser,speicher,gruppen,schema}?anlage=  242 Wärmeerzeugung, per Anlage
+/projekte/[id]/heizung/erzeugung?anlage=  242 Wärmeerzeugung (one page), per Anlage
 /projekte/[id]/heizung/verteilung/waermebedarf[/calcId]  243 Wärmebedarf SIA 384/2 (project-wide), PDF /api/pdf/heat-load/[calcId]
 /projekte/[id]/heizung/verteilung/{fussbodenheizung[/systemId],heizkoerper,sicherheit,schema}?anlage=  243, per Anlage
 /projekte/[id]/lueftung        KWL-Planung: design criteria + phase progress, PDF /api/pdf/kwl-plan/[id]
@@ -241,6 +241,18 @@ Anlage. The Planungsgrundlagen page was dropped: checklist params come from the 
 src/lib/heating/params.ts: generators / cooling / storage from the Anlagen, floor from the FBH systems, power from the
 heat loads, building data edited in 242 System). Engines of heat load and floor heating kept; their new UI and the
 other subchapters (Warmwasser, Speicher sizing, Gruppen, Heizkörper, Sicherheit, both Prinzipschemas) follow one by one.
+242 merged into one page (2026-10-05, user decision): building data, then the Anlage in four sectors – 1 Wärmequelle
+(generators, parallel), 2 Warmwasser (Wassererwärmer via Umschaltventil, volume), 3 Energiespeicher (technischer
+Speicher, volume), 4 Verteiler (druckbehaftet with Hauptpumpe / drucklos with Bypass, or decoupled by the Speicher)
+with Heizgruppen (Drossel-, Umlenk-, Beimisch-, Einspritzschaltung mit Dreiweg- / Durchgangsventil; Wärmeabgabe,
+kW, VL/RL, optional Wärmezähler; mismatch Schaltung vs. Verteiler only warns). Prinzipschema drawn live below
+(src/lib/heating/generation-schema.ts, shared primitives for a later PDF): SIA 410 symbols, VL red solid / RL blue
+dashed; source side per generator (EWS with Solepumpe + MAG, Grundwasser Zwischenkreis + Platten-WT + Brunnen,
+Fernwärme Platten-WT with Wärmezähler + Regelventil, Holz with Rücklaufhochhaltung); parts SIA 410 lacks are built
+from its parts («~ sinngemäss» in the legend). Each group: Kugelhähne, Thermometer VL/RL, VL-Fühler. Group emitters
+also feed the checklist params. Plan PDF /api/pdf/heating-schema/<plantId> (src/pdf/heating-schema-document.tsx,
+sheet as the Sanitär plan, trade «Heizung» in red; Plankopf in heating_plants.schema_plan, migration applied 2026-10-05).
+Next: Warmwasser / Speicher sizing.
 
 KWL-Planung (2026-09-25): the Lüftung tab is a planning dossier by SIA 108 phases 31, 32, 33, 41, 51, 52, 53, 61
 (src/lib/kwl/phases.ts: goals + checklists DE/FR/IT with SIA 382/5 / SIA 108 references, conditional on the design

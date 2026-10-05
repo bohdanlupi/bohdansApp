@@ -1838,12 +1838,8 @@
     "systemsNav": "Dimensionnement",
     "chapters": {
       "generation": "242 Production de chaleur",
+      "generationTitle": "Production de chaleur",
       "distribution": "243 Distribution de chaleur",
-      "system": "Système",
-      "hotWater": "Eau chaude",
-      "storage": "Accumulateur d’énergie",
-      "groups": "Groupes",
-      "schemaGeneration": "Schéma de principe production",
       "heatDemand": "Besoins de chaleur SIA 384/2",
       "floorHeating": "Chauffage au sol",
       "radiators": "Radiateurs",
@@ -1879,14 +1875,140 @@
     "storageToggle": "Accumulateur d’énergie présent",
     "placeholder": {
       "title": "À suivre",
-      "hotWater": "Besoins et accumulateur d’eau chaude (SIA 385/2), puissance pour la production d’eau chaude, protection contre les légionelles.",
-      "storage": "Accumulateur technique / tampon : volume, temps de coupure, raccordement.",
-      "groups": "Groupes de chauffage : émission, puissance, températures aller/retour, courbe de chauffe, circulateur, vanne mélangeuse.",
-      "schemaGeneration": "Schéma de principe de la production avec cartouche et légende.",
       "radiators": "Dimensionnement des radiateurs par local selon les besoins de chaleur.",
       "safety": "Expansion, soupape de sécurité et autres dispositifs de sécurité (SSIGE HE301-01, SIA 384/1).",
       "schemaDistribution": "Schéma de principe de la distribution (groupes, distributeurs, locaux) avec cartouche et légende.",
       "text": "Ce chapitre sera élaboré prochainement."
+    },
+    "generation": {
+      "sectors": {
+        "source": "Source de chaleur",
+        "hotWater": "Eau chaude",
+        "storage": "Accumulateur d’énergie",
+        "distribution": "Distributeur et groupes"
+      },
+      "short": {
+        "hpAir": "PAC air/eau",
+        "hpBrine": "PAC eau glycolée/eau",
+        "hpWater": "PAC eau/eau",
+        "pellets": "Chaudière à pellets",
+        "logWood": "Chaudière à bûches",
+        "district": "Chauffage à distance",
+        "gasOil": "Chaudière gaz/mazout"
+      },
+      "emitterShort": {
+        "floor": "Chauffage au sol",
+        "radiators": "Radiateurs",
+        "tabs": "TABS",
+        "air": "Aérothermes"
+      },
+      "circuits": {
+        "throttle": "Montage à étranglement",
+        "diverting": "Montage en décharge",
+        "mixing": "Montage en mélange",
+        "injection3": "Montage à injection avec vanne 3 voies",
+        "injection2": "Montage à injection avec vanne 2 voies"
+      },
+      "circuitShort": {
+        "throttle": "Étranglement",
+        "diverting": "Décharge",
+        "mixing": "Mélange",
+        "injection3": "Injection 3 voies",
+        "injection2": "Injection 2 voies"
+      },
+      "schema": {
+        "noGenerator": "Choisir le producteur",
+        "boreholes": "Sondes géothermiques",
+        "supplyWell": "Puits de captage",
+        "returnWell": "Puits de restitution",
+        "intermediate": "Circuit intermédiaire",
+        "districtPrimary": "Chauffage à distance (primaire)",
+        "waterHeater": "Chauffe-eau",
+        "noHotWater": "pas de chauffe-eau",
+        "storage": "Accumulateur technique",
+        "noStorage": "pas d’accumulateur",
+        "mainPump": "Pompe principale",
+        "pressurized": "Distributeur sous pression",
+        "unpressurized": "Distributeur sans pression",
+        "bypass": "Bypass",
+        "group": "Groupe",
+        "noGroups": "pas encore de groupes",
+        "cold": "EF",
+        "hot": "EC",
+        "supply": "D",
+        "return": "R"
+      },
+      "hotWater": "Chauffe-eau chargé par l’installation (vanne d’inversion)",
+      "volume": "Volume [l]",
+      "distributor": "Distributeur",
+      "distributors": {
+        "pressurized": "Sous pression",
+        "unpressurized": "Sans pression"
+      },
+      "distributorHint": {
+        "pressurized": "Avec pompe principale ; pour montages à étranglement, en décharge et à injection.",
+        "unpressurized": "Sans pression différentielle (découplé par bypass ou accumulateur) ; pour montages en mélange avec pompe de groupe."
+      },
+      "addGroup": "Ajouter un groupe",
+      "removeGroup": "Supprimer le groupe",
+      "noGroups": "Pas encore de groupes. Ajoute les groupes du distributeur.",
+      "columns": {
+        "name": "Groupe",
+        "circuit": "Montage",
+        "emitter": "Émission",
+        "power": "Puissance [kW]",
+        "supply": "D [°C]",
+        "return": "R [°C]",
+        "heatMeter": "Compteur de chaleur"
+      },
+      "mismatch": {
+        "pressurized": "Les montages en mélange vont sur un distributeur sans pression (la pression différentielle perturbe le mélange) : {groups}.",
+        "unpressurized": "Les montages à étranglement, en décharge et à injection exigent un distributeur sous pression : {groups}."
+      },
+      "schemaTitle": "Schéma de principe production de chaleur",
+      "schemaHint": "Dessiné à partir des données ci-dessus ; signes selon SIA 410.",
+      "moveHorizontal": "Déplacer le schéma latéralement",
+      "legendTitle": "Légende",
+      "legendHint": "« ~ » = composé par analogie de signes de la SIA 410 (absent de la norme).",
+      "pipes": {
+        "vl": "Départ eau de chauffage",
+        "rl": "Retour eau de chauffage",
+        "brine": "Eau glycolée / circuit intermédiaire départ",
+        "brineR": "Eau glycolée / circuit intermédiaire retour",
+        "gw": "Eau souterraine captage",
+        "gwR": "Eau souterraine restitution",
+        "pwc": "Eau froide",
+        "pwh": "Eau chaude"
+      },
+      "legend": {
+        "ball": "Robinet à boisseau",
+        "check": "Clapet de retenue",
+        "regValve": "Vanne de réglage",
+        "valve2": "Vanne 2 voies motorisée",
+        "valve3": "Vanne 3 voies motorisée",
+        "pump": "Circulateur",
+        "thermometer": "Thermomètre",
+        "sensor": "Sonde de température",
+        "heatMeter": "Compteur de chaleur",
+        "expansion": "Vase d’expansion à membrane",
+        "boilerSolid": "Chaudière combustible solide",
+        "boilerGasOil": "Chaudière mazout / gaz",
+        "hpAir": "PAC air/eau",
+        "hpWater": "PAC eau glycolée ou eau/eau",
+        "plateHx": "Échangeur à plaques",
+        "storage": "Accumulateur technique",
+        "waterHeater": "Chauffe-eau avec échangeur",
+        "ews": "Sonde géothermique",
+        "well": "Puits avec pompe immergée",
+        "floor": "Chauffage au sol / TABS",
+        "radiator": "Radiateur",
+        "register": "Registre / aérotherme",
+        "apparatus": "Appareil (général)"
+      },
+      "plankopf": {
+        "plan": "Schéma de principe",
+        "trade": "Chauffage"
+      }
     }
   },
   "heatLoad": {

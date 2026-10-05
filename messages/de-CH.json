@@ -1838,12 +1838,8 @@
     "systemsNav": "Dimensionierung",
     "chapters": {
       "generation": "242 Wärmeerzeugung",
+      "generationTitle": "Wärmeerzeugung",
       "distribution": "243 Wärmeverteilung",
-      "system": "System",
-      "hotWater": "Warmwasser",
-      "storage": "Energiespeicher",
-      "groups": "Gruppen",
-      "schemaGeneration": "Prinzipschema Wärmeerzeugung",
       "heatDemand": "Wärmebedarf SIA 384/2",
       "floorHeating": "Fussbodenheizung",
       "radiators": "Heizkörper",
@@ -1879,14 +1875,140 @@
     "storageToggle": "Energiespeicher vorhanden",
     "placeholder": {
       "title": "Folgt",
-      "hotWater": "Warmwasserbedarf und -speicher (SIA 385/2), Leistung für die Wassererwärmung, Legionellenschutz.",
-      "storage": "Technischer Speicher / Pufferspeicher: Volumen, Sperrzeiten, Einbindung.",
-      "groups": "Heizgruppen: Wärmeabgabe, Leistung, Vor- und Rücklauftemperatur, Heizkurve, Umwälzpumpe, Mischventil.",
-      "schemaGeneration": "Prinzipschema der Wärmeerzeugung mit Plankopf und Legende.",
       "radiators": "Heizkörperauslegung je Raum aus dem Wärmebedarf.",
       "safety": "Expansion, Sicherheitsventil und weitere Sicherheitseinrichtungen (SWKI HE301-01, SIA 384/1).",
       "schemaDistribution": "Prinzipschema der Wärmeverteilung (Gruppen, Verteiler, Räume) mit Plankopf und Legende.",
       "text": "Dieses Kapitel wird als Nächstes ausgearbeitet."
+    },
+    "generation": {
+      "sectors": {
+        "source": "Wärmequelle",
+        "hotWater": "Warmwasser",
+        "storage": "Energiespeicher",
+        "distribution": "Verteiler und Heizgruppen"
+      },
+      "short": {
+        "hpAir": "WP Luft/Wasser",
+        "hpBrine": "WP Sole/Wasser",
+        "hpWater": "WP Wasser/Wasser",
+        "pellets": "Pelletkessel",
+        "logWood": "Stückholzkessel",
+        "district": "Fernwärme",
+        "gasOil": "Gas-/Ölkessel"
+      },
+      "emitterShort": {
+        "floor": "Fussbodenheizung",
+        "radiators": "Heizkörper",
+        "tabs": "TABS",
+        "air": "Lufterhitzer"
+      },
+      "circuits": {
+        "throttle": "Drosselschaltung",
+        "diverting": "Umlenkschaltung",
+        "mixing": "Beimischschaltung",
+        "injection3": "Einspritzschaltung mit Dreiwegventil",
+        "injection2": "Einspritzschaltung mit Durchgangsventil"
+      },
+      "circuitShort": {
+        "throttle": "Drosselschaltung",
+        "diverting": "Umlenkschaltung",
+        "mixing": "Beimischschaltung",
+        "injection3": "Einspritzung 3-Weg",
+        "injection2": "Einspritzung DV"
+      },
+      "schema": {
+        "noGenerator": "Wärmeerzeuger wählen",
+        "boreholes": "Erdwärmesonden",
+        "supplyWell": "Förderbrunnen",
+        "returnWell": "Rückgabebrunnen",
+        "intermediate": "Zwischenkreis",
+        "districtPrimary": "Fernwärme (primär)",
+        "waterHeater": "Wassererwärmer",
+        "noHotWater": "kein Wassererwärmer",
+        "storage": "Technischer Speicher",
+        "noStorage": "kein Energiespeicher",
+        "mainPump": "Hauptpumpe",
+        "pressurized": "Druckbehafteter Verteiler",
+        "unpressurized": "Druckloser Verteiler",
+        "bypass": "Bypass",
+        "group": "Gruppe",
+        "noGroups": "noch keine Heizgruppen",
+        "cold": "KW",
+        "hot": "WW",
+        "supply": "VL",
+        "return": "RL"
+      },
+      "hotWater": "Wassererwärmer wird von der Anlage geladen (Umschaltventil)",
+      "volume": "Volumen [l]",
+      "distributor": "Verteiler",
+      "distributors": {
+        "pressurized": "Druckbehaftet",
+        "unpressurized": "Drucklos"
+      },
+      "distributorHint": {
+        "pressurized": "Mit Hauptpumpe; für Drossel-, Umlenk- und Einspritzschaltungen.",
+        "unpressurized": "Ohne Differenzdruck (Bypass oder Speicher entkoppelt); für Beimischschaltungen mit eigener Gruppenpumpe."
+      },
+      "addGroup": "Gruppe hinzufügen",
+      "removeGroup": "Gruppe entfernen",
+      "noGroups": "Noch keine Heizgruppen. Füge die Gruppen des Verteilers hinzu.",
+      "columns": {
+        "name": "Gruppe",
+        "circuit": "Schaltung",
+        "emitter": "Wärmeabgabe",
+        "power": "Leistung [kW]",
+        "supply": "VL [°C]",
+        "return": "RL [°C]",
+        "heatMeter": "Wärmezähler"
+      },
+      "mismatch": {
+        "pressurized": "Beimischschaltungen gehören an einen drucklosen Verteiler (der Differenzdruck stört die Mischung): {groups}.",
+        "unpressurized": "Drossel-, Umlenk- und Einspritzschaltungen brauchen einen druckbehafteten Verteiler: {groups}."
+      },
+      "schemaTitle": "Prinzipschema Wärmeerzeugung",
+      "schemaHint": "Wird aus den Angaben oben gezeichnet; Symbole nach SIA 410.",
+      "moveHorizontal": "Schema seitlich verschieben",
+      "legendTitle": "Legende",
+      "legendHint": "«~» = sinngemäss aus Sinnbildern der SIA 410 zusammengesetzt (in der Norm nicht enthalten).",
+      "pipes": {
+        "vl": "Vorlauf Heizwasser",
+        "rl": "Rücklauf Heizwasser",
+        "brine": "Sole / Zwischenkreis Vorlauf",
+        "brineR": "Sole / Zwischenkreis Rücklauf",
+        "gw": "Grundwasser Entnahme",
+        "gwR": "Grundwasser Rückgabe",
+        "pwc": "Kaltwasser",
+        "pwh": "Warmwasser"
+      },
+      "legend": {
+        "ball": "Kugelhahn",
+        "check": "Rückflussverhinderer",
+        "regValve": "Regulierventil",
+        "valve2": "Durchgangsventil mit Motorantrieb",
+        "valve3": "Dreiwegventil mit Motorantrieb",
+        "pump": "Umwälzpumpe",
+        "thermometer": "Thermometer",
+        "sensor": "Temperaturfühler",
+        "heatMeter": "Wärmezähler",
+        "expansion": "Membran-Ausdehnungsgefäss",
+        "boilerSolid": "Heizkessel fester Brennstoff",
+        "boilerGasOil": "Heizkessel Öl / Gas",
+        "hpAir": "Wärmepumpe Luft/Wasser",
+        "hpWater": "Wärmepumpe Sole- bzw. Wasser/Wasser",
+        "plateHx": "Platten-Wärmetauscher",
+        "storage": "Technischer Speicher",
+        "waterHeater": "Wassererwärmer mit Wärmetauscher",
+        "ews": "Erdwärmesonde",
+        "well": "Brunnen mit Unterwasserpumpe",
+        "floor": "Fussbodenheizung / TABS",
+        "radiator": "Heizkörper",
+        "register": "Heizregister / Lufterhitzer",
+        "apparatus": "Apparat (allgemein)"
+      },
+      "plankopf": {
+        "plan": "Prinzipschema",
+        "trade": "Heizung"
+      }
     }
   },
   "heatLoad": {

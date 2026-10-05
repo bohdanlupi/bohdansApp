@@ -8,6 +8,7 @@ import { evaluateHeatLoad } from "@/lib/heating/heat-load";
 import { effectiveHeatingParams } from "@/lib/heating/params";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
 import { parsePlant } from "@/lib/heating/plant-schema";
+import { parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import { createClient } from "@/lib/supabase/server";
 
 /** Heizungsplanung of a project (defaults when none is saved yet). Deduplicated per request. */
@@ -27,8 +28,8 @@ export const loadHeatCalcs = cache(async (projectId: string) => {
 /** Wärmeerzeugungsanlagen (242) of a project. */
 export const loadHeatingPlants = cache(async (projectId: string) => {
   const supabase = await createClient();
-  const { data } = await supabase.from("heating_plants").select("id, name, data").eq("project_id", projectId).order("sort").order("created_at");
-  return (data ?? []).map((p) => ({ id: p.id, name: p.name, data: parsePlant(p.data) }));
+  const { data } = await supabase.from("heating_plants").select("id, name, data, schema_plan").eq("project_id", projectId).order("sort").order("created_at");
+  return (data ?? []).map((p) => ({ id: p.id, name: p.name, data: parsePlant(p.data), schemaPlan: parseSchemaPlan(p.schema_plan) }));
 });
 
 export type LoadedPlant = Awaited<ReturnType<typeof loadHeatingPlants>>[number];
