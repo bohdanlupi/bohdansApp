@@ -2453,7 +2453,32 @@
         "saveFirst": "Zuerst speichern",
         "noLv": "Noch kein Leistungsverzeichnis im Projekt.",
         "toLvs": "Zu den Leistungsverzeichnissen"
-      }
+      },
+      "hotWaterHeater": "Erwärmung",
+      "hotWaterHeaters": {
+        "coil": "Innenliegendes Register",
+        "external": "Aussenliegender Wärmetauscher"
+      },
+      "hotWaterCoils": "Register",
+      "hotWaterCoilTypes": {
+        "single": "1 Register",
+        "lower": "2 Register, unteres angeschlossen",
+        "upper": "2 Register, oberes angeschlossen",
+        "series": "2 Register in Serie angeschlossen"
+      },
+      "storageConnection": "Anschluss",
+      "storageConnections": {
+        "conventional": "Anschluss konventionell",
+        "reduced": "Anschluss reduziert"
+      },
+      "storageConnectionHint": {
+        "conventional": "VL und RL der Wärmeerzeuger und der Verteiler einzeln am Speicher.",
+        "reduced": "VL mit T-Stück in den Speicher und direkt weiter zum Verteiler; RL vom Verteiler durch den Speicher."
+      },
+      "storageTemp": "Speichertemperatur",
+      "storageTempNone": "– (keine VL-Temperatur der Heizgruppen)",
+      "storageReturn": "Rücklauf zum Speicher",
+      "storageTempHint": "Speicher mit der höchsten VL-Temperatur der Heizgruppen. Rücklauf = Mischung der Gruppen-Rückläufe mit ihren Volumenströmen auf der Verteilerseite V̇ = Φ / (ρ · cp · (T Speicher − T RL))."
     }
   },
   "heatLoad": {

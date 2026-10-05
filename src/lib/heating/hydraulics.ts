@@ -114,3 +114,22 @@ export function evaluateHydraulics(data: PlantData, ews: EwsResult | null): Circ
   }
   return out;
 }
+
+/**
+ * Energiespeicher at the highest VL of the Heizgruppen; Rücklauf to the Speicher mixed from the groups with their
+ * primary flows at that temperature: V̇ = Φ / (ρ · cp · (T_Speicher − T_RL)), returning at their T_RL.
+ */
+export function storageTemperatures(data: PlantData): { storage: number | null; ret: number | null; flow: number | null } {
+  const supplies = data.groups.flatMap((g) => (g.supplyTemp !== null ? [g.supplyTemp] : []));
+  const ts = supplies.length ? Math.max(...supplies) : null;
+  if (ts === null) return { storage: null, ret: null, flow: null };
+  let flow = 0;
+  let sum = 0;
+  for (const g of data.groups) {
+    if (g.power === null || g.power <= 0 || g.returnTemp === null || g.returnTemp >= ts) continue;
+    const v = flowOf(g.power, ts - g.returnTemp)!;
+    flow += v;
+    sum += v * g.returnTemp;
+  }
+  return { storage: ts, ret: flow > 0 ? sum / flow : null, flow: flow > 0 ? flow : null };
+}

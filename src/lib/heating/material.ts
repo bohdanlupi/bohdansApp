@@ -177,8 +177,14 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
 
   // --- Warmwasser ----------------------------------------------------------------------------------------------------
   if (data.hotWater) {
-    const electric = data.hotWaterElectric > 0 ? ` mit Elektroeinsatz ${fmt(data.hotWaterElectric, 1)} kW` : "";
-    neutral("hotWater", `Wassererwärmer${data.hotWaterVolume ? ` ${fmt(data.hotWaterVolume)} l` : ""}${electric}`);
+    const electric = data.hotWaterElectric > 0 ? `, Elektroeinsatz ${fmt(data.hotWaterElectric, 1)} kW` : "";
+    const coils = { single: "mit innenliegendem Register", lower: "mit 2 Registern (unteres angeschlossen)", upper: "mit 2 Registern (oberes angeschlossen)", series: "mit 2 Registern in Serie" }[data.hotWaterCoils];
+    const heater = data.hotWaterHeater === "external" ? "für aussenliegenden Wärmetauscher" : coils;
+    neutral("hotWater", `Wassererwärmer${data.hotWaterVolume ? ` ${fmt(data.hotWaterVolume)} l` : ""} ${heater}${electric}`);
+    if (data.hotWaterHeater === "external") {
+      neutral("hotWater", "Platten-Wärmetauscher Warmwasser");
+      neutral("hotWater", "Speicherladepumpe Trinkwasser (Sekundärseite)");
+    }
     if (safety.hotWaterValve) {
       const thread = dnThread(safety.hotWaterValve.isv ?? 15) ?? 0.5;
       article("hotWater", "Nussbaum", A.potableSafetyValves.find((v) => v.thread === thread), 1, "Sicherheitsventil Wassererwärmer 6 bar");

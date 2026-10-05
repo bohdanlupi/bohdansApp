@@ -24,7 +24,7 @@ import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
 import type { EmitterType, GeneratorType } from "./plan-schema";
 import { type CircuitType, generatorName, type PlantData } from "./plant-schema";
 import { emptyEwsContext, type EwsContext, evaluateEws } from "./ews";
-import { evaluateHydraulics } from "./hydraulics";
+import { evaluateHydraulics, storageTemperatures } from "./hydraulics";
 import { evaluateSafety } from "./safety";
 
 export type PipeKind = "vl" | "rl" | "brine" | "brineR" | "gw" | "gwR" | "pwc" | "pwh";
@@ -452,8 +452,10 @@ export function buildGenerationSchema(
   // Pipe sizes («NW» = outer diameter of the Optipress-Therm pipe, as in the Sanitärschema) beside the circuits.
   const circuits = evaluateHydraulics(data, ews);
   const nw = (key: string, x: number, y: number, anchor: "start" | "middle" | "end" = "middle") => {
-    const size = circuits.find((c) => c.key === key)?.size;
-    if (size) text(x, y, `NW ${size.d}`, 6, { anchor, muted: true });
+    const c = circuits.find((x) => x.key === key);
+    if (!c?.size) return;
+    text(x, y, `NW ${c.size.d}`, 6, { anchor, muted: true });
+    if (c.flow !== null) text(x, y + 7, `${Math.round(c.flow * 1000).toLocaleString("de-CH")} l/h`, 6, { anchor, muted: true });
   };
   const MAG_ROOM = 95;
   const sourceRight = x0 + gens.reduce((s, u) => s + genWidth(u?.type ?? null, data), 0) + 10 + MAG_ROOM;
@@ -474,7 +476,7 @@ export function buildGenerationSchema(
     firstLeg = Math.min(firstLeg, xv);
     drawGenerator(g, colX, gx, top, unit ? generatorName(data.generators, unit, (t) => labels.generators[t]) : "", unit?.id ?? "");
     if (ww === "generator" && unit && unit.id === wwUnit?.id) wwGen = { gx, top };
-    if (unit) nw(`gen:${unit.id}`, (xv + xr) / 2, YBALL - 12);
+    if (unit) nw(`gen:${unit.id}`, (xv + xr) / 2, YBALL - 22);
     pipe("vl", [[xv, top], [xv, YMV]]);
     pipe("rl", [[xr, YMR], [xr, top]]);
     dot(xv, YMV, "vl");
@@ -717,7 +719,7 @@ export function buildGenerationSchema(
     sym("drain", xb, yB + 34, "up", { side: sideOf("up", "left") });
     sym("pump", xb, yB + 62, "up");
     sourceSafetyValve(xb, top - 12, -16);
-    nw(`source:${id}`, (xa + xb) / 2, yA + 18);
+    nw(`source:${id}`, xa - 8, yA + 18, "end");
     // Zwischenkreis → Platten-WT (on the ground) → Grundwasser: Förderbrunnen (Unterwasserpumpe), Rückgabebrunnen.
     used.add("plateHx");
     used.add("well");
@@ -745,26 +747,34 @@ export function buildGenerationSchema(
   const separator = (x: number) => separators.push(x);
 
   // --- 2 Warmwasser ---------------------------------------------------------------------------------------------
+  const external = data.hotWater && data.hotWaterHeater === "external";
   const wwLeft = sourceRight;
-  const wwRight = wwLeft + 170;
+  const wwRight = wwLeft + 170 + (external ? 80 : 0);
   separator(wwLeft);
   text(wwLeft + 12, TITLE_Y, labels.sectors.hotWater.toUpperCase(), 8, { anchor: "start", bold: true });
   pipe("vl", [[wwLeft, YMV], [wwRight, YMV]]);
   pipe("rl", [[wwRight, YMR], [wwLeft, YMR]]);
-  // Supply / return verticals of the coil (the group connection draws its horizontals with the group).
+  // Supply / return verticals of the heating side (the group connection draws its horizontals with the group).
   const xw = wwLeft + 40;
   const WW_VL = 48; // WW-Ladegruppe: lines above the boxes of the groups
   const WW_RL = 40;
   if (data.hotWater) {
-    // Wassererwärmer 2.2.7 on the ground with its coil at the bottom.
-    const xT = xw + 26;
+    // Wassererwärmer 2.2.7 on the ground: innenliegende Register (lower / upper), or a Platten-WT beside it with the
+    // Ladepumpe on the drinking-water side.
+    const xT = xw + 26 + (external ? 80 : 0);
     const top = G - 150;
-    const yIn = G - 50;
-    const yOut = G - 22;
+    const lower = { in: G - 50, out: G - 22 };
+    const upper = { in: G - 104, out: G - 76 };
+    const hx = xw + 52; // Platten-WT
+    const coils = data.hotWaterCoils;
+    // Where the heating VL enters and the RL leaves.
+    const xIn = external ? hx - 22 : xT + 4;
+    const yIn = external ? G - 74 : coils === "upper" || coils === "series" ? upper.in : lower.in;
+    const yOut = external ? G - 46 : coils === "upper" ? upper.out : lower.out;
     if (ww === "diverter") {
       // Umschaltventil (Dreiweg) in the supply main.
-      pipe("vl", [[xw, YMV], [xw, yIn], [xT + 4, yIn]]);
-      pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, YMR]]);
+      pipe("vl", [[xw, YMV], [xw, yIn], [xIn, yIn]]);
+      pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, YMR]]);
       dot(xw - 22, YMR, "rl");
       sym("valve3", xw, YMV, "right", { port: sideOf("right", "below") });
       sym("ball", xw, YBALL, "down");
@@ -776,24 +786,36 @@ export function buildGenerationSchema(
       // Over the Ausdehnungsgefäss of the Heizung (below the Entleerungen of the generator legs).
       const yV = YMR + 56;
       const yR = YMR + 66;
-      pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn], [xT + 4, yIn]]);
-      pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
-      sym("ball", xw, 298, "down");
-      sym("pump", xw, 316, "down");
-      sym("check", xw, 338, "down");
-      sym("ball", xw - 22, 330, "up");
-      nw("hotWater", xw + 4, 262, "start");
+      pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn], [xIn, yIn]]);
+      pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
+      sym("ball", xw, 236, "down");
+      sym("pump", xw, 256, "down");
+      sym("check", xw, 278, "down");
+      sym("ball", xw - 22, 280, "up");
+      nw("hotWater", xw + 4, yV - 2, "start");
     } else if (ww === "group" && wwGroup) {
       // WW-Ladegruppe: its lines come over the Verteiler from the right.
-      pipe("vl", [[xw, WW_VL], [xw, yIn], [xT + 4, yIn]]);
-      pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, WW_RL]]);
+      pipe("vl", [[xw, WW_VL], [xw, yIn], [xIn, yIn]]);
+      pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, WW_RL]]);
       sym("ball", xw, YBALL, "down");
       sym("ball", xw - 22, YBALL, "up");
       nw(`group:${wwGroup.id}`, xw + 4, YBALL + 30, "start");
     }
     used.add("waterHeater");
     add(rect(xT, top, 64, 150), rect(xT, top, 64, 16, "bg", 1));
-    add(coil(xT + 4, yIn, yOut, 46));
+    if (external) {
+      // Platten-WT; Ladepumpe from the bottom of the Speicher through the WT back into its top.
+      used.add("plateHx");
+      add(...plateHx(hx, G - 60, 44));
+      pipe("pwc", [[xT, G - 22], [hx + 28, G - 22], [hx + 28, G - 46], [hx + 22, G - 46]]);
+      pipe("pwh", [[hx + 22, G - 74], [hx + 36, G - 74], [hx + 36, top + 40], [xT, top + 40]]);
+      sym("pump", (hx + 28 + xT) / 2, G - 22, "left");
+    } else {
+      add(coil(xT + 4, lower.in, lower.out, 46));
+      if (coils !== "single") add(coil(xT + 4, upper.in, upper.out, 46));
+      // In Serie: out of the upper Register into the lower one.
+      if (coils === "series") pipe("vl", [[xT + 4, upper.out], [xT - 8, upper.out], [xT - 8, lower.in], [xT + 4, lower.in]]);
+    }
     text(xT + 32, top + 11, data.hotWaterVolume ? `${Math.round(data.hotWaterVolume)} l` : "– l", 7, { bold: true });
     text(xT + 32, G + 14, labels.waterHeater, 7.5, { bold: true });
     // Kaltwasser in at the bottom, Warmwasser out at the top.
@@ -811,21 +833,33 @@ export function buildGenerationSchema(
   separator(stLeft);
   text(stLeft + 12, TITLE_Y, labels.sectors.storage.toUpperCase(), 8, { anchor: "start", bold: true });
   if (data.storage) {
-    // Technischer Speicher on the ground; the mains drop into it on the generator side and rise out of it on the
-    // consumer side (VL at the top, RL at the bottom).
-    const xs = stLeft + 45;
-    const w = 70;
-    const top = G - 170;
+    // Technischer Speicher on the ground, the size of the Wassererwärmer. Konventionell: the mains drop into it on the
+    // generator side and rise out of it on the consumer side (VL at the top, RL at the bottom); reduziert: the VL main
+    // runs on to the Verteiler with a T-Stück into the top, the RL from the Verteiler runs through the Speicher.
+    const xs = stLeft + 48;
+    const w = 64;
+    const top = G - 150;
     const yTop = top + 26;
     const yBot = G - 20;
     used.add("storage");
-    add(rect(xs, top, w, 170), rect(xs, top, w, 16, "bg", 1));
+    add(rect(xs, top, w, 150), rect(xs, top, w, 16, "bg", 1));
     text(xs + w / 2, top + 11, data.storageVolume ? `${Math.round(data.storageVolume)} l` : "– l", 7, { bold: true });
     text(xs + w / 2, G + 14, labels.storage, 7.5, { bold: true });
-    pipe("vl", [[stLeft, YMV], [xs - 16, YMV], [xs - 16, yTop], [xs, yTop]]);
+    // Speicher at the highest VL of the groups, the mixed Rücklauf of the groups.
+    const temps = storageTemperatures(data);
+    if (temps.storage !== null) text(xs + w / 2, top + 30, `${temps.storage} °C`, 7, { muted: true });
+    if (temps.ret !== null) text(xs + w / 2, yBot - 8, `${labels.return} ${(Math.round(temps.ret * 10) / 10).toLocaleString("de-CH")} °C`, 6.5, { muted: true });
     pipe("rl", [[xs, yBot], [xs - 30, yBot], [xs - 30, YMR], [stLeft, YMR]]);
-    pipe("vl", [[xs + w, yTop], [xs + w + 16, yTop], [xs + w + 16, YMV], [stRight, YMV]]);
     pipe("rl", [[stRight, YMR], [xs + w + 30, YMR], [xs + w + 30, yBot], [xs + w, yBot]]);
+    if (data.storageConnection === "reduced") {
+      const xc = xs + w / 2;
+      pipe("vl", [[stLeft, YMV], [stRight, YMV]]);
+      pipe("vl", [[xc, YMV], [xc, top]]);
+      dot(xc, YMV, "vl");
+    } else {
+      pipe("vl", [[stLeft, YMV], [xs - 16, YMV], [xs - 16, yTop], [xs, yTop]]);
+      pipe("vl", [[xs + w, yTop], [xs + w + 16, yTop], [xs + w + 16, YMV], [stRight, YMV]]);
+    }
   } else {
     pipe("vl", [[stLeft, YMV], [stRight, YMV]]);
     pipe("rl", [[stRight, YMR], [stLeft, YMR]]);
@@ -887,7 +921,7 @@ export function buildGenerationSchema(
     text(cx, yBox + 25, loadsWater ? labels.waterHeater : group.emitter ? labels.emitters[group.emitter] : "", 6.5, { muted: true });
     text(cx, yBox + 37, [power, temps].filter(Boolean).join(" · "), 6.5, { muted: true });
     text(cx, YRD + 18, labels.circuits[group.circuit], 6.5, { muted: true });
-    nw(`group:${group.id}`, cx, yC + 15);
+    nw(`group:${group.id}`, cx, yC + 12);
     // Absperrungen at the Verteiler.
     sym("ball", a, 312, "up");
     sym("ball", b, 312, "down");

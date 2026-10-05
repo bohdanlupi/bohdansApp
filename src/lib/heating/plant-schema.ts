@@ -17,6 +17,12 @@ export const distributorTypes = ["pressurized", "unpressurized"] as const;
 
 /** Connection of the Wassererwärmer: Umschaltventil in the main, separately at a generator, at a Heizgruppe. */
 export const hotWaterConnections = ["diverter", "generator", "group"] as const;
+/** Heating of the Wassererwärmer: innenliegendes Register or aussenliegender Wärmetauscher (Platten-WT + Ladepumpe). */
+export const hotWaterHeaters = ["coil", "external"] as const;
+/** Innenliegende Register: one; two with the lower / upper one connected; two connected in series. */
+export const hotWaterCoilTypes = ["single", "lower", "upper", "series"] as const;
+/** Energiespeicher: konventionell (VL and RL through the Speicher) or reduziert (VL teed off, RL through it). */
+export const storageConnections = ["conventional", "reduced"] as const;
 
 export type CircuitType = (typeof circuitTypes)[number];
 export type HotWaterConnection = (typeof hotWaterConnections)[number];
@@ -198,6 +204,8 @@ export const plantSchema = z.object({
    * Ladepumpe, or as the consumer of a Heizgruppe (WW-Ladegruppe on the Verteiler).
    */
   hotWaterConnection: z.enum(hotWaterConnections).catch("diverter"),
+  hotWaterHeater: z.enum(hotWaterHeaters).catch("coil"),
+  hotWaterCoils: z.enum(hotWaterCoilTypes).catch("single"),
   /** Id of the generator of the separate connection (null = the first one). */
   hotWaterGenerator: z.string().max(64).nullable().catch(null),
   /** Id of the Heizgruppe loading the Wassererwärmer. */
@@ -205,6 +213,7 @@ export const plantSchema = z.object({
   /** Energy storage (technischer Speicher) present. */
   storage: z.boolean().catch(false),
   storageVolume: num(0, 1000000),
+  storageConnection: z.enum(storageConnections).catch("conventional"),
   distributor: z.enum(distributorTypes).catch("unpressurized"),
   groups: z
     .array(z.unknown())

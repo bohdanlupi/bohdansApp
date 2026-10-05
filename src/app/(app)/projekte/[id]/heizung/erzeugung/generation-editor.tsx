@@ -13,7 +13,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { buildGenerationSchema, generationLabels } from "@/lib/heating/generation-schema";
 import { emitterTypes, generatorTypes, type HeatingParams, type HeatingPlan } from "@/lib/heating/plan-schema";
-import { circuitMismatch, circuitTypes, distributorTypes, type GeneratorUnit, generatorName, hotWaterConnections, type HeatingGroup, type PlantData } from "@/lib/heating/plant-schema";
+import { storageTemperatures } from "@/lib/heating/hydraulics";
+import {
+  circuitMismatch,
+  circuitTypes,
+  distributorTypes,
+  type GeneratorUnit,
+  generatorName,
+  hotWaterCoilTypes,
+  hotWaterConnections,
+  hotWaterHeaters,
+  type HeatingGroup,
+  type PlantData,
+  storageConnections,
+} from "@/lib/heating/plant-schema";
 import { evaluateEws, ewsContextOf } from "@/lib/heating/ews";
 import { evaluateSafety } from "@/lib/heating/safety";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
@@ -70,6 +83,7 @@ export function GenerationEditor({
   const ews = useMemo(() => (hasEws ? evaluateEws(d, ewsCtx) : null), [d, ewsCtx, hasEws]);
   const schema = useMemo(() => buildGenerationSchema(d, labels, { ews: ewsCtx }), [d, labels, ewsCtx]);
   const safety = useMemo(() => evaluateSafety(d, ews), [d, ews]);
+  const temps = useMemo(() => storageTemperatures(d), [d]);
   const mismatched = d.groups.filter((g) => circuitMismatch(g.circuit, d.distributor));
 
   return (
@@ -160,6 +174,10 @@ export function GenerationEditor({
           {d.hotWater && (
             <div className="grid gap-4 sm:grid-cols-2">
               <NumberParam label={tg("volume")} value={d.hotWaterVolume} editable={editable} onChange={(v) => setPlant({ hotWaterVolume: v })} />
+              <OptionField label={tg("hotWaterHeater")} value={d.hotWaterHeater} options={hotWaterHeaters} optionLabel={(v) => tg(`hotWaterHeaters.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterHeater: v })} />
+              {d.hotWaterHeater === "coil" && (
+                <OptionField label={tg("hotWaterCoils")} value={d.hotWaterCoils} options={hotWaterCoilTypes} optionLabel={(v) => tg(`hotWaterCoilTypes.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterCoils: v })} />
+              )}
               <NumberParam label={tg("hotWaterElectric")} value={d.hotWaterElectric} decimals={1} editable={editable} onChange={(v) => setPlant({ hotWaterElectric: v ?? 0 })} hint={tg("hotWaterElectricHint")} />
               <OptionField label={tg("hotWaterConnection")} value={d.hotWaterConnection} options={hotWaterConnections} optionLabel={(v) => tg(`hotWaterConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterConnection: v })} />
               {d.hotWaterConnection === "generator" && d.generators.length > 1 && (
@@ -194,7 +212,15 @@ export function GenerationEditor({
         </Section>
         <Section title={`3 · ${tg("sectors.storage")}`} collapseKey="heating-generation:storage">
           <Toggle label={t("storageToggle")} checked={d.storage} editable={editable} onChange={(v) => setPlant({ storage: v })} />
-          {d.storage && <NumberParam label={tg("volume")} value={d.storageVolume} editable={editable} onChange={(v) => setPlant({ storageVolume: v })} />}
+          {d.storage && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <NumberParam label={tg("volume")} value={d.storageVolume} editable={editable} onChange={(v) => setPlant({ storageVolume: v })} />
+              <OptionField label={tg("storageConnection")} value={d.storageConnection} options={storageConnections} optionLabel={(v) => tg(`storageConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ storageConnection: v })} hint={tg(`storageConnectionHint.${d.storageConnection}`)} />
+              <Fact label={tg("storageTemp")} value={temps.storage !== null ? `${formatNumber(temps.storage, 0)} °C` : tg("storageTempNone")} />
+              <Fact label={tg("storageReturn")} value={temps.ret !== null ? `${formatNumber(temps.ret, 1)} °C${temps.flow !== null ? ` · ${formatNumber(temps.flow * 1000, 0)} l/h` : ""}` : "–"} />
+            </div>
+          )}
+          {d.storage && <p className="text-xs text-muted-foreground">{tg("storageTempHint")}</p>}
         </Section>
       </div>
 

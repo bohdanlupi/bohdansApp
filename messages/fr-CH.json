@@ -2453,7 +2453,32 @@
         "saveFirst": "Enregistrer d’abord",
         "noLv": "Pas encore de descriptif dans le projet.",
         "toLvs": "Vers les descriptifs"
-      }
+      },
+      "hotWaterHeater": "Chauffage",
+      "hotWaterHeaters": {
+        "coil": "Registre intérieur",
+        "external": "Échangeur extérieur"
+      },
+      "hotWaterCoils": "Registre",
+      "hotWaterCoilTypes": {
+        "single": "1 registre",
+        "lower": "2 registres, inférieur raccordé",
+        "upper": "2 registres, supérieur raccordé",
+        "series": "2 registres raccordés en série"
+      },
+      "storageConnection": "Raccordement",
+      "storageConnections": {
+        "conventional": "Raccordement conventionnel",
+        "reduced": "Raccordement réduit"
+      },
+      "storageConnectionHint": {
+        "conventional": "Aller et retour des producteurs et du distributeur raccordés séparément à l’accumulateur.",
+        "reduced": "Aller avec té vers l’accumulateur et directement vers le distributeur ; retour du distributeur à travers l’accumulateur."
+      },
+      "storageTemp": "Température de l’accumulateur",
+      "storageTempNone": "– (pas de température de départ des groupes)",
+      "storageReturn": "Retour vers l’accumulateur",
+      "storageTempHint": "Accumulateur à la température de départ la plus élevée des groupes. Retour = mélange des retours des groupes avec leurs débits côté distributeur V̇ = Φ / (ρ · cp · (T accumulateur − T retour))."
     }
   },
   "heatLoad": {

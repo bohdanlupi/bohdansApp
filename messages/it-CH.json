@@ -2453,7 +2453,32 @@
         "saveFirst": "Prima salvare",
         "noLv": "Ancora nessun capitolato nel progetto.",
         "toLvs": "Ai capitolati"
-      }
+      },
+      "hotWaterHeater": "Riscaldamento",
+      "hotWaterHeaters": {
+        "coil": "Registro interno",
+        "external": "Scambiatore esterno"
+      },
+      "hotWaterCoils": "Registro",
+      "hotWaterCoilTypes": {
+        "single": "1 registro",
+        "lower": "2 registri, inferiore allacciato",
+        "upper": "2 registri, superiore allacciato",
+        "series": "2 registri allacciati in serie"
+      },
+      "storageConnection": "Allacciamento",
+      "storageConnections": {
+        "conventional": "Allacciamento convenzionale",
+        "reduced": "Allacciamento ridotto"
+      },
+      "storageConnectionHint": {
+        "conventional": "Mandata e ritorno dei generatori e del distributore allacciati separatamente all’accumulatore.",
+        "reduced": "Mandata con raccordo a T verso l’accumulatore e direttamente al distributore; ritorno dal distributore attraverso l’accumulatore."
+      },
+      "storageTemp": "Temperatura accumulatore",
+      "storageTempNone": "– (nessuna temperatura di mandata dei gruppi)",
+      "storageReturn": "Ritorno all’accumulatore",
+      "storageTempHint": "Accumulatore alla temperatura di mandata più alta dei gruppi. Ritorno = miscela dei ritorni dei gruppi con le loro portate lato distributore V̇ = Φ / (ρ · cp · (T accumulatore − T ritorno))."
     }
   },
   "heatLoad": {
