@@ -262,7 +262,7 @@ export type SafetyResult = {
   /** Sicherheitsventil of the Wassererwärmer, sized by Ausdehnung with the power of its Elektroeinsatz. */
   hotWaterValve: { power: number; flow: number; isv: number | null; isa: number | null } | null;
   /**
-   * Solekreis after HE301-01, its content from the EWS calculation unless entered, and the minimum size after SIA 384/6
+   * Solekreis (or Zwischenkreis of a Wasser/Wasser-WP) after HE301-01, its content from the EWS calculation unless entered, and the minimum size after SIA 384/6
    * 3.4.2.6 (3 × ΔV/V0, ≥ 18 l); the larger one is chosen.
    */
   brine: (VesselResult & { e: number; vsys: number; sia: EwsResult["vessel"] | null; chosen: number | null }) | null;
@@ -314,7 +314,8 @@ export function evaluateSafety(data: PlantData, ews: EwsResult | null = null): S
   const hotWaterValve = electric > 0 ? { power: electric, flow: electric, isv: hotWaterLines?.isv ?? null, isa: hotWaterLines?.isa ?? null } : null;
   const b = s.brine;
   const types = data.generators.map((g) => g.type);
-  const brine = types.includes("hpBrine")
+  // Solekreis of a Sole/Wasser-WP, or Zwischenkreis of a Wasser/Wasser-WP (same rules, content entered).
+  const brine = types.includes("hpBrine") || types.includes("hpWater")
     ? (() => {
         const eb = glycolExpansion(b.glycol, b.share, b.minTemp, b.regeneration ? 40 : 20);
         const vsysB = b.vsys ?? ews?.volume ?? 0;

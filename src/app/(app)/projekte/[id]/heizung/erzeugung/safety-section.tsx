@@ -30,6 +30,8 @@ export function SafetySection({
   const tp = useTranslations("heatingPlan");
   const s = data.safety;
   const setBrine = (patch: Partial<Brine>) => setSafety({ brine: { ...s.brine, ...patch } });
+  // Solekreis of a Sole/Wasser-WP, else the Zwischenkreis of a Wasser/Wasser-WP.
+  const sole = data.generators.some((g) => g.type === "hpBrine");
   const closingLabel = (c: "0.8" | "0.9") => t(`closing.${c}`);
 
   return (
@@ -139,16 +141,16 @@ export function SafetySection({
       {/* Solekreis */}
       {result.brine && (
         <div className="space-y-3 border-t pt-3">
-          <h3 className="text-sm font-medium">{t("brine")}</h3>
+          <h3 className="text-sm font-medium">{t(sole ? "brine" : "intermediate")}</h3>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <NumberParam
-              label={t("brineVsys")}
+              label={t(sole ? "brineVsys" : "intermediateVsys")}
               value={s.brine.vsys}
               decimals={0}
               editable={editable}
               placeholder={result.brine.sia ? fmt(result.brine.vsys, 0) : ""}
               onChange={(v) => setBrine({ vsys: v })}
-              hint={result.brine.sia ? t("brineVsysEws") : t("brineVsysHint")}
+              hint={result.brine.sia ? t("brineVsysEws") : t(sole ? "brineVsysHint" : "intermediateVsysHint")}
             />
             <OptionField label={t("glycol")} value={s.brine.glycol} options={["propylene", "ethylene"] as const} optionLabel={(v) => t(`glycols.${v}`)} editable={editable} onChange={(v) => setBrine({ glycol: v, share: Number(Object.keys(glycolCurves[v])[0]) })} />
             <div className="space-y-1.5">
@@ -187,7 +189,7 @@ export function SafetySection({
               <Result label={t("r.chosen")} value={fmt(result.brine.chosen, 0)} unit="l" tone="ok" hint={t("r.chosenHint")} />
             </div>
           )}
-          {!result.brine.vsys && <Notice>{t("brineVsysMissing")}</Notice>}
+          {!result.brine.vsys && <Notice>{t(sole ? "brineVsysMissing" : "intermediateVsysMissing")}</Notice>}
         </div>
       )}
 

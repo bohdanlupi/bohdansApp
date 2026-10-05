@@ -163,7 +163,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
         const length = ews?.length ? `, je ${fmt(Math.ceil(ews.length / 5) * 5)} m` : "";
         neutral("brine", `Erdwärmesonde Duplex ${e.diameter} mm${length}`, e.probes);
       } else {
-        neutral("brine", "Druckausdehnungsgefäss Zwischenkreis (nach Berechnung)");
+        vessel("brine", safety.brine?.chosen ?? null, data.safety.brine.pSV, "Druckausdehnungsgefäss Zwischenkreis");
         neutral("brine", "Platten-Wärmetauscher Zwischenkreis / Grundwasser");
         neutral("brine", "Förderbrunnen mit Unterwasserpumpe");
         neutral("brine", "Rückgabebrunnen");

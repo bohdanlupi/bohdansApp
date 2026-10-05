@@ -2132,7 +2132,11 @@
           "highPressure": "pfin superiore a 2,3 bar: la pressione di taratura supera 3,0 bar (tabella 12) – verificare la pressione di concessione e PS dei componenti."
         },
         "brineVsysEws": "Vuoto = contenuto dal calcolo delle sonde (sonde, condotte, altro contenuto).",
-        "hotWaterValve": "Scaldacqua (resistenza elettrica)"
+        "hotWaterValve": "Scaldacqua (resistenza elettrica)",
+        "intermediate": "Vaso d’espansione circuito intermedio (3.2.4)",
+        "intermediateVsys": "Contenuto circuito intermedio [dm³]",
+        "intermediateVsysHint": "Scambiatore a piastre, evaporatore e condotte.",
+        "intermediateVsysMissing": "Inserire il contenuto del circuito intermedio – fino ad allora vale solo il volume di riserva minimo di 3 dm³."
       },
       "addGenerator": "Aggiungi generatore",
       "removeGenerator": "Rimuovi generatore",

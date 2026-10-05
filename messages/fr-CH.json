@@ -2132,7 +2132,11 @@
           "highPressure": "pfin supérieure à 2,3 bar : la pression de tarage dépasse 3,0 bar (tableau 12) – vérifier la pression de concession et PS des éléments."
         },
         "brineVsysEws": "Vide = contenu du calcul des sondes (sondes, conduites, autre contenu).",
-        "hotWaterValve": "Chauffe-eau (corps de chauffe électrique)"
+        "hotWaterValve": "Chauffe-eau (corps de chauffe électrique)",
+        "intermediate": "Vase d’expansion circuit intermédiaire (3.2.4)",
+        "intermediateVsys": "Contenu circuit intermédiaire [dm³]",
+        "intermediateVsysHint": "Échangeur à plaques, évaporateur et conduites.",
+        "intermediateVsysMissing": "Saisir le contenu du circuit intermédiaire – en attendant, seul le volume de réserve minimal de 3 dm³ est pris en compte."
       },
       "addGenerator": "Ajouter un producteur",
       "removeGenerator": "Supprimer le producteur",

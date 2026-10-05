@@ -2132,7 +2132,11 @@
           "highPressure": "pfin über 2,3 bar: der Ansprechdruck liegt über 3,0 bar (Tabelle 12) – Konzessionsdruck und PS der Anlagenteile prüfen."
         },
         "brineVsysEws": "Leer = Inhalt aus der Erdwärmesonden-Berechnung (Sonden, Zuleitungen, weiterer Inhalt).",
-        "hotWaterValve": "Wassererwärmer (Elektroeinsatz)"
+        "hotWaterValve": "Wassererwärmer (Elektroeinsatz)",
+        "intermediate": "Druckausdehnungsgefäss Zwischenkreis (3.2.4)",
+        "intermediateVsys": "Inhalt Zwischenkreis [dm³]",
+        "intermediateVsysHint": "Platten-Wärmetauscher, Verdampfer und Leitungen.",
+        "intermediateVsysMissing": "Inhalt des Zwischenkreises eingeben – bis dahin gilt nur das Mindest-Vorlagevolumen von 3 dm³."
       },
       "addGenerator": "Wärmeerzeuger hinzufügen",
       "removeGenerator": "Wärmeerzeuger entfernen",
