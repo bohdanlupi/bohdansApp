@@ -379,6 +379,8 @@ const YMV = 130; // Vorlauf main, above all apparatus
 const YMR = 160; // Rücklauf main
 const YVD = 330; // Vorlauf bar of the Verteiler, just above the ground
 const YRD = 360; // Rücklauf bar
+const YBALL = YMR + 40; // Absperrungen of the generators, the Wassererwärmer and the Sondenverteiler im Technikraum
+const YBRINE_PUMP = YMR + 100; // Solepumpe at a Sondenverteiler
 const TITLE_Y = 22;
 const GROUP_W = 104;
 const GROUP_LEG = 36; // VL leg → RL leg of a group
@@ -460,9 +462,9 @@ export function buildGenerationSchema(
     pipe("rl", [[xr, YMR], [xr, top]]);
     dot(xv, YMV, "vl");
     dot(xr, YMR, "rl");
-    // Absperrungen of VL and RL at the same height near the generator.
-    sym("ball", xv, top - 44, "up");
-    sym("ball", xr, top - 44, "down");
+    // Absperrungen of VL and RL at the height of those of the Wassererwärmer.
+    sym("ball", xv, YBALL, "up");
+    sym("ball", xr, YBALL, "down");
     if (g !== null) {
       // Sicherheitsventil on the VL between generator and Absperrung, unabsperrbar (HE301-01 6.2.4).
       const ySV = top - 12;
@@ -473,12 +475,12 @@ export function buildGenerationSchema(
     }
     if (g === "pellets" || g === "logWood") {
       // Rücklaufhochhaltung: Dreiwegventil in the return, bypass from the supply.
-      pipe("vl", [[xv, YMR + 48], [xr - 6, YMR + 48]]);
-      dot(xv, YMR + 48, "vl");
-      sym("valve3", xr, YMR + 48, "down", { port: sideOf("down", "left") });
-      sym("pump", xr, YMR + 80, "down");
+      pipe("vl", [[xv, YMR + 72], [xr - 6, YMR + 72]]);
+      dot(xv, YMR + 72, "vl");
+      sym("valve3", xr, YMR + 72, "down", { port: sideOf("down", "left") });
+      sym("pump", xr, YMR + 104, "down");
     } else if (g) {
-      sym("pump", xr, YMR + 56, "down");
+      sym("pump", xr, YMR + 80, "down");
     }
     colX += w;
   }
@@ -597,9 +599,9 @@ export function buildGenerationSchema(
       const right = drawProbes(xa - 74 - (probeCount() - 1) * PROBE_PITCH, yV, yS);
       pipe("brineR", [[gx, top + 16], [xa, top + 16], [xa, yV], [right, yV]]);
       pipe("brine", [[right, yS], [xb, yS], [xb, top + 8], [gx, top + 8]]);
-      sym("ball", xa, yA - 10, "up");
-      sym("ball", xb, yA - 10, "down");
-      sym("pump", xb, yA + 50, "down");
+      sym("ball", xa, YBALL, "up");
+      sym("ball", xb, YBALL, "down");
+      sym("pump", xb, YBRINE_PUMP, "down");
     } else if (dist === "outside") {
       // Verteiler outside the building at the height of the WP, the lines pass through the wall.
       const yV = top + 12;
@@ -610,11 +612,15 @@ export function buildGenerationSchema(
       const right = drawProbes(xw - 34 - (probeCount() - 1) * PROBE_PITCH, yV, yS);
       pipe("brineR", [[gx, top + 8], [gx - 12, top + 8], [gx - 12, yA], [xa, yA], [xa, yV], [right, yV]]);
       pipe("brine", [[right, yS], [xb, yS], [xb, yB], [gx - 22, yB], [gx - 22, top + 16], [gx, top + 16]]);
+      // Absperrungen next to the wall, the Solepumpe between them and the WP.
+      sym("ball", xa, yT + 16, "down");
+      sym("ball", xb, yT + 16, "up");
+      sym("pump", xb, YBRINE_PUMP, "up");
     } else {
       pipe("brineR", [[gx, top + 8], [gx - 12, top + 8], [gx - 12, yA], [xa, yA], [xa, yLow]]);
       pipe("brine", [[xb, yLow], [xb, yB], [gx - 22, yB], [gx - 22, top + 16], [gx, top + 16]]);
     }
-    if (dist !== "inside") sym("ball", xa, yA + 26, "down");
+    if (dist === "none") sym("ball", xa, yA + 26, "down");
     // Ausdehnungsgefäss connected from below: branch to the left, rising through the plombierte Absperrung
     // (Kappenventil) and the Entleerung into the vessel.
     {
@@ -632,10 +638,9 @@ export function buildGenerationSchema(
         text(xm, yT - 62, v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel, 6.5, { bold: true });
       }
     }
-    if (dist === "inside") return;
+    if (dist !== "none") return;
     sym("ball", xb, yB + 20, "up");
     sym("pump", xb, yB + 62, "up");
-    if (dist === "outside") return;
     if (!wide) {
       // Erdwärmesonden: U-loop below the ground line.
       used.add("ews");
@@ -695,8 +700,8 @@ export function buildGenerationSchema(
       pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, YMR]]);
       dot(xw - 22, YMR, "rl");
       sym("valve3", xw, YMV, "right", { port: sideOf("right", "below") });
-      sym("ball", xw, YMR + 40, "down");
-      sym("ball", xw - 22, YMR + 40, "up");
+      sym("ball", xw, YBALL, "down");
+      sym("ball", xw - 22, YBALL, "up");
     } else if (ww === "generator" && wwGen) {
       // Own pair from the side of the generator, below the mains: Ladepumpe, Rückflussverhinderer, Absperrungen.
       const { gx, top: gTop } = wwGen;
@@ -712,8 +717,8 @@ export function buildGenerationSchema(
       // WW-Ladegruppe: its lines come over the Verteiler from the right.
       pipe("vl", [[xw, WW_VL], [xw, yIn], [xT + 4, yIn]]);
       pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, WW_RL]]);
-      sym("ball", xw, YMR + 40, "down");
-      sym("ball", xw - 22, YMR + 40, "up");
+      sym("ball", xw, YBALL, "down");
+      sym("ball", xw - 22, YBALL, "up");
     }
     used.add("waterHeater");
     add(rect(xT, top, 64, 150), rect(xT, top, 64, 16, "bg", 1));
