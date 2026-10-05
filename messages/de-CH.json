@@ -2003,7 +2003,7 @@
         "floor": "Fussbodenheizung / TABS",
         "radiator": "Heizkörper",
         "register": "Heizregister / Lufterhitzer",
-        "apparatus": "Apparat (allgemein)"
+        "apparatus": "Heizgruppe / Apparat mit Bezeichnung"
       },
       "plankopf": {
         "plan": "Prinzipschema",

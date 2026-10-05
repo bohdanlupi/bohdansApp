@@ -325,9 +325,6 @@ function emitterSymbol(key: SymbolKey, x: number, y: number, w: number): Prim[] 
   }
 }
 
-const emitterKey = (e: EmitterType | null): SymbolKey =>
-  e === "floor" || e === "tabs" ? "floor" : e === "radiators" ? "radiator" : e === "air" ? "register" : "apparatus";
-
 // ---------------------------------------------------------------------------
 // Layout
 // ---------------------------------------------------------------------------
@@ -531,8 +528,8 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
   pipe("rl", [[wwRight, YMR], [wwLeft, YMR]]);
   // Supply / return verticals of the coil (the group connection draws its horizontals with the group).
   const xw = wwLeft + 40;
-  const WW_VL = 88; // WW-Ladegruppe: lines between the group texts and the Wärmeabgabe of the other groups
-  const WW_RL = 80;
+  const WW_VL = 48; // WW-Ladegruppe: lines above the boxes of the groups
+  const WW_RL = 40;
   if (data.hotWater) {
     // Wassererwärmer 2.2.7 on the ground with its coil at the bottom.
     const xT = xw + 26;
@@ -639,29 +636,26 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
     const a = b0 + 30 + i * GROUP_W; // VL leg
     const b = a + GROUP_LEG; // RL leg
     const cx = (a + b) / 2;
-    const yC = 104; // consumer
+    const yC = 104; // bottom of the group box
+    const yBox = 58; // top of the group box
+    pipe("vl", [[a, YVD], [a, yC]]);
+    pipe("rl", [[b, yC], [b, YRD]]);
     const loadsWater = wwGroup?.id === group.id;
     if (loadsWater) {
-      // WW-Ladegruppe: the legs continue over the other groups to the Wassererwärmer.
-      pipe("vl", [[a, YVD], [a, WW_VL], [xw, WW_VL]]);
-      pipe("rl", [[xw - 22, WW_RL], [b, WW_RL], [b, YRD]]);
-    } else {
-      pipe("vl", [[a, YVD], [a, yC]]);
-      pipe("rl", [[b, yC], [b, YRD]]);
+      // WW-Ladegruppe: the lines leave the top of its box and run over the other groups to the Wassererwärmer.
+      pipe("vl", [[a, yBox], [a, WW_VL], [xw, WW_VL]]);
+      pipe("rl", [[xw - 22, WW_RL], [b, WW_RL], [b, yBox]]);
     }
     dot(a, YVD, "vl");
     dot(b, YRD, "rl");
-    // Consumer and its texts.
-    if (!loadsWater) {
-      const ek = emitterKey(group.emitter);
-      used.add(ek);
-      add(...emitterSymbol(ek, cx, yC - 6, 50));
-    }
+    // The same box for every group (1.27.1 Apparat mit Bezeichnung) with its texts inside.
+    used.add("apparatus");
+    add(rect(cx - 46, yBox, 92, yC - yBox));
     const temps = group.supplyTemp !== null || group.returnTemp !== null ? `${group.supplyTemp ?? "–"}/${group.returnTemp ?? "–"} °C` : "";
     const power = group.power !== null ? `${Math.round(group.power * 10) / 10} kW` : "";
-    text(cx, 52, group.name || opts.groupNames?.(i) || `${labels.group} ${i + 1}`, 7.5, { bold: true });
-    text(cx, 63, loadsWater ? labels.waterHeater : group.emitter ? labels.emitters[group.emitter] : "", 6.5, { muted: true });
-    text(cx, 74, [power, temps].filter(Boolean).join(" · "), 6.5, { muted: true });
+    text(cx, yBox + 13, group.name || opts.groupNames?.(i) || `${labels.group} ${i + 1}`, 7.5, { bold: true });
+    text(cx, yBox + 25, loadsWater ? labels.waterHeater : group.emitter ? labels.emitters[group.emitter] : "", 6.5, { muted: true });
+    text(cx, yBox + 37, [power, temps].filter(Boolean).join(" · "), 6.5, { muted: true });
     text(cx, YRD + 18, labels.circuits[group.circuit], 6.5, { muted: true });
     // Absperrungen at the Verteiler.
     sym("ball", a, 312, "up");
