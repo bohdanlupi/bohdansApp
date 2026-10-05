@@ -1,12 +1,17 @@
 // Prinzipschema of a Wärmeerzeugungsanlage (242), as drawing primitives shared by the web view and the PDF. Four
 // sectors from left to right:
 //
-//   WÄRMEQUELLE            WARMWASSER          ENERGIESPEICHER      VERTEILER / HEIZGRUPPEN
-//                                                                    G1      G2      G3    (consumers on top)
-//   VL ════╤═══════════════╦═══════════════════╗ ┌──┐ ╔═══════════════╤═══════╤═══════╤═══  Vorlauf bar
-//   RL ┄┄┄┄┼┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┼┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄│ │  │ │┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┼┄┄┄┄┄┄┄┼┄┄┄┄┄┄┄┼┄┄┄  Rücklauf bar
-//        generators         Wassererwärmer       └──┘
-//        (source side below: EWS, Brunnen, Fernwärme)
+//   WÄRMEQUELLE        WARMWASSER        ENERGIESPEICHER     VERTEILER / HEIZGRUPPEN
+//                                                                  G1      G2      G3   (consumers on top)
+//   VL ══╤════════╤═══════╦═══════════╗    ┌───────╗ ┌──┐            │┊      │┊      │┊
+//   RL ┄┄┼┄┄┄┄┄┄┄┄┼┄┄┄┄┄┄┄┊┄┄┄┄┄┄┄┄┄┄┄┊┄┄┐ │ ┄┄┄┄┄┊┄┊ ┊            │┊      │┊      │┊
+//        │        │       ║  ┌───┐    ║  ┊ │       ║ ┊   ══════════╧╪══════╧╪══════╧╪══  Vorlauf bar
+//      ┌─┴─┐    ┌─┴─┐     ╚══│ ≶ │    ╚═ │ │       ╚═┊   ┄┄┄┄┄┄┄┄┄┄┄┴┄┄┄┄┄┄┄┴┄┄┄┄┄┄┄┴┄┄  Rücklauf bar
+//   ▁▁▁└───┘▁▁▁▁└───┘▁▁▁▁▁▁▁▁└───┘▁▁▁▁▁▁▁└─┘▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  ground line
+//    generators     Wassererwärmer    Speicher               (EWS / Brunnen below the ground)
+//
+// Generators, Wassererwärmer and Speicher stand on one ground line, the mains run over them and drop to the
+// Verteiler just above the ground; the Heizgruppen rise from it.
 //
 // Symbols after SIA 410 (1978/1986): 1.26 Armaturen, 1.27 Apparate, 1.28 Messelemente, 1.29 Antriebe, 1.210 Zähler,
 // 1.211 Energiemittel, 2.1 Heizkessel, 2.2 Speicher und Wärmetauscher, 2.3 Heizkörper, 2.4 Ausdehnungsgefässe, 2.5.1
@@ -327,22 +332,26 @@ const emitterKey = (e: EmitterType | null): SymbolKey =>
 // Layout
 // ---------------------------------------------------------------------------
 
-const YV = 330; // Vorlauf main / bar
-const YR = 360; // Rücklauf main / bar
-const YG = 480; // top of the generators
+const G = 400; // ground line: generators, Wassererwärmer and Speicher stand on it
+const YMV = 130; // Vorlauf main, above all apparatus
+const YMR = 160; // Rücklauf main
+const YVD = 330; // Vorlauf bar of the Verteiler, just above the ground
+const YRD = 360; // Rücklauf bar
 const TITLE_Y = 22;
 const GROUP_W = 104;
 const GROUP_LEG = 36; // VL leg → RL leg of a group
 
 /** Width of the column of a generator (the source side lies left of the generator). */
 const genWidth = (g: GeneratorType | null) => (g === "hpWater" ? 270 : g === "hpBrine" || g === "district" ? 190 : 120);
+/** Height of the generator symbol standing on the ground. */
+const genHeight = (g: GeneratorType | null) => (g === "district" ? 44 : g === "hpAir" || g === "hpBrine" || g === "hpWater" ? 72 : 60);
 
 export function buildGenerationSchema(data: PlantData, labels: GenerationLabels, opts: { groupNames?: (i: number) => string } = {}): GenerationSchema {
   const lines: SchemaLine[] = [];
   const groups: SchemaGroup[] = [];
   const used = new Set<SymbolKey>();
   const pipes = new Set<PipeKind>();
-  let maxY = YR + 60;
+  let maxY = G + 30;
   let current: SchemaGroup = { groupId: null, prims: [] };
   groups.push(current);
   const begin = (groupId: string | null) => {
@@ -372,6 +381,7 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
   };
 
   // --- 1 Wärmequelle ------------------------------------------------------------------------------------------
+  // Generators stand on the ground; their legs rise to the mains, which run over all sectors.
   const gens: (GeneratorType | null)[] = data.generators.length ? data.generators : [null];
   const x0 = 24;
   const sourceRight = x0 + gens.reduce((s, g) => s + genWidth(g), 0) + 10;
@@ -380,128 +390,126 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
   for (const g of gens) {
     const w = genWidth(g);
     const gx = colX + w - 66; // left edge of the generator box (44 wide)
+    const top = G - genHeight(g);
     const xv = gx + 10; // VL out
     const xr = gx + 34; // RL in
     firstLeg = Math.min(firstLeg, xv);
-    drawGenerator(g, colX, gx);
-    // VL leg up to the main, RL leg down from it.
-    pipe("vl", [[xv, YG], [xv, YV]]);
-    pipe("rl", [[xr, YR], [xr, YG]]);
-    dot(xv, YV, "vl");
-    dot(xr, YR, "rl");
-    sym("ball", xv, 455, "up");
-    sym("ball", xr, 378, "down");
+    drawGenerator(g, colX, gx, top);
+    pipe("vl", [[xv, top], [xv, YMV]]);
+    pipe("rl", [[xr, YMR], [xr, top]]);
+    dot(xv, YMV, "vl");
+    dot(xr, YMR, "rl");
+    sym("ball", xv, top - 24, "up");
+    sym("ball", xr, YMR + 20, "down");
     if (g === "pellets" || g === "logWood") {
       // Rücklaufhochhaltung: Dreiwegventil in the return, bypass from the supply.
-      pipe("vl", [[xv, 404], [xr - 6, 404]]);
-      dot(xv, 404, "vl");
-      sym("valve3", xr, 404, "down", { port: sideOf("down", "left") });
-      sym("pump", xr, 432, "down");
-      sym("check", xr, 458, "down");
+      pipe("vl", [[xv, YMR + 48], [xr - 6, YMR + 48]]);
+      dot(xv, YMR + 48, "vl");
+      sym("valve3", xr, YMR + 48, "down", { port: sideOf("down", "left") });
+      sym("pump", xr, YMR + 80, "down");
+      sym("check", xr, YMR + 108, "down");
     } else if (g) {
-      sym("pump", xr, 410, "down");
-      sym("check", xr, 440, "down");
+      sym("pump", xr, YMR + 56, "down");
+      sym("check", xr, YMR + 88, "down");
     }
     colX += w;
   }
-  pipe("vl", [[firstLeg, YV], [sourceRight, YV]]);
-  pipe("rl", [[sourceRight, YR], [firstLeg + 24, YR]]);
+  pipe("vl", [[firstLeg, YMV], [sourceRight, YMV]]);
+  pipe("rl", [[sourceRight, YMR], [firstLeg + 24, YMR]]);
   text(x0, TITLE_Y, labels.sectors.source.toUpperCase(), 8, { anchor: "start", bold: true });
 
-  function drawGenerator(g: GeneratorType | null, cx: number, gx: number) {
+  function drawGenerator(g: GeneratorType | null, cx: number, gx: number, top: number) {
     const mid = gx + 22;
-    let bottom = YG + 60;
     if (g === null) {
       used.add("apparatus");
-      add(rect(gx, YG, 44, 60));
-      text(mid, YG + 74, labels.noGenerator, 7, { muted: true });
+      add(rect(gx, top, 44, G - top));
+      text(mid, G + 14, labels.noGenerator, 7, { muted: true });
       return;
     }
     if (g === "pellets" || g === "logWood" || g === "gasOil") {
       // 2.1.1 Heizkessel with the Energiemittel.
       used.add(g === "gasOil" ? "boilerGasOil" : "boilerSolid");
-      add(rect(gx, YG, 44, 60));
-      if (g === "gasOil") add(...fuel("liquid", mid - 8, YG + 36), ...fuel("gas", mid + 8, YG + 36));
-      else add(...fuel("solid", mid, YG + 36));
+      add(rect(gx, top, 44, G - top));
+      if (g === "gasOil") add(...fuel("liquid", mid - 8, top + 36), ...fuel("gas", mid + 8, top + 36));
+      else add(...fuel("solid", mid, top + 36));
     } else if (g === "district") {
       // Übergabestation: 2.2.5 Platten-Wärmetauscher; primary side with Wärmezähler and Regelventil to the left.
       used.add("plateHx");
-      add(...plateHx(mid, YG + 22, 44));
-      bottom = YG + 44;
-      const yS = YG + 10;
-      const yR = YG + 34;
+      add(...plateHx(mid, top + 22, 44));
+      const yS = top + 6;
+      const yR = top + 36;
       pipe("vl", [[cx + 14, yS], [gx, yS]]);
       pipe("rl", [[gx, yR], [cx + 14, yR]]);
       sym("ball", cx + 30, yS, "right");
       sym("ball", cx + 30, yR, "left");
-      sym("heatMeter", gx - 70, yR, "left", { side: sideOf("left", "below") });
-      sym("valve2", gx - 30, yR, "left", { side: sideOf("left", "below") });
-      text(cx + 14, yS - 8, labels.districtPrimary, 7, { anchor: "start", bold: true });
+      sym("heatMeter", gx - 70, yR, "left", { side: sideOf("left", "above") });
+      sym("valve2", gx - 30, yR, "left", { side: sideOf("left", "above") });
+      text(cx + 14, yS - 30, labels.districtPrimary, 7, { anchor: "start", bold: true });
     } else {
       // Wärmepumpe: 2.2.11 (Luft/Wasser: fan, evaporator, compressor); Sole and Wasser with a Verdampfer-WT instead.
       used.add(g === "hpAir" ? "hpAir" : "hpWater");
       const c = 24;
-      add(rect(gx, YG, 44, 3 * c), ln(gx, YG + c, gx + 44, YG + c, 1), ln(gx, YG + 2 * c, gx + 44, YG + 2 * c, 1));
+      add(rect(gx, top, 44, 3 * c), ln(gx, top + c, gx + 44, top + c, 1), ln(gx, top + 2 * c, gx + 44, top + 2 * c, 1));
       if (g === "hpAir") {
-        add(ln(gx, YG, gx + 44, YG + c, 0.6), ln(gx, YG + c, gx + 44, YG, 0.6), { t: "circle", cx: mid, cy: YG + c / 2, r: 7, fill: "bg", stroke: "ink", sw: 0.9 });
-        add(poly([[mid - 4, YG + c / 2 - 5], [mid + 6, YG + c / 2], [mid - 4, YG + c / 2 + 5]], "none", 0.8));
+        add(ln(gx, top, gx + 44, top + c, 0.6), ln(gx, top + c, gx + 44, top, 0.6), { t: "circle", cx: mid, cy: top + c / 2, r: 7, fill: "bg", stroke: "ink", sw: 0.9 });
+        add(poly([[mid - 4, top + c / 2 - 5], [mid + 6, top + c / 2], [mid - 4, top + c / 2 + 5]], "none", 0.8));
       } else {
-        add(coil(gx + 6, YG + 6, YG + c - 6, 30));
+        add(coil(gx + 6, top + 6, top + c - 6, 30));
       }
-      add(coil(gx + 6, YG + c + 6, YG + 2 * c - 6, 30));
-      add(...compressor(mid, YG + 2.5 * c));
-      bottom = YG + 3 * c;
-      if (g === "hpBrine" || g === "hpWater") drawSourceLoop(g, cx, gx);
+      add(coil(gx + 6, top + c + 6, top + 2 * c - 6, 30));
+      add(...compressor(mid, top + 2.5 * c));
+      if (g === "hpBrine" || g === "hpWater") drawSourceLoop(g, gx, top);
     }
-    text(mid, bottom + 13, labels.generators[g], 7.5, { bold: true });
+    text(mid, G + 14, labels.generators[g], 7.5, { bold: true });
   }
 
-  /** Sole circuit to the Erdwärmesonden, or Zwischenkreis to the Platten-WT and the Brunnen. */
-  function drawSourceLoop(g: "hpBrine" | "hpWater", cx: number, gx: number) {
+  /**
+   * Sole circuit to the Erdwärmesonden (below the ground), or Zwischenkreis to a Platten-WT on the ground with the
+   * Brunnen below it. The lines leave the evaporator, rise over the source side and drop to it, so the fittings sit on
+   * the long vertical runs.
+   */
+  function drawSourceLoop(g: "hpBrine" | "hpWater", gx: number, top: number) {
     const wide = g === "hpWater";
-    const xa = gx - (wide ? 100 : 64); // to the source (cooled)
-    const xb = gx - (wide ? 70 : 30); // back to the evaporator
-    const yOut = YG + 8;
-    const yIn = YG + 16;
-    const yLow = YG + 120; // top of the EWS / the Platten-WT
-    pipe("brineR", [[gx, yOut], [xa, yOut], [xa, yLow]]);
-    pipe("brine", [[xb, yLow], [xb, yIn], [gx, yIn]]);
-    sym("ball", xa, YG + 34, "down");
-    sym("expansion", xa, YG + 60, "down", { side: sideOf("down", "left") });
-    sym("ball", xb, YG + 34, "up");
-    sym("pump", xb, YG + 62, "up");
+    const xb = gx - 34; // back to the evaporator
+    const xa = xb - 30; // to the source (cooled)
+    const yA = YMR + 50; // crossings over the source side
+    const yB = yA + 12;
+    const yLow = wide ? G - 44 : G; // top of the Platten-WT / the ground
+    pipe("brineR", [[gx, top + 8], [gx - 12, top + 8], [gx - 12, yA], [xa, yA], [xa, yLow]]);
+    pipe("brine", [[xb, yLow], [xb, yB], [gx - 22, yB], [gx - 22, top + 16], [gx, top + 16]]);
+    sym("ball", xa, yA + 26, "down");
+    sym("expansion", xa, yA + 70, "down", { side: sideOf("down", "left") });
+    sym("ball", xb, yB + 20, "up");
+    sym("pump", xb, yB + 62, "up");
     if (!wide) {
-      // Erdwärmesonden: terrain line, the U-loop below it.
+      // Erdwärmesonden: U-loop below the ground line.
       used.add("ews");
-      add(ln(xa - 18, yLow, xb + 18, yLow, 1));
-      for (let x = xa - 16; x <= xb + 16; x += 6) add(ln(x, yLow, x - 4, yLow + 4, 0.6));
-      pipe("brineR", [[xa, yLow], [xa, yLow + 60]]);
-      pipe("brine", [[xb, yLow + 60], [xb, yLow]]);
-      add({ t: "path", d: `M${xa},${yLow + 60} A${(xb - xa) / 2},${(xb - xa) / 2} 0 0 0 ${xb},${yLow + 60}`, fill: "none", stroke: pipeColors.brine, sw: 1.6 });
-      text((xa + xb) / 2, yLow + 60 + (xb - xa) / 2 + 14, labels.boreholes, 7, { bold: true });
+      pipe("brineR", [[xa, G], [xa, G + 60]]);
+      pipe("brine", [[xb, G + 60], [xb, G]]);
+      add({ t: "path", d: `M${xa},${G + 60} A${(xb - xa) / 2},${(xb - xa) / 2} 0 0 0 ${xb},${G + 60}`, fill: "none", stroke: pipeColors.brine, sw: 1.6 });
+      text((xa + xb) / 2, G + 60 + (xb - xa) / 2 + 14, labels.boreholes, 7, { bold: true });
       return;
     }
-    // Zwischenkreis → Platten-WT → Grundwasser: Förderbrunnen (Unterwasserpumpe) and Rückgabebrunnen.
+    // Zwischenkreis → Platten-WT (on the ground) → Grundwasser: Förderbrunnen (Unterwasserpumpe), Rückgabebrunnen.
     used.add("plateHx");
     used.add("well");
     const hx = (xa + xb) / 2;
-    const hy = yLow + 22;
-    add(...plateHx(hx, hy, 44));
-    text(xb + 6, YG + 100, labels.intermediate, 6.5, { anchor: "start", muted: true });
-    // Groundwater: from the supply well up into the WT, out of it down to the return well.
-    const wa = hx - 50;
-    const wb = hx + 50;
-    const yW = hy + 70;
-    pipe("gw", [[wa, yW + 46], [wa, hy + 10], [hx - 22, hy + 10]]);
-    pipe("gwR", [[hx + 22, hy + 10], [wb, hy + 10], [wb, yW]]);
+    add(...plateHx(hx, G - 22, 44));
+    text(hx, G + 14, labels.intermediate, 6.5, { muted: true });
+    const wa = hx - 84;
+    const wb = hx - 44;
+    const ySup = G - 32;
+    const yRet = G - 12;
+    pipe("gw", [[wa, G + 76], [wa, ySup], [hx - 22, ySup]]);
+    pipe("gwR", [[hx - 22, yRet], [wb, yRet], [wb, G + 30]]);
+    sym("ball", wa + 22, ySup, "right");
+    sym("ball", wb + 12, yRet, "left");
     for (const [wx, name, anchor] of [[wa, labels.supplyWell, "end"], [wb, labels.returnWell, "start"]] as const) {
-      add(ln(wx - 7, yW - 6, wx - 7, yW + 60, 1), ln(wx + 7, yW - 6, wx + 7, yW + 60, 1));
-      add(poly([[wx - 4, yW + 6], [wx + 4, yW + 6], [wx, yW + 11]], "none", 0.7), ln(wx - 5, yW + 13, wx + 5, yW + 13, 0.6));
-      text(anchor === "end" ? wx - 11 : wx + 11, yW + 40, name, 6.5, { anchor, bold: true });
+      add(ln(wx - 7, G + 24, wx - 7, G + 90, 1), ln(wx + 7, G + 24, wx + 7, G + 90, 1));
+      add(poly([[wx - 4, G + 36], [wx + 4, G + 36], [wx, G + 41]], "none", 0.7), ln(wx - 5, G + 43, wx + 5, G + 43, 0.6));
+      text(anchor === "end" ? wx - 11 : wx + 11, G + 104, name, 6.5, { anchor, bold: true });
     }
-    sym("pump", wa, yW + 46, "up");
-    sym("ball", wa, hy + 34, "up");
-    sym("ball", wb, hy + 34, "down");
+    sym("pump", wa, G + 76, "up");
   }
 
   // Sector separators (drawn at the end, over the full height).
@@ -513,86 +521,89 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
   const wwRight = wwLeft + 170;
   separator(wwLeft);
   text(wwLeft + 12, TITLE_Y, labels.sectors.hotWater.toUpperCase(), 8, { anchor: "start", bold: true });
+  pipe("vl", [[wwLeft, YMV], [wwRight, YMV]]);
+  pipe("rl", [[wwRight, YMR], [wwLeft, YMR]]);
   if (data.hotWater) {
-    // Umschaltventil (Dreiweg) in the supply, Wassererwärmer 2.2.7 with its coil below the mains.
+    // Umschaltventil (Dreiweg) in the supply main, Wassererwärmer 2.2.7 on the ground with its coil at the bottom.
     const xw = wwLeft + 40;
     const xT = xw + 26;
-    const top = 420;
-    const yIn = 520;
-    const yOut = 548;
-    pipe("vl", [[wwLeft, YV], [wwRight, YV]]);
-    pipe("rl", [[wwRight, YR], [wwLeft, YR]]);
-    pipe("vl", [[xw, YV], [xw, yIn], [xT + 4, yIn]]);
-    pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, YR]]);
-    dot(xw - 22, YR, "rl");
-    sym("valve3", xw, YV, "right", { port: sideOf("right", "below") });
-    sym("ball", xw, 470, "down");
-    sym("ball", xw - 22, 470, "up");
+    const top = G - 150;
+    const yIn = G - 50;
+    const yOut = G - 22;
+    pipe("vl", [[xw, YMV], [xw, yIn], [xT + 4, yIn]]);
+    pipe("rl", [[xT + 4, yOut], [xw - 22, yOut], [xw - 22, YMR]]);
+    dot(xw - 22, YMR, "rl");
+    sym("valve3", xw, YMV, "right", { port: sideOf("right", "below") });
+    sym("ball", xw, YMR + 40, "down");
+    sym("ball", xw - 22, YMR + 40, "up");
     used.add("waterHeater");
     add(rect(xT, top, 64, 150), rect(xT, top, 64, 16, "bg", 1));
     add(coil(xT + 4, yIn, yOut, 46));
     text(xT + 32, top + 11, data.hotWaterVolume ? `${Math.round(data.hotWaterVolume)} l` : "– l", 7, { bold: true });
-    text(xT + 32, top + 166, labels.waterHeater, 7.5, { bold: true });
+    text(xT + 32, G + 14, labels.waterHeater, 7.5, { bold: true });
     // Kaltwasser in at the bottom, Warmwasser out at the top.
     pipe("pwh", [[xT + 64, top + 30], [xT + 88, top + 30]]);
-    pipe("pwc", [[xT + 88, top + 138], [xT + 64, top + 138]]);
+    pipe("pwc", [[xT + 88, G - 12], [xT + 64, G - 12]]);
     text(xT + 90, top + 33, labels.hot, 6.5, { anchor: "start", bold: true });
-    text(xT + 90, top + 141, labels.cold, 6.5, { anchor: "start", bold: true });
+    text(xT + 90, G - 9, labels.cold, 6.5, { anchor: "start", bold: true });
   } else {
-    pipe("vl", [[wwLeft, YV], [wwRight, YV]]);
-    pipe("rl", [[wwRight, YR], [wwLeft, YR]]);
-    text((wwLeft + wwRight) / 2, YR + 40, labels.noHotWater, 7, { muted: true });
+    text((wwLeft + wwRight) / 2, G - 20, labels.noHotWater, 7, { muted: true });
   }
 
   // --- 3 Energiespeicher ----------------------------------------------------------------------------------------
   const stLeft = wwRight;
-  const stRight = stLeft + 150;
+  const stRight = stLeft + 160;
   separator(stLeft);
   text(stLeft + 12, TITLE_Y, labels.sectors.storage.toUpperCase(), 8, { anchor: "start", bold: true });
   if (data.storage) {
-    const xs = stLeft + 40;
+    // Technischer Speicher on the ground; the mains drop into it on the generator side and rise out of it on the
+    // consumer side (VL at the top, RL at the bottom).
+    const xs = stLeft + 45;
     const w = 70;
-    const top = 270;
+    const top = G - 170;
     const yTop = top + 26;
-    const yBot = 420;
+    const yBot = G - 20;
     used.add("storage");
     add(rect(xs, top, w, 170), rect(xs, top, w, 16, "bg", 1));
     text(xs + w / 2, top + 11, data.storageVolume ? `${Math.round(data.storageVolume)} l` : "– l", 7, { bold: true });
-    text(xs + w / 2, top + 184, labels.storage, 7.5, { bold: true });
-    pipe("vl", [[stLeft, YV], [xs - 16, YV], [xs - 16, yTop], [xs, yTop]]);
-    pipe("vl", [[xs + w, yTop], [xs + w + 16, yTop], [xs + w + 16, YV], [stRight, YV]]);
-    pipe("rl", [[stRight, YR], [xs + w + 16, YR], [xs + w + 16, yBot], [xs + w, yBot]]);
-    pipe("rl", [[xs, yBot], [xs - 16, yBot], [xs - 16, YR], [stLeft, YR]]);
+    text(xs + w / 2, G + 14, labels.storage, 7.5, { bold: true });
+    pipe("vl", [[stLeft, YMV], [xs - 16, YMV], [xs - 16, yTop], [xs, yTop]]);
+    pipe("rl", [[xs, yBot], [xs - 30, yBot], [xs - 30, YMR], [stLeft, YMR]]);
+    pipe("vl", [[xs + w, yTop], [xs + w + 16, yTop], [xs + w + 16, YMV], [stRight, YMV]]);
+    pipe("rl", [[stRight, YMR], [xs + w + 30, YMR], [xs + w + 30, yBot], [xs + w, yBot]]);
   } else {
-    pipe("vl", [[stLeft, YV], [stRight, YV]]);
-    pipe("rl", [[stRight, YR], [stLeft, YR]]);
-    text((stLeft + stRight) / 2, YR + 40, labels.noStorage, 7, { muted: true });
+    pipe("vl", [[stLeft, YMV], [stRight, YMV]]);
+    pipe("rl", [[stRight, YMR], [stLeft, YMR]]);
+    text((stLeft + stRight) / 2, G - 20, labels.noStorage, 7, { muted: true });
   }
 
   // --- 4 Verteiler und Heizgruppen --------------------------------------------------------------------------------
+  // The mains drop from above to the Verteiler, which sits just above the ground.
   const dLeft = stRight;
   separator(dLeft);
   text(dLeft + 12, TITLE_Y, labels.sectors.distribution.toUpperCase(), 8, { anchor: "start", bold: true });
   const n = Math.max(data.groups.length, 1);
-  const b0 = dLeft + 60; // bar start
+  const xdR = dLeft + 20; // RL drop
+  const xdV = dLeft + 42; // VL drop
+  const b0 = dLeft + 95; // bar start (room for the Hauptpumpe label)
   const b1 = b0 + n * GROUP_W + 6;
   const pressurized = data.distributor === "pressurized";
-  pipe("vl", [[dLeft, YV], [b0, YV]]);
-  pipe("rl", [[b0, YR], [dLeft, YR]]);
+  pipe("vl", [[dLeft, YMV], [xdV, YMV], [xdV, YVD], [b0, YVD]]);
+  pipe("rl", [[b0, YRD], [xdR, YRD], [xdR, YMR], [dLeft, YMR]]);
   // Verteiler bars (thicker).
-  pipe("vl", [[b0, YV], [b1, YV]], 3.6);
-  pipe("rl", [[b1, YR], [b0, YR]], 3.6);
+  pipe("vl", [[b0, YVD], [b1, YVD]], 3.6);
+  pipe("rl", [[b1, YRD], [b0, YRD]], 3.6);
   if (pressurized) {
-    sym("pump", dLeft + 30, YV, "right");
-    text(dLeft + 30, YV - 14, labels.mainPump, 6.5, { muted: true });
+    sym("pump", xdV, 240, "down");
+    text(xdV + 12, 243, labels.mainPump, 6.5, { anchor: "start", muted: true });
   } else if (!data.storage) {
     // Druckloser Verteiler: VL and RL short-circuited at the feed (Bypass).
-    pipe("vl", [[b0 + 6, YV], [b0 + 6, YR]]);
-    dot(b0 + 6, YV, "vl");
-    dot(b0 + 6, YR, "rl");
-    text(b0 + 2, YR + 16, labels.bypass, 6.5, { anchor: "end", muted: true });
+    pipe("vl", [[b0 + 6, YVD], [b0 + 6, YRD]]);
+    dot(b0 + 6, YVD, "vl");
+    dot(b0 + 6, YRD, "rl");
+    text(b0 + 2, YRD + 16, labels.bypass, 6.5, { anchor: "end", muted: true });
   }
-  text(b0, YR + 50, pressurized ? labels.pressurized : labels.unpressurized, 7.5, { anchor: "start", bold: true });
+  text(b0, G + 14, pressurized ? labels.pressurized : labels.unpressurized, 7.5, { anchor: "start", bold: true });
 
   data.groups.forEach((group, i) => {
     begin(group.id);
@@ -600,10 +611,10 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
     const b = a + GROUP_LEG; // RL leg
     const cx = (a + b) / 2;
     const yC = 104; // consumer
-    pipe("vl", [[a, YV], [a, yC]]);
-    pipe("rl", [[b, yC], [b, YR]]);
-    dot(a, YV, "vl");
-    dot(b, YR, "rl");
+    pipe("vl", [[a, YVD], [a, yC]]);
+    pipe("rl", [[b, yC], [b, YRD]]);
+    dot(a, YVD, "vl");
+    dot(b, YRD, "rl");
     // Consumer and its texts.
     const ek = emitterKey(group.emitter);
     used.add(ek);
@@ -613,7 +624,7 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
     text(cx, 52, group.name || opts.groupNames?.(i) || `${labels.group} ${i + 1}`, 7.5, { bold: true });
     text(cx, 63, group.emitter ? labels.emitters[group.emitter] : "", 6.5, { muted: true });
     text(cx, 74, [power, temps].filter(Boolean).join(" · "), 6.5, { muted: true });
-    text(cx, YR + 18, labels.circuits[group.circuit], 6.5, { muted: true });
+    text(cx, YRD + 18, labels.circuits[group.circuit], 6.5, { muted: true });
     // Absperrungen and thermometers near the Verteiler.
     sym("ball", a, 312, "up");
     sym("ball", b, 312, "down");
@@ -669,6 +680,10 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
   begin(null);
   if (!data.groups.length) text(b0 + 30, 200, labels.noGroups, 7, { anchor: "start", muted: true });
   for (const x of separators) add(ln(x, 8, x, maxY + 10, 0.6, "6 3 1.5 3"));
+  // Ground line with hatching below it.
+  const right = Math.max(b1 + 40, 600) - 10;
+  add(ln(10, G, right, G, 1.2));
+  for (let x = 16; x <= right; x += 10) add(ln(x, G, x - 5, G + 5, 0.5));
 
   const width = Math.max(b1 + 40, 600);
   return {
