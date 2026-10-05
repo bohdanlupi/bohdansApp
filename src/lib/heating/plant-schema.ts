@@ -219,6 +219,8 @@ export const plantSchema = z.object({
   ews: ewsSchema.catch(() => ewsSchema.parse({})),
   /** DN chosen by hand per circuit (key from hydraulics.ts), instead of the calculated one. */
   dn: z.record(z.string().max(80), z.number().int().min(10).max(200)).catch({}),
+  /** Single pipe length per circuit [m] (key from hydraulics.ts); VL + RL give its content. */
+  lengths: z.record(z.string().max(80), z.number().finite().min(0).max(100000)).catch({}),
   notes: z.string().max(4000).catch(""),
 });
 

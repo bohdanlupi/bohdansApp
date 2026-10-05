@@ -2136,7 +2136,8 @@
         "intermediate": "Druckausdehnungsgefäss Zwischenkreis (3.2.4)",
         "intermediateVsys": "Inhalt Zwischenkreis [dm³]",
         "intermediateVsysHint": "Platten-Wärmetauscher, Verdampfer und Leitungen.",
-        "intermediateVsysMissing": "Inhalt des Zwischenkreises eingeben – bis dahin gilt nur das Mindest-Vorlagevolumen von 3 dm³."
+        "intermediateVsysMissing": "Inhalt des Zwischenkreises eingeben – bis dahin gilt nur das Mindest-Vorlagevolumen von 3 dm³.",
+        "intermediateVsysPipes": "Leitungen des Zwischenkreises aus Länge und DN (Materialauszug); Platten-Wärmetauscher und Verdampfer zuschlagen."
       },
       "addGenerator": "Wärmeerzeuger hinzufügen",
       "removeGenerator": "Wärmeerzeuger entfernen",
@@ -2404,14 +2405,16 @@
         "title": "Materialauszug",
         "hint": "Alle Komponenten des Prinzipschemas. Wärmeerzeuger, Speicher, Wassererwärmer, Erdwärmesonden und Brunnen neutral; Armaturen auf Optipress-Therm von Nussbaum, übrige Komponenten aus dem Meier-Tobler-Katalog.",
         "hydraulics": "Volumenströme und Nennweiten",
-        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT); DN = kleinste Optipress-Therm-Dimension mit v ≤ {v1} m/s (bis DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (grösser). Sole-/Zwischenkreis: Kälteleistung aus den Erdwärmesonden, sonst 75 % der Heizleistung. Warmwasser: Volumenstrom der Wärmeerzeuger.",
+        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT); DN = kleinste Optipress-Therm-Dimension mit v ≤ {v1} m/s (bis DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (grösser). Sole-/Zwischenkreis: Kälteleistung aus den Erdwärmesonden, sonst 75 % der Heizleistung. Warmwasser: Volumenstrom der Wärmeerzeuger. Länge = einfache Leitungslänge; Inhalt = VL + RL mit dem Innendurchmesser der gewählten Dimension.",
         "columns": {
           "circuit": "Kreis",
           "power": "Leistung",
           "deltaT": "ΔT [K]",
           "flow": "Volumenstrom",
           "calculated": "DN berechnet",
-          "dn": "DN gewählt"
+          "dn": "DN gewählt",
+          "length": "Länge [m]",
+          "volume": "Inhalt"
         },
         "auto": "berechnet (DN {dn})",
         "autoNone": "berechnet (–)",

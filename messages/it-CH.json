@@ -2136,7 +2136,8 @@
         "intermediate": "Vaso d’espansione circuito intermedio (3.2.4)",
         "intermediateVsys": "Contenuto circuito intermedio [dm³]",
         "intermediateVsysHint": "Scambiatore a piastre, evaporatore e condotte.",
-        "intermediateVsysMissing": "Inserire il contenuto del circuito intermedio – fino ad allora vale solo il volume di riserva minimo di 3 dm³."
+        "intermediateVsysMissing": "Inserire il contenuto del circuito intermedio – fino ad allora vale solo il volume di riserva minimo di 3 dm³.",
+        "intermediateVsysPipes": "Condotte del circuito intermedio da lunghezza e DN (estratto materiale); aggiungere scambiatore a piastre ed evaporatore."
       },
       "addGenerator": "Aggiungi generatore",
       "removeGenerator": "Rimuovi generatore",
@@ -2404,14 +2405,16 @@
         "title": "Estratto materiale",
         "hint": "Tutti i componenti dello schema di principio. Generatori, accumulatore, scaldacqua, sonde geotermiche e pozzi neutri; rubinetteria su Optipress-Therm di Nussbaum, altri componenti dal catalogo Meier Tobler.",
         "hydraulics": "Portate e diametri nominali",
-        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT); DN = la più piccola dimensione Optipress-Therm con v ≤ {v1} m/s (fino a DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (oltre). Circuito glicolato / intermedio: potenza frigorifera delle sonde, altrimenti 75 % della potenza termica. Acqua calda: portata dei generatori.",
+        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT); DN = la più piccola dimensione Optipress-Therm con v ≤ {v1} m/s (fino a DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (oltre). Circuito glicolato / intermedio: potenza frigorifera delle sonde, altrimenti 75 % della potenza termica. Acqua calda: portata dei generatori. Lunghezza = lunghezza semplice della condotta; contenuto = andata + ritorno con il diametro interno della dimensione scelta.",
         "columns": {
           "circuit": "Circuito",
           "power": "Potenza",
           "deltaT": "ΔT [K]",
           "flow": "Portata",
           "calculated": "DN calcolato",
-          "dn": "DN scelto"
+          "dn": "DN scelto",
+          "length": "Lunghezza [m]",
+          "volume": "Contenuto"
         },
         "auto": "calcolato (DN {dn})",
         "autoNone": "calcolato (–)",

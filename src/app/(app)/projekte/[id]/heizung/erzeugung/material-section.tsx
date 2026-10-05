@@ -63,6 +63,12 @@ export function MaterialSection({
     if (c.kind === "group" && group) return group.name || `${tg("schema.group")} ${data.groups.indexOf(group) + 1}`;
     return t(`circuits.${c.kind}`);
   };
+  const setLength = (key: string, length: number | null) => {
+    const next = { ...data.lengths };
+    if (length === null || length <= 0) delete next[key];
+    else next[key] = length;
+    setPlant({ lengths: next });
+  };
   const setDn = (key: string, dn: number | null) => {
     const next = { ...data.dn };
     if (dn === null) delete next[key];
@@ -109,13 +115,15 @@ export function MaterialSection({
           <p className="text-sm text-muted-foreground">–</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[44rem] text-sm">
+            <table className="w-full min-w-[56rem] text-sm">
               <thead className="text-left text-xs text-muted-foreground">
                 <tr>
                   <th className="py-1 pr-2 font-medium">{t("columns.circuit")}</th>
                   <th className="w-24 py-1 pr-2 text-right font-medium">{t("columns.power")}</th>
                   <th className="w-24 py-1 pr-2 text-right font-medium">{t("columns.deltaT")}</th>
                   <th className="w-24 py-1 pr-2 text-right font-medium">{t("columns.flow")}</th>
+                  <th className="w-24 py-1 pr-2 text-right font-medium">{t("columns.length")}</th>
+                  <th className="w-24 py-1 pr-2 text-right font-medium">{t("columns.volume")}</th>
                   <th className="w-28 py-1 pr-2 text-right font-medium">{t("columns.calculated")}</th>
                   <th className="w-36 py-1 font-medium">{t("columns.dn")}</th>
                 </tr>
@@ -145,6 +153,10 @@ export function MaterialSection({
                         )}
                       </td>
                       <td className="py-1.5 pr-2 text-right tabular-nums">{c.flow !== null ? `${fmt(c.flow, 2)} m³/h` : "–"}</td>
+                      <td className="py-1.5 pr-2">
+                        <NumberField value={c.length} decimals={1} label={`${t("columns.length")} ${circuitName(c)}`} disabled={!editable} onChange={(v) => setLength(c.key, v)} className="h-8 rounded-lg" />
+                      </td>
+                      <td className="py-1.5 pr-2 text-right tabular-nums">{c.volume !== null ? `${fmt(c.volume, 1)} dm³` : "–"}</td>
                       <td className="py-1.5 pr-2 text-right tabular-nums">{c.calculated ? `DN ${c.calculated.dn}` : "–"}</td>
                       <td className="py-1.5">
                         <NativeSelect

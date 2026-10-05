@@ -46,7 +46,14 @@ export type Circuit = {
   calculated: PipeSize | null;
   size: PipeSize | null;
   overridden: boolean;
+  /** Single pipe length [m] and content of VL + RL [dm³]. */
+  length: number | null;
+  volume: number | null;
 };
+
+/** Content of VL + RL of a pipe of the size [dm³]. */
+export const pipeContent = (size: PipeSize | null, length: number | null) =>
+  size && length ? 2 * length * 10 * (Math.PI / 4) * (size.di / 100) ** 2 : null; // m → dm, mm → dm
 
 const WATER = { rho: 990, cp: 4.18 };
 
@@ -67,7 +74,9 @@ export function evaluateHydraulics(data: PlantData, ews: EwsResult | null): Circ
   const circuit = (key: string, kind: CircuitKind, id: string | null, power: number | null, deltaT: number | null, flow: number | null): Circuit => {
     const calculated = sizeFor(flow);
     const chosen = data.dn[key] !== undefined ? sizeOfDn(data.dn[key]) : null;
-    return { key, kind, id, power, deltaT, flow, calculated, size: chosen ?? calculated, overridden: chosen !== null };
+    const size = chosen ?? calculated;
+    const length = data.lengths[key] ?? null;
+    return { key, kind, id, power, deltaT, flow, calculated, size, overridden: chosen !== null, length, volume: pipeContent(size, length) };
   };
   const out: Circuit[] = [];
   const genFlows = new Map<string, number | null>();

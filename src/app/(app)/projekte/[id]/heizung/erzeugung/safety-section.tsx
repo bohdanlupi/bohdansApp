@@ -148,9 +148,9 @@ export function SafetySection({
               value={s.brine.vsys}
               decimals={0}
               editable={editable}
-              placeholder={result.brine.sia ? fmt(result.brine.vsys, 0) : ""}
+              placeholder={result.brine.vsysCalc !== null ? fmt(result.brine.vsysCalc, 1) : ""}
               onChange={(v) => setBrine({ vsys: v })}
-              hint={result.brine.sia ? t("brineVsysEws") : t(sole ? "brineVsysHint" : "intermediateVsysHint")}
+              hint={sole ? t(result.brine.sia ? "brineVsysEws" : "brineVsysHint") : t(result.brine.vsysCalc !== null ? "intermediateVsysPipes" : "intermediateVsysHint")}
             />
             <OptionField label={t("glycol")} value={s.brine.glycol} options={["propylene", "ethylene"] as const} optionLabel={(v) => t(`glycols.${v}`)} editable={editable} onChange={(v) => setBrine({ glycol: v, share: Number(Object.keys(glycolCurves[v])[0]) })} />
             <div className="space-y-1.5">

@@ -9,6 +9,7 @@
 
 import type { EmitterType, GeneratorType } from "./plan-schema";
 import type { EwsResult } from "./ews";
+import { evaluateHydraulics } from "./hydraulics";
 import type { HeatingGroup, PlantData } from "./plant-schema";
 
 const G = 9.81;
@@ -265,7 +266,7 @@ export type SafetyResult = {
    * Solekreis (or Zwischenkreis of a Wasser/Wasser-WP) after HE301-01, its content from the EWS calculation unless entered, and the minimum size after SIA 384/6
    * 3.4.2.6 (3 × ΔV/V0, ≥ 18 l); the larger one is chosen.
    */
-  brine: (VesselResult & { e: number; vsys: number; sia: EwsResult["vessel"] | null; chosen: number | null }) | null;
+  brine: (VesselResult & { e: number; vsys: number; vsysCalc: number | null; sia: EwsResult["vessel"] | null; chosen: number | null }) | null;
   hints: ("pressureLimiter" | "waterShortage" | "preVessel" | "logWood" | "highPressure" | "noPower")[];
 };
 
@@ -318,10 +319,15 @@ export function evaluateSafety(data: PlantData, ews: EwsResult | null = null): S
   const brine = types.includes("hpBrine") || types.includes("hpWater")
     ? (() => {
         const eb = glycolExpansion(b.glycol, b.share, b.minTemp, b.regeneration ? 40 : 20);
-        const vsysB = b.vsys ?? ews?.volume ?? 0;
+        // Content: entered, else from the EWS calculation (Solekreis) or the pipes of the Zwischenkreis (length × DN).
+        const pipes = evaluateHydraulics(data, ews)
+          .filter((c) => c.kind === "source" && data.generators.find((u) => u.id === c.id)?.type === "hpWater")
+          .reduce<number | null>((sum, c) => (c.volume !== null ? (sum ?? 0) + c.volume : sum), null);
+        const vsysCalc = types.includes("hpBrine") ? (ews?.volume ?? null) : pipes;
+        const vsysB = b.vsys ?? vsysCalc ?? 0;
         const v = sizeVessel({ vsys: vsysB, vsto: 0, eSto: 0, e: eb, x: 2.5, height: b.height ?? 0, pv: 0, extraP0: 0, pSV: b.pSV, closing: b.closing, pfin: b.pfin, vn: b.vn, minReserve: 3 });
         const sia = ews?.vessel ?? null;
-        return { ...v, e: eb, vsys: vsysB, sia, chosen: v.vn !== null || sia ? Math.max(v.vn ?? 0, sia?.size ?? 0) : null };
+        return { ...v, e: eb, vsys: vsysB, vsysCalc, sia, chosen: v.vn !== null || sia ? Math.max(v.vn ?? 0, sia?.size ?? 0) : null };
       })()
     : null;
   const hints: SafetyResult["hints"] = [];

@@ -2136,7 +2136,8 @@
         "intermediate": "Vase d’expansion circuit intermédiaire (3.2.4)",
         "intermediateVsys": "Contenu circuit intermédiaire [dm³]",
         "intermediateVsysHint": "Échangeur à plaques, évaporateur et conduites.",
-        "intermediateVsysMissing": "Saisir le contenu du circuit intermédiaire – en attendant, seul le volume de réserve minimal de 3 dm³ est pris en compte."
+        "intermediateVsysMissing": "Saisir le contenu du circuit intermédiaire – en attendant, seul le volume de réserve minimal de 3 dm³ est pris en compte.",
+        "intermediateVsysPipes": "Conduites du circuit intermédiaire selon longueur et DN (extrait de matériel) ; ajouter l’échangeur à plaques et l’évaporateur."
       },
       "addGenerator": "Ajouter un producteur",
       "removeGenerator": "Supprimer le producteur",
@@ -2404,14 +2405,16 @@
         "title": "Extrait de matériel",
         "hint": "Tous les composants du schéma de principe. Producteurs, accumulateur, chauffe-eau, sondes géothermiques et puits neutres ; robinetterie sur Optipress-Therm de Nussbaum, autres composants du catalogue Meier Tobler.",
         "hydraulics": "Débits et diamètres nominaux",
-        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT) ; DN = plus petite dimension Optipress-Therm avec v ≤ {v1} m/s (jusqu’au DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (au-delà). Circuit d’eau glycolée / intermédiaire : puissance frigorifique des sondes, sinon 75 % de la puissance de chauffage. Eau chaude : débit des producteurs.",
+        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT) ; DN = plus petite dimension Optipress-Therm avec v ≤ {v1} m/s (jusqu’au DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (au-delà). Circuit d’eau glycolée / intermédiaire : puissance frigorifique des sondes, sinon 75 % de la puissance de chauffage. Eau chaude : débit des producteurs. Longueur = longueur simple de la conduite ; contenu = aller + retour avec le diamètre intérieur de la dimension choisie.",
         "columns": {
           "circuit": "Circuit",
           "power": "Puissance",
           "deltaT": "ΔT [K]",
           "flow": "Débit",
           "calculated": "DN calculé",
-          "dn": "DN choisi"
+          "dn": "DN choisi",
+          "length": "Longueur [m]",
+          "volume": "Contenu"
         },
         "auto": "calculé (DN {dn})",
         "autoNone": "calculé (–)",
