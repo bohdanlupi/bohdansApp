@@ -1935,7 +1935,8 @@
         "hot": "WW",
         "supply": "VL",
         "return": "RL",
-        "vessel": "MAG"
+        "vessel": "MAG",
+        "doNotClose": "Vorsicht nicht schliessen"
       },
       "hotWater": "Wassererwärmer wird von der Anlage geladen",
       "volume": "Volumen [l]",
@@ -2003,7 +2004,9 @@
         "radiator": "Heizkörper",
         "register": "Heizregister / Lufterhitzer",
         "apparatus": "Heizgruppe / Apparat mit Bezeichnung",
-        "safetyValve": "Sicherheitsventil"
+        "safetyValve": "Sicherheitsventil",
+        "drain": "Entleerhahn",
+        "capValve": "Kappenventil (gegen Schliessen gesichert)"
       },
       "plankopf": {
         "plan": "Prinzipschema",
@@ -2116,6 +2119,14 @@
           "logWood": "Von Hand beschickte Feststoff-Wärmeerzeuger: Anforderungen nach 3.3 (thermische Ablaufsicherung) beachten.",
           "highPressure": "pfin über 2,3 bar: der Ansprechdruck liegt über 3,0 bar (Tabelle 12) – Konzessionsdruck und PS der Anlagenteile prüfen."
         }
+      },
+      "addGenerator": "Wärmeerzeuger hinzufügen",
+      "removeGenerator": "Wärmeerzeuger entfernen",
+      "noGenerators": "Noch keine Wärmeerzeuger.",
+      "generatorColumns": {
+        "type": "Typ",
+        "name": "Bezeichnung",
+        "power": "ΦN [kW]"
       }
     }
   },

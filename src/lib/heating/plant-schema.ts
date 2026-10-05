@@ -21,11 +21,6 @@ export type CircuitType = (typeof circuitTypes)[number];
 export type HotWaterConnection = (typeof hotWaterConnections)[number];
 export type DistributorType = (typeof distributorTypes)[number];
 
-const set = <T extends readonly [string, ...string[]]>(values: T) =>
-  z
-    .array(z.unknown())
-    .transform((list): T[number][] => values.filter((v) => list.includes(v)))
-    .catch([]);
 const num = (min: number, max: number) => z.number().finite().min(min).max(max).nullable().catch(null);
 
 const groupSchema = z.object({
@@ -59,20 +54,20 @@ const brineSchema = z.object({
   vn: num(0, 100000),
 });
 
+/** One Wärmeerzeuger of the Anlage; several of the same type are possible. */
+const generatorSchema = z.object({
+  id: z.string().min(1).max(64),
+  type: z.enum(generatorTypes),
+  /** Name in the schema (empty = type, numbered when the type occurs more than once). */
+  name: z.string().max(60).catch(""),
+  /** Nennwärmeleistung ΦN [kW] (HE301-01: Sicherheitsventil, Zuschlagsfaktor X). */
+  power: num(0, 100000),
+});
+
+export type GeneratorUnit = z.infer<typeof generatorSchema>;
+
 /** Sicherheitseinrichtungen after SWKI HE301-01 (inputs; results in safety.ts). */
 const safetySchema = z.object({
-  /** Nennwärmeleistung ΦN per generator [kW]. */
-  powers: z
-    .record(z.string(), z.unknown())
-    .catch({})
-    .transform((rec) =>
-      Object.fromEntries(
-        generatorTypes.flatMap((g) => {
-          const v = rec[g];
-          return typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 100000 ? [[g, v]] : [];
-        }),
-      ) as Partial<Record<GeneratorType, number>>,
-    ),
   medium: z.enum(["water", "antifreeze30", "antifreeze40"]).catch("water"),
   /** Mittlere Auslegungstemperatur (VL + RL) / 2 [°C]; null = from the Heizgruppen. */
   meanTemp: num(0, 150),
@@ -96,7 +91,15 @@ const safetySchema = z.object({
 
 export const plantSchema = z.object({
   /** Heat generators of the Anlage (Wärmequelle), connected in parallel. */
-  generators: set(generatorTypes),
+  generators: z
+    .array(z.unknown())
+    .catch([])
+    .transform((list) =>
+      list.slice(0, 20).flatMap((g) => {
+        const parsed = generatorSchema.safeParse(g);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ),
   /** The Anlage also cools (e.g. reversible heat pump, free cooling via the borehole heat exchangers). */
   cooling: z.boolean().catch(false),
   /** Wassererwärmer charged by the Anlage (Umschaltventil in the supply). */
@@ -107,8 +110,8 @@ export const plantSchema = z.object({
    * Ladepumpe, or as the consumer of a Heizgruppe (WW-Ladegruppe on the Verteiler).
    */
   hotWaterConnection: z.enum(hotWaterConnections).catch("diverter"),
-  /** Generator of the separate connection (null = the first one). */
-  hotWaterGenerator: z.enum(generatorTypes).nullable().catch(null),
+  /** Id of the generator of the separate connection (null = the first one). */
+  hotWaterGenerator: z.string().max(64).nullable().catch(null),
   /** Id of the Heizgruppe loading the Wassererwärmer. */
   hotWaterGroup: z.string().max(64).nullable().catch(null),
   /** Energy storage (technischer Speicher) present. */
@@ -128,10 +131,35 @@ export const plantSchema = z.object({
   notes: z.string().max(4000).catch(""),
 });
 
-export type PlantData = z.infer<typeof plantSchema> & { generators: GeneratorType[] };
+export type PlantData = z.infer<typeof plantSchema>;
+
+/**
+ * Older Anlagen stored the generators as a set of types and their power in safety.powers: each type becomes one
+ * generator whose id is the type (so hotWaterGenerator, which held the type, still points to it).
+ */
+function migrate(value: unknown): unknown {
+  if (!value || typeof value !== "object") return value;
+  const raw = value as Record<string, unknown>;
+  if (!Array.isArray(raw.generators) || !raw.generators.some((g) => typeof g === "string")) return raw;
+  const powers = ((raw.safety as Record<string, unknown> | undefined)?.powers ?? {}) as Record<string, unknown>;
+  return {
+    ...raw,
+    generators: raw.generators.map((g) => (typeof g === "string" ? { id: g, type: g, name: "", power: typeof powers[g] === "number" ? powers[g] : null } : g)),
+  };
+}
 
 export const emptyPlant = (): PlantData => plantSchema.parse({});
-export const parsePlant = (value: unknown): PlantData => plantSchema.catch(emptyPlant).parse(value ?? {});
+export const parsePlant = (value: unknown): PlantData => plantSchema.catch(emptyPlant).parse(migrate(value ?? {}));
+
+/** Types of the generators, without duplicates (checklists). */
+export const generatorTypesOf = (data: PlantData): GeneratorType[] => generatorTypes.filter((t) => data.generators.some((g) => g.type === t));
+
+/** Name of a generator: its own, else the type, numbered when the type occurs more than once. */
+export function generatorName(units: GeneratorUnit[], unit: GeneratorUnit, typeName: (t: GeneratorType) => string): string {
+  if (unit.name.trim()) return unit.name.trim();
+  const same = units.filter((u) => u.type === unit.type);
+  return same.length > 1 ? `${typeName(unit.type)} ${same.indexOf(unit) + 1}` : typeName(unit.type);
+}
 
 /** Circuits that need a differential pressure on the Verteiler (no own group pump on the primary side). */
 export const needsPressure = (circuit: CircuitType) => circuit !== "mixing";

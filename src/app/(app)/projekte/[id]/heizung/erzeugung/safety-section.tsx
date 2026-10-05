@@ -3,9 +3,9 @@
 import { useTranslations } from "next-intl";
 
 import { NativeSelect } from "@/components/form";
-import { fmt, Notice, NumberField, Result, Section } from "@/components/planning/fields";
+import { fmt, Notice, Result, Section } from "@/components/planning/fields";
 import { NumberParam, OptionField, Toggle } from "@/components/planning/plan-ui";
-import type { PlantData } from "@/lib/heating/plant-schema";
+import { generatorName, type PlantData } from "@/lib/heating/plant-schema";
 import { glycolCurves, type Glycol, type SafetyResult, type VesselResult } from "@/lib/heating/safety";
 
 type Safety = PlantData["safety"];
@@ -54,18 +54,9 @@ export function SafetySection({
               </thead>
               <tbody>
                 {result.valves.map((v) => (
-                  <tr key={v.generator} className="border-t">
-                    <td className="py-1.5 pr-2">{tp(`options.generators.${v.generator}` as never)}</td>
-                    <td className="py-1.5 pr-2">
-                      <NumberField
-                        value={s.powers[v.generator] ?? null}
-                        decimals={1}
-                        label={t("columns.power")}
-                        disabled={!editable}
-                        onChange={(p) => setSafety({ powers: { ...s.powers, [v.generator]: p ?? undefined } })}
-                        className="h-8 rounded-lg"
-                      />
-                    </td>
+                  <tr key={v.id} className="border-t">
+                    <td className="py-1.5 pr-2">{generatorName(data.generators, data.generators.find((u) => u.id === v.id)!, (g) => tp(`generation.short.${g}` as never))}</td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums">{v.power !== null ? fmt(v.power, 1) : "–"}</td>
                     <td className="py-1.5 pr-2">{t(`mode.${v.mode}`)}</td>
                     <td className="py-1.5 pr-2 text-right tabular-nums">{v.flow !== null ? `${fmt(v.flow, v.mode === "evaporation" ? 1 : 0)} ${v.mode === "evaporation" ? "kg/h" : "l/h"}` : "–"}</td>
                     <td className="py-1.5 pr-2 text-right tabular-nums">{v.isv !== null ? `DN ${v.isv}` : v.mode === "evaporation" ? t("byManufacturer") : "–"}</td>

@@ -1,5 +1,5 @@
 import type { EmitterType, GeneratorType, HeatingParams } from "./plan-schema";
-import type { PlantData } from "./plant-schema";
+import { generatorTypesOf, type PlantData } from "./plant-schema";
 
 /**
  * Parameters that filter the SIA 108 checklists, taken from the chapters: generators, cooling and storage from the
@@ -14,7 +14,7 @@ export function effectiveHeatingParams(
   /** Building heat loads of the calculations [W]. */
   heatLoads: number[],
 ): HeatingParams {
-  const generators = [...new Set(plants.flatMap((p) => p.data.generators))] as GeneratorType[];
+  const generators = [...new Set(plants.flatMap((p) => generatorTypesOf(p.data)))] as GeneratorType[];
   const fromGroups = plants.flatMap((p) => p.data.groups.flatMap((g) => (g.emitter ? [g.emitter] : [])));
   const emitters = [...new Set<EmitterType>([...(floorSystems > 0 ? ["floor" as const] : []), ...fromGroups])];
   const total = heatLoads.reduce((s, w) => s + w, 0);

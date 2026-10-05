@@ -1935,7 +1935,8 @@
         "hot": "EC",
         "supply": "D",
         "return": "R",
-        "vessel": "VE"
+        "vessel": "VE",
+        "doNotClose": "Attention ne pas fermer"
       },
       "hotWater": "Chauffe-eau chargé par l’installation",
       "volume": "Volume [l]",
@@ -2003,7 +2004,9 @@
         "radiator": "Radiateur",
         "register": "Registre / aérotherme",
         "apparatus": "Groupe / appareil avec désignation",
-        "safetyValve": "Soupape de sûreté"
+        "safetyValve": "Soupape de sûreté",
+        "drain": "Robinet de vidange",
+        "capValve": "Vanne à capuchon (protégée contre la fermeture)"
       },
       "plankopf": {
         "plan": "Schéma de principe",
@@ -2116,6 +2119,14 @@
           "logWood": "Producteurs à combustible solide chargés à la main : respecter les exigences de 3.3 (sécurité d’écoulement thermique).",
           "highPressure": "pfin supérieure à 2,3 bar : la pression de tarage dépasse 3,0 bar (tableau 12) – vérifier la pression de concession et PS des éléments."
         }
+      },
+      "addGenerator": "Ajouter un producteur",
+      "removeGenerator": "Supprimer le producteur",
+      "noGenerators": "Pas encore de producteurs.",
+      "generatorColumns": {
+        "type": "Type",
+        "name": "Désignation",
+        "power": "ΦN [kW]"
       }
     }
   },

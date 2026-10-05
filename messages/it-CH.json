@@ -1935,7 +1935,8 @@
         "hot": "AC",
         "supply": "M",
         "return": "R",
-        "vessel": "VE"
+        "vessel": "VE",
+        "doNotClose": "Attenzione non chiudere"
       },
       "hotWater": "Scaldacqua caricato dall’impianto",
       "volume": "Volume [l]",
@@ -2003,7 +2004,9 @@
         "radiator": "Radiatore",
         "register": "Batteria / aerotermo",
         "apparatus": "Gruppo / apparecchio con designazione",
-        "safetyValve": "Valvola di sicurezza"
+        "safetyValve": "Valvola di sicurezza",
+        "drain": "Rubinetto di scarico",
+        "capValve": "Valvola a cappuccio (protetta contro la chiusura)"
       },
       "plankopf": {
         "plan": "Schema di principio",
@@ -2116,6 +2119,14 @@
           "logWood": "Generatori a combustibile solido caricati a mano: rispettare i requisiti del 3.3 (scarico termico di sicurezza).",
           "highPressure": "pfin superiore a 2,3 bar: la pressione di taratura supera 3,0 bar (tabella 12) – verificare la pressione di concessione e PS dei componenti."
         }
+      },
+      "addGenerator": "Aggiungi generatore",
+      "removeGenerator": "Rimuovi generatore",
+      "noGenerators": "Ancora nessun generatore.",
+      "generatorColumns": {
+        "type": "Tipo",
+        "name": "Designazione",
+        "power": "ΦN [kW]"
       }
     }
   },

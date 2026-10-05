@@ -218,6 +218,8 @@ export function sizeVessel(i: VesselInput): VesselResult {
 export const evaporates = (g: GeneratorType) => g === "pellets" || g === "logWood" || g === "gasOil";
 
 export type ValveResult = {
+  /** Id of the generator unit. */
+  id: string;
   generator: GeneratorType;
   power: number | null;
   mode: "evaporation" | "expansion";
@@ -245,7 +247,7 @@ export type SafetyResult = {
 
 export function evaluateSafety(data: PlantData): SafetyResult {
   const s = data.safety;
-  const powers = data.generators.map((g) => s.powers[g] ?? null);
+  const powers = data.generators.map((g) => g.power);
   const phiN = powers.reduce<number>((sum, p) => sum + (p ?? 0), 0);
   const x = reserveFactor(phiN);
   const means = data.groups.flatMap((g) => (g.supplyTemp !== null && g.returnTemp !== null ? [(g.supplyTemp + g.returnTemp) / 2] : []));
@@ -269,16 +271,16 @@ export function evaluateSafety(data: PlantData): SafetyResult {
     pfin: s.pfin,
     vn: s.vn,
   });
-  const valves = data.generators.map((g, i): ValveResult => {
-    const power = powers[i];
-    if (evaporates(g)) {
-      return { generator: g, power, mode: "evaporation", flow: power !== null ? (power / HE_WATER) * 3600 : null, isv: null, isa: power !== null ? blowOffDn(power, s.pSV) : null };
+  const valves = data.generators.map(({ id, type, power }): ValveResult => {
+    if (evaporates(type)) {
+      return { id, generator: type, power, mode: "evaporation", flow: power !== null ? (power / HE_WATER) * 3600 : null, isv: null, isa: power !== null ? blowOffDn(power, s.pSV) : null };
     }
     const lines = power !== null ? expansionValveLines(power) : null;
-    return { generator: g, power, mode: "expansion", flow: power, isv: lines?.isv ?? null, isa: lines?.isa ?? null };
+    return { id, generator: type, power, mode: "expansion", flow: power, isv: lines?.isv ?? null, isa: lines?.isa ?? null };
   });
   const b = s.brine;
-  const brine = data.generators.includes("hpBrine")
+  const types = data.generators.map((g) => g.type);
+  const brine = types.includes("hpBrine")
     ? (() => {
         const eb = glycolExpansion(b.glycol, b.share, b.minTemp, b.regeneration ? 40 : 20);
         const vsysB = b.vsys ?? 0;
@@ -292,9 +294,9 @@ export function evaluateSafety(data: PlantData): SafetyResult {
   const hints: SafetyResult["hints"] = [];
   if (powers.some((p) => p === null)) hints.push("noPower");
   if (phiN > 300) hints.push("pressureLimiter");
-  if (data.generators.some(evaporates)) hints.push("waterShortage");
+  if (types.some(evaporates)) hints.push("waterShortage");
   if (meanTemp > 70) hints.push("preVessel");
-  if (data.generators.includes("logWood")) hints.push("logWood");
+  if (types.includes("logWood")) hints.push("logWood");
   if (vessel.pfin > 2.3) hints.push("highPressure");
   return { phiN, x, e, meanTemp, eSto, vsysEstimate, vsys, vessel, isl: phiN > 0 ? islDn(phiN) : null, valves, brine, hints };
 }

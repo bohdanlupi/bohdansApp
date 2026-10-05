@@ -22,7 +22,7 @@
 import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
 
 import type { EmitterType, GeneratorType } from "./plan-schema";
-import type { CircuitType, PlantData } from "./plant-schema";
+import { type CircuitType, generatorName, type PlantData } from "./plant-schema";
 import { evaluateSafety } from "./safety";
 
 export type PipeKind = "vl" | "rl" | "brine" | "brineR" | "gw" | "gwR" | "pwc" | "pwh";
@@ -43,6 +43,8 @@ export const pipeDashed = (k: PipeKind) => k === "rl" || k === "brineR" || k ===
 /** Symbols of the schema, also the entries of the legend (in legend order). */
 export const symbolKeys = [
   "ball",
+  "capValve",
+  "drain",
   "check",
   "regValve",
   "valve2",
@@ -72,6 +74,8 @@ export type SymbolKey = (typeof symbolKeys)[number];
 /** SIA 410 number of each symbol (legend); «~» = built from SIA 410 parts. */
 export const symbolRefs: Record<SymbolKey, string> = {
   ball: "1.26.7",
+  capValve: "~ 1.26.5",
+  drain: "2.6.7",
   check: "1.26.9",
   regValve: "2.6.9",
   valve2: "1.26.5 / 1.29.10",
@@ -118,6 +122,8 @@ export type GenerationLabels = {
   bypass: string;
   /** Short name of the Druckausdehnungsgefäss (e.g. «MAG»). */
   vessel: string;
+  /** Warning at the Kappenventil of the Ausdehnungsgefäss. */
+  doNotClose: string;
   group: string;
   noGroups: string;
   cold: string;
@@ -129,7 +135,7 @@ export type GenerationLabels = {
 const generatorKeys: GeneratorType[] = ["hpAir", "hpBrine", "hpWater", "pellets", "logWood", "district", "gasOil"];
 const emitterKeys: EmitterType[] = ["floor", "radiators", "tabs", "air"];
 const circuitKeys: CircuitType[] = ["throttle", "diverting", "mixing", "injection3", "injection2"];
-const schemaTextKeys = ["noGenerator", "boreholes", "supplyWell", "returnWell", "intermediate", "districtPrimary", "waterHeater", "noHotWater", "storage", "noStorage", "mainPump", "pressurized", "unpressurized", "bypass", "vessel", "group", "noGroups", "cold", "hot", "supply", "return"] as const;
+const schemaTextKeys = ["noGenerator", "boreholes", "supplyWell", "returnWell", "intermediate", "districtPrimary", "waterHeater", "noHotWater", "storage", "noStorage", "mainPump", "pressurized", "unpressurized", "bypass", "vessel", "doNotClose", "group", "noGroups", "cold", "hot", "supply", "return"] as const;
 
 /** Labels of the schema from the messages «heatingPlan.generation» (`t` is scoped to that namespace). */
 export function generationLabels(t: (key: string) => string): GenerationLabels {
@@ -229,6 +235,19 @@ export function drawSymbol(key: SymbolKey, x: number, y: number, dir: Dir = "rig
     case "ball":
       // 1.26.7 Hahn (Kugelhahn): Absperrorgan with an open circle.
       return [...g.bowtie(), g.circle(0, 0, 2, "bg", 0.8)];
+    case "capValve":
+      // Kappenventil: 1.26.5 Ventil under a cap (secured against closing), drawn as a frame around it.
+      return [g.box(0, 0, 18, 15), ...g.bowtie("bg", "bg", 6, 4.5), g.circle(0, 0, 1.5, "ink")];
+    case "drain":
+      // 2.6.7 Entleerhahn on a short branch at side s: Absperrorgan along the branch and the hose cap.
+      return [
+        g.line(0, 0, 0, 4 * s, 0.8),
+        g.poly([[-3, 4 * s], [3, 4 * s], [0, 7.5 * s]], "bg", 0.8),
+        g.poly([[-3, 11 * s], [3, 11 * s], [0, 7.5 * s]], "bg", 0.8),
+        g.line(-3.5, 12.5 * s, 3.5, 12.5 * s, 1),
+        g.line(-3.5, 12.5 * s, -3.5, 11 * s, 0.8),
+        g.line(3.5, 12.5 * s, 3.5, 11 * s, 0.8),
+      ];
     case "check":
       // 1.26.9 Rückflussverhinderer: downstream triangle filled.
       return g.bowtie("bg", "ink");
@@ -293,13 +312,14 @@ const label = (x: number, y: number, s: string, size = 7, opts: { anchor?: "star
  * 1.26.10 Sicherheitsventil mit Federbelastung on a stub rising from (x, y): Eck-Absperrorgan (inlet from below,
  * outlet to the left) with the spring on top.
  */
-export function safetyValve(x: number, y: number): Prim[] {
+export function safetyValve(x: number, y: number, outlet: 1 | -1 = -1): Prim[] {
   const c = y - 12;
+  const o = outlet;
   return [
     ln(x, y, x, y - 5, 1),
     poly([[x - 3.5, y - 5], [x + 3.5, y - 5], [x, c]], "bg", 0.9),
-    poly([[x - 7, c - 3.5], [x - 7, c + 3.5], [x, c]], "bg", 0.9),
-    ln(x - 7, c, x - 10, c, 0.9),
+    poly([[x + 7 * o, c - 3.5], [x + 7 * o, c + 3.5], [x, c]], "bg", 0.9),
+    ln(x + 7 * o, c, x + 10 * o, c, 0.9),
     path(`M${x},${c} L${x + 2.5},${c - 1.5} L${x - 2.5},${c - 3.5} L${x + 2.5},${c - 5.5} L${x - 2.5},${c - 7.5} L${x},${c - 9}`, 0.7),
   ];
 }
@@ -399,67 +419,74 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
 
   // --- 1 Wärmequelle ------------------------------------------------------------------------------------------
   // Generators stand on the ground; their legs rise to the mains, which run over all sectors.
-  const gens: (GeneratorType | null)[] = data.generators.length ? data.generators : [null];
+  const gens = data.generators.length ? data.generators : [null];
   const x0 = 24;
   const safety = evaluateSafety(data);
-  const MAG_ROOM = 50;
-  const sourceRight = x0 + gens.reduce((s, g) => s + genWidth(g), 0) + 10 + MAG_ROOM;
+  const MAG_ROOM = 95;
+  const sourceRight = x0 + gens.reduce((s, u) => s + genWidth(u?.type ?? null), 0) + 10 + MAG_ROOM;
   let colX = x0;
   let firstLeg = Infinity;
   // Wassererwärmer loading: generator of the separate connection, Heizgruppe of the WW-Ladegruppe.
   const ww = data.hotWater ? data.hotWaterConnection : null;
-  const wwGenType = data.hotWaterGenerator && data.generators.includes(data.hotWaterGenerator) ? data.hotWaterGenerator : (data.generators[0] ?? null);
+  const wwUnit = data.generators.find((u) => u.id === data.hotWaterGenerator) ?? data.generators[0] ?? null;
   const wwGroup = ww === "group" ? (data.groups.find((g) => g.id === data.hotWaterGroup) ?? null) : null;
   let wwGen: { gx: number; top: number } | null = null;
-  for (const g of gens) {
+  for (const unit of gens) {
+    const g = unit?.type ?? null;
     const w = genWidth(g);
     const gx = colX + w - 66; // left edge of the generator box (44 wide)
     const top = G - genHeight(g);
     const xv = gx + 6; // VL out
     const xr = gx + 38; // RL in
     firstLeg = Math.min(firstLeg, xv);
-    drawGenerator(g, colX, gx, top);
-    if (g !== null) {
-      // Sicherheitsventil at the highest point of the generator, unabsperrbar (HE301-01 6.2.4).
-      used.add("safetyValve");
-      add(...safetyValve(gx + 22, top));
-    }
-    if (ww === "generator" && g !== null && g === wwGenType) wwGen = { gx, top };
+    drawGenerator(g, colX, gx, top, unit ? generatorName(data.generators, unit, (t) => labels.generators[t]) : "");
+    if (ww === "generator" && unit && unit.id === wwUnit?.id) wwGen = { gx, top };
     pipe("vl", [[xv, top], [xv, YMV]]);
     pipe("rl", [[xr, YMR], [xr, top]]);
     dot(xv, YMV, "vl");
     dot(xr, YMR, "rl");
-    sym("ball", xv, top - 24, "up");
-    sym("ball", xr, YMR + 20, "down");
+    // Absperrungen of VL and RL at the same height near the generator.
+    sym("ball", xv, top - 44, "up");
+    sym("ball", xr, top - 44, "down");
+    if (g !== null) {
+      // Sicherheitsventil on the VL between generator and Absperrung, unabsperrbar (HE301-01 6.2.4).
+      const ySV = top - 12;
+      pipe("vl", [[xv, ySV], [xv + 10, ySV]]);
+      dot(xv, ySV, "vl");
+      used.add("safetyValve");
+      add(...safetyValve(xv + 10, ySV, 1));
+    }
     if (g === "pellets" || g === "logWood") {
       // Rücklaufhochhaltung: Dreiwegventil in the return, bypass from the supply.
       pipe("vl", [[xv, YMR + 48], [xr - 6, YMR + 48]]);
       dot(xv, YMR + 48, "vl");
       sym("valve3", xr, YMR + 48, "down", { port: sideOf("down", "left") });
       sym("pump", xr, YMR + 80, "down");
-      sym("check", xr, YMR + 108, "down");
     } else if (g) {
       sym("pump", xr, YMR + 56, "down");
-      sym("check", xr, YMR + 88, "down");
     }
     colX += w;
   }
   pipe("vl", [[firstLeg, YMV], [sourceRight, YMV]]);
   // Druckausdehnungsgefäss on the Rücklauf to the generators (suction side), plombierte Absperrung (HE301-01 3.2.2).
   {
-    const xm = sourceRight - 30;
-    pipe("rl", [[xm, YMR], [xm, YMR + 20]]);
+    const xm = sourceRight - 72;
+    pipe("rl", [[xm, YMR], [xm, YMR + 34]]);
     dot(xm, YMR, "rl");
-    sym("ball", xm, YMR + 10, "down");
-    sym("expansion", xm, YMR + 20, "right", { side: sideOf("right", "below") });
+    sym("capValve", xm, YMR + 13, "down");
+    sym("drain", xm, YMR + 27, "down", { side: sideOf("down", "right") });
+    sym("expansion", xm, YMR + 34, "right", { side: sideOf("right", "below") });
+    const [first, ...rest] = labels.doNotClose.split(" ");
+    text(xm + 12, YMR + 9, first, 5.5, { anchor: "start", bold: true });
+    text(xm + 12, YMR + 16, rest.join(" "), 5.5, { anchor: "start", bold: true });
     const v = safety.vessel;
-    text(xm, YMR + 58, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, 6.5, { bold: true });
-    if (v.vn !== null) text(xm, YMR + 68, `p0 ${v.p0.toFixed(1)} bar`, 6.5, { muted: true });
+    text(xm, YMR + 72, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, 6.5, { bold: true });
+    if (v.vn !== null) text(xm, YMR + 82, `p0 ${v.p0.toFixed(1)} bar`, 6.5, { muted: true });
   }
-  pipe("rl", [[sourceRight, YMR], [firstLeg + 24, YMR]]);
+  pipe("rl", [[sourceRight, YMR], [firstLeg + 32, YMR]]);
   text(x0, TITLE_Y, labels.sectors.source.toUpperCase(), 8, { anchor: "start", bold: true });
 
-  function drawGenerator(g: GeneratorType | null, cx: number, gx: number, top: number) {
+  function drawGenerator(g: GeneratorType | null, cx: number, gx: number, top: number, name: string) {
     const mid = gx + 22;
     if (g === null) {
       used.add("apparatus");
@@ -501,7 +528,7 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
       add(...compressor(mid, top + 2.5 * c));
       if (g === "hpBrine" || g === "hpWater") drawSourceLoop(g, gx, top);
     }
-    text(mid, G + 14, labels.generators[g], 7.5, { bold: true });
+    text(mid, G + 14, name, 7.5, { bold: true });
   }
 
   /**
@@ -703,11 +730,17 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
     sym("ball", a, 312, "up");
     sym("ball", b, 312, "down");
     // After the pump (consumer side): Vorlauffühler, thermometers and Absperrungen in VL and RL.
-    sym("sensor", a, 164, "up", { side: sideOf("up", "left") });
-    sym("thermometer", a, 144, "up", { side: sideOf("up", "left") });
-    sym("thermometer", b, 144, "down", { side: sideOf("down", "right") });
-    sym("ball", a, 122, "up");
-    sym("ball", b, 122, "down");
+    sym("sensor", a, 166, "up", { side: sideOf("up", "left") });
+    sym("thermometer", a, 146, "up", { side: sideOf("up", "left") });
+    sym("thermometer", b, 146, "down", { side: sideOf("down", "right") });
+    sym("ball", a, 126, "up");
+    sym("ball", b, 126, "down");
+    // Entleerungen in VL and RL: between the Absperrungen and the group box, and between the Absperrungen at the
+    // Verteiler and the Wärmezähler.
+    for (const y of [112, 299]) {
+      sym("drain", a, y, "up", { side: sideOf("up", "left") });
+      sym("drain", b, y, "down", { side: sideOf("down", "right") });
+    }
     if (group.heatMeter) {
       // Wärmezähler between the Mischventil and the Verteiler: meter in the RL, probe in the VL wired to the Rechenwerk.
       sym("heatMeter", b, 288, "down", { side: sideOf("down", "left") });
@@ -807,7 +840,7 @@ export function legendSymbol(key: SymbolKey): Prim[] {
       return [{ t: "line", x1: 6, y1: 27, x2: 34, y2: 27, stroke: "muted", sw: 1 }, ...safetyValve(22, 27)];
     default: {
       // Pipe symbols on a short pipe: parts beside the pipe hang below it, drives point up.
-      const offPipe = key === "thermometer" || key === "sensor" || key === "heatMeter" || key === "expansion";
+      const offPipe = key === "thermometer" || key === "sensor" || key === "heatMeter" || key === "expansion" || key === "drain";
       const y = key === "expansion" ? 5 : offPipe ? 8 : key === "valve2" || key === "valve3" ? 22 : 15;
       return [{ t: "line", x1: 2, y1: y, x2: 38, y2: y, stroke: "muted", sw: 1 }, ...drawSymbol(key, 20, y, "right", { side: offPipe ? 1 : -1, port: 1 })];
     }

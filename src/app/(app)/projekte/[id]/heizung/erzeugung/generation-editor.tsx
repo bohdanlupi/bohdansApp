@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { buildGenerationSchema, generationLabels } from "@/lib/heating/generation-schema";
 import { emitterTypes, generatorTypes, type HeatingParams, type HeatingPlan } from "@/lib/heating/plan-schema";
-import { circuitMismatch, circuitTypes, distributorTypes, hotWaterConnections,type HeatingGroup, type PlantData } from "@/lib/heating/plant-schema";
+import { circuitMismatch, circuitTypes, distributorTypes, type GeneratorUnit, generatorName, hotWaterConnections, type HeatingGroup, type PlantData } from "@/lib/heating/plant-schema";
 import { evaluateSafety } from "@/lib/heating/safety";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { formatNumber } from "@/lib/number-input";
@@ -51,6 +51,8 @@ export function GenerationEditor({
   const d = anlage.plan;
   const setParam = <K extends keyof HeatingParams>(key: K, value: HeatingParams[K]) => building.update((x) => ({ ...x, params: { ...x.params, [key]: value } }));
   const setPlant = (patch: Partial<PlantData>) => anlage.update((x) => ({ ...x, ...patch }));
+  const setUnit = (id: string, patch: Partial<GeneratorUnit>) => anlage.update((x) => ({ ...x, generators: x.generators.map((u) => (u.id === id ? { ...u, ...patch } : u)) }));
+  const unitName = (u: GeneratorUnit) => generatorName(d.generators, u, (g) => tg(`short.${g}` as never));
   const setGroup = (id: string, patch: Partial<HeatingGroup>) => anlage.update((x) => ({ ...x, groups: x.groups.map((g) => (g.id === id ? { ...g, ...patch } : g)) }));
   const o = (group: string) => (value: string) => t(`options.${group}.${value}` as never);
   const status = building.status !== "saved" ? building.status : anlage.status;
@@ -81,23 +83,64 @@ export function GenerationEditor({
       </Section>
 
       <Section title={`1 · ${tg("sectors.source")}`} description={t("system.generatorsHint")}>
-        <div className="grid gap-6 md:grid-cols-2">
-          <fieldset className="space-y-2">
-            <legend className="mb-1 text-sm font-medium">{t("system.generators")}</legend>
-            {generatorTypes.map((g) => (
-              <Toggle
-                key={g}
-                label={o("generators")(g)}
-                checked={d.generators.includes(g)}
-                editable={editable}
-                onChange={(on) => setPlant({ generators: generatorTypes.filter((x) => (x === g ? on : d.generators.includes(x))) })}
-              />
-            ))}
-          </fieldset>
-          <fieldset className="space-y-2">
-            <legend className="mb-1 text-sm font-medium">{t("system.more")}</legend>
-            <Toggle label={t("system.cooling")} checked={d.cooling} editable={editable} onChange={(v) => setPlant({ cooling: v })} />
-          </fieldset>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-medium">{t("system.generators")}</h3>
+            {editable && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => anlage.update((x) => ({ ...x, generators: [...x.generators, { id: crypto.randomUUID(), type: x.generators.at(-1)?.type ?? "hpAir", name: "", power: null }] }))}
+              >
+                <Plus /> {tg("addGenerator")}
+              </Button>
+            )}
+          </div>
+          {d.generators.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{tg("noGenerators")}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[40rem] text-sm">
+                <thead className="text-left text-xs text-muted-foreground">
+                  <tr>
+                    <th className="py-1 pr-2 font-medium">{tg("generatorColumns.type")}</th>
+                    <th className="py-1 pr-2 font-medium">{tg("generatorColumns.name")}</th>
+                    <th className="w-28 py-1 pr-2 text-right font-medium">{tg("generatorColumns.power")}</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.generators.map((u) => (
+                    <tr key={u.id} className="border-t">
+                      <td className="py-1.5 pr-2">
+                        <NativeSelect value={u.type} disabled={!editable} aria-label={tg("generatorColumns.type")} onChange={(e) => setUnit(u.id, { type: e.target.value as GeneratorUnit["type"] })}>
+                          {generatorTypes.map((g) => (
+                            <option key={g} value={g}>
+                              {o("generators")(g)}
+                            </option>
+                          ))}
+                        </NativeSelect>
+                      </td>
+                      <td className="py-1.5 pr-2">
+                        <Input value={u.name} maxLength={60} disabled={!editable} placeholder={unitName(u)} aria-label={tg("generatorColumns.name")} onChange={(e) => setUnit(u.id, { name: e.target.value })} className="h-8 bg-field" />
+                      </td>
+                      <td className="py-1.5 pr-2">
+                        <NumberField value={u.power} decimals={1} label={tg("generatorColumns.power")} disabled={!editable} onChange={(v) => setUnit(u.id, { power: v })} className="h-8 rounded-lg" />
+                      </td>
+                      <td className="py-1.5 text-right">
+                        {editable && (
+                          <Button size="icon" variant="ghost" aria-label={tg("removeGenerator")} onClick={() => anlage.update((x) => ({ ...x, generators: x.generators.filter((y) => y.id !== u.id) }))}>
+                            <Trash2 />
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <Toggle label={t("system.cooling")} checked={d.cooling} editable={editable} onChange={(v) => setPlant({ cooling: v })} />
         </div>
       </Section>
 
@@ -111,9 +154,9 @@ export function GenerationEditor({
               {d.hotWaterConnection === "generator" && d.generators.length > 1 && (
                 <OptionField
                   label={tg("hotWaterGenerator")}
-                  value={d.hotWaterGenerator && d.generators.includes(d.hotWaterGenerator) ? d.hotWaterGenerator : d.generators[0]}
-                  options={d.generators}
-                  optionLabel={o("generators")}
+                  value={d.generators.some((u) => u.id === d.hotWaterGenerator) ? d.hotWaterGenerator! : d.generators[0].id}
+                  options={d.generators.map((u) => u.id)}
+                  optionLabel={(id) => unitName(d.generators.find((u) => u.id === id)!)}
                   editable={editable}
                   onChange={(v) => setPlant({ hotWaterGenerator: v })}
                 />

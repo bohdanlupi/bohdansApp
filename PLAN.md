@@ -258,7 +258,11 @@ Tabelle 13 or entered, Speicher without X, p0 = pst + pv + 0.3, pfin ≤ pSV / 1
 separate Solekreis MAG (X = 2.5, Vwr ≥ 3 dm³, e from the glycol curves of Anhang A.5/A.6, digitised by eye), SV per
 generator (boilers by Verdampfung + iSA2 Tab. 9 col. A, WP / Fernwärme by Ausdehnung Tab. 5), iSL Tab. 3, hints
 (Druckbegrenzer > 300 kW, WMS, Vorschaltgefäss, 3.3). Schema: SV 1.26.10 on each generator, MAG on the RL main.
-Kompressor / Druckhaltepumpe (B.8/B.9) not yet. Next: Warmwasser / Speicher sizing.
+Kompressor / Druckhaltepumpe (B.8/B.9) not yet.
+Generators are a list (heating_plants.data.generators: id, type, name, ΦN; several of one type; older type sets are
+migrated on parse, ids = type). Schema: SV teed off the VL below the Absperrungen (VL/RL at one height, no
+Rückflussverhinderer), MAG with Kappenventil + Entleerung and «Vorsicht nicht schliessen», Entleerungen (2.6.7) in
+VL/RL of each group above and below. Next: Warmwasser / Speicher sizing.
 
 KWL-Planung (2026-09-25): the Lüftung tab is a planning dossier by SIA 108 phases 31, 32, 33, 41, 51, 52, 53, 61
 (src/lib/kwl/phases.ts: goals + checklists DE/FR/IT with SIA 382/5 / SIA 108 references, conditional on the design

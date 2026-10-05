@@ -50,7 +50,7 @@ export async function createHeatingPlant(_prev: FormState, formData: FormData): 
   if (!count) {
     const { data: plan } = await supabase.from("heating_plans").select("data").eq("project_id", projectId.data).maybeSingle();
     const { generators, storage, cooling } = parseHeatingPlan(plan?.data).params;
-    initial = { ...initial, generators, storage, cooling };
+    initial = parsePlant({ generators, storage, cooling });
   }
   const { data, error } = await supabase
     .from("heating_plants")
