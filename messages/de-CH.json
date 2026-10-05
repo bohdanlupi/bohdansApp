@@ -1917,6 +1917,7 @@
       "schema": {
         "noGenerator": "Wärmeerzeuger wählen",
         "boreholes": "Erdwärmesonden",
+        "distributor": "Verteiler",
         "supplyWell": "Förderbrunnen",
         "returnWell": "Rückgabebrunnen",
         "intermediate": "Zwischenkreis",
@@ -1999,6 +2000,7 @@
         "storage": "Technischer Speicher",
         "waterHeater": "Wassererwärmer mit Wärmetauscher",
         "ews": "Erdwärmesonde",
+        "distributor": "Sondenverteiler (Verteiler und Sammler)",
         "well": "Brunnen mit Unterwasserpumpe",
         "floor": "Fussbodenheizung / TABS",
         "radiator": "Heizkörper",
@@ -2229,6 +2231,12 @@
         "maxDepth": "Max. Bohrtiefe [m]",
         "maxDepthHint": "Gemäss Bewilligung.",
         "square": "2 × 2 quadratisch statt in Linie",
+        "distributor": "Sondenverteiler",
+        "distributors": {
+          "none": "kein Verteiler",
+          "inside": "Verteiler im Technikraum",
+          "outside": "Verteiler ausserhalb Gebäude"
+        },
         "design": "Auslegetemperatur (3.1, Tabelle 2)",
         "regeneration": "Regenerationsrate fBHE",
         "regenerations": {

@@ -108,6 +108,8 @@ const ewsSchema = z.object({
   /** 4 EWS in a 2 × 2 square instead of a line. */
   square: z.boolean().catch(false),
   spacing: z.number().finite().min(1).max(50).catch(10),
+  /** Sondenverteiler: none (probes straight to the WP), in the Technikraum or outside the building. */
+  distributor: z.enum(["none", "inside", "outside"]).catch("none"),
   /** Maximum Bohrtiefe of the permit [m]. */
   maxDepth: num(0, 2000),
   layers: z

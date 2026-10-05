@@ -1917,6 +1917,7 @@
       "schema": {
         "noGenerator": "Scegliere il generatore",
         "boreholes": "Sonde geotermiche",
+        "distributor": "Distributore",
         "supplyWell": "Pozzo di captazione",
         "returnWell": "Pozzo di restituzione",
         "intermediate": "Circuito intermedio",
@@ -1999,6 +2000,7 @@
         "storage": "Accumulatore tecnico",
         "waterHeater": "Scaldacqua con scambiatore",
         "ews": "Sonda geotermica",
+        "distributor": "Distributore delle sonde (mandata e ritorno)",
         "well": "Pozzo con pompa sommersa",
         "floor": "Riscaldamento a pavimento / TABS",
         "radiator": "Radiatore",
@@ -2229,6 +2231,12 @@
         "maxDepth": "Profondità di perforazione max. [m]",
         "maxDepthHint": "Secondo autorizzazione.",
         "square": "2 × 2 a quadrato invece che in linea",
+        "distributor": "Distributore delle sonde",
+        "distributors": {
+          "none": "senza distributore",
+          "inside": "distributore nel locale tecnico",
+          "outside": "distributore all’esterno dell’edificio"
+        },
         "design": "Temperatura di progetto (3.1, tabella 2)",
         "regeneration": "Tasso di rigenerazione fBHE",
         "regenerations": {

@@ -163,6 +163,7 @@ export function EwsSection({
           {required("count", "probes", 0, t("countHint"))}
           {required("spacing", "spacing", 1, t("spacingHint"))}
           {num("maxDepth", "maxDepth", 0, undefined, t("maxDepthHint"))}
+          <OptionField label={t("distributor")} value={e.distributor} options={["none", "inside", "outside"] as const} optionLabel={(v) => t(`distributors.${v}`)} editable={editable} onChange={(v) => setEws({ distributor: v })} />
           {e.probes === 4 && (
             <div className="flex items-end pb-2">
               <Toggle label={t("square")} checked={e.square} editable={editable} onChange={(v) => setEws({ square: v })} />
