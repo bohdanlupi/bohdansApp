@@ -2050,6 +2050,12 @@
           "0.9": "pS = 0,9 · pSV (pSV ≥ 1,15 · pfin)"
         },
         "valvesHint": "Soupape au point le plus haut du producteur ou directement après la tubulure de départ, non obturable (6.2.4). Producteurs avec vaporisation : soupape selon le débit de vapeur du fabricant, iSA2 selon tableau 9 colonne A (≤ 10 m, ≤ 8 coudes) ; sortie au moins un DN plus grande que l’entrée.",
+        "sourceValvesHint": "Circuit d’eau glycolée / intermédiaire : l’évaporateur de la pompe à chaleur est un échangeur sans vaporisation, la soupape est donc dimensionnée selon la dilatation (6.2.3, éq. 19 : qV = Φ · 1 l/(h·kW), conduites selon tableau 5). Φ = puissance frigorifique des sondes géothermiques, sinon la puissance de chauffage de la pompe à chaleur (du côté de la sécurité). Aucun organe d’arrêt entre l’évaporateur et la soupape ; la conduite iSA2 peut se terminer dans la chaufferie.",
+        "fromHeating": "(puissance de chauffage)",
+        "sourceCircuit": {
+          "hpBrine": "circuit d’eau glycolée",
+          "hpWater": "circuit intermédiaire"
+        },
         "vessel": "Vase d’expansion sous pression chauffage (3.2.4, 3.2.5)",
         "medium": "Fluide caloporteur",
         "media": {

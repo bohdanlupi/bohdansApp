@@ -3,6 +3,8 @@
 //     with a Sole/Wasser-WP, separately for the Solekreis (3.2.4: X = 2.5, Vwr ≥ 3 dm³, e up to 20 °C / 40 °C)
 //   – Sicherheitsventil per Wärmeerzeuger (6.2.3: by Verdampfung qm = Φmax / he, or by Ausdehnung qV = ΦN · 1 l/(h·kW)),
 //     pressures after Tabelle 11 / 12, line sizes after Tabelle 3, 5 and 9.
+//   – Sicherheitsventil of the Sole- / Zwischenkreis at the Verdampfer of a WP: a Wärmeübertrager without Verdampfung,
+//     so sized by Ausdehnung (6.2.3, Gl. 19) with its Nennleistung (Kälteleistung, else the Heizleistung).
 // All pressures are gauge pressures in bar.
 
 import type { EmitterType, GeneratorType } from "./plan-schema";
@@ -231,6 +233,20 @@ export type ValveResult = {
   isa: number | null;
 };
 
+/** Sicherheitsventil of the Sole- / Zwischenkreis of a Sole/Wasser- or Wasser/Wasser-WP (sized by Ausdehnung). */
+export type SourceValveResult = {
+  /** Id of the generator unit. */
+  id: string;
+  generator: "hpBrine" | "hpWater";
+  /** Nennleistung of the Verdampfer [kW]; `fromHeating`: the Heizleistung of the WP, as no Kälteleistung is known. */
+  power: number | null;
+  fromHeating: boolean;
+  /** Volumenstrom qV = Φ · 1 l/(h·kW) [l/h]. */
+  flow: number | null;
+  isv: number | null;
+  isa: number | null;
+};
+
 export type SafetyResult = {
   phiN: number;
   x: number;
@@ -242,6 +258,7 @@ export type SafetyResult = {
   vessel: VesselResult;
   isl: number | null;
   valves: ValveResult[];
+  sourceValves: SourceValveResult[];
   /**
    * Solekreis after HE301-01, its content from the EWS calculation unless entered, and the minimum size after SIA 384/6
    * 3.4.2.6 (3 × ΔV/V0, ≥ 18 l); the larger one is chosen.
@@ -283,6 +300,13 @@ export function evaluateSafety(data: PlantData, ews: EwsResult | null = null): S
     const lines = power !== null ? expansionValveLines(power) : null;
     return { id, generator: type, power, mode: "expansion", flow: power, isv: lines?.isv ?? null, isa: lines?.isa ?? null };
   });
+  const sourceValves = data.generators.flatMap(({ id, type, power }): SourceValveResult[] => {
+    if (type !== "hpBrine" && type !== "hpWater") return [];
+    const cooling = type === "hpBrine" ? data.ews.coolingCapacity : null;
+    const phi = cooling ?? power;
+    const lines = phi !== null ? expansionValveLines(phi) : null;
+    return [{ id, generator: type, power: phi, fromHeating: cooling === null && phi !== null, flow: phi, isv: lines?.isv ?? null, isa: lines?.isa ?? null }];
+  });
   const b = s.brine;
   const types = data.generators.map((g) => g.type);
   const brine = types.includes("hpBrine")
@@ -301,5 +325,5 @@ export function evaluateSafety(data: PlantData, ews: EwsResult | null = null): S
   if (meanTemp > 70) hints.push("preVessel");
   if (types.includes("logWood")) hints.push("logWood");
   if (vessel.pfin > 2.3) hints.push("highPressure");
-  return { phiN, x, e, meanTemp, eSto, vsysEstimate, vsys, vessel, isl: phiN > 0 ? islDn(phiN) : null, valves, brine, hints };
+  return { phiN, x, e, meanTemp, eSto, vsysEstimate, vsys, vessel, isl: phiN > 0 ? islDn(phiN) : null, valves, sourceValves, brine, hints };
 }

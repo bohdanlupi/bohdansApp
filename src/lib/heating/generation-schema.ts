@@ -572,6 +572,13 @@ export function buildGenerationSchema(
     if (sub) text(xm, y - 62, sub, 6.5, { muted: true });
   }
 
+  /** Sicherheitsventil of the Sole- / Zwischenkreis on its line from the Verdampfer, before any Absperrung (6.2.3). */
+  function sourceSafetyValve(x: number, y: number) {
+    dot(x, y, "brineR");
+    used.add("safetyValve");
+    add(...safetyValve(x, y, -1));
+  }
+
   /** Bottom of a U-tube from x (kind kl, down) to x + 2r (kind kr, up). */
   function uBend(x: number, y: number, r: number, kl: PipeKind, kr: PipeKind): Prim[] {
     const arc = (x1: number, y1: number, x2: number, y2: number, kind: PipeKind): Prim => ({ t: "path", d: `M${x1},${y1} A${r},${r} 0 0 0 ${x2},${y2}`, fill: "none", stroke: pipeColors[kind], sw: 1.6 });
@@ -673,6 +680,7 @@ export function buildGenerationSchema(
       sym("drain", xa, YBALL + 14, "up", { side: sideOf("up", "left") });
       sym("drain", xb, YBALL + 14, "down", { side: sideOf("down", "left") });
       sym("pump", xb, YPUMP, "down");
+      sourceSafetyValve(xa + 14, top + 16);
       pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
       dot(xa, Y_VESSEL, "brineR");
       const v = safety.brine;
@@ -693,6 +701,7 @@ export function buildGenerationSchema(
     sym("ball", xb, yB + 20, "up");
     sym("drain", xb, yB + 34, "up", { side: sideOf("up", "left") });
     sym("pump", xb, yB + 62, "up");
+    sourceSafetyValve(gx - 40, yA);
     // Zwischenkreis → Platten-WT (on the ground) → Grundwasser: Förderbrunnen (Unterwasserpumpe), Rückgabebrunnen.
     used.add("plateHx");
     used.add("well");

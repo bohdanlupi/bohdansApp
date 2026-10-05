@@ -2050,6 +2050,12 @@
           "0.9": "pS = 0,9 · pSV (pSV ≥ 1,15 · pfin)"
         },
         "valvesHint": "Sicherheitsventil am höchsten Punkt des Wärmeerzeugers bzw. unmittelbar nach dem Vorlaufstutzen, unabsperrbar (6.2.4). Wärmeerzeuger mit Verdampfung: Ventil nach Dampfmassenstrom gemäss Hersteller, iSA2 nach Tabelle 9 Spalte A (≤ 10 m, ≤ 8 Bögen); Austritt mind. eine Nennweite grösser als der Eintritt.",
+        "sourceValvesHint": "Sole- / Zwischenkreis: Der Verdampfer der Wärmepumpe ist ein Wärmeübertrager ohne Verdampfung, das Sicherheitsventil wird deshalb nach Ausdehnung bemessen (6.2.3, Gl. 19: qV = Φ · 1 l/(h·kW), Leitungen nach Tabelle 5). Φ = Kälteleistung aus den Erdwärmesonden, sonst die Heizleistung der Wärmepumpe (auf der sicheren Seite). Zwischen Verdampfer und Sicherheitsventil keine Absperrung; die iSA2 darf im Heizraum enden.",
+        "fromHeating": "(Heizleistung)",
+        "sourceCircuit": {
+          "hpBrine": "Solekreis",
+          "hpWater": "Zwischenkreis"
+        },
         "vessel": "Druckausdehnungsgefäss Heizung (3.2.4, 3.2.5)",
         "medium": "Wärmeträgermedium",
         "media": {

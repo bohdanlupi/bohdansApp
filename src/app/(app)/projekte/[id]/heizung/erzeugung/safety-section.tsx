@@ -63,6 +63,21 @@ export function SafetySection({
                     <td className="py-1.5 text-right tabular-nums">{v.isa !== null ? `DN ${v.isa}` : "–"}</td>
                   </tr>
                 ))}
+                {result.sourceValves.map((v) => (
+                  <tr key={`source-${v.id}`} className="border-t">
+                    <td className="py-1.5 pr-2">
+                      {generatorName(data.generators, data.generators.find((u) => u.id === v.id)!, (g) => tp(`generation.short.${g}` as never))} · {t(`sourceCircuit.${v.generator}`)}
+                    </td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums">
+                      {v.power !== null ? fmt(v.power, 1) : "–"}
+                      {v.fromHeating && <span className="block text-xs text-muted-foreground">{t("fromHeating")}</span>}
+                    </td>
+                    <td className="py-1.5 pr-2">{t("mode.expansion")}</td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums">{v.flow !== null ? `${fmt(v.flow, 0)} l/h` : "–"}</td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums">{v.isv !== null ? `DN ${v.isv}` : "–"}</td>
+                    <td className="py-1.5 text-right tabular-nums">{v.isa !== null ? `DN ${v.isa}` : "–"}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -72,6 +87,7 @@ export function SafetySection({
           <OptionField label={t("closingLabel")} value={s.closing} options={["0.8", "0.9"] as const} optionLabel={closingLabel} editable={editable} onChange={(v) => setSafety({ closing: v })} />
         </div>
         <p className="text-xs text-muted-foreground">{t("valvesHint")}</p>
+        {result.sourceValves.length > 0 && <p className="text-xs text-muted-foreground">{t("sourceValvesHint")}</p>}
       </div>
 
       {/* Druckausdehnungsgefäss Heizung */}

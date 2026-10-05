@@ -2050,6 +2050,12 @@
           "0.9": "pS = 0,9 · pSV (pSV ≥ 1,15 · pfin)"
         },
         "valvesHint": "Valvola nel punto più alto del generatore o subito dopo il raccordo di mandata, non intercettabile (6.2.4). Generatori con evaporazione: valvola secondo la portata di vapore del fabbricante, iSA2 secondo tabella 9 colonna A (≤ 10 m, ≤ 8 curve); uscita almeno un DN più grande dell’entrata.",
+        "sourceValvesHint": "Circuito glicolato / intermedio: l’evaporatore della pompa di calore è uno scambiatore senza evaporazione, la valvola è quindi dimensionata secondo la dilatazione (6.2.3, eq. 19: qV = Φ · 1 l/(h·kW), condotte secondo tabella 5). Φ = potenza frigorifera delle sonde geotermiche, altrimenti la potenza termica della pompa di calore (a favore della sicurezza). Nessun organo d’intercettazione tra evaporatore e valvola; la condotta iSA2 può terminare nel locale caldaia.",
+        "fromHeating": "(potenza termica)",
+        "sourceCircuit": {
+          "hpBrine": "circuito glicolato",
+          "hpWater": "circuito intermedio"
+        },
         "vessel": "Vaso d’espansione a pressione riscaldamento (3.2.4, 3.2.5)",
         "medium": "Fluido termovettore",
         "media": {
