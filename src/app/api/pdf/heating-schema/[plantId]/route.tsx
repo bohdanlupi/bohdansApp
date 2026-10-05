@@ -4,6 +4,10 @@ import { createTranslator } from "next-intl";
 import { languageToLocale } from "@/i18n/config";
 import { getCurrentProfile } from "@/lib/auth";
 import { buildGenerationSchema, generationLabels, type PipeKind, type SymbolKey, symbolKeys } from "@/lib/heating/generation-schema";
+import { ewsContextOf } from "@/lib/heating/ews";
+import { evaluateHeatLoad } from "@/lib/heating/heat-load";
+import { parseHeatLoad } from "@/lib/heating/heat-load-schema";
+import { parseHeatingPlan } from "@/lib/heating/plan-schema";
 import { parsePlant } from "@/lib/heating/plant-schema";
 import { findPhase } from "@/lib/kwl/phases";
 import { parseSchemaPlan } from "@/lib/kwl/schema-plan";
@@ -27,9 +31,11 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const supabase = await createClient();
   const { data: plant } = await supabase.from("heating_plants").select("*").eq("id", plantId).maybeSingle();
   if (!plant) return new Response("Not found", { status: 404 });
-  const [{ data: project }, { data: firm }] = await Promise.all([
+  const [{ data: project }, { data: firm }, { data: planRow }, { data: calcs }] = await Promise.all([
     supabase.from("projects").select("*").eq("id", plant.project_id).maybeSingle(),
     supabase.from("firm_settings").select("*").eq("id", true).single(),
+    supabase.from("heating_plans").select("data").eq("project_id", plant.project_id).maybeSingle(),
+    supabase.from("heating_calcs").select("data").eq("project_id", plant.project_id),
   ]);
   if (!project) return new Response("Not found", { status: 404 });
   if (!firm) return new Response("Firm settings missing", { status: 500 });
@@ -40,7 +46,10 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const g = (key: string) => t(`heatingPlan.generation.${key}`);
   const k = (key: string) => t(`kwlSystem.plankopf.${key}`);
 
-  const schema = buildGenerationSchema(parsePlant(plant.data), generationLabels(g));
+  // Same project context as the page: site, EBF and the building heat load (Erdwärmesonden).
+  const heatingPlan = parseHeatingPlan(planRow?.data);
+  const heatLoad = (calcs ?? []).reduce((s, c) => s + evaluateHeatLoad(parseHeatLoad(c.data), heatingPlan.site, heatingPlan.catalog).building, 0);
+  const schema = buildGenerationSchema(parsePlant(plant.data), generationLabels(g), { ews: ewsContextOf(heatingPlan, heatLoad) });
   const plan = parseSchemaPlan(plant.schema_plan);
   const phase = plan.phase ? findPhase(plan.phase) : null;
 

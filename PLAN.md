@@ -262,7 +262,16 @@ Kompressor / Druckhaltepumpe (B.8/B.9) not yet.
 Generators are a list (heating_plants.data.generators: id, type, name, ΦN; several of one type; older type sets are
 migrated on parse, ids = type). Schema: SV teed off the VL below the Absperrungen (VL/RL at one height, no
 Rückflussverhinderer), MAG with Kappenventil + Entleerung and «Vorsicht nicht schliessen», Entleerungen (2.6.7) in
-VL/RL of each group above and below. Next: Warmwasser / Speicher sizing.
+VL/RL of each group above and below.
+Erdwärmesonden SIA 384/6 (2026-10-05, section 6 with a Sole/Wasser-WP): src/lib/heating/ews.ts + ews-data.ts – simplified
+method D.4 (Figur 9 pixel-digitised, Figuren 3 / 12 / 13–21 read at grid points, ±1 %), Volllaststunden Gl. 15–18 (min.
+1800 h), Zuschlag Gl. 20, Bodentemperatur C.2 (Gl. 4–10) and iteration Gl. 21/22 (stop at ≤ 5 m), Tabelle 2 R1–R4 with
+future neighbour probes 3.5 (Gl. 1–3, Q_H,li = (Q0 + ΔQ·Ath/AE)·1.25, no climate correction of SIA 380/1), hydraulics
+Darcy/Colebrook (laminar < 2300 → design +1.5 K), velocities, Verteiler ≤ 15 kPa, pump < 8 %, MAG 3 × ΔV/V0 ≥ 18 l
+(compared with the HE301 Sole-MAG, larger wins). «Einfache Anlage» check (≤ 4 EWS, monovalent, Wohnen, no cooling).
+Verified: D.4.8.1 111.5 m (norm 111.3), D.4.8.2 146.3 (146.5), D.4.8.4 R2 / 0 °C, D.7.4 0.187 kPa/m (0.19); the D.7.4
+Zuleitung values of the norm are 2× the formula (norm doubles the length). cp of the brines not in the norm (Clariant).
+Next: Warmwasser / Speicher sizing.
 
 KWL-Planung (2026-09-25): the Lüftung tab is a planning dossier by SIA 108 phases 31, 32, 33, 41, 51, 52, 53, 61
 (src/lib/kwl/phases.ts: goals + checklists DE/FR/IT with SIA 382/5 / SIA 108 references, conditional on the design

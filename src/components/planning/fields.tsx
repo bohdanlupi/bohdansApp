@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
 
 import { formatNumber, parseNumber } from "@/lib/number-input";
 import { cn } from "@/lib/utils";
@@ -97,22 +98,64 @@ export function Result({
   );
 }
 
-export function Section({ title, description, children, actions }: {
+// Collapsed sections, remembered in localStorage (falls back to memory when storage is blocked).
+const collapsedMemory = new Map<string, boolean>();
+const collapseListeners = new Set<() => void>();
+function subscribeCollapsed(listener: () => void) {
+  collapseListeners.add(listener);
+  return () => collapseListeners.delete(listener);
+}
+function readCollapsed(key: string | null): boolean {
+  if (!key) return false;
+  if (collapsedMemory.has(key)) return collapsedMemory.get(key)!;
+  try {
+    return window.localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+function writeCollapsed(key: string, value: boolean) {
+  collapsedMemory.set(key, value);
+  try {
+    window.localStorage.setItem(key, value ? "1" : "0");
+  } catch {
+    // storage blocked: kept in memory for this visit
+  }
+  collapseListeners.forEach((l) => l());
+}
+
+/**
+ * Bordered section with title, description and actions. With `collapseKey` it can be minimised to its title; the
+ * state is remembered per key in the browser (localStorage).
+ */
+export function Section({ title, description, children, actions, collapseKey }: {
   title: string;
   description?: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
+  collapseKey?: string;
 }) {
+  const storageKey = collapseKey ? `section-collapsed:${collapseKey}` : null;
+  const collapsed = useSyncExternalStore(subscribeCollapsed, () => readCollapsed(storageKey), () => false);
+  const toggle = () => storageKey && writeCollapsed(storageKey, !collapsed);
+  const heading = storageKey ? (
+    <button type="button" onClick={toggle} aria-expanded={!collapsed} className="flex items-center gap-1.5 text-left font-semibold hover:text-brand">
+      <ChevronDown className={cn("size-4 shrink-0 transition-transform", collapsed && "-rotate-90")} />
+      {title}
+    </button>
+  ) : (
+    <h2 className="font-semibold">{title}</h2>
+  );
   return (
     <section className="space-y-3 rounded-xl border p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="font-semibold">{title}</h2>
-          {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
+          {storageKey ? <h2>{heading}</h2> : heading}
+          {description && !collapsed && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
         </div>
-        {actions}
+        {!collapsed && actions}
       </div>
-      {children}
+      {!collapsed && children}
     </section>
   );
 }

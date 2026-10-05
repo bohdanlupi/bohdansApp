@@ -33,7 +33,7 @@ export function SafetySection({
   const closingLabel = (c: "0.8" | "0.9") => t(`closing.${c}`);
 
   return (
-    <Section title={`5 · ${t("title")}`} description={t("hint")}>
+    <Section title={`5 · ${t("title")}`} description={t("hint")} collapseKey="heating-generation:safety">
       {/* Sicherheitsventile per Wärmeerzeuger */}
       <div className="space-y-2">
         <h3 className="text-sm font-medium">{t("valves")}</h3>
@@ -115,7 +115,15 @@ export function SafetySection({
         <div className="space-y-3 border-t pt-3">
           <h3 className="text-sm font-medium">{t("brine")}</h3>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <NumberParam label={t("brineVsys")} value={s.brine.vsys} decimals={0} editable={editable} onChange={(v) => setBrine({ vsys: v })} hint={t("brineVsysHint")} />
+            <NumberParam
+              label={t("brineVsys")}
+              value={s.brine.vsys}
+              decimals={0}
+              editable={editable}
+              placeholder={result.brine.sia ? fmt(result.brine.vsys, 0) : ""}
+              onChange={(v) => setBrine({ vsys: v })}
+              hint={result.brine.sia ? t("brineVsysEws") : t("brineVsysHint")}
+            />
             <OptionField label={t("glycol")} value={s.brine.glycol} options={["propylene", "ethylene"] as const} optionLabel={(v) => t(`glycols.${v}`)} editable={editable} onChange={(v) => setBrine({ glycol: v, share: Number(Object.keys(glycolCurves[v])[0]) })} />
             <div className="space-y-1.5">
               <label htmlFor="brine-share" className="text-sm font-medium">
@@ -147,7 +155,13 @@ export function SafetySection({
             <Result label={t("r.vexTot")} value={fmt(result.brine.vexTot, 1)} unit="dm³" />
           </div>
           <VesselResults r={result.brine} pSV={s.brine.pSV} />
-          {!s.brine.vsys && <Notice>{t("brineVsysMissing")}</Notice>}
+          {result.brine.sia && (
+            <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
+              <Result label={t("r.siaMin")} value={fmt(result.brine.sia.min, 1)} unit="l" hint={t("r.siaMinHint")} />
+              <Result label={t("r.chosen")} value={fmt(result.brine.chosen, 0)} unit="l" tone="ok" hint={t("r.chosenHint")} />
+            </div>
+          )}
+          {!result.brine.vsys && <Notice>{t("brineVsysMissing")}</Notice>}
         </div>
       )}
 

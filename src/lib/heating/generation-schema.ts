@@ -23,6 +23,7 @@ import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
 
 import type { EmitterType, GeneratorType } from "./plan-schema";
 import { type CircuitType, generatorName, type PlantData } from "./plant-schema";
+import { emptyEwsContext, type EwsContext, evaluateEws } from "./ews";
 import { evaluateSafety } from "./safety";
 
 export type PipeKind = "vl" | "rl" | "brine" | "brineR" | "gw" | "gwR" | "pwc" | "pwh";
@@ -383,7 +384,11 @@ const genWidth = (g: GeneratorType | null) => (g === "hpWater" ? 270 : g === "hp
 /** Height of the generator symbol standing on the ground. */
 const genHeight = (g: GeneratorType | null) => (g === "district" ? 44 : g === "hpAir" || g === "hpBrine" || g === "hpWater" ? 72 : 60);
 
-export function buildGenerationSchema(data: PlantData, labels: GenerationLabels, opts: { groupNames?: (i: number) => string } = {}): GenerationSchema {
+export function buildGenerationSchema(
+  data: PlantData,
+  labels: GenerationLabels,
+  opts: { groupNames?: (i: number) => string; ews?: EwsContext } = {},
+): GenerationSchema {
   const lines: SchemaLine[] = [];
   const groups: SchemaGroup[] = [];
   const used = new Set<SymbolKey>();
@@ -421,7 +426,8 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
   // Generators stand on the ground; their legs rise to the mains, which run over all sectors.
   const gens = data.generators.length ? data.generators : [null];
   const x0 = 24;
-  const safety = evaluateSafety(data);
+  const ews = data.generators.some((g) => g.type === "hpBrine") ? evaluateEws(data, opts.ews ?? emptyEwsContext) : null;
+  const safety = evaluateSafety(data, ews);
   const MAG_ROOM = 95;
   const sourceRight = x0 + gens.reduce((s, u) => s + genWidth(u?.type ?? null), 0) + 10 + MAG_ROOM;
   let colX = x0;
@@ -549,7 +555,7 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
     sym("expansion", xa, yA + 70, "down", { side: sideOf("down", "left") });
     if (g === "hpBrine" && safety.brine) {
       const v = safety.brine;
-      text(xa - 15, yA + 106, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, 6.5, { bold: true });
+      text(xa - 15, yA + 106, v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel, 6.5, { bold: true });
     }
     sym("ball", xb, yB + 20, "up");
     sym("pump", xb, yB + 62, "up");
@@ -560,6 +566,7 @@ export function buildGenerationSchema(data: PlantData, labels: GenerationLabels,
       pipe("brine", [[xb, G + 60], [xb, G]]);
       add({ t: "path", d: `M${xa},${G + 60} A${(xb - xa) / 2},${(xb - xa) / 2} 0 0 0 ${xb},${G + 60}`, fill: "none", stroke: pipeColors.brine, sw: 1.6 });
       text((xa + xb) / 2, G + 60 + (xb - xa) / 2 + 14, labels.boreholes, 7, { bold: true });
+      if (ews?.length) text((xa + xb) / 2, G + 60 + (xb - xa) / 2 + 24, `${data.ews.probes} × ${Math.ceil(ews.length)} m`, 6.5, { muted: true });
       return;
     }
     // Zwischenkreis → Platten-WT (on the ground) → Grundwasser: Förderbrunnen (Unterwasserpumpe), Rückgabebrunnen.

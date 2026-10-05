@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { brineMedia, envelopeFactors, regenerationRates, requirementClasses, rockTypes } from "./ews-data";
 import { emitterTypes, type GeneratorType, generatorTypes } from "./plan-schema";
 
 // Wärmeerzeugungsanlage (heating_plants.data), chapter 242 Wärmeerzeugung in four sectors: Wärmequelle (generators),
@@ -89,6 +90,87 @@ const safetySchema = z.object({
   brine: brineSchema.catch(() => brineSchema.parse({})),
 });
 
+const layerSchema = z.object({
+  id: z.string().min(1).max(64),
+  /** Gesteinstyp of Tabelle 11 / 12 (null = own values). */
+  rock: z.enum(Object.keys(rockTypes) as [keyof typeof rockTypes, ...(keyof typeof rockTypes)[]]).nullable().catch(null),
+  thickness: z.number().finite().min(0).max(1000).catch(0),
+  lambda: z.number().finite().min(0.1).max(10).catch(2),
+  rhoC: z.number().finite().min(0.1).max(5).catch(2),
+});
+
+export type GroundLayer = z.infer<typeof layerSchema>;
+
+/** Erdwärmesonden after SIA 384/6 (inputs; results in ews.ts). Null = default from the project or the norm. */
+const ewsSchema = z.object({
+  diameter: z.union([z.literal(32), z.literal(40)]).catch(32),
+  probes: z.number().int().min(1).max(50).catch(1),
+  /** 4 EWS in a 2 × 2 square instead of a line. */
+  square: z.boolean().catch(false),
+  spacing: z.number().finite().min(1).max(50).catch(10),
+  /** Maximum Bohrtiefe of the permit [m]. */
+  maxDepth: num(0, 2000),
+  layers: z
+    .array(z.unknown())
+    .catch([])
+    .transform((list) =>
+      list.slice(0, 20).flatMap((l) => {
+        const parsed = layerSchema.safeParse(l);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ),
+  altitude: num(0, 5000),
+  thetaMean: num(-20, 30),
+  /** Bodenoberflächentemperatur for the Heizfall, if measured [°C]. */
+  thetaGs: num(-20, 30),
+  side: z.enum(["north", "south"]).catch("north"),
+  gradient: z.number().finite().min(0).max(0.2).catch(0.03),
+  heatLoad: num(0, 100000),
+  /** Wärmepumpe at the Auslegepunkt B0W35: Heizleistung, Kälteleistung; Heizleistung for Warmwasser (B0W55) [kW]. */
+  heatingCapacity: num(0, 100000),
+  coolingCapacity: num(0, 100000),
+  heatingCapacityHotWater: num(0, 100000),
+  hotWater: z.boolean().catch(true),
+  hotWaterLitres: z.number().finite().min(0).max(1000000).catch(0),
+  hotWaterTemp: z.number().finite().min(0).max(100).catch(55),
+  coldWaterTemp: z.number().finite().min(0).max(40).catch(10),
+  regeneration: z.enum(regenerationRates).catch("none"),
+  /** Anforderung R1–R4 (null = from the neighbour probes, else R1). */
+  requirement: z.enum(requirementClasses).nullable().catch(null),
+  neighbours: z
+    .object({
+      enabled: z.boolean().catch(false),
+      gsf: num(0, 10000000),
+      asf: num(0, 10000000),
+      aff: num(0, 10000000),
+      energyArea: num(0, 10000000),
+      category: z.enum(Object.keys(envelopeFactors) as [keyof typeof envelopeFactors, ...(keyof typeof envelopeFactors)[]]).catch("mfh"),
+      /** Q_H,li0 and ΔQ_H,li after SIA 380/1:2016 Tabelle 6, Q_W after Tabelle 27 [kWh/m²]. */
+      qHli0: num(0, 1000),
+      dqHli: num(0, 1000),
+      qW: num(0, 1000),
+      fGeo: num(0, 100),
+      f50m: num(0, 100),
+    })
+    .catch(() => ({ enabled: false, gsf: null, asf: null, aff: null, energyArea: null, category: "mfh" as const, qHli0: null, dqHli: null, qW: null, fGeo: null, f50m: null })),
+  medium: z.enum(Object.keys(brineMedia) as [keyof typeof brineMedia, ...(keyof typeof brineMedia)[]]).catch("eg25"),
+  cp: num(1, 5),
+  /** Temperature difference at the evaporator [K] (3.4.4.5: 3–4 K, max. 5 K). */
+  deltaT: z.number().finite().min(0.5).max(10).catch(3),
+  /** Zuleitung EWS – Verteiler (single length) and Solekreisleitung Verteiler – WP; PE SDR 11 outer diameter. */
+  feedLength: z.number().finite().min(0).max(10000).catch(10),
+  feedDn: z.number().int().catch(40),
+  mainLength: z.number().finite().min(0).max(10000).catch(10),
+  mainDn: z.number().int().catch(50),
+  distributorLoss: num(0, 1000),
+  evaporatorLoss: num(0, 1000),
+  pumpEfficiency: z.number().finite().min(0.05).max(1).catch(0.3),
+  /** Further contents (Verdampfer, Verteiler) [l]. */
+  extraVolume: num(0, 100000),
+  vesselPrePressure: z.number().finite().min(0).max(10).catch(1),
+  vesselMaxPressure: z.number().finite().min(0.5).max(20).catch(3),
+});
+
 export const plantSchema = z.object({
   /** Heat generators of the Anlage (Wärmequelle), connected in parallel. */
   generators: z
@@ -128,6 +210,7 @@ export const plantSchema = z.object({
       }),
     ),
   safety: safetySchema.catch(() => safetySchema.parse({})),
+  ews: ewsSchema.catch(() => ewsSchema.parse({})),
   notes: z.string().max(4000).catch(""),
 });
 

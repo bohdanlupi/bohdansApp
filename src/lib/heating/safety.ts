@@ -6,6 +6,7 @@
 // All pressures are gauge pressures in bar.
 
 import type { EmitterType, GeneratorType } from "./plan-schema";
+import type { EwsResult } from "./ews";
 import type { HeatingGroup, PlantData } from "./plant-schema";
 
 const G = 9.81;
@@ -241,11 +242,15 @@ export type SafetyResult = {
   vessel: VesselResult;
   isl: number | null;
   valves: ValveResult[];
-  brine: (VesselResult & { e: number; vsys: number }) | null;
+  /**
+   * Solekreis after HE301-01, its content from the EWS calculation unless entered, and the minimum size after SIA 384/6
+   * 3.4.2.6 (3 × ΔV/V0, ≥ 18 l); the larger one is chosen.
+   */
+  brine: (VesselResult & { e: number; vsys: number; sia: EwsResult["vessel"] | null; chosen: number | null }) | null;
   hints: ("pressureLimiter" | "waterShortage" | "preVessel" | "logWood" | "highPressure" | "noPower")[];
 };
 
-export function evaluateSafety(data: PlantData): SafetyResult {
+export function evaluateSafety(data: PlantData, ews: EwsResult | null = null): SafetyResult {
   const s = data.safety;
   const powers = data.generators.map((g) => g.power);
   const phiN = powers.reduce<number>((sum, p) => sum + (p ?? 0), 0);
@@ -283,12 +288,10 @@ export function evaluateSafety(data: PlantData): SafetyResult {
   const brine = types.includes("hpBrine")
     ? (() => {
         const eb = glycolExpansion(b.glycol, b.share, b.minTemp, b.regeneration ? 40 : 20);
-        const vsysB = b.vsys ?? 0;
-        return {
-          ...sizeVessel({ vsys: vsysB, vsto: 0, eSto: 0, e: eb, x: 2.5, height: b.height ?? 0, pv: 0, extraP0: 0, pSV: b.pSV, closing: b.closing, pfin: b.pfin, vn: b.vn, minReserve: 3 }),
-          e: eb,
-          vsys: vsysB,
-        };
+        const vsysB = b.vsys ?? ews?.volume ?? 0;
+        const v = sizeVessel({ vsys: vsysB, vsto: 0, eSto: 0, e: eb, x: 2.5, height: b.height ?? 0, pv: 0, extraP0: 0, pSV: b.pSV, closing: b.closing, pfin: b.pfin, vn: b.vn, minReserve: 3 });
+        const sia = ews?.vessel ?? null;
+        return { ...v, e: eb, vsys: vsysB, sia, chosen: v.vn !== null || sia ? Math.max(v.vn ?? 0, sia?.size ?? 0) : null };
       })()
     : null;
   const hints: SafetyResult["hints"] = [];

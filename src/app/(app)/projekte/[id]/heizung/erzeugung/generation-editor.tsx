@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { buildGenerationSchema, generationLabels } from "@/lib/heating/generation-schema";
 import { emitterTypes, generatorTypes, type HeatingParams, type HeatingPlan } from "@/lib/heating/plan-schema";
 import { circuitMismatch, circuitTypes, distributorTypes, type GeneratorUnit, generatorName, hotWaterConnections, type HeatingGroup, type PlantData } from "@/lib/heating/plant-schema";
+import { evaluateEws, ewsContextOf } from "@/lib/heating/ews";
 import { evaluateSafety } from "@/lib/heating/safety";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { formatNumber } from "@/lib/number-input";
@@ -21,6 +22,7 @@ import { formatNumber } from "@/lib/number-input";
 import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
 import { saveHeatingPlan, saveHeatingPlant, saveHeatingSchemaPlan } from "../actions";
 import { GenerationSchemaView } from "./generation-schema-view";
+import { EwsSection } from "./ews-section";
 import { SafetySection } from "./safety-section";
 
 /**
@@ -58,8 +60,11 @@ export function GenerationEditor({
   const status = building.status !== "saved" ? building.status : anlage.status;
 
   const labels = useMemo(() => generationLabels((key) => tg(key as never)), [tg]);
-  const schema = useMemo(() => buildGenerationSchema(d, labels), [d, labels]);
-  const safety = useMemo(() => evaluateSafety(d), [d]);
+  const ewsCtx = useMemo(() => ewsContextOf(building.plan, (power ?? 0) * 1000), [building.plan, power]);
+  const hasEws = d.generators.some((g) => g.type === "hpBrine");
+  const ews = useMemo(() => (hasEws ? evaluateEws(d, ewsCtx) : null), [d, ewsCtx, hasEws]);
+  const schema = useMemo(() => buildGenerationSchema(d, labels, { ews: ewsCtx }), [d, labels, ewsCtx]);
+  const safety = useMemo(() => evaluateSafety(d, ews), [d, ews]);
   const mismatched = d.groups.filter((g) => circuitMismatch(g.circuit, d.distributor));
 
   return (
@@ -69,7 +74,7 @@ export function GenerationEditor({
           <SaveIndicator status={status} />
         </div>
       )}
-      <Section title={t("system.building")} description={t("system.buildingHint")}>
+      <Section title={t("system.building")} description={t("system.buildingHint")} collapseKey="heating-generation:building">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <OptionField label={t("params.buildingType")} value={p.buildingType} options={["efh", "mfh", "nonResidential"] as const} optionLabel={o("buildingType")} editable={editable} onChange={(v) => setParam("buildingType", v)} />
           <OptionField label={t("params.construction")} value={p.construction} options={["new", "renovation", "replacement"] as const} optionLabel={o("construction")} editable={editable} onChange={(v) => setParam("construction", v)} />
@@ -82,7 +87,7 @@ export function GenerationEditor({
         </div>
       </Section>
 
-      <Section title={`1 · ${tg("sectors.source")}`} description={t("system.generatorsHint")}>
+      <Section title={`1 · ${tg("sectors.source")}`} description={t("system.generatorsHint")} collapseKey="heating-generation:source">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-sm font-medium">{t("system.generators")}</h3>
@@ -145,7 +150,7 @@ export function GenerationEditor({
       </Section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Section title={`2 · ${tg("sectors.hotWater")}`}>
+        <Section title={`2 · ${tg("sectors.hotWater")}`} collapseKey="heating-generation:hotWater">
           <Toggle label={tg("hotWater")} checked={d.hotWater} editable={editable} onChange={(v) => setPlant({ hotWater: v })} />
           {d.hotWater && (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -181,7 +186,7 @@ export function GenerationEditor({
           {d.hotWater && d.hotWaterConnection === "generator" && d.generators.length === 0 && <Notice>{tg("hotWaterNoGenerator")}</Notice>}
           {d.hotWater && d.hotWaterConnection === "group" && !d.groups.some((g) => g.id === d.hotWaterGroup) && <Notice>{tg("hotWaterNoGroup")}</Notice>}
         </Section>
-        <Section title={`3 · ${tg("sectors.storage")}`}>
+        <Section title={`3 · ${tg("sectors.storage")}`} collapseKey="heating-generation:storage">
           <Toggle label={t("storageToggle")} checked={d.storage} editable={editable} onChange={(v) => setPlant({ storage: v })} />
           {d.storage && <NumberParam label={tg("volume")} value={d.storageVolume} editable={editable} onChange={(v) => setPlant({ storageVolume: v })} />}
         </Section>
@@ -189,6 +194,7 @@ export function GenerationEditor({
 
       <Section
         title={`4 · ${tg("sectors.distribution")}`}
+        collapseKey="heating-generation:distribution"
         actions={
           editable && (
             <Button
@@ -285,8 +291,11 @@ export function GenerationEditor({
 
       <SafetySection data={d} result={safety} editable={editable} setSafety={(patch) => setPlant({ safety: { ...d.safety, ...patch } })} />
 
+      {ews && <EwsSection data={d} ctx={ewsCtx} result={ews} editable={editable} setEws={(patch) => setPlant({ ews: { ...d.ews, ...patch } })} />}
+
       <Section
         title={tg("schemaTitle")}
+        collapseKey="heating-generation:schema"
         description={tg("schemaHint")}
         actions={
           <SchemaPrintButton
@@ -303,7 +312,7 @@ export function GenerationEditor({
         <GenerationSchemaView schema={schema} label={tg("schemaTitle")} />
       </Section>
 
-      <Section title={t("system.notes")}>
+      <Section title={t("system.notes")} collapseKey="heating-generation:notes">
         <Textarea id="plant-notes" aria-label={t("system.notes")} value={d.notes} maxLength={4000} disabled={!editable} onChange={(e) => setPlant({ notes: e.target.value })} className="min-h-24 bg-field" />
       </Section>
     </div>
