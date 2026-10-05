@@ -25,6 +25,7 @@ import type { EmitterType, GeneratorType } from "./plan-schema";
 import { type CircuitType, generatorName, type PlantData } from "./plant-schema";
 import { emptyEwsContext, type EwsContext, evaluateEws } from "./ews";
 import { evaluateHydraulics, storageTemperatures } from "./hydraulics";
+import { componentTypes } from "./material";
 import { evaluateSafety } from "./safety";
 
 export type PipeKind = "vl" | "rl" | "brine" | "brineR" | "gw" | "gwR" | "pwc" | "pwh";
@@ -457,6 +458,10 @@ export function buildGenerationSchema(
     text(x, y, `NW ${c.size.d}`, 6, { anchor, muted: true });
     if (c.flow !== null) text(x, y + 7, `${Math.round(c.flow * 1000).toLocaleString("de-CH")} l/h`, 6, { anchor, muted: true });
   };
+  // Types of pumps, Dreiwegventile, Sicherheitsventile and Ausdehnungsgefässe (the picks of the Materialauszug).
+  const types = componentTypes(data, ews);
+  const typeText = (key: string, x: number, y: number, anchor: "start" | "middle" | "end" = "middle") =>
+    (types.get(key) ?? []).forEach((line, i) => text(x, y + i * 6.5, line, 5.5, { anchor, muted: true }));
   const MAG_ROOM = 95;
   const sourceRight = x0 + gens.reduce((s, u) => s + genWidth(u?.type ?? null, data), 0) + 10 + MAG_ROOM;
   let colX = x0;
@@ -494,6 +499,7 @@ export function buildGenerationSchema(
       dot(xv, ySV, "vl");
       used.add("safetyValve");
       add(...safetyValve(xv + 10, ySV, 1));
+      if (unit) typeText(`sv:gen:${unit.id}`, xv + 16, ySV - 36);
     }
     if (g === "pellets" || g === "logWood") {
       // Rücklaufhochhaltung: Dreiwegventil in the return, bypass from the supply.
@@ -501,8 +507,13 @@ export function buildGenerationSchema(
       dot(xv, YMR + 72, "vl");
       sym("valve3", xr, YMR + 72, "down", { port: sideOf("down", "left") });
       sym("pump", xr, YMR + 104, "down");
+      if (unit) {
+        typeText(`valve3:gen:${unit.id}`, xv - 4, YMR + 70, "end");
+        typeText(`pump:gen:${unit.id}`, xr - 10, YMR + 101, "end");
+      }
     } else if (g) {
       sym("pump", xr, YPUMP, "down");
+      if (unit) typeText(`pump:gen:${unit.id}`, xr - 10, YPUMP - 3, "end");
     }
     colX += w;
   }
@@ -515,7 +526,7 @@ export function buildGenerationSchema(
     pipe("rl", [[xd, YMR], [xd, Y_VESSEL], [xm, Y_VESSEL]]);
     dot(xd, YMR, "rl");
     const v = safety.vessel;
-    expansionVessel("rl", xm, -1, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, v.vn !== null ? `p0 ${v.p0.toFixed(1)} bar` : "");
+    expansionVessel("rl", xm, -1, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, v.vn !== null ? `p0 ${v.p0.toFixed(1)} bar` : "", "vessel:heating");
   }
   pipe("rl", [[sourceRight, YMR], [firstLeg + 32, YMR]]);
   text(x0, TITLE_Y, labels.sectors.source.toUpperCase(), 8, { anchor: "start", bold: true });
@@ -569,7 +580,7 @@ export function buildGenerationSchema(
    * Ausdehnungsgefäss connected from below: the branch comes along the tee line at Y_VESSEL to xm and rises through
    * the plombierte Absperrung (Kappenventil) and the Entleerung (on the side `drainSide`) into the vessel.
    */
-  function expansionVessel(kind: PipeKind, xm: number, drainSide: 1 | -1, name: string, sub = "") {
+  function expansionVessel(kind: PipeKind, xm: number, drainSide: 1 | -1, name: string, sub = "", typeKey = "") {
     const y = Y_VESSEL;
     pipe(kind, [[xm, y], [xm, y - 34]]);
     sym("capValve", xm, y - 13, "up");
@@ -580,6 +591,10 @@ export function buildGenerationSchema(
     text(xm, y + 17, rest.join(" "), 5.5, { bold: true });
     text(xm, sub ? y - 72 : y - 62, name, 6.5, { bold: true });
     if (sub) text(xm, y - 62, sub, 6.5, { muted: true });
+    if (typeKey) {
+      if (sub) typeText(typeKey, xm + 12, y - 47, "start");
+      else typeText(typeKey, xm, y - 72);
+    }
   }
 
   /**
@@ -696,11 +711,13 @@ export function buildGenerationSchema(
       sym("drain", xb, YBALL + 14, "down", { side: sideOf("down", "left") });
       sym("pump", xb, YPUMP, "down");
       sourceSafetyValve(xb, top - 12, 10);
+      typeText(`pump:source:${id}`, xb + 10, YPUMP - 3, "start");
+      typeText(`sv:source:${id}`, xb + 17, top - 48);
       nw(`source:${id}`, (xa + xb) / 2, YBALL + 36);
       pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
       dot(xa, Y_VESSEL, "brineR");
       const v = safety.brine;
-      expansionVessel("brineR", xa - 30, 1, v && v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel);
+      expansionVessel("brineR", xa - 30, 1, v && v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel, "", "vessel:source");
       return;
     }
     // Zwischenkreis: the lines leave the evaporator, rise over the source side and drop to the Platten-WT.
@@ -714,12 +731,14 @@ export function buildGenerationSchema(
     pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
     dot(xa, Y_VESSEL, "brineR");
     const vz = safety.brine;
-    expansionVessel("brineR", xa - 30, 1, vz && vz.chosen !== null ? `${labels.vessel} ${Math.round(vz.chosen)} l` : labels.vessel);
+    expansionVessel("brineR", xa - 30, 1, vz && vz.chosen !== null ? `${labels.vessel} ${Math.round(vz.chosen)} l` : labels.vessel, "", "vessel:source");
     sym("ball", xb, yB + 20, "up");
     sym("drain", xb, yB + 34, "up", { side: sideOf("up", "left") });
     sym("pump", xb, yB + 62, "up");
     sourceSafetyValve(xb, top - 12, -16);
-    nw(`source:${id}`, xa - 8, yA + 18, "end");
+    typeText(`pump:source:${id}`, xb - 10, yB + 59, "end");
+    typeText(`sv:source:${id}`, xb - 12, top - 4);
+    nw(`source:${id}`, (xa + xb) / 2, yA - 19);
     // Zwischenkreis → Platten-WT (on the ground) → Grundwasser: Förderbrunnen (Unterwasserpumpe), Rückgabebrunnen.
     used.add("plateHx");
     used.add("well");
@@ -777,6 +796,7 @@ export function buildGenerationSchema(
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, YMR]]);
       dot(xw - 22, YMR, "rl");
       sym("valve3", xw, YMV, "right", { port: sideOf("right", "below") });
+      typeText("valve3:hotWater", xw + 14, YMV - 20, "start");
       sym("ball", xw, YBALL, "down");
       sym("ball", xw - 22, YBALL, "up");
       nw("hotWater", xw + 4, YBALL + 30, "start");
@@ -790,6 +810,7 @@ export function buildGenerationSchema(
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
       sym("ball", xw, 236, "down");
       sym("pump", xw, 256, "down");
+      typeText("pump:hotWater", xw + 10, 239, "start");
       sym("check", xw, 278, "down");
       sym("ball", xw - 22, 280, "up");
       nw("hotWater", xw + 4, yV - 2, "start");
@@ -874,7 +895,7 @@ export function buildGenerationSchema(
   const n = Math.max(data.groups.length, 1);
   const xdR = dLeft + 20; // RL drop
   const xdV = dLeft + 42; // VL drop
-  const b0 = dLeft + 95; // bar start (room for the Hauptpumpe label)
+  const b0 = dLeft + (data.distributor === "pressurized" ? 125 : 95); // bar start (room for the Hauptpumpe texts)
   const b1 = b0 + n * GROUP_W + 6;
   const pressurized = data.distributor === "pressurized";
   pipe("vl", [[dLeft, YMV], [xdV, YMV], [xdV, YVD], [b0, YVD]]);
@@ -886,6 +907,7 @@ export function buildGenerationSchema(
     sym("pump", xdV, 240, "down");
     text(xdV + 12, 243, labels.mainPump, 6.5, { anchor: "start", muted: true });
     nw("main", xdV + 12, 252, "start");
+    typeText("pump:main", xdV + 12, 268, "start");
   } else if (!data.storage) {
     // Druckloser Verteiler: VL and RL short-circuited at the feed (Bypass).
     pipe("vl", [[b0 + 6, YVD], [b0 + 6, YRD]]);
@@ -954,6 +976,8 @@ export function buildGenerationSchema(
         dot(b, 250, "rl");
         sym("valve3", a, 250, "up", { port: sideOf("up", "right") });
         sym("pump", a, 205, "up");
+        typeText(`valve3:group:${group.id}`, a - 22, 248, "end");
+        typeText(`pump:group:${group.id}`, a + 10, 202, "start");
         break;
       case "throttle":
         // Drosselschaltung: Durchgangsventil, no group pump.
@@ -964,6 +988,7 @@ export function buildGenerationSchema(
         pipe("vl", [[a, 240], [b - 6, 240]]);
         dot(a, 240, "vl");
         sym("valve3", b, 240, "down", { port: sideOf("down", "left") });
+        typeText(`valve3:group:${group.id}`, b + 22, 238, "start");
         break;
       case "injection3":
         // Einspritzschaltung mit Dreiwegventil: primary valve in the return with its bypass, secondary bypass, pump.
@@ -972,6 +997,8 @@ export function buildGenerationSchema(
         sym("valve3", b, 262, "down", { port: sideOf("down", "left") });
         bypass(222);
         sym("pump", a, 190, "up");
+        typeText(`valve3:group:${group.id}`, b + 22, 260, "start");
+        typeText(`pump:group:${group.id}`, a + 10, 187, "start");
         break;
       case "injection2":
         // Einspritzschaltung mit Durchgangsventil: valve in the primary supply, Regulierventil, secondary bypass, pump.
@@ -979,6 +1006,7 @@ export function buildGenerationSchema(
         sym("regValve", b, 258, "down");
         bypass(222);
         sym("pump", a, 190, "up");
+        typeText(`pump:group:${group.id}`, a + 10, 187, "start");
         break;
     }
   });

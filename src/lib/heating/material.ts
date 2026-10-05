@@ -62,6 +62,72 @@ function valveFor<T extends { kvs: number }>(list: T[], flow: number | null): T 
   return sorted.find((v) => v.kvs >= flow / Math.sqrt(0.1)) ?? sorted.at(-1) ?? null;
 }
 
+/** Sicherheitsventil DN (Tabelle 5) at pSV: Afriso, else IMI DG/Hswiss (null: none in the catalogues). */
+function safetyValveFor(power: number | null, pSV: number) {
+  const dn = power !== null ? (expansionValveLines(power)?.isv ?? 15) : 15;
+  const thread = dnThread(dn) ?? 0.5;
+  const afriso = A.afrisoValves.find((v) => v.thread === thread && Math.abs(v.bar - pSV) < 1e-6);
+  const imi = A.imiValves.find((v) => v.dn === dn && Math.abs(v.bar - pSV) < 1e-6);
+  return { dn, thread, article: afriso ?? imi ?? null, maker: afriso ? "Afriso" : imi ? "IMI DG/H" : null };
+}
+
+/** Reflex N: the next size ≥ VN. */
+const vesselFor = (vn: number | null) => (vn !== null ? [...A.vessels].sort((a, b) => a.volume - b.volume).find((x) => x.volume >= vn - 1e-9) : undefined);
+
+/** Short type of a Biral pump from its catalogue text, e.g. ["PrimAX", "25-6"]. */
+const pumpType = (text: string) => {
+  const m = /^Biral (\w+) \S+ (\d+F?-\d+)/.exec(text);
+  return m ? [m[1], m[2]] : [text];
+};
+
+/**
+ * Types of the pumps, Dreiwegventile (with actuator), Sicherheitsventile and Ausdehnungsgefässe for the Prinzipschema,
+ * the same picks as in the Materialauszug. Keys: `pump:<circuit>`, `valve3:<circuit>`, `sv:<circuit>`, `vessel:heating`,
+ * `vessel:source`; circuits as in hydraulics.ts.
+ */
+export function componentTypes(data: PlantData, ews: EwsResult | null): Map<string, string[]> {
+  const safety = evaluateSafety(data, ews);
+  const circuits = evaluateHydraulics(data, ews);
+  const out = new Map<string, string[]>();
+  const circuitOf = (key: string) => circuits.find((c) => c.key === key);
+  const pump = (key: string, medium: "heating" | "brine") => {
+    const c = circuitOf(key);
+    const p = pumpFor(medium, c?.size ?? null, c?.flow ?? null);
+    if (p) out.set(`pump:${key}`, pumpType(p.text));
+  };
+  const valve3 = (key: string, list: { kvs: number; text: string }[], actuator: string) => {
+    const v = valveFor(list, circuitOf(key)?.flow ?? null);
+    if (v) out.set(`valve3:${key}`, [v.text.split(" ").at(-1)!, actuator]);
+  };
+  const sv = (key: string, power: number | null, pSV: number) => {
+    const v = safetyValveFor(power, pSV);
+    const size = v.maker === "Afriso" ? `${threadName(v.thread)}"` : `DN ${v.dn}`;
+    out.set(`sv:${key}`, [`${v.maker ?? "SV"} ${size}`, `${fmt(pSV, 1)} bar`]);
+  };
+  for (const u of data.generators) {
+    sv(`gen:${u.id}`, u.power, data.safety.pSV);
+    pump(`gen:${u.id}`, "heating");
+    if (u.type === "pellets" || u.type === "logWood") valve3(`gen:${u.id}`, A.mixingValves, "SAS61.03");
+    if (u.type === "hpBrine" || u.type === "hpWater") {
+      sv(`source:${u.id}`, safety.sourceValves.find((v) => v.id === u.id)?.power ?? null, data.safety.brine.pSV);
+      pump(`source:${u.id}`, u.type === "hpBrine" ? "brine" : "heating");
+    }
+  }
+  const vh = vesselFor(safety.vessel.vn);
+  if (vh) out.set("vessel:heating", [`Reflex N ${vh.volume}`]);
+  const vs = vesselFor(safety.brine?.chosen ?? null);
+  if (vs) out.set("vessel:source", [`Reflex N ${vs.volume}`]);
+  if (data.hotWater && data.hotWaterConnection === "diverter") valve3("hotWater", A.diverterValves, "GLB161.9E");
+  if (data.hotWater && data.hotWaterConnection === "generator") pump("hotWater", "heating");
+  if (data.distributor === "pressurized") pump("main", "heating");
+  for (const g of data.groups) {
+    const key = `group:${g.id}`;
+    if (g.circuit === "mixing" || g.circuit === "diverting" || g.circuit === "injection3") valve3(key, A.mixingValves, "SAS61.03");
+    if (g.circuit === "mixing" || g.circuit === "injection3" || g.circuit === "injection2") pump(key, "heating");
+  }
+  return out;
+}
+
 export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialLine[] {
   const safety = evaluateSafety(data, ews);
   const circuits = evaluateHydraulics(data, ews);
@@ -104,17 +170,14 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
   };
   /** Sicherheitsventil DN (Tabelle 5) at pSV: Afriso, else IMI DG/Hswiss; Entleerhahn before it, T-Stück on the line. */
   const safetyValve = (group: MaterialGroup, power: number | null, pSV: number, size: PipeSize | null) => {
-    const dn = power !== null ? (expansionValveLines(power)?.isv ?? 15) : 15;
-    const thread = dnThread(dn) ?? 0.5;
-    const afriso = A.afrisoValves.find((v) => v.thread === thread && Math.abs(v.bar - pSV) < 1e-6);
-    const imi = A.imiValves.find((v) => v.dn === dn && Math.abs(v.bar - pSV) < 1e-6);
-    article(group, "Meier Tobler", afriso ?? imi, 1, `Sicherheitsventil DN ${dn}, ${fmt(pSV, 1)} bar`);
+    const { dn, thread, article: valve } = safetyValveFor(power, pSV);
+    article(group, "Meier Tobler", valve, 1, `Sicherheitsventil DN ${dn}, ${fmt(pSV, 1)} bar`);
     tee(group, size, thread, 1);
     article(group, "Meier Tobler", A.drainValves.find((v) => v.thread === 0.5));
   };
   /** Reflex N (next size ≥ VN) with Reflex SU Kappenventil, Wandhalterung up to 25 l, Manometer by pSV. */
   const vessel = (group: MaterialGroup, vn: number | null, pSV: number, label: string) => {
-    const v = vn !== null ? [...A.vessels].sort((a, b) => a.volume - b.volume).find((x) => x.volume >= vn - 1e-9) : undefined;
+    const v = vesselFor(vn);
     article(group, "Meier Tobler", v, 1, `${label} (Nenninhalt nach Berechnung)`);
     const volume = v?.volume ?? vn ?? 0;
     article(group, "Meier Tobler", A.capValves.find((c) => c.thread === (volume <= 80 ? 0.75 : 1)));
