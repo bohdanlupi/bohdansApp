@@ -43,6 +43,57 @@ const groupSchema = z.object({
 
 export type HeatingGroup = z.infer<typeof groupSchema>;
 
+const closing = z.enum(["0.8", "0.9"]).catch("0.8");
+
+/** Solekreis of a Sole/Wasser-WP: own Druckausdehnungsgefäss (HE301-01 3.2.4). */
+const brineSchema = z.object({
+  vsys: num(0, 1000000),
+  glycol: z.enum(["ethylene", "propylene"]).catch("propylene"),
+  share: z.number().catch(25),
+  minTemp: z.number().finite().min(-40).max(20).catch(-5),
+  regeneration: z.boolean().catch(false),
+  height: num(0, 300),
+  pSV: z.number().finite().min(0.5).max(40).catch(3),
+  closing,
+  pfin: num(0, 40),
+  vn: num(0, 100000),
+});
+
+/** Sicherheitseinrichtungen after SWKI HE301-01 (inputs; results in safety.ts). */
+const safetySchema = z.object({
+  /** Nennwärmeleistung ΦN per generator [kW]. */
+  powers: z
+    .record(z.string(), z.unknown())
+    .catch({})
+    .transform((rec) =>
+      Object.fromEntries(
+        generatorTypes.flatMap((g) => {
+          const v = rec[g];
+          return typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 100000 ? [[g, v]] : [];
+        }),
+      ) as Partial<Record<GeneratorType, number>>,
+    ),
+  medium: z.enum(["water", "antifreeze30", "antifreeze40"]).catch("water"),
+  /** Mittlere Auslegungstemperatur (VL + RL) / 2 [°C]; null = from the Heizgruppen. */
+  meanTemp: num(0, 150),
+  /** Anlageinhalt without Speicher [dm³]; null = Richtwert after Tabelle 13. */
+  vsys: num(0, 1000000),
+  /** Maximum Speichertemperatur [°C] (null = 60). */
+  storageTemp: num(0, 150),
+  /** Static height from the vessel connection to the highest consumer [m]. */
+  height: num(0, 300),
+  /** Maximum abgesicherte Vorlauftemperatur [°C] (Dampfdruck above 100 °C). */
+  thetaMax: num(0, 150),
+  pSV: z.number().finite().min(0.5).max(40).catch(3),
+  closing,
+  pfin: num(0, 40),
+  /** Additional Vordruck with the vessel on the pressure side of the pump [bar]. */
+  extraP0: num(0, 10),
+  /** Chosen nominal volume [dm³]; null = next standard size. */
+  vn: num(0, 100000),
+  brine: brineSchema.catch(() => brineSchema.parse({})),
+});
+
 export const plantSchema = z.object({
   /** Heat generators of the Anlage (Wärmequelle), connected in parallel. */
   generators: set(generatorTypes),
@@ -73,6 +124,7 @@ export const plantSchema = z.object({
         return parsed.success ? [parsed.data] : [];
       }),
     ),
+  safety: safetySchema.catch(() => safetySchema.parse({})),
   notes: z.string().max(4000).catch(""),
 });
 

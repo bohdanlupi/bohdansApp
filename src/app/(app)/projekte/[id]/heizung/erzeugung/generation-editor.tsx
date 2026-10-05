@@ -14,12 +14,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { buildGenerationSchema, generationLabels } from "@/lib/heating/generation-schema";
 import { emitterTypes, generatorTypes, type HeatingParams, type HeatingPlan } from "@/lib/heating/plan-schema";
 import { circuitMismatch, circuitTypes, distributorTypes, hotWaterConnections,type HeatingGroup, type PlantData } from "@/lib/heating/plant-schema";
+import { evaluateSafety } from "@/lib/heating/safety";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { formatNumber } from "@/lib/number-input";
 
 import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
 import { saveHeatingPlan, saveHeatingPlant, saveHeatingSchemaPlan } from "../actions";
 import { GenerationSchemaView } from "./generation-schema-view";
+import { SafetySection } from "./safety-section";
 
 /**
  * 242 Wärmeerzeugung: the building data of the project (for the checklists) and the chosen Anlage in four sectors –
@@ -55,6 +57,7 @@ export function GenerationEditor({
 
   const labels = useMemo(() => generationLabels((key) => tg(key as never)), [tg]);
   const schema = useMemo(() => buildGenerationSchema(d, labels), [d, labels]);
+  const safety = useMemo(() => evaluateSafety(d), [d]);
   const mismatched = d.groups.filter((g) => circuitMismatch(g.circuit, d.distributor));
 
   return (
@@ -236,6 +239,8 @@ export function GenerationEditor({
           </Notice>
         )}
       </Section>
+
+      <SafetySection data={d} result={safety} editable={editable} setSafety={(patch) => setPlant({ safety: { ...d.safety, ...patch } })} />
 
       <Section
         title={tg("schemaTitle")}

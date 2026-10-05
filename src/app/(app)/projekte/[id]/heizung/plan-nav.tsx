@@ -12,7 +12,6 @@ export const distributionChapters = [
   ["verteilung/waermebedarf", "heatDemand"],
   ["verteilung/fussbodenheizung", "floorHeating"],
   ["verteilung/heizkoerper", "radiators"],
-  ["verteilung/sicherheit", "safety"],
   ["verteilung/schema", "schemaDistribution"],
 ] as const;
 

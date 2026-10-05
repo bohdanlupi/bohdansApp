@@ -1843,7 +1843,6 @@
       "heatDemand": "Fabbisogno di calore SIA 384/2",
       "floorHeating": "Riscaldamento a pavimento",
       "radiators": "Radiatori",
-      "safety": "Dispositivi di sicurezza",
       "schemaDistribution": "Schema di principio distribuzione"
     },
     "plant": {
@@ -1876,7 +1875,6 @@
     "placeholder": {
       "title": "In arrivo",
       "radiators": "Dimensionamento dei radiatori per locale dal fabbisogno di calore.",
-      "safety": "Espansione, valvola di sicurezza e altri dispositivi di sicurezza (SSIGA HE301-01, SIA 384/1).",
       "schemaDistribution": "Schema di principio della distribuzione (gruppi, collettori, locali) con cartiglio e legenda.",
       "text": "Questo capitolo sarà elaborato prossimamente."
     },
@@ -1936,7 +1934,8 @@
         "cold": "AF",
         "hot": "AC",
         "supply": "M",
-        "return": "R"
+        "return": "R",
+        "vessel": "VE"
       },
       "hotWater": "Scaldacqua caricato dall’impianto",
       "volume": "Volume [l]",
@@ -2003,7 +2002,8 @@
         "floor": "Riscaldamento a pavimento / TABS",
         "radiator": "Radiatore",
         "register": "Batteria / aerotermo",
-        "apparatus": "Gruppo / apparecchio con designazione"
+        "apparatus": "Gruppo / apparecchio con designazione",
+        "safetyValve": "Valvola di sicurezza"
       },
       "plankopf": {
         "plan": "Schema di principio",
@@ -2018,7 +2018,105 @@
       "hotWaterGenerator": "Generatore di calore",
       "hotWaterGroup": "Gruppo",
       "hotWaterNoGenerator": "Scegli prima un generatore sotto Fonte di calore.",
-      "hotWaterNoGroup": "Scegli il gruppo che carica lo scaldacqua (da creare sotto Distributore e gruppi)."
+      "hotWaterNoGroup": "Scegli il gruppo che carica lo scaldacqua (da creare sotto Distributore e gruppi).",
+      "safety": {
+        "title": "Dispositivi di sicurezza (SITC HE301-01)",
+        "hint": "Valvole di sicurezza per generatore e vaso d’espansione a pressione con precarica di gas (HE301-01 3.2.4, 3.2.5, 6.2, allegato B.6). Tutte le pressioni sono sovrappressioni.",
+        "valves": "Generatori e valvole di sicurezza (6.2)",
+        "noGenerators": "Scegli prima i generatori sotto Fonte di calore.",
+        "columns": {
+          "generator": "Generatore",
+          "power": "ΦN [kW]",
+          "mode": "Dimensionamento",
+          "flow": "Portata di scarico",
+          "isv": "iSV",
+          "isa": "iSA2"
+        },
+        "mode": {
+          "evaporation": "per evaporazione (qm = Φ / 2000 kJ/kg)",
+          "expansion": "per dilatazione (qV = ΦN · 1 l/h·kW, tab. 5)"
+        },
+        "byManufacturer": "= DN entrata VS",
+        "pSV": "Pressione di taratura pSV [bar]",
+        "pSVHint": "≤ pressione ammissibile PS del componente più debole (3.2.2).",
+        "closingLabel": "Pressione di chiusura della valvola",
+        "closing": {
+          "0.8": "pS = 0,8 · pSV (pSV ≥ 1,3 · pfin)",
+          "0.9": "pS = 0,9 · pSV (pSV ≥ 1,15 · pfin)"
+        },
+        "valvesHint": "Valvola nel punto più alto del generatore o subito dopo il raccordo di mandata, non intercettabile (6.2.4). Generatori con evaporazione: valvola secondo la portata di vapore del fabbricante, iSA2 secondo tabella 9 colonna A (≤ 10 m, ≤ 8 curve); uscita almeno un DN più grande dell’entrata.",
+        "vessel": "Vaso d’espansione a pressione riscaldamento (3.2.4, 3.2.5)",
+        "medium": "Fluido termovettore",
+        "media": {
+          "water": "Acqua",
+          "antifreeze30": "30 % vol. antigelo",
+          "antifreeze40": "40 % vol. antigelo"
+        },
+        "meanTemp": "Temperatura media di progetto [°C]",
+        "meanTempHint": "(M + R) / 2; vuoto = valore più alto dei gruppi.",
+        "vsys": "Contenuto Vsys senza accumulatore [dm³]",
+        "vsysHint": "Vuoto = valore indicativo secondo tabella 13 dai gruppi (emissione, potenza, mandata).",
+        "vsysSkipped": "Valore indicativo secondo tabella 13; {n} gruppo/i senza potenza, mandata o emissione non considerato/i.",
+        "storageTemp": "Temperatura max. accumulatore [°C]",
+        "storageTempHint": "Accumulatore {v} dm³, senza fattore X (eq. 4).",
+        "height": "Altezza statica hst [m]",
+        "heightHint": "Raccordo del vaso fino all’utenza più alta.",
+        "thetaMax": "Temperatura di mandata max. assicurata θmax [°C]",
+        "thetaMaxHint": "Pressione di vapore pv secondo tabella 2 (fino a 100 °C = 0).",
+        "extraP0": "Supplemento pressione iniziale [bar]",
+        "extraP0Hint": "Solo con allacciamento sul lato di mandata del circolatore (3.2.5).",
+        "pfin": "Pressione finale pfin [bar]",
+        "pfinHint": "Vuoto = valore max. ammesso secondo tabella 12.",
+        "vn": "Volume nominale scelto VN [dm³]",
+        "vnHint": "Vuoto = grandezza del fabbricante successiva ≥ VN,min.",
+        "brine": "Vaso d’espansione circuito salamoia (3.2.4)",
+        "brineVsys": "Contenuto circuito salamoia [dm³]",
+        "brineVsysHint": "Sonde geotermiche, condotte ed evaporatore.",
+        "brineVsysMissing": "Inserisci il contenuto del circuito salamoia – fino ad allora vale solo il volume di riserva minimo di 3 dm³.",
+        "glycol": "Antigelo",
+        "glycols": {
+          "propylene": "Glicole propilenico (allegato A.6)",
+          "ethylene": "Glicole etilenico (allegato A.5)"
+        },
+        "share": "Quota",
+        "minTemp": "Temperatura min. salamoia [°C]",
+        "regeneration": "Con rigenerazione del terreno (riscaldamento fino a 40 °C invece di 20 °C)",
+        "brineHeightHint": "Raccordo del vaso fino al punto più alto del circuito.",
+        "r": {
+          "phiN": "Potenza nominale ΦN",
+          "e": "Coefficiente di dilatazione e",
+          "eHint": "Tabella 1 a {t} °C",
+          "eBrineHint": "Allegato A, {a} → {b} °C",
+          "x": "Fattore X",
+          "vex": "Volume di dilatazione Vex",
+          "vwr": "Volume di riserva Vwr",
+          "vwrMin": "min. 3 dm³",
+          "vexTot": "Vex,tot",
+          "pst": "Pressione statica pst",
+          "p0": "Pressione iniziale p0",
+          "p0Hint": "pst + pv + 0,3 bar",
+          "pfin": "Pressione finale pfin",
+          "pfinHint": "pSV = {p} bar",
+          "vnMin": "VN,min",
+          "vn": "Volume nominale VN",
+          "pfil": "Pressione di riempimento pfil (freddo)",
+          "isl": "iSL",
+          "islHint": "Tabella 3"
+        },
+        "checks": {
+          "pressures": "La pressione finale pfin deve superare la pressione iniziale p0 – aumentare la pressione di taratura o verificare l’altezza statica.",
+          "volume": "Il volume nominale scelto è inferiore a VN,min.",
+          "safetyValve": "pSV ≥ 1,3 · pfin (o 1,15 · pfin) non è rispettato (tabella 11)."
+        },
+        "hints": {
+          "noPower": "Per almeno un generatore manca la potenza nominale ΦN.",
+          "pressureLimiter": "ΦN > 300 kW: limitatore di pressione necessario, che spegne e blocca prima dell’intervento della valvola (3.2.2).",
+          "waterShortage": "Generatori con evaporazione: dispositivo di mancanza d’acqua necessario (3.2.2, 7.2.5; eccezione ≤ 300 kW se non nel punto più alto).",
+          "preVessel": "Temperatura media superiore a 70 °C: prevedere un vaso intermedio non isolato prima del vaso d’espansione (3.2.2).",
+          "logWood": "Generatori a combustibile solido caricati a mano: rispettare i requisiti del 3.3 (scarico termico di sicurezza).",
+          "highPressure": "pfin superiore a 2,3 bar: la pressione di taratura supera 3,0 bar (tabella 12) – verificare la pressione di concessione e PS dei componenti."
+        }
+      }
     }
   },
   "heatLoad": {

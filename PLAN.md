@@ -119,7 +119,7 @@ can read everything; write access by role.
 /projekte/[id]/heizung/[31…61] SIA 108 phase: checklists (SIA 384/1, 384/2, 384/6, 384/7, EN-103, HE301 refs)
 /projekte/[id]/heizung/erzeugung?anlage=  242 Wärmeerzeugung (one page), per Anlage
 /projekte/[id]/heizung/verteilung/waermebedarf[/calcId]  243 Wärmebedarf SIA 384/2 (project-wide), PDF /api/pdf/heat-load/[calcId]
-/projekte/[id]/heizung/verteilung/{fussbodenheizung[/systemId],heizkoerper,sicherheit,schema}?anlage=  243, per Anlage
+/projekte/[id]/heizung/verteilung/{fussbodenheizung[/systemId],heizkoerper,schema}?anlage=  243, per Anlage
 /projekte/[id]/lueftung        KWL-Planung: design criteria + phase progress, PDF /api/pdf/kwl-plan/[id]
 /projekte/[id]/lueftung/[31…61] SIA 108 phase: checklists (SIA 382/5 refs) + calculations + diagrams
 /projekte/[id]/lueftung/wohnungen[/calcId]  dwelling calculations, PDF /api/pdf/kwl/[calcId]
@@ -252,7 +252,13 @@ Fernwärme Platten-WT with Wärmezähler + Regelventil, Holz with Rücklaufhochh
 from its parts («~ sinngemäss» in the legend). Each group: Kugelhähne, Thermometer VL/RL, VL-Fühler. Group emitters
 also feed the checklist params. Plan PDF /api/pdf/heating-schema/<plantId> (src/pdf/heating-schema-document.tsx,
 sheet as the Sanitär plan, trade «Heizung» in red; Plankopf in heating_plants.schema_plan, migration applied 2026-10-05).
-Next: Warmwasser / Speicher sizing.
+Sicherheitseinrichtungen moved from 243 into 242 (2026-10-05): src/lib/heating/safety.ts after SWKI HE301-01 –
+MAG mit vorgegebener Gasfüllung (3.2.4/3.2.5, verified against example B.6; e Tabelle 1, X Figur 5, Vsys Richtwert
+Tabelle 13 or entered, Speicher without X, p0 = pst + pv + 0.3, pfin ≤ pSV / 1.3 or 1.15, VN next maker size, pfil),
+separate Solekreis MAG (X = 2.5, Vwr ≥ 3 dm³, e from the glycol curves of Anhang A.5/A.6, digitised by eye), SV per
+generator (boilers by Verdampfung + iSA2 Tab. 9 col. A, WP / Fernwärme by Ausdehnung Tab. 5), iSL Tab. 3, hints
+(Druckbegrenzer > 300 kW, WMS, Vorschaltgefäss, 3.3). Schema: SV 1.26.10 on each generator, MAG on the RL main.
+Kompressor / Druckhaltepumpe (B.8/B.9) not yet. Next: Warmwasser / Speicher sizing.
 
 KWL-Planung (2026-09-25): the Lüftung tab is a planning dossier by SIA 108 phases 31, 32, 33, 41, 51, 52, 53, 61
 (src/lib/kwl/phases.ts: goals + checklists DE/FR/IT with SIA 382/5 / SIA 108 references, conditional on the design

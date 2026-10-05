@@ -1843,7 +1843,6 @@
       "heatDemand": "Wärmebedarf SIA 384/2",
       "floorHeating": "Fussbodenheizung",
       "radiators": "Heizkörper",
-      "safety": "Sicherheitseinrichtungen",
       "schemaDistribution": "Prinzipschema Wärmeverteilung"
     },
     "plant": {
@@ -1876,7 +1875,6 @@
     "placeholder": {
       "title": "Folgt",
       "radiators": "Heizkörperauslegung je Raum aus dem Wärmebedarf.",
-      "safety": "Expansion, Sicherheitsventil und weitere Sicherheitseinrichtungen (SWKI HE301-01, SIA 384/1).",
       "schemaDistribution": "Prinzipschema der Wärmeverteilung (Gruppen, Verteiler, Räume) mit Plankopf und Legende.",
       "text": "Dieses Kapitel wird als Nächstes ausgearbeitet."
     },
@@ -1936,7 +1934,8 @@
         "cold": "KW",
         "hot": "WW",
         "supply": "VL",
-        "return": "RL"
+        "return": "RL",
+        "vessel": "MAG"
       },
       "hotWater": "Wassererwärmer wird von der Anlage geladen",
       "volume": "Volumen [l]",
@@ -2003,7 +2002,8 @@
         "floor": "Fussbodenheizung / TABS",
         "radiator": "Heizkörper",
         "register": "Heizregister / Lufterhitzer",
-        "apparatus": "Heizgruppe / Apparat mit Bezeichnung"
+        "apparatus": "Heizgruppe / Apparat mit Bezeichnung",
+        "safetyValve": "Sicherheitsventil"
       },
       "plankopf": {
         "plan": "Prinzipschema",
@@ -2018,7 +2018,105 @@
       "hotWaterGenerator": "Wärmeerzeuger",
       "hotWaterGroup": "Heizgruppe",
       "hotWaterNoGenerator": "Wähle unter Wärmequelle zuerst einen Wärmeerzeuger.",
-      "hotWaterNoGroup": "Wähle die Heizgruppe, die den Wassererwärmer lädt (unter Verteiler und Heizgruppen anlegen)."
+      "hotWaterNoGroup": "Wähle die Heizgruppe, die den Wassererwärmer lädt (unter Verteiler und Heizgruppen anlegen).",
+      "safety": {
+        "title": "Sicherheitseinrichtungen (SWKI HE301-01)",
+        "hint": "Sicherheitsventile je Wärmeerzeuger und Druckausdehnungsgefäss mit vorgegebener Gasfüllung (HE301-01 3.2.4, 3.2.5, 6.2, Anhang B.6). Alle Drücke sind Überdrücke.",
+        "valves": "Wärmeerzeuger und Sicherheitsventile (6.2)",
+        "noGenerators": "Wähle unter Wärmequelle zuerst die Wärmeerzeuger.",
+        "columns": {
+          "generator": "Wärmeerzeuger",
+          "power": "ΦN [kW]",
+          "mode": "Bemessung",
+          "flow": "Abblasemenge",
+          "isv": "iSV",
+          "isa": "iSA2"
+        },
+        "mode": {
+          "evaporation": "nach Verdampfung (qm = Φ / 2000 kJ/kg)",
+          "expansion": "nach Ausdehnung (qV = ΦN · 1 l/h·kW, Tab. 5)"
+        },
+        "byManufacturer": "= DN SV-Eintritt",
+        "pSV": "Ansprechdruck pSV [bar]",
+        "pSVHint": "≤ zulässiger Druck PS des schwächsten Anlagenteils (3.2.2).",
+        "closingLabel": "Schliessdruck des Sicherheitsventils",
+        "closing": {
+          "0.8": "pS = 0,8 · pSV (pSV ≥ 1,3 · pfin)",
+          "0.9": "pS = 0,9 · pSV (pSV ≥ 1,15 · pfin)"
+        },
+        "valvesHint": "Sicherheitsventil am höchsten Punkt des Wärmeerzeugers bzw. unmittelbar nach dem Vorlaufstutzen, unabsperrbar (6.2.4). Wärmeerzeuger mit Verdampfung: Ventil nach Dampfmassenstrom gemäss Hersteller, iSA2 nach Tabelle 9 Spalte A (≤ 10 m, ≤ 8 Bögen); Austritt mind. eine Nennweite grösser als der Eintritt.",
+        "vessel": "Druckausdehnungsgefäss Heizung (3.2.4, 3.2.5)",
+        "medium": "Wärmeträgermedium",
+        "media": {
+          "water": "Wasser",
+          "antifreeze30": "30 Vol-% Frostschutz",
+          "antifreeze40": "40 Vol-% Frostschutz"
+        },
+        "meanTemp": "Mittlere Auslegungstemperatur [°C]",
+        "meanTempHint": "(VL + RL) / 2; leer = höchster Wert der Heizgruppen.",
+        "vsys": "Anlageinhalt Vsys ohne Speicher [dm³]",
+        "vsysHint": "Leer = Richtwert nach Tabelle 13 aus den Heizgruppen (Wärmeabgabe, Leistung, VL).",
+        "vsysSkipped": "Richtwert nach Tabelle 13; {n} Gruppe(n) ohne Leistung, VL oder Wärmeabgabe nicht berücksichtigt.",
+        "storageTemp": "Max. Speichertemperatur [°C]",
+        "storageTempHint": "Speicher {v} dm³, ohne Zuschlagsfaktor X (Gl. 4).",
+        "height": "Statische Höhe hst [m]",
+        "heightHint": "Anschlussstutzen Gefäss bis höchstgelegener Verbraucher.",
+        "thetaMax": "Max. abgesicherte VL-Temperatur θmax [°C]",
+        "thetaMaxHint": "Dampfdruck pv nach Tabelle 2 (bis 100 °C = 0).",
+        "extraP0": "Zuschlag Vordruck [bar]",
+        "extraP0Hint": "Nur bei Anschluss auf der Druckseite der Umwälzpumpe (3.2.5).",
+        "pfin": "Auslegungs-Enddruck pfin [bar]",
+        "pfinHint": "Leer = höchster zulässiger Wert nach Tabelle 12.",
+        "vn": "Gewähltes Nennvolumen VN [dm³]",
+        "vnHint": "Leer = nächste Herstellergrösse ≥ VN,min.",
+        "brine": "Druckausdehnungsgefäss Solekreis (3.2.4)",
+        "brineVsys": "Inhalt Solekreis [dm³]",
+        "brineVsysHint": "Erdwärmesonden, Leitungen und Verdampfer.",
+        "brineVsysMissing": "Inhalt des Solekreises eingeben – bis dahin gilt nur das Mindest-Vorlagevolumen von 3 dm³.",
+        "glycol": "Frostschutzmittel",
+        "glycols": {
+          "propylene": "Propylenglykol (Anhang A.6)",
+          "ethylene": "Ethylenglykol (Anhang A.5)"
+        },
+        "share": "Anteil",
+        "minTemp": "Tiefste Soletemperatur [°C]",
+        "regeneration": "Mit Erdreichregeneration (Erwärmung bis 40 °C statt 20 °C)",
+        "brineHeightHint": "Anschlussstutzen Gefäss bis höchster Punkt des Solekreises.",
+        "r": {
+          "phiN": "Nennwärmeleistung ΦN",
+          "e": "Ausdehnungskoeffizient e",
+          "eHint": "Tabelle 1 bei {t} °C",
+          "eBrineHint": "Anhang A, {a} → {b} °C",
+          "x": "Zuschlagsfaktor X",
+          "vex": "Ausdehnungsvolumen Vex",
+          "vwr": "Vorlagevolumen Vwr",
+          "vwrMin": "mind. 3 dm³",
+          "vexTot": "Vex,tot",
+          "pst": "Statischer Druck pst",
+          "p0": "Vordruck p0",
+          "p0Hint": "pst + pv + 0,3 bar",
+          "pfin": "Enddruck pfin",
+          "pfinHint": "pSV = {p} bar",
+          "vnMin": "VN,min",
+          "vn": "Nennvolumen VN",
+          "pfil": "Fülldruck pfil (kalt)",
+          "isl": "iSL",
+          "islHint": "Tabelle 3"
+        },
+        "checks": {
+          "pressures": "Der Enddruck pfin muss über dem Vordruck p0 liegen – Ansprechdruck erhöhen oder statische Höhe prüfen.",
+          "volume": "Das gewählte Nennvolumen ist kleiner als VN,min.",
+          "safetyValve": "pSV ≥ 1,3 · pfin (bzw. 1,15 · pfin) ist nicht eingehalten (Tabelle 11)."
+        },
+        "hints": {
+          "noPower": "Für die Bemessung fehlt bei mindestens einem Wärmeerzeuger die Nennwärmeleistung ΦN.",
+          "pressureLimiter": "ΦN > 300 kW: Druckbegrenzer erforderlich, der vor dem Ansprechen des Sicherheitsventils abschaltet und verriegelt (3.2.2).",
+          "waterShortage": "Wärmeerzeuger mit Verdampfung: Wassermangelsicherung erforderlich (3.2.2, 7.2.5; Ausnahme ≤ 300 kW, wenn nicht an höchster Stelle).",
+          "preVessel": "Mittlere Temperatur über 70 °C: nicht gedämmtes Vorschaltgefäss vor dem Ausdehnungsgefäss vorsehen (3.2.2).",
+          "logWood": "Von Hand beschickte Feststoff-Wärmeerzeuger: Anforderungen nach 3.3 (thermische Ablaufsicherung) beachten.",
+          "highPressure": "pfin über 2,3 bar: der Ansprechdruck liegt über 3,0 bar (Tabelle 12) – Konzessionsdruck und PS der Anlagenteile prüfen."
+        }
+      }
     }
   },
   "heatLoad": {

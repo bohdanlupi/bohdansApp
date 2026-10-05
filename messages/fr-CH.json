@@ -1843,7 +1843,6 @@
       "heatDemand": "Besoins de chaleur SIA 384/2",
       "floorHeating": "Chauffage au sol",
       "radiators": "Radiateurs",
-      "safety": "Dispositifs de sécurité",
       "schemaDistribution": "Schéma de principe distribution"
     },
     "plant": {
@@ -1876,7 +1875,6 @@
     "placeholder": {
       "title": "À suivre",
       "radiators": "Dimensionnement des radiateurs par local selon les besoins de chaleur.",
-      "safety": "Expansion, soupape de sécurité et autres dispositifs de sécurité (SSIGE HE301-01, SIA 384/1).",
       "schemaDistribution": "Schéma de principe de la distribution (groupes, distributeurs, locaux) avec cartouche et légende.",
       "text": "Ce chapitre sera élaboré prochainement."
     },
@@ -1936,7 +1934,8 @@
         "cold": "EF",
         "hot": "EC",
         "supply": "D",
-        "return": "R"
+        "return": "R",
+        "vessel": "VE"
       },
       "hotWater": "Chauffe-eau chargé par l’installation",
       "volume": "Volume [l]",
@@ -2003,7 +2002,8 @@
         "floor": "Chauffage au sol / TABS",
         "radiator": "Radiateur",
         "register": "Registre / aérotherme",
-        "apparatus": "Groupe / appareil avec désignation"
+        "apparatus": "Groupe / appareil avec désignation",
+        "safetyValve": "Soupape de sûreté"
       },
       "plankopf": {
         "plan": "Schéma de principe",
@@ -2018,7 +2018,105 @@
       "hotWaterGenerator": "Producteur de chaleur",
       "hotWaterGroup": "Groupe",
       "hotWaterNoGenerator": "Choisis d’abord un producteur sous Source de chaleur.",
-      "hotWaterNoGroup": "Choisis le groupe qui charge le chauffe-eau (à créer sous Distributeur et groupes)."
+      "hotWaterNoGroup": "Choisis le groupe qui charge le chauffe-eau (à créer sous Distributeur et groupes).",
+      "safety": {
+        "title": "Dispositifs de sécurité (SICC HE301-01)",
+        "hint": "Soupapes de sûreté par producteur et vase d’expansion sous pression à remplissage de gaz prédéfini (HE301-01 3.2.4, 3.2.5, 6.2, annexe B.6). Toutes les pressions sont des surpressions.",
+        "valves": "Producteurs et soupapes de sûreté (6.2)",
+        "noGenerators": "Choisis d’abord les producteurs sous Source de chaleur.",
+        "columns": {
+          "generator": "Producteur",
+          "power": "ΦN [kW]",
+          "mode": "Dimensionnement",
+          "flow": "Débit de décharge",
+          "isv": "iSV",
+          "isa": "iSA2"
+        },
+        "mode": {
+          "evaporation": "selon vaporisation (qm = Φ / 2000 kJ/kg)",
+          "expansion": "selon dilatation (qV = ΦN · 1 l/h·kW, tab. 5)"
+        },
+        "byManufacturer": "= DN entrée SS",
+        "pSV": "Pression de tarage pSV [bar]",
+        "pSVHint": "≤ pression admissible PS de l’élément le plus faible (3.2.2).",
+        "closingLabel": "Pression de fermeture de la soupape",
+        "closing": {
+          "0.8": "pS = 0,8 · pSV (pSV ≥ 1,3 · pfin)",
+          "0.9": "pS = 0,9 · pSV (pSV ≥ 1,15 · pfin)"
+        },
+        "valvesHint": "Soupape au point le plus haut du producteur ou directement après la tubulure de départ, non obturable (6.2.4). Producteurs avec vaporisation : soupape selon le débit de vapeur du fabricant, iSA2 selon tableau 9 colonne A (≤ 10 m, ≤ 8 coudes) ; sortie au moins un DN plus grande que l’entrée.",
+        "vessel": "Vase d’expansion sous pression chauffage (3.2.4, 3.2.5)",
+        "medium": "Fluide caloporteur",
+        "media": {
+          "water": "Eau",
+          "antifreeze30": "30 % vol. antigel",
+          "antifreeze40": "40 % vol. antigel"
+        },
+        "meanTemp": "Température moyenne de dimensionnement [°C]",
+        "meanTempHint": "(D + R) / 2 ; vide = valeur la plus haute des groupes.",
+        "vsys": "Contenu Vsys sans accumulateur [dm³]",
+        "vsysHint": "Vide = valeur indicative selon tableau 13 à partir des groupes (émission, puissance, départ).",
+        "vsysSkipped": "Valeur indicative selon tableau 13 ; {n} groupe(s) sans puissance, départ ou émission non pris en compte.",
+        "storageTemp": "Température max. de l’accumulateur [°C]",
+        "storageTempHint": "Accumulateur {v} dm³, sans facteur X (éq. 4).",
+        "height": "Hauteur statique hst [m]",
+        "heightHint": "Raccord du vase jusqu’au consommateur le plus haut.",
+        "thetaMax": "Température de départ max. sécurisée θmax [°C]",
+        "thetaMaxHint": "Pression de vapeur pv selon tableau 2 (jusqu’à 100 °C = 0).",
+        "extraP0": "Supplément pression initiale [bar]",
+        "extraP0Hint": "Seulement avec raccordement côté refoulement du circulateur (3.2.5).",
+        "pfin": "Pression finale pfin [bar]",
+        "pfinHint": "Vide = valeur max. admissible selon tableau 12.",
+        "vn": "Volume nominal choisi VN [dm³]",
+        "vnHint": "Vide = taille de fabricant suivante ≥ VN,min.",
+        "brine": "Vase d’expansion circuit d’eau glycolée (3.2.4)",
+        "brineVsys": "Contenu du circuit d’eau glycolée [dm³]",
+        "brineVsysHint": "Sondes géothermiques, conduites et évaporateur.",
+        "brineVsysMissing": "Saisis le contenu du circuit d’eau glycolée – jusque-là seul le volume de réserve minimal de 3 dm³ est pris en compte.",
+        "glycol": "Antigel",
+        "glycols": {
+          "propylene": "Propylène glycol (annexe A.6)",
+          "ethylene": "Éthylène glycol (annexe A.5)"
+        },
+        "share": "Proportion",
+        "minTemp": "Température min. de l’eau glycolée [°C]",
+        "regeneration": "Avec régénération du sol (réchauffement jusqu’à 40 °C au lieu de 20 °C)",
+        "brineHeightHint": "Raccord du vase jusqu’au point le plus haut du circuit.",
+        "r": {
+          "phiN": "Puissance nominale ΦN",
+          "e": "Coefficient de dilatation e",
+          "eHint": "Tableau 1 à {t} °C",
+          "eBrineHint": "Annexe A, {a} → {b} °C",
+          "x": "Facteur X",
+          "vex": "Volume de dilatation Vex",
+          "vwr": "Volume de réserve Vwr",
+          "vwrMin": "min. 3 dm³",
+          "vexTot": "Vex,tot",
+          "pst": "Pression statique pst",
+          "p0": "Pression initiale p0",
+          "p0Hint": "pst + pv + 0,3 bar",
+          "pfin": "Pression finale pfin",
+          "pfinHint": "pSV = {p} bar",
+          "vnMin": "VN,min",
+          "vn": "Volume nominal VN",
+          "pfil": "Pression de remplissage pfil (froid)",
+          "isl": "iSL",
+          "islHint": "Tableau 3"
+        },
+        "checks": {
+          "pressures": "La pression finale pfin doit dépasser la pression initiale p0 – augmenter la pression de tarage ou vérifier la hauteur statique.",
+          "volume": "Le volume nominal choisi est inférieur à VN,min.",
+          "safetyValve": "pSV ≥ 1,3 · pfin (ou 1,15 · pfin) n’est pas respecté (tableau 11)."
+        },
+        "hints": {
+          "noPower": "La puissance nominale ΦN manque pour au moins un producteur.",
+          "pressureLimiter": "ΦN > 300 kW : limiteur de pression nécessaire, coupant et verrouillant avant le déclenchement de la soupape (3.2.2).",
+          "waterShortage": "Producteurs avec vaporisation : sécurité de manque d’eau nécessaire (3.2.2, 7.2.5 ; exception ≤ 300 kW s’il n’est pas au point le plus haut).",
+          "preVessel": "Température moyenne supérieure à 70 °C : prévoir un vase intermédiaire non isolé avant le vase d’expansion (3.2.2).",
+          "logWood": "Producteurs à combustible solide chargés à la main : respecter les exigences de 3.3 (sécurité d’écoulement thermique).",
+          "highPressure": "pfin supérieure à 2,3 bar : la pression de tarage dépasse 3,0 bar (tableau 12) – vérifier la pression de concession et PS des éléments."
+        }
+      }
     }
   },
   "heatLoad": {
