@@ -78,6 +78,16 @@ export function SafetySection({
                     <td className="py-1.5 text-right tabular-nums">{v.isa !== null ? `DN ${v.isa}` : "–"}</td>
                   </tr>
                 ))}
+                {result.hotWaterValve && (
+                  <tr className="border-t">
+                    <td className="py-1.5 pr-2">{t("hotWaterValve")}</td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums">{fmt(result.hotWaterValve.power, 1)}</td>
+                    <td className="py-1.5 pr-2">{t("mode.expansion")}</td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums">{`${fmt(result.hotWaterValve.flow, 0)} l/h`}</td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums">{result.hotWaterValve.isv !== null ? `DN ${result.hotWaterValve.isv}` : "–"}</td>
+                    <td className="py-1.5 text-right tabular-nums">{result.hotWaterValve.isa !== null ? `DN ${result.hotWaterValve.isa}` : "–"}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

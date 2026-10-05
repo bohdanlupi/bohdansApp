@@ -2131,7 +2131,8 @@
           "logWood": "Producteurs à combustible solide chargés à la main : respecter les exigences de 3.3 (sécurité d’écoulement thermique).",
           "highPressure": "pfin supérieure à 2,3 bar : la pression de tarage dépasse 3,0 bar (tableau 12) – vérifier la pression de concession et PS des éléments."
         },
-        "brineVsysEws": "Vide = contenu du calcul des sondes (sondes, conduites, autre contenu)."
+        "brineVsysEws": "Vide = contenu du calcul des sondes (sondes, conduites, autre contenu).",
+        "hotWaterValve": "Chauffe-eau (corps de chauffe électrique)"
       },
       "addGenerator": "Ajouter un producteur",
       "removeGenerator": "Supprimer le producteur",
@@ -2392,6 +2393,59 @@
           "deltaT": "Écart à l’évaporateur supérieur à 5 K (3.4.4.5).",
           "laminar": "Écoulement laminaire dans les sondes : la température de dimensionnement a été relevée de 1,5 K (3.1.1.3, D.7.4.2)."
         }
+      },
+      "hotWaterElectric": "Corps de chauffe électrique [kW]",
+      "hotWaterElectricHint": "Usuel 9 kW, 0 = sans. Dimensionne la soupape du chauffe-eau.",
+      "material": {
+        "title": "Extrait de matériel",
+        "hint": "Tous les composants du schéma de principe. Producteurs, accumulateur, chauffe-eau, sondes géothermiques et puits neutres ; robinetterie sur Optipress-Therm de Nussbaum, autres composants du catalogue Meier Tobler.",
+        "hydraulics": "Débits et diamètres nominaux",
+        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT) ; DN = plus petite dimension Optipress-Therm avec v ≤ {v1} m/s (jusqu’au DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (au-delà). Circuit d’eau glycolée / intermédiaire : puissance frigorifique des sondes, sinon 75 % de la puissance de chauffage. Eau chaude : débit des producteurs.",
+        "columns": {
+          "circuit": "Circuit",
+          "power": "Puissance",
+          "deltaT": "ΔT [K]",
+          "flow": "Débit",
+          "calculated": "DN calculé",
+          "dn": "DN choisi"
+        },
+        "auto": "calculé (DN {dn})",
+        "autoNone": "calculé (–)",
+        "circuits": {
+          "generator": "Producteur",
+          "source": "Circuit de source",
+          "hotWater": "Raccordement eau chaude",
+          "group": "Groupe de chauffage",
+          "main": "Pompe principale distributeur"
+        },
+        "sourceCircuit": {
+          "hpBrine": "circuit d’eau glycolée",
+          "hpWater": "circuit intermédiaire"
+        },
+        "list": "Liste de matériel",
+        "listHint": "Pompes proposées seulement selon le DN et le débit (hauteur 6 m) – vérifier avec la courbe de la pompe. Vannes de réglage avec kvs pour Δp 10 kPa. Reflex N : vérifier le raccordement et la pression de service max. avec la fiche technique.",
+        "groups": {
+          "source": "Production de chaleur",
+          "brine": "Circuit d’eau glycolée / intermédiaire",
+          "expansion": "Maintien de pression chauffage",
+          "hotWater": "Eau chaude",
+          "storage": "Accumulateur",
+          "distribution": "Distributeur et groupes"
+        },
+        "article": "Article",
+        "text": "Désignation",
+        "quantity": "Quantité",
+        "neutral": "neutre",
+        "chapter": "Chapitre",
+        "newGroupOption": "Nouveau groupe",
+        "targetLv": "Descriptif",
+        "groupTitle": "Titre du nouveau groupe",
+        "lvGroup": "Production de chaleur {name}",
+        "insertIntoLv": "Reprendre dans le descriptif",
+        "inserted": "{count} positions reprises dans le descriptif.",
+        "saveFirst": "Enregistrer d’abord",
+        "noLv": "Pas encore de descriptif dans le projet.",
+        "toLvs": "Vers les descriptifs"
       }
     }
   },

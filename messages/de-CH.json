@@ -2131,7 +2131,8 @@
           "logWood": "Von Hand beschickte Feststoff-Wärmeerzeuger: Anforderungen nach 3.3 (thermische Ablaufsicherung) beachten.",
           "highPressure": "pfin über 2,3 bar: der Ansprechdruck liegt über 3,0 bar (Tabelle 12) – Konzessionsdruck und PS der Anlagenteile prüfen."
         },
-        "brineVsysEws": "Leer = Inhalt aus der Erdwärmesonden-Berechnung (Sonden, Zuleitungen, weiterer Inhalt)."
+        "brineVsysEws": "Leer = Inhalt aus der Erdwärmesonden-Berechnung (Sonden, Zuleitungen, weiterer Inhalt).",
+        "hotWaterValve": "Wassererwärmer (Elektroeinsatz)"
       },
       "addGenerator": "Wärmeerzeuger hinzufügen",
       "removeGenerator": "Wärmeerzeuger entfernen",
@@ -2392,6 +2393,59 @@
           "deltaT": "Spreizung am Verdampfer über 5 K (3.4.4.5).",
           "laminar": "Laminare Strömung in den Sonden: Die Auslegetemperatur wurde um 1,5 K angehoben (3.1.1.3, D.7.4.2)."
         }
+      },
+      "hotWaterElectric": "Elektroeinsatz [kW]",
+      "hotWaterElectricHint": "Üblich 9 kW, 0 = ohne. Bemisst das Sicherheitsventil des Wassererwärmers.",
+      "material": {
+        "title": "Materialauszug",
+        "hint": "Alle Komponenten des Prinzipschemas. Wärmeerzeuger, Speicher, Wassererwärmer, Erdwärmesonden und Brunnen neutral; Armaturen auf Optipress-Therm von Nussbaum, übrige Komponenten aus dem Meier-Tobler-Katalog.",
+        "hydraulics": "Volumenströme und Nennweiten",
+        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT); DN = kleinste Optipress-Therm-Dimension mit v ≤ {v1} m/s (bis DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (grösser). Sole-/Zwischenkreis: Kälteleistung aus den Erdwärmesonden, sonst 75 % der Heizleistung. Warmwasser: Volumenstrom der Wärmeerzeuger.",
+        "columns": {
+          "circuit": "Kreis",
+          "power": "Leistung",
+          "deltaT": "ΔT [K]",
+          "flow": "Volumenstrom",
+          "calculated": "DN berechnet",
+          "dn": "DN gewählt"
+        },
+        "auto": "berechnet (DN {dn})",
+        "autoNone": "berechnet (–)",
+        "circuits": {
+          "generator": "Wärmeerzeuger",
+          "source": "Quellenkreis",
+          "hotWater": "Warmwasser-Anschluss",
+          "group": "Heizgruppe",
+          "main": "Hauptpumpe Verteiler"
+        },
+        "sourceCircuit": {
+          "hpBrine": "Solekreis",
+          "hpWater": "Zwischenkreis"
+        },
+        "list": "Materialliste",
+        "listHint": "Pumpen nur nach Nennweite und Volumenstrom vorgeschlagen (Förderhöhe 6 m) – mit der Pumpenkennlinie prüfen. Regelventile mit kvs bei Δp 10 kPa. Reflex N: Anschluss und max. Betriebsdruck mit dem Datenblatt prüfen.",
+        "groups": {
+          "source": "Wärmeerzeugung",
+          "brine": "Sole- / Zwischenkreis",
+          "expansion": "Druckhaltung Heizung",
+          "hotWater": "Warmwasser",
+          "storage": "Energiespeicher",
+          "distribution": "Verteiler und Heizgruppen"
+        },
+        "article": "Artikel",
+        "text": "Bezeichnung",
+        "quantity": "Menge",
+        "neutral": "neutral",
+        "chapter": "Kapitel",
+        "newGroupOption": "Neue Gruppe",
+        "targetLv": "Leistungsverzeichnis",
+        "groupTitle": "Titel der neuen Gruppe",
+        "lvGroup": "Wärmeerzeugung {name}",
+        "insertIntoLv": "Ins LV übernehmen",
+        "inserted": "{count} Positionen ins LV übernommen.",
+        "saveFirst": "Zuerst speichern",
+        "noLv": "Noch kein Leistungsverzeichnis im Projekt.",
+        "toLvs": "Zu den Leistungsverzeichnissen"
       }
     }
   },

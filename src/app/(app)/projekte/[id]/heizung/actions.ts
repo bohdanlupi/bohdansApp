@@ -9,10 +9,17 @@ import type { FormState } from "@/lib/form-state";
 import { emptyFloorSystem, parseFloorSystem } from "@/lib/heating/floor-schema";
 import { emptyHeatLoad, parseHeatLoad } from "@/lib/heating/heat-load-schema";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
+import { evaluateEws, ewsContextOf } from "@/lib/heating/ews";
+import { evaluateHeatLoad } from "@/lib/heating/heat-load";
+import { type MaterialGroup, materialGroups, type MaterialLine, plantMaterial } from "@/lib/heating/material";
 import { emptyPlant, parsePlant } from "@/lib/heating/plant-schema";
 import { initialsOf, nextRevisionIndex, parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import type { AppLanguage } from "@/lib/supabase/types";
+import { renumberLv } from "@/lib/tree-actions";
+
+import { loadHeatCalcs, loadHeatingPlan } from "./load-plan";
 
 const nameSchema = z.string().trim().min(1).max(200);
 const ids = z.tuple([z.uuid(), z.uuid()]);
@@ -254,4 +261,132 @@ export async function deleteHeatingSystem(id: string, projectId: string): Promis
 
   revalidatePath(`/projekte/${projectId}/heizung`, "layout");
   redirect(`/projekte/${projectId}/heizung/verteilung/fussbodenheizung`);
+}
+
+// ---------------------------------------------------------------------------
+// Materialauszug 242 → LV
+// ---------------------------------------------------------------------------
+
+const makeLabel: Record<AppLanguage, { make: string; number: string }> = {
+  de: { make: "Fabrikat", number: "Art.-Nr." },
+  fr: { make: "Fabricant", number: "N° d’art." },
+  it: { make: "Fabbricante", number: "N. art." },
+};
+
+const materialTargets = z.record(z.enum(materialGroups), z.uuid().nullable());
+
+/**
+ * Inserts the Materialauszug of an Anlage into an LV: each group (Wärmeerzeugung, Sole-/Zwischenkreis, Druckhaltung,
+ * Warmwasser, Energiespeicher, Verteilung) into its chosen chapter, groups without one into a new group `groupTitle`.
+ * Articles of the Nussbaum and Meier Tobler IGH catalogues become catalogue positions, the neutral parts R-positions.
+ */
+export async function insertHeatingMaterial(
+  plantId: string,
+  projectId: string,
+  lvId: string,
+  groupTitle: string,
+  targets: Partial<Record<MaterialGroup, string | null>> = {},
+): Promise<{ error?: string; count?: number }> {
+  await assertRole("admin", "planer");
+  const parsedTargets = materialTargets.safeParse(targets);
+  if (!z.array(z.uuid()).safeParse([plantId, projectId, lvId]).success || !parsedTargets.success) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  const [{ data: plant }, { data: lv }, plan, calcs] = await Promise.all([
+    supabase.from("heating_plants").select("data").eq("id", plantId).eq("project_id", projectId).maybeSingle(),
+    supabase.from("lvs").select("id, language").eq("id", lvId).eq("project_id", projectId).maybeSingle(),
+    loadHeatingPlan(projectId),
+    loadHeatCalcs(projectId),
+  ]);
+  if (!plant || !lv) return { error: "invalidInput" };
+
+  const data = parsePlant(plant.data);
+  const load = calcs.reduce((s, c) => s + evaluateHeatLoad(c.data, plan.site, plan.catalog).building, 0);
+  const ews = data.generators.some((g) => g.type === "hpBrine") ? evaluateEws(data, ewsContextOf(plan, load)) : null;
+  const lines = plantMaterial(data, ews).filter((l) => l.quantity > 0);
+  if (!lines.length) return { error: "invalidInput" };
+
+  // Chapters must be groups of this LV; lines without one need the title of the new group.
+  const chosen = [...new Set(Object.values(parsedTargets.data).filter((v): v is string => !!v))];
+  const { data: groups } = chosen.length
+    ? await supabase.from("lv_nodes").select("id").eq("lv_id", lvId).eq("kind", "group").in("id", chosen)
+    : { data: [] as { id: string }[] };
+  const valid = new Set((groups ?? []).map((g) => g.id));
+  const chapterOf = (group: MaterialGroup) => {
+    const id = parsedTargets.data[group];
+    return id && valid.has(id) ? id : null;
+  };
+  const needsGroup = lines.some((l) => !chapterOf(l.group));
+  const title = nameSchema.safeParse(groupTitle);
+  if (needsGroup && !title.success) return { error: "invalidInput" };
+
+  const articles = [...new Set(lines.flatMap((l) => (l.article ? [l.article] : [])))];
+  const { data: catalogs } = await supabase.from("catalogs").select("id, supplier").eq("source", "igh").or("name.ilike.%nussbaum%,name.ilike.%meier tobler%");
+  const catalogIds = (catalogs ?? []).map((c) => c.id);
+  const { data: entries } =
+    articles.length && catalogIds.length
+      ? await supabase
+          .from("catalog_nodes")
+          .select("id, catalog_id, article_number, short_text, long_text, unit, unit_price")
+          .in("catalog_id", catalogIds)
+          .eq("kind", "position")
+          .in("article_number", articles)
+      : { data: [] };
+  const supplierOf = new Map((catalogs ?? []).map((c) => [c.id, c.supplier]));
+  // The same number may exist in both catalogues: take the one of the line's manufacturer.
+  const entryOf = (l: MaterialLine) =>
+    (entries ?? []).find((e) => e.article_number === l.article && (supplierOf.get(e.catalog_id) ?? "").toLowerCase().includes((l.manufacturer ?? "").toLowerCase().split(" ")[0])) ??
+    (entries ?? []).find((e) => e.article_number === l.article);
+
+  const language = lv.language as AppLanguage;
+  const groupId = crypto.randomUUID();
+  const rows: Record<string, unknown>[] = needsGroup
+    ? [{ id: groupId, lv_id: lvId, parent_id: null, kind: "group", short_text: { [language]: title.data }, long_text: {}, sort: 1_000_000 }]
+    : [];
+  let sort = 1_000_001;
+  for (const l of lines) {
+    const parentId = chapterOf(l.group) ?? groupId;
+    const entry = l.article ? entryOf(l) : undefined;
+    if (entry) {
+      const longText = { ...(entry.long_text as Record<string, string>) };
+      const supplier = supplierOf.get(entry.catalog_id);
+      if (supplier && entry.article_number) {
+        const langs = Object.keys(entry.short_text as object) as AppLanguage[];
+        for (const lang of langs.length ? langs : [language]) {
+          longText[lang] = [longText[lang], `${makeLabel[lang].make}: ${supplier}, ${makeLabel[lang].number} ${entry.article_number}`].filter(Boolean).join("\n");
+        }
+      }
+      rows.push({
+        id: crypto.randomUUID(),
+        lv_id: lvId,
+        parent_id: parentId,
+        kind: "position",
+        short_text: entry.short_text,
+        long_text: longText,
+        unit: entry.unit ?? l.unit,
+        quantity: l.quantity,
+        gross_unit_price: entry.unit_price,
+        source_catalog_node_id: entry.id,
+        sort: sort++,
+      });
+    } else {
+      rows.push({
+        id: crypto.randomUUID(),
+        lv_id: lvId,
+        parent_id: parentId,
+        kind: "r_position",
+        short_text: { [language]: l.label },
+        long_text: l.article ? { [language]: `${makeLabel[language].make}: ${l.manufacturer ?? ""}, ${makeLabel[language].number} ${l.article}` } : {},
+        unit: l.unit,
+        quantity: l.quantity,
+        sort: sort++,
+      });
+    }
+  }
+
+  const { error } = await supabase.from("lv_nodes").insert(rows as never[]);
+  if (error) return { error: "saveFailed" };
+  await renumberLv(lvId);
+  revalidatePath(`/projekte/${projectId}/lv/${lvId}`, "layout");
+  return { count: rows.length - (needsGroup ? 1 : 0) };
 }

@@ -2131,7 +2131,8 @@
           "logWood": "Generatori a combustibile solido caricati a mano: rispettare i requisiti del 3.3 (scarico termico di sicurezza).",
           "highPressure": "pfin superiore a 2,3 bar: la pressione di taratura supera 3,0 bar (tabella 12) – verificare la pressione di concessione e PS dei componenti."
         },
-        "brineVsysEws": "Vuoto = contenuto dal calcolo delle sonde (sonde, condotte, altro contenuto)."
+        "brineVsysEws": "Vuoto = contenuto dal calcolo delle sonde (sonde, condotte, altro contenuto).",
+        "hotWaterValve": "Scaldacqua (resistenza elettrica)"
       },
       "addGenerator": "Aggiungi generatore",
       "removeGenerator": "Rimuovi generatore",
@@ -2392,6 +2393,59 @@
           "deltaT": "Salto termico all’evaporatore superiore a 5 K (3.4.4.5).",
           "laminar": "Flusso laminare nelle sonde: la temperatura di progetto è stata aumentata di 1,5 K (3.1.1.3, D.7.4.2)."
         }
+      },
+      "hotWaterElectric": "Resistenza elettrica [kW]",
+      "hotWaterElectricHint": "Usuale 9 kW, 0 = senza. Dimensiona la valvola di sicurezza dello scaldacqua.",
+      "material": {
+        "title": "Estratto materiale",
+        "hint": "Tutti i componenti dello schema di principio. Generatori, accumulatore, scaldacqua, sonde geotermiche e pozzi neutri; rubinetteria su Optipress-Therm di Nussbaum, altri componenti dal catalogo Meier Tobler.",
+        "hydraulics": "Portate e diametri nominali",
+        "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT); DN = la più piccola dimensione Optipress-Therm con v ≤ {v1} m/s (fino a DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (oltre). Circuito glicolato / intermedio: potenza frigorifera delle sonde, altrimenti 75 % della potenza termica. Acqua calda: portata dei generatori.",
+        "columns": {
+          "circuit": "Circuito",
+          "power": "Potenza",
+          "deltaT": "ΔT [K]",
+          "flow": "Portata",
+          "calculated": "DN calcolato",
+          "dn": "DN scelto"
+        },
+        "auto": "calcolato (DN {dn})",
+        "autoNone": "calcolato (–)",
+        "circuits": {
+          "generator": "Generatore",
+          "source": "Circuito della sorgente",
+          "hotWater": "Allacciamento acqua calda",
+          "group": "Gruppo di riscaldamento",
+          "main": "Pompa principale distributore"
+        },
+        "sourceCircuit": {
+          "hpBrine": "circuito glicolato",
+          "hpWater": "circuito intermedio"
+        },
+        "list": "Lista materiale",
+        "listHint": "Pompe proposte solo secondo DN e portata (prevalenza 6 m) – verificare con la curva della pompa. Valvole di regolazione con kvs a Δp 10 kPa. Reflex N: verificare attacco e pressione d’esercizio max. con la scheda tecnica.",
+        "groups": {
+          "source": "Produzione di calore",
+          "brine": "Circuito glicolato / intermedio",
+          "expansion": "Mantenimento della pressione riscaldamento",
+          "hotWater": "Acqua calda",
+          "storage": "Accumulatore",
+          "distribution": "Distributore e gruppi"
+        },
+        "article": "Articolo",
+        "text": "Designazione",
+        "quantity": "Quantità",
+        "neutral": "neutro",
+        "chapter": "Capitolo",
+        "newGroupOption": "Nuovo gruppo",
+        "targetLv": "Capitolato",
+        "groupTitle": "Titolo del nuovo gruppo",
+        "lvGroup": "Produzione di calore {name}",
+        "insertIntoLv": "Riprendere nel capitolato",
+        "inserted": "{count} posizioni riprese nel capitolato.",
+        "saveFirst": "Prima salvare",
+        "noLv": "Ancora nessun capitolato nel progetto.",
+        "toLvs": "Ai capitolati"
       }
     }
   },

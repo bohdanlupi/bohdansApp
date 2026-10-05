@@ -63,6 +63,8 @@ const generatorSchema = z.object({
   name: z.string().max(60).catch(""),
   /** Nennwärmeleistung ΦN [kW] (HE301-01: Sicherheitsventil, Zuschlagsfaktor X). */
   power: num(0, 100000),
+  /** Spreizung VL – RL at the generator [K] (null = by type, see hydraulics.ts). */
+  deltaT: num(1, 60),
 });
 
 export type GeneratorUnit = z.infer<typeof generatorSchema>;
@@ -189,6 +191,8 @@ export const plantSchema = z.object({
   /** Wassererwärmer charged by the Anlage (Umschaltventil in the supply). */
   hotWater: z.boolean().catch(false),
   hotWaterVolume: num(0, 100000),
+  /** Elektroeinsatz of the Wassererwärmer [kW] (0 = none); sizes its Sicherheitsventil. */
+  hotWaterElectric: z.number().finite().min(0).max(1000).catch(9),
   /**
    * How the Wassererwärmer is loaded: Umschaltventil in the supply main, separately at a generator with its own
    * Ladepumpe, or as the consumer of a Heizgruppe (WW-Ladegruppe on the Verteiler).
@@ -213,6 +217,8 @@ export const plantSchema = z.object({
     ),
   safety: safetySchema.catch(() => safetySchema.parse({})),
   ews: ewsSchema.catch(() => ewsSchema.parse({})),
+  /** DN chosen by hand per circuit (key from hydraulics.ts), instead of the calculated one. */
+  dn: z.record(z.string().max(80), z.number().int().min(10).max(200)).catch({}),
   notes: z.string().max(4000).catch(""),
 });
 
@@ -229,7 +235,7 @@ function migrate(value: unknown): unknown {
   const powers = ((raw.safety as Record<string, unknown> | undefined)?.powers ?? {}) as Record<string, unknown>;
   return {
     ...raw,
-    generators: raw.generators.map((g) => (typeof g === "string" ? { id: g, type: g, name: "", power: typeof powers[g] === "number" ? powers[g] : null } : g)),
+    generators: raw.generators.map((g) => (typeof g === "string" ? { id: g, type: g, name: "", power: typeof powers[g] === "number" ? powers[g] : null, deltaT: null } : g)),
   };
 }
 

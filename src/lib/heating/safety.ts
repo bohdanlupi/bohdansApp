@@ -259,6 +259,8 @@ export type SafetyResult = {
   isl: number | null;
   valves: ValveResult[];
   sourceValves: SourceValveResult[];
+  /** Sicherheitsventil of the Wassererwärmer, sized by Ausdehnung with the power of its Elektroeinsatz. */
+  hotWaterValve: { power: number; flow: number; isv: number | null; isa: number | null } | null;
   /**
    * Solekreis after HE301-01, its content from the EWS calculation unless entered, and the minimum size after SIA 384/6
    * 3.4.2.6 (3 × ΔV/V0, ≥ 18 l); the larger one is chosen.
@@ -307,6 +309,9 @@ export function evaluateSafety(data: PlantData, ews: EwsResult | null = null): S
     const lines = phi !== null ? expansionValveLines(phi) : null;
     return [{ id, generator: type, power: phi, fromHeating: cooling === null && phi !== null, flow: phi, isv: lines?.isv ?? null, isa: lines?.isa ?? null }];
   });
+  const electric = data.hotWater ? data.hotWaterElectric : 0;
+  const hotWaterLines = electric > 0 ? expansionValveLines(electric) : null;
+  const hotWaterValve = electric > 0 ? { power: electric, flow: electric, isv: hotWaterLines?.isv ?? null, isa: hotWaterLines?.isa ?? null } : null;
   const b = s.brine;
   const types = data.generators.map((g) => g.type);
   const brine = types.includes("hpBrine")
@@ -325,5 +330,5 @@ export function evaluateSafety(data: PlantData, ews: EwsResult | null = null): S
   if (meanTemp > 70) hints.push("preVessel");
   if (types.includes("logWood")) hints.push("logWood");
   if (vessel.pfin > 2.3) hints.push("highPressure");
-  return { phiN, x, e, meanTemp, eSto, vsysEstimate, vsys, vessel, isl: phiN > 0 ? islDn(phiN) : null, valves, sourceValves, brine, hints };
+  return { phiN, x, e, meanTemp, eSto, vsysEstimate, vsys, vessel, isl: phiN > 0 ? islDn(phiN) : null, valves, sourceValves, hotWaterValve, brine, hints };
 }

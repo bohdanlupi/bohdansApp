@@ -19,10 +19,12 @@ import { evaluateSafety } from "@/lib/heating/safety";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { formatNumber } from "@/lib/number-input";
 
+import type { LvWithChapters } from "../../lueftung/anlagen/[systemId]/quantities-panel";
 import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
 import { saveHeatingPlan, saveHeatingPlant, saveHeatingSchemaPlan } from "../actions";
 import { GenerationSchemaView } from "./generation-schema-view";
 import { EwsSection } from "./ews-section";
+import { MaterialSection } from "./material-section";
 import { SafetySection } from "./safety-section";
 
 /**
@@ -35,6 +37,7 @@ export function GenerationEditor({
   initialPlan,
   plant,
   power,
+  lvs,
   editable,
 }: {
   projectId: string;
@@ -42,6 +45,8 @@ export function GenerationEditor({
   plant: { id: string; name: string; data: PlantData; schemaPlan: SchemaPlan };
   /** Building heat load of all calculations [kW], null without calculation. */
   power: number | null;
+  /** LVs of the project with their chapters, for inserting the Materialauszug. */
+  lvs: LvWithChapters[];
   editable: boolean;
 }) {
   const t = useTranslations("heatingPlan");
@@ -95,7 +100,7 @@ export function GenerationEditor({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => anlage.update((x) => ({ ...x, generators: [...x.generators, { id: crypto.randomUUID(), type: x.generators.at(-1)?.type ?? "hpAir", name: "", power: null }] }))}
+                onClick={() => anlage.update((x) => ({ ...x, generators: [...x.generators, { id: crypto.randomUUID(), type: x.generators.at(-1)?.type ?? "hpAir", name: "", power: null, deltaT: null }] }))}
               >
                 <Plus /> {tg("addGenerator")}
               </Button>
@@ -155,6 +160,7 @@ export function GenerationEditor({
           {d.hotWater && (
             <div className="grid gap-4 sm:grid-cols-2">
               <NumberParam label={tg("volume")} value={d.hotWaterVolume} editable={editable} onChange={(v) => setPlant({ hotWaterVolume: v })} />
+              <NumberParam label={tg("hotWaterElectric")} value={d.hotWaterElectric} decimals={1} editable={editable} onChange={(v) => setPlant({ hotWaterElectric: v ?? 0 })} hint={tg("hotWaterElectricHint")} />
               <OptionField label={tg("hotWaterConnection")} value={d.hotWaterConnection} options={hotWaterConnections} optionLabel={(v) => tg(`hotWaterConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterConnection: v })} />
               {d.hotWaterConnection === "generator" && d.generators.length > 1 && (
                 <OptionField
@@ -292,6 +298,20 @@ export function GenerationEditor({
       <SafetySection data={d} result={safety} editable={editable} setSafety={(patch) => setPlant({ safety: { ...d.safety, ...patch } })} />
 
       {ews && <EwsSection data={d} ctx={ewsCtx} result={ews} editable={editable} setEws={(patch) => setPlant({ ews: { ...d.ews, ...patch } })} />}
+
+      <MaterialSection
+        number={ews ? 7 : 6}
+        data={d}
+        ews={ews}
+        plantId={plant.id}
+        plantName={plant.name}
+        projectId={projectId}
+        lvs={lvs}
+        dirty={anlage.status !== "saved"}
+        editable={editable}
+        setPlant={setPlant}
+        setUnit={setUnit}
+      />
 
       <Section
         title={tg("schemaTitle")}
