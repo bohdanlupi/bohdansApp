@@ -552,10 +552,23 @@ export function buildGenerationSchema(
     pipe("brineR", [[gx, top + 8], [gx - 12, top + 8], [gx - 12, yA], [xa, yA], [xa, yLow]]);
     pipe("brine", [[xb, yLow], [xb, yB], [gx - 22, yB], [gx - 22, top + 16], [gx, top + 16]]);
     sym("ball", xa, yA + 26, "down");
-    sym("expansion", xa, yA + 70, "down", { side: sideOf("down", "left") });
-    if (g === "hpBrine" && safety.brine) {
-      const v = safety.brine;
-      text(xa - 15, yA + 106, v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel, 6.5, { bold: true });
+    // Ausdehnungsgefäss connected from below: branch to the left, rising through the plombierte Absperrung
+    // (Kappenventil) and the Entleerung into the vessel.
+    {
+      const yT = yA + 100;
+      const xm = xa - 30;
+      pipe("brineR", [[xa, yT], [xm, yT], [xm, yT - 34]]);
+      dot(xa, yT, "brineR");
+      sym("capValve", xm, yT - 13, "up");
+      sym("drain", xm, yT - 27, "up", { side: sideOf("up", "right") });
+      sym("expansion", xm, yT - 34, "right", { side: sideOf("right", "above") });
+      const [first, ...rest] = labels.doNotClose.split(" ");
+      text(xm, yT + 10, first, 5.5, { bold: true });
+      text(xm, yT + 17, rest.join(" "), 5.5, { bold: true });
+      if (g === "hpBrine" && safety.brine) {
+        const v = safety.brine;
+        text(xm, yT - 62, v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel, 6.5, { bold: true });
+      }
     }
     sym("ball", xb, yB + 20, "up");
     sym("pump", xb, yB + 62, "up");
