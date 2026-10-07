@@ -973,7 +973,7 @@ export function buildGenerationSchema(
     // Technischer Speicher on the ground, the size of the Wassererwärmer. Konventionell: the mains drop into it on the
     // generator side and rise out of it on the consumer side (VL at the top, RL at the bottom); reduziert: the VL main
     // runs on to the Verteiler with a T-Stück down into the Speicher, the RL from the Verteiler runs through it. The VL
-    // into the Speicher enters its side near the top through a thermischer Siphon.
+    // into the Speicher enters its side near the top through a thermischer Siphon (konventionell also the VL out of it).
     const xs = stLeft + 68;
     // Legs to and from the Speicher: RL outside, VL inside, far enough apart for the thermometers beside them.
     const dR = 44;
@@ -1003,7 +1003,9 @@ export function buildGenerationSchema(
       legs.push([xs - dV, -1]);
     } else {
       pipe("vl", [[stLeft, YMV], [xs - dV, YMV], [xs - dV, yTop]]);
-      pipe("vl", [[xs + w, yTop], [xs + w + dV, yTop], [xs + w + dV, YMV], [stRight, YMV]]);
+      // VL out of the Speicher on the consumer side through a siphon, the mirror image of the one on the way in.
+      siphonPipe(xs + w, yTop, xs + w + dV - SIPHON_W, xs + w + dV);
+      pipe("vl", [[xs + w + dV, yTop], [xs + w + dV, YMV], [stRight, YMV]]);
       legs.push([xs - dV, -1], [xs + w + dV, 1]);
     }
     siphonPipe(xs - dV, yTop, xs - dV, xs);
