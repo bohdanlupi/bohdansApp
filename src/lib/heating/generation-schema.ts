@@ -906,13 +906,13 @@ export function buildGenerationSchema(
     add(rect(xT, top, 64, 150), rect(xT, top, 64, 16, "bg", 1));
     tankSensor(data.hotWaterSensor, xT, top);
     tankThermometers(data.hotWaterThermometers, xT, top);
-    // Elektroeinsatz (when it has a power) from the left side above the upper Register (clear of the Fühler on the
-    // right and the connections on the left), its power beside the element inside the Wassererwärmer.
+    // Elektroeinsatz (when it has a power) from the right side at the height of the lower Register (between the lower
+    // Fühler and the Kaltwasser), its power beside the head.
     if (data.hotWaterElectric > 0) {
-      const yE = G - 122;
+      const yE = (lower.in + lower.out) / 2;
       used.add("electricHeater");
-      add(...electricHeater(xT, yE, 30, 1));
-      text(xT + 34, yE + 2.5, `${(Math.round(data.hotWaterElectric * 10) / 10).toLocaleString("de-CH")} kW`, 6, { anchor: "start", muted: true });
+      add(...electricHeater(xT + 64, yE, 30, -1));
+      text(xT + 75, yE + 2.5, `${(Math.round(data.hotWaterElectric * 10) / 10).toLocaleString("de-CH")} kW`, 6, { anchor: "start", muted: true });
     }
     if (external) {
       // Platten-WT; Ladepumpe from the bottom of the Speicher through the WT back into its top.
