@@ -7,6 +7,7 @@ import { z } from "zod";
 import { onlyKnown, trades } from "@/lib/address-options";
 import { assertRole } from "@/lib/auth";
 import type { FormState } from "@/lib/form-state";
+import { heatingBkps, heatingRoot, heatingStructure } from "@/lib/lv-heating-structure";
 import { ventilationBkp, ventilationStructure } from "@/lib/lv-ventilation-structure";
 import { createClient } from "@/lib/supabase/server";
 import type { AppLanguage } from "@/lib/supabase/types";
@@ -94,6 +95,53 @@ export async function createVentilationStructure(lvId: string, projectId: string
 
   const language = lv.language as AppLanguage;
   const nodes = ventilationStructure(levels, systems, language);
+  const idOf = new Map(nodes.map((n) => [n.key, crypto.randomUUID()]));
+  let sort = (last?.[0]?.sort ?? 0) + 1;
+  const rows = nodes.map((n) => ({
+    id: idOf.get(n.key)!,
+    lv_id: lvId,
+    parent_id: n.parentKey ? idOf.get(n.parentKey)! : null,
+    kind: "group" as const,
+    custom_number: n.number,
+    short_text: { [language]: n.text },
+    long_text: {},
+    sort: sort++,
+  }));
+  const { error } = await supabase.from("lv_nodes").insert(rows);
+  if (error) return { error: "saveFailed" };
+  await renumberLv(lvId);
+  revalidatePath(`/projekte/${projectId}/lv/${lvId}`, "layout");
+  return { count: rows.length };
+}
+
+const heatingStructureSchema = z.object({
+  mode: z.enum(["flat", "lose", "houses"]),
+  groups: z.array(z.string().trim().min(1).max(150)).max(50),
+  bkps: z.array(z.enum(heatingBkps)).min(1),
+});
+
+/**
+ * Creates the chapter structure «Heizung» (BKP 24 with 241–243, LUPI template) at the end of an LV, like the one for
+ * the Lüftung. Refused when the LV already has a group 24 on top level.
+ */
+export async function createHeatingStructure(lvId: string, projectId: string, input: unknown): Promise<{ error?: string; count?: number }> {
+  await assertRole("admin", "planer");
+  const parsed = heatingStructureSchema.safeParse(input);
+  if (!z.array(z.uuid()).safeParse([lvId, projectId]).success || !parsed.success) return { error: "invalidInput" };
+  const { mode, groups, bkps } = parsed.data;
+  if (mode !== "flat" && groups.length === 0) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  const [{ data: lv }, { data: existing }, { data: last }] = await Promise.all([
+    supabase.from("lvs").select("id, language").eq("id", lvId).eq("project_id", projectId).maybeSingle(),
+    supabase.from("lv_nodes").select("id").eq("lv_id", lvId).is("parent_id", null).eq("kind", "group").eq("custom_number", heatingRoot).limit(1),
+    supabase.from("lv_nodes").select("sort").eq("lv_id", lvId).order("sort", { ascending: false }).limit(1),
+  ]);
+  if (!lv) return { error: "invalidInput" };
+  if (existing?.length) return { error: "heatingStructureExists" };
+
+  const language = lv.language as AppLanguage;
+  const nodes = heatingStructure(mode, groups, bkps, language);
   const idOf = new Map(nodes.map((n) => [n.key, crypto.randomUUID()]));
   let sort = (last?.[0]?.sort ?? 0) + 1;
   const rows = nodes.map((n) => ({

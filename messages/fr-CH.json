@@ -81,7 +81,8 @@
     "createUserFailed": "L'utilisateur n'a pas pu être créé.",
     "catalogReadOnly": "Les catalogues fournisseurs ne peuvent pas être modifiés. Ils sont mis à jour par une nouvelle importation.",
     "tooManyEntries": "La sélection est trop grande (5000 entrées au maximum). Veuillez choisir des groupes plus petits.",
-    "structureExists": "Le descriptif contient déjà une structure 244."
+    "structureExists": "Le descriptif contient déjà une structure 244.",
+    "heatingStructureExists": "Le descriptif contient déjà une structure 24."
   },
   "projects": {
     "title": "Projets",
@@ -1737,6 +1738,32 @@
     "addSystem": "+ installation",
     "defaultSystem": "Installation {n}",
     "los": "Lot {n}",
+    "create": "Créer les chapitres",
+    "created": "{count} chapitres créés."
+  },
+  "lvHeatingStructure": {
+    "button": "Structure chauffage",
+    "title": "Créer la structure chauffage (CFC 24)",
+    "description": "Crée les chapitres 241 Approvisionnement en agents énergétiques, 242 Production de chaleur et 243 Distribution de chaleur selon le modèle LUPI, avec numéros et noms, à la fin du descriptif. L’extrait de matériel de la production de chaleur peut ensuite être repris directement dans ces chapitres.",
+    "modes": {
+      "flat": "Sans subdivision",
+      "lose": "Par lots",
+      "houses": "Par bâtiments"
+    },
+    "modesHint": {
+      "flat": "24 › 241–243 › chapitres 0–6",
+      "lose": "24 › lots L01 … › 241.01–243.01 › chapitres 0–6",
+      "houses": "24 › bâtiments H01 … › 241.01–243.01 › chapitres 0–6"
+    },
+    "groupsHint": {
+      "lose": "Lots (noms modifiables) :",
+      "houses": "Bâtiments (noms modifiables) :"
+    },
+    "addGroup": {
+      "lose": "+ Lot",
+      "houses": "+ Bâtiment"
+    },
+    "removeGroup": "Supprimer",
     "create": "Créer les chapitres",
     "created": "{count} chapitres créés."
   },

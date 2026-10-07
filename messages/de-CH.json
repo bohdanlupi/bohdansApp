@@ -81,7 +81,8 @@
     "createUserFailed": "Der Benutzer konnte nicht angelegt werden.",
     "catalogReadOnly": "Lieferantenkataloge können nicht bearbeitet werden. Sie werden durch einen neuen Import aktualisiert.",
     "tooManyEntries": "Die Auswahl ist zu gross (höchstens 5000 Einträge). Bitte kleinere Gruppen wählen.",
-    "structureExists": "Das LV enthält bereits eine Kapitelstruktur 244."
+    "structureExists": "Das LV enthält bereits eine Kapitelstruktur 244.",
+    "heatingStructureExists": "Das LV enthält bereits eine Kapitelstruktur 24."
   },
   "projects": {
     "title": "Projekte",
@@ -1737,6 +1738,32 @@
     "addSystem": "+ Anlage",
     "defaultSystem": "Anlage {n}",
     "los": "Los {n}",
+    "create": "Kapitel anlegen",
+    "created": "{count} Kapitel angelegt."
+  },
+  "lvHeatingStructure": {
+    "button": "Struktur Heizung",
+    "title": "Kapitelstruktur Heizung (BKP 24) anlegen",
+    "description": "Legt die Kapitel 241 Zulieferung Energieträger, 242 Wärmeerzeugung und 243 Wärmeverteilung nach der LUPI-Vorlage mit Nummern und Namen am Ende des Leistungsverzeichnisses an. Der Materialauszug der Wärmeerzeugung kann danach direkt in diese Kapitel übernommen werden.",
+    "modes": {
+      "flat": "Ohne Unterteilung",
+      "lose": "Nach Losen",
+      "houses": "Nach Häusern"
+    },
+    "modesHint": {
+      "flat": "24 › 241–243 › Kapitel 0–6",
+      "lose": "24 › Lose L01 … › 241.01–243.01 › Kapitel 0–6",
+      "houses": "24 › Häuser H01 … › 241.01–243.01 › Kapitel 0–6"
+    },
+    "groupsHint": {
+      "lose": "Lose (Namen anpassbar):",
+      "houses": "Häuser (Namen anpassbar):"
+    },
+    "addGroup": {
+      "lose": "+ Los",
+      "houses": "+ Haus"
+    },
+    "removeGroup": "Entfernen",
     "create": "Kapitel anlegen",
     "created": "{count} Kapitel angelegt."
   },

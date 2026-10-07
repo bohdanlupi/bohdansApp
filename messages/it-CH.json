@@ -81,7 +81,8 @@
     "createUserFailed": "Non è stato possibile creare l'utente.",
     "catalogReadOnly": "I cataloghi dei fornitori non possono essere modificati. Vengono aggiornati con una nuova importazione.",
     "tooManyEntries": "La selezione è troppo grande (al massimo 5000 voci). Selezioni gruppi più piccoli.",
-    "structureExists": "L’elenco contiene già una struttura 244."
+    "structureExists": "L’elenco contiene già una struttura 244.",
+    "heatingStructureExists": "L’elenco contiene già una struttura 24."
   },
   "projects": {
     "title": "Progetti",
@@ -1737,6 +1738,32 @@
     "addSystem": "+ impianto",
     "defaultSystem": "Impianto {n}",
     "los": "Lotto {n}",
+    "create": "Creare i capitoli",
+    "created": "{count} capitoli creati."
+  },
+  "lvHeatingStructure": {
+    "button": "Struttura riscaldamento",
+    "title": "Creare la struttura riscaldamento (CCC 24)",
+    "description": "Crea i capitoli 241 Fornitura di vettori energetici, 242 Produzione di calore e 243 Distribuzione del calore secondo il modello LUPI, con numeri e nomi, alla fine dell’elenco prestazioni. L’estratto materiale della produzione di calore può poi essere ripreso direttamente in questi capitoli.",
+    "modes": {
+      "flat": "Senza suddivisione",
+      "lose": "Per lotti",
+      "houses": "Per edifici"
+    },
+    "modesHint": {
+      "flat": "24 › 241–243 › capitoli 0–6",
+      "lose": "24 › lotti L01 … › 241.01–243.01 › capitoli 0–6",
+      "houses": "24 › edifici H01 … › 241.01–243.01 › capitoli 0–6"
+    },
+    "groupsHint": {
+      "lose": "Lotti (nomi modificabili):",
+      "houses": "Edifici (nomi modificabili):"
+    },
+    "addGroup": {
+      "lose": "+ Lotto",
+      "houses": "+ Edificio"
+    },
+    "removeGroup": "Rimuovi",
     "create": "Creare i capitoli",
     "created": "{count} capitoli creati."
   },

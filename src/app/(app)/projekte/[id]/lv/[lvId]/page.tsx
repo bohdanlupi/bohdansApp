@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import { loadCostOptions } from "../../cost-options";
 import { loadProject } from "../../load-project";
+import { HeatingStructureButton } from "./heating-structure";
 import { loadLv } from "./load-lv";
 import { VentilationStructureButton } from "./ventilation-structure";
 
@@ -44,7 +45,12 @@ export default async function LvEditorPage({ params }: PageProps<"/projekte/[id]
       editable={profile.role !== "viewer"}
       catalogs={catalogs ?? []}
       costOptions={costOptions}
-      toolbarExtra={<VentilationStructureButton key="ventilation-structure" lvId={lvId} projectId={id} language={lv.language ?? "de"} systems={systems ?? []} />}
+      toolbarExtra={
+        <>
+          <VentilationStructureButton key="ventilation-structure" lvId={lvId} projectId={id} language={lv.language ?? "de"} systems={systems ?? []} />
+          <HeatingStructureButton key="heating-structure" lvId={lvId} projectId={id} language={lv.language ?? "de"} />
+        </>
+      }
     />
   );
 }
