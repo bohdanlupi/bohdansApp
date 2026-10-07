@@ -2050,7 +2050,8 @@
       "hotWaterConnection": "Raccordement",
       "hotWaterConnections": {
         "diverter": "Vanne d’inversion sur le départ",
-        "generator": "Séparé sur le producteur (pompe de charge)",
+        "internal": "Départ séparé, commutation interne",
+        "generator": "Départ/retour depuis le générateur",
         "group": "Sur un groupe (groupe de charge ECS)"
       },
       "hotWaterGenerator": "Producteur de chaleur",

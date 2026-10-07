@@ -16,7 +16,12 @@ export const circuitTypes = ["throttle", "diverting", "mixing", "injection3", "i
 export const distributorTypes = ["pressurized", "unpressurized"] as const;
 
 /** Connection of the Wassererwärmer: Umschaltventil in the main, separately at a generator, at a Heizgruppe. */
-export const hotWaterConnections = ["diverter", "generator", "group"] as const;
+/**
+ * How the Wassererwärmer is loaded: Umschaltventil in the supply main; separate Vorlauf from the generator, switched
+ * inside it, the Rücklauf straight into the main (internal); separate Vorlauf and Rücklauf at the generator with a
+ * Ladepumpe (generator); as the consumer of a Heizgruppe (group).
+ */
+export const hotWaterConnections = ["diverter", "internal", "generator", "group"] as const;
 /** Heating of the Wassererwärmer: innenliegendes Register or aussenliegender Wärmetauscher (Platten-WT + Ladepumpe). */
 export const hotWaterHeaters = ["coil", "external"] as const;
 /** Innenliegende Register: one; two with the lower / upper one connected; two connected in series. */
@@ -267,7 +272,18 @@ export const generatorTypesOf = (data: PlantData): GeneratorType[] => generatorT
 
 /** Generator with the separate Warmwasser connection (its own Ladepumpe), null with another connection. */
 export const hotWaterUnit = (data: PlantData): GeneratorUnit | null =>
-  data.hotWater && data.hotWaterConnection === "generator" ? (data.generators.find((u) => u.id === data.hotWaterGenerator) ?? data.generators[0] ?? null) : null;
+  data.hotWater && (data.hotWaterConnection === "generator" || data.hotWaterConnection === "internal")
+    ? (data.generators.find((u) => u.id === data.hotWaterGenerator) ?? data.generators[0] ?? null)
+    : null;
+
+/**
+ * Pumps built into a generator: as chosen, and with «Separater Vorlauf, Umschaltung intern» the Heizungs- and the
+ * WW-Ladepumpe of the loading generator (forced). Such pumps are neither drawn nor in the Materialauszug.
+ */
+export function pumpsInside(data: PlantData, unit: GeneratorUnit) {
+  const forced = data.hotWaterConnection === "internal" && hotWaterUnit(data)?.id === unit.id;
+  return { source: unit.internalPumps.source, heating: unit.internalPumps.heating || forced, hotWater: unit.internalPumps.hotWater || forced, forced };
+}
 
 /** Name of a generator: its own, else the type, numbered when the type occurs more than once. */
 export function generatorName(units: GeneratorUnit[], unit: GeneratorUnit, typeName: (t: GeneratorType) => string): string {

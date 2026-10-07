@@ -2050,7 +2050,8 @@
       "hotWaterConnection": "Allacciamento",
       "hotWaterConnections": {
         "diverter": "Valvola deviatrice sulla mandata",
-        "generator": "Separato sul generatore (pompa di carico)",
+        "internal": "Mandata separata, commutazione interna",
+        "generator": "Mandata/ritorno dal generatore",
         "group": "Su un gruppo (gruppo di carico ACS)"
       },
       "hotWaterGenerator": "Generatore di calore",

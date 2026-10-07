@@ -25,6 +25,7 @@ import {
   hotWaterHeaters,
   hotWaterUnit,
   type HeatingGroup,
+  pumpsInside,
   type PlantData,
   storageConnections,
 } from "@/lib/heating/plant-schema";
@@ -163,7 +164,7 @@ export function GenerationEditor({
                           )}
                         </td>
                       </tr>
-                      <InternalPumps unit={u} wwUnit={wwUnit} editable={editable} onChange={(internalPumps) => setUnit(u.id, { internalPumps })} />
+                      <InternalPumps unit={u} wwUnit={d.hotWaterConnection === "generator" ? wwUnit : null} forced={pumpsInside(d, u).forced} editable={editable} onChange={(internalPumps) => setUnit(u.id, { internalPumps })} />
                     </Fragment>
                   ))}
                 </tbody>
@@ -186,7 +187,7 @@ export function GenerationEditor({
               )}
               <NumberParam label={tg("hotWaterElectric")} value={d.hotWaterElectric} decimals={1} editable={editable} onChange={(v) => setPlant({ hotWaterElectric: v ?? 0 })} hint={tg("hotWaterElectricHint")} />
               <OptionField label={tg("hotWaterConnection")} value={d.hotWaterConnection} options={hotWaterConnections} optionLabel={(v) => tg(`hotWaterConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterConnection: v })} />
-              {d.hotWaterConnection === "generator" && d.generators.length > 1 && (
+              {(d.hotWaterConnection === "generator" || d.hotWaterConnection === "internal") && d.generators.length > 1 && (
                 <OptionField
                   label={tg("hotWaterGenerator")}
                   value={d.generators.some((u) => u.id === d.hotWaterGenerator) ? d.hotWaterGenerator! : d.generators[0].id}
@@ -213,7 +214,7 @@ export function GenerationEditor({
               )}
             </div>
           )}
-          {d.hotWater && d.hotWaterConnection === "generator" && d.generators.length === 0 && <Notice>{tg("hotWaterNoGenerator")}</Notice>}
+          {d.hotWater && (d.hotWaterConnection === "generator" || d.hotWaterConnection === "internal") && d.generators.length === 0 && <Notice>{tg("hotWaterNoGenerator")}</Notice>}
           {d.hotWater && d.hotWaterConnection === "group" && !d.groups.some((g) => g.id === d.hotWaterGroup) && <Notice>{tg("hotWaterNoGroup")}</Notice>}
         </Section>
         <Section title={`3 · ${tg("sectors.storage")}`} collapseKey="heating-generation:storage">
@@ -383,20 +384,25 @@ export function GenerationEditor({
 function InternalPumps({
   unit,
   wwUnit,
+  forced,
   editable,
   onChange,
 }: {
   unit: GeneratorUnit;
+  /** Generator with the separate connection «VL/RL ab Wärmeerzeuger» (its WW-Ladepumpe), else null. */
   wwUnit: GeneratorUnit | null;
+  /** «Umschaltung intern» at this generator: its Heizungs- and WW-Ladepumpe are in it anyway (no buttons). */
+  forced: boolean;
   editable: boolean;
   onChange: (value: GeneratorUnit["internalPumps"]) => void;
 }) {
   const tg = useTranslations("heatingPlan.generation.internalPumps");
   const keys = [
     ...(unit.type === "hpBrine" || unit.type === "hpWater" ? (["source"] as const) : []),
-    "heating" as const,
+    ...(forced ? [] : (["heating"] as const)),
     ...(wwUnit?.id === unit.id ? (["hotWater"] as const) : []),
   ];
+  if (!keys.length) return null;
   return (
     <tr>
       <td colSpan={4} className="pb-2">

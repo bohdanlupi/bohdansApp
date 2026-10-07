@@ -10,7 +10,7 @@ import type { EwsResult } from "./ews";
 import { type Circuit, evaluateHydraulics, type PipeSize } from "./hydraulics";
 import * as A from "./material-data";
 import type { GeneratorType } from "./plan-schema";
-import { generatorName, hotWaterUnit, type PlantData } from "./plant-schema";
+import { generatorName, hotWaterUnit, type PlantData, pumpsInside } from "./plant-schema";
 import { evaluateSafety, expansionValveLines } from "./safety";
 
 export const materialGroups = ["source", "brine", "expansion", "hotWater", "storage", "distribution"] as const;
@@ -88,7 +88,7 @@ const vesselFor = (vn: number | null) => (vn !== null ? [...A.vessels].sort((a, 
  * else (Umschaltventil) all generators; null when unknown.
  */
 function hotWaterPower(data: PlantData): number | null {
-  if (data.hotWaterConnection === "generator") return hotWaterUnit(data)?.power ?? null;
+  if (data.hotWaterConnection === "generator" || data.hotWaterConnection === "internal") return hotWaterUnit(data)?.power ?? null;
   if (data.hotWaterConnection === "group") return data.groups.find((g) => g.id === data.hotWaterGroup)?.power ?? null;
   const powers = data.generators.map((u) => u.power).filter((p): p is number => p !== null);
   return powers.length ? powers.reduce((s, p) => s + p, 0) : null;
@@ -126,7 +126,7 @@ export function componentTypes(data: PlantData, ews: EwsResult | null): Map<stri
   };
   for (const u of data.generators) {
     sv(`gen:${u.id}`, u.power, data.safety.pSV);
-    if (!u.internalPumps.heating) pump(`gen:${u.id}`, "heating");
+    if (!pumpsInside(data, u).heating) pump(`gen:${u.id}`, "heating");
     if (u.type === "pellets" || u.type === "logWood") valve3(`gen:${u.id}`, A.mixingValves, "SAS61.03");
     if (u.type === "hpBrine" || u.type === "hpWater") {
       sv(`source:${u.id}`, safety.sourceValves.find((v) => v.id === u.id)?.power ?? null, data.safety.brine.pSV);
@@ -140,7 +140,7 @@ export function componentTypes(data: PlantData, ews: EwsResult | null): Map<stri
   if (data.hotWater) sv("hotWater", hotWaterPower(data), data.safety.pSV);
   if (data.hotWater && data.hotWaterConnection === "diverter") valve3("hotWater", A.diverterValves, "GLB161.9E");
   const wwUnit = hotWaterUnit(data);
-  if (wwUnit && !wwUnit.internalPumps.hotWater) pump("hotWater", "heating");
+  if (wwUnit && data.hotWaterConnection === "generator" && !pumpsInside(data, wwUnit).hotWater) pump("hotWater", "heating");
   if (data.distributor === "pressurized") pump("main", "heating");
   for (const g of data.groups) {
     const key = `group:${g.id}`;
@@ -240,7 +240,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
       actuated("source", A.mixingValves, c, "SAS61.03");
     }
     // Pumps built into the generator are supplied with it.
-    if (!u.internalPumps.heating) pump("source", "heating", c);
+    if (!pumpsInside(data, u).heating) pump("source", "heating", c);
     pipes("source", c);
     if (u.type === "district") neutral("source", 0, "Primärseite Fernwärme (Wärmezähler, Regelventil, Absperrungen) – Lieferung Fernwärmeversorger");
 
@@ -307,7 +307,8 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     if (data.hotWaterConnection !== "group") pipes("hotWater", c);
     if (data.hotWaterConnection === "diverter") actuated("hotWater", A.diverterValves, c, "GLB161.9E");
     if (data.hotWaterConnection === "generator") {
-      if (!hotWaterUnit(data)?.internalPumps.hotWater) pump("hotWater", "heating", c);
+      const unit = hotWaterUnit(data);
+      if (unit && !pumpsInside(data, unit).hotWater) pump("hotWater", "heating", c);
     }
   }
 

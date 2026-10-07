@@ -22,7 +22,7 @@
 import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
 
 import type { EmitterType, GeneratorType } from "./plan-schema";
-import { type CircuitType, generatorName, hotWaterUnit, type PlantData } from "./plant-schema";
+import { type CircuitType, generatorName, hotWaterUnit, type PlantData, pumpsInside } from "./plant-schema";
 import { emptyEwsContext, type EwsContext, evaluateEws } from "./ews";
 import { evaluateHydraulics, storageTemperatures } from "./hydraulics";
 import { componentTypes } from "./material";
@@ -514,7 +514,7 @@ export function buildGenerationSchema(
     // Erdwärmesonden / Grundwasser (241 Zulieferung Energieträger) end just left of the first WP with a source.
     if (hasSource(g) && supplyEnd === null) supplyEnd = gx - 12;
     drawGenerator(g, colX, gx, top, unit ? generatorName(data.generators, unit, (t) => labels.generators[t]) : "", unit?.id ?? "");
-    if (ww === "generator" && unit && unit.id === wwUnit?.id) wwGen = { gx, top };
+    if ((ww === "generator" || ww === "internal") && unit && unit.id === wwUnit?.id) wwGen = { gx, top };
     if (unit) nw(`gen:${unit.id}`, (xv + xr) / 2, YBALL - 22);
     pipe("vl", [[xv, top], [xv, YMV]]);
     pipe("rl", [[xr, YMR], [xr, top]]);
@@ -543,7 +543,7 @@ export function buildGenerationSchema(
       if (unit) typeText(`valve3:gen:${unit.id}`, xv - 4, YMR + 70, "end");
     }
     // Heizungspumpe (with a Rücklaufhochhaltung below its Dreiwegventil), unless built into the generator.
-    if (g && !unit?.internalPumps.heating) {
+    if (g && !(unit && pumpsInside(data, unit).heating)) {
       const yP = g === "pellets" || g === "logWood" ? YMR + 104 : YPUMP;
       sym("pump", xr, yP, "down");
       if (unit) typeText(`pump:gen:${unit.id}`, xr - 10, yP - 3, "end");
@@ -906,21 +906,26 @@ export function buildGenerationSchema(
       waterHeaterFittings(xw, xIn, yIn, yOut);
       waterHeaterSafetyValve(xw, YBALL + 68);
       nw("hotWater", xw + 4, YBALL - 28, "start");
-    } else if (ww === "generator" && wwGen) {
-      // Own pair from the side of the generator, just below the mains: Absperrungen and thermometers as at the other
-      // connections, the Sicherheitsventil below them in the VL, the Ladepumpe in the RL.
+    } else if ((ww === "generator" || ww === "internal") && wwGen) {
+      // Own Vorlauf from the side of the generator, just below the mains: Absperrungen and thermometers as at the other
+      // connections, the Sicherheitsventil below them in the VL. «VL/RL ab Wärmeerzeuger»: the Rücklauf back to the
+      // generator with the Ladepumpe; «Umschaltung intern»: the Rücklauf straight up into the main (crossing the
+      // Vorlauf), both pumps in the generator.
       const { gx, top: gTop } = wwGen;
       const yV = YMR + 16;
       const yR = YMR + 26;
-      // The pair rises right of the Ausdehnungsgefäss of the Heizung (which hangs on the RL leg of this generator).
+      // The Vorlauf (and Rücklauf) rise right of the Ausdehnungsgefäss of the Heizung (on the RL leg of this generator).
       const xV = sourceRight - 40;
       const xR = sourceRight - 30;
       pipe("vl", [[gx + 44, gTop + 12], [xV, gTop + 12], [xV, yV], [xw, yV], [xw, yIn]]);
-      pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [xR, yR], [xR, gTop + 28], [gx + 44, gTop + 28]]);
+      if (ww === "internal") {
+        pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, YMR]]);
+        dot(xw - 22, YMR, "rl");
+      } else pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [xR, yR], [xR, gTop + 28], [gx + 44, gTop + 28]]);
       waterHeaterFittings(xw, xIn, yIn, yOut);
       waterHeaterSafetyValve(xw, 262);
       // Ladepumpe in the RL back to the generator, at the height of the pumps of the generators.
-      if (!wwUnit?.internalPumps.hotWater) {
+      if (ww === "generator" && !(wwUnit && pumpsInside(data, wwUnit).hotWater)) {
         sym("pump", xw - 22, YPUMP, "up");
         typeText("pump:hotWater", xw - 32, YPUMP - 3, "end");
       }

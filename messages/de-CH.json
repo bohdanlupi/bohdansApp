@@ -2050,7 +2050,8 @@
       "hotWaterConnection": "Anschluss",
       "hotWaterConnections": {
         "diverter": "Umschaltventil im Vorlauf",
-        "generator": "Separat am Wärmeerzeuger (Ladepumpe)",
+        "internal": "Separater Vorlauf, Umschaltung intern",
+        "generator": "VL/RL ab Wärmeerzeuger",
         "group": "An einer Heizgruppe (WW-Ladegruppe)"
       },
       "hotWaterGenerator": "Wärmeerzeuger",
