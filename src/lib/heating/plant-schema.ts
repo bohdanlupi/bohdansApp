@@ -218,7 +218,7 @@ export const plantSchema = z.object({
   /** Wassererwärmer charged by the Anlage (Umschaltventil in the supply). */
   hotWater: z.boolean().catch(false),
   hotWaterVolume: num(0, 100000),
-  /** Elektroeinsatz of the Wassererwärmer [kW] (0 = none); sizes its Sicherheitsventil. */
+  /** Elektroeinsatz of the Wassererwärmer [kW] (0 = none, not drawn); sizes its Sicherheitsventil. */
   hotWaterElectric: z.number().finite().min(0).max(1000).catch(9),
   /**
    * How the Wassererwärmer is loaded: Umschaltventil in the supply main, separately at a generator with its own

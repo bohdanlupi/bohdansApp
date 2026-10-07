@@ -2031,6 +2031,7 @@
         "plateHx": "Platten-Wärmetauscher",
         "storage": "Technischer Speicher",
         "waterHeater": "Wassererwärmer mit Wärmetauscher",
+        "electricHeater": "Elektroeinsatz",
         "ews": "Erdwärmesonde",
         "distributor": "Sondenverteiler (Verteiler und Sammler)",
         "well": "Brunnen mit Unterwasserpumpe",

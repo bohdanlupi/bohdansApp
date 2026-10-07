@@ -67,6 +67,7 @@ export const symbolKeys = [
   "plateHx",
   "storage",
   "waterHeater",
+  "electricHeater",
   "ews",
   "distributor",
   "well",
@@ -101,6 +102,7 @@ export const symbolRefs: Record<SymbolKey, string> = {
   plateHx: "2.2.5",
   storage: "~ 2.2.2",
   waterHeater: "2.2.7",
+  electricHeater: "~",
   ews: "~",
   distributor: "~",
   well: "~ 1.27.3",
@@ -350,6 +352,15 @@ function fuel(kind: "solid" | "liquid" | "gas", x: number, y: number): Prim[] {
   if (kind === "solid") return [{ t: "rect", x: x - 4, y: y - 4, w: 8, h: 8, fill: "ink" }];
   if (kind === "gas") return [poly([[x - 4.5, y + 4], [x, y - 4.5], [x + 4.5, y + 4]])];
   return [{ t: "circle", cx: x, cy: y + 2, r: 3, fill: "ink" }, ln(x, y - 1, x, y - 6, 0.8), ln(x - 1, y - 0.5, x - 4, y - 5, 0.8), ln(x + 1, y - 0.5, x + 4, y - 5, 0.8)];
+}
+
+/**
+ * Elektroeinsatz: connection head (box) outside the wall at x, the heating element as a zigzag reaching `length`
+ * into the Speicher (to the left) at height y.
+ */
+function electricHeater(x: number, y: number, length: number): Prim[] {
+  const zig = Array.from({ length: Math.floor((length - 6) / 3) + 1 }, (_, i) => `L${x - 6 - i * 3},${y + (i % 2 ? 2.5 : -2.5)}`).join(" ");
+  return [rect(x, y - 4, 8, 8, "bg", 0.9), path(`M${x},${y} L${x - 6},${y} ${zig}`, 0.8)];
 }
 
 /** Coil «<» of a Wärmetauscher (2.2.4) between y1 and y2, entering from the left at x over width w. */
@@ -883,6 +894,13 @@ export function buildGenerationSchema(
     add(rect(xT, top, 64, 150), rect(xT, top, 64, 16, "bg", 1));
     tankSensor(data.hotWaterSensor, xT, top);
     tankThermometers(data.hotWaterThermometers, xT, top);
+    // Elektroeinsatz (when it has a power) from the right side between the Register, its power beside the head.
+    if (data.hotWaterElectric > 0) {
+      const yE = G - 63;
+      used.add("electricHeater");
+      add(...electricHeater(xT + 64, yE, 30));
+      text(xT + 75, yE + 2.5, `${(Math.round(data.hotWaterElectric * 10) / 10).toLocaleString("de-CH")} kW`, 6, { anchor: "start", muted: true });
+    }
     if (external) {
       // Platten-WT; Ladepumpe from the bottom of the Speicher through the WT back into its top.
       used.add("plateHx");
@@ -1231,6 +1249,8 @@ export function legendSymbol(key: SymbolKey): Prim[] {
       return [rect(11, 1, 18, 28), rect(11, 1, 18, 7, "bg", 0.8)];
     case "waterHeater":
       return [rect(11, 1, 18, 28), rect(11, 1, 18, 7, "bg", 0.8), coil(12, 18, 26, 12)];
+    case "electricHeater":
+      return electricHeater(29, 15, 20);
     case "ews":
       return [ln(4, 6, 36, 6), path("M14,6 L14,22 A6,6 0 0 0 26,22 L26,6", 1.4)];
     case "distributor":

@@ -2031,6 +2031,7 @@
         "plateHx": "Scambiatore a piastre",
         "storage": "Accumulatore tecnico",
         "waterHeater": "Scaldacqua con scambiatore",
+        "electricHeater": "Resistenza elettrica",
         "ews": "Sonda geotermica",
         "distributor": "Distributore delle sonde (mandata e ritorno)",
         "well": "Pozzo con pompa sommersa",

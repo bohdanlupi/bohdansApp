@@ -2031,6 +2031,7 @@
         "plateHx": "Échangeur à plaques",
         "storage": "Accumulateur technique",
         "waterHeater": "Chauffe-eau avec échangeur",
+        "electricHeater": "Corps de chauffe électrique",
         "ews": "Sonde géothermique",
         "distributor": "Distributeur des sondes (aller et retour)",
         "well": "Puits avec pompe immergée",
