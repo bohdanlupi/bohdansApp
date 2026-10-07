@@ -269,6 +269,8 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     const c = data.hotWaterConnection === "group" ? circuitOf(`group:${data.hotWaterGroup}`) : circuitOf("hotWater");
     ball("hotWater", c?.size ?? null, 2);
     safetyValve("hotWater", hotWaterPower(data), data.safety.pSV, c?.size ?? null);
+    thermometer("hotWater", c?.size ?? null, 2);
+    drain("hotWater", c?.size ?? null, 2);
     if (data.hotWaterConnection === "diverter") actuated("hotWater", A.diverterValves, c, "GLB161.9E");
     if (data.hotWaterConnection === "generator") {
       if (!hotWaterUnit(data)?.internalPumps.hotWater) pump("hotWater", "heating", c);
@@ -278,10 +280,12 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
   // --- Energiespeicher -----------------------------------------------------------------------------------------------
   if (data.storage) {
     neutral("storage", `Technischer Speicher${data.storageVolume ? ` ${fmt(data.storageVolume)} l` : ""}`);
-    // Absperrungen in all lines to and from the Speicher (reduziert: 3, konventionell: 4), Entleerungen in both RL
-    // connections; sized like the mains (the largest generator circuit).
+    // Absperrungen and thermometers in all lines to and from the Speicher (reduziert: 3, konventionell: 4),
+    // Entleerungen in both RL connections; sized like the mains (the largest generator circuit).
     const mains = circuits.filter((c) => c.kind === "generator" && c.size).sort((a, b) => b.size!.d - a.size!.d)[0]?.size ?? null;
-    ball("storage", mains, data.storageConnection === "reduced" ? 3 : 4);
+    const legs = data.storageConnection === "reduced" ? 3 : 4;
+    ball("storage", mains, legs);
+    thermometer("storage", mains, legs);
     drain("storage", mains, 2);
   }
 

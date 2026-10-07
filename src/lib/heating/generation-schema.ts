@@ -822,6 +822,19 @@ export function buildGenerationSchema(
     };
   }
 
+  /**
+   * Thermometers (above) and Entleerungen (below) in the heating VL and RL of the Wassererwärmer, on their horizontals
+   * between the legs at xw / xw - 22 and the connections at xIn.
+   */
+  function waterHeaterFittings(xw: number, xIn: number, yIn: number, yOut: number) {
+    const xt = xIn - 34;
+    const xd = xIn - 16;
+    sym("thermometer", xt, yIn, "right", { side: sideOf("right", "above") });
+    sym("thermometer", xt, yOut, "left", { side: sideOf("left", "above") });
+    sym("drain", xd, yIn, "right", { side: sideOf("right", "below") });
+    sym("drain", xd, yOut, "left", { side: sideOf("left", "below") });
+  }
+
   /** Sicherheitsventil on the heating VL of the Wassererwärmer, between its Absperrung and it; outlet to the right. */
   function waterHeaterSafetyValve(xw: number, y: number) {
     pipe("vl", [[xw, y], [xw + 10, y]]);
@@ -850,6 +863,7 @@ export function buildGenerationSchema(
       sym("ball", xw, YBALL, "down");
       sym("ball", xw - 22, YBALL, "up");
       waterHeaterSafetyValve(xw, YBALL + 68);
+      waterHeaterFittings(xw, xIn, yIn, yOut);
       nw("hotWater", xw + 4, YBALL + 30, "start");
     } else if (ww === "generator" && wwGen) {
       // Own pair from the side of the generator, below the mains: Absperrungen at one height, Sicherheitsventil and
@@ -863,6 +877,7 @@ export function buildGenerationSchema(
       sym("ball", xw, 240, "down");
       sym("ball", xw - 22, 240, "up");
       waterHeaterSafetyValve(xw, 266);
+      waterHeaterFittings(xw, xIn, yIn, yOut);
       if (!wwUnit?.internalPumps.hotWater) {
         sym("pump", xw, 284, "down");
         typeText("pump:hotWater", xw + 10, 281, "start");
@@ -875,14 +890,17 @@ export function buildGenerationSchema(
 
   // --- 3 Energiespeicher ----------------------------------------------------------------------------------------
   const stLeft = wwRight;
-  const stRight = stLeft + 160;
+  const stRight = stLeft + (data.storage ? 200 : 160);
   separator(stLeft);
   text(stLeft + 12, TITLE_Y, labels.sectors.storage.toUpperCase(), 8, { anchor: "start", bold: true });
   if (data.storage) {
     // Technischer Speicher on the ground, the size of the Wassererwärmer. Konventionell: the mains drop into it on the
     // generator side and rise out of it on the consumer side (VL at the top, RL at the bottom); reduziert: the VL main
     // runs on to the Verteiler with a T-Stück into the top, the RL from the Verteiler runs through the Speicher.
-    const xs = stLeft + 48;
+    const xs = stLeft + 68;
+    // Legs to and from the Speicher: RL outside, VL inside, far enough apart for the thermometers beside them.
+    const dR = 44;
+    const dV = 20;
     const w = 64;
     const top = G - 150;
     const yTop = top + 26;
@@ -895,26 +913,28 @@ export function buildGenerationSchema(
     const temps = storageTemperatures(data);
     if (temps.storage !== null) text(xs + w / 2, top + 30, `${temps.storage} °C`, 7, { muted: true });
     if (temps.ret !== null) text(xs + w / 2, yBot - 8, `${labels.return} ${(Math.round(temps.ret * 10) / 10).toLocaleString("de-CH")} °C`, 6.5, { muted: true });
-    pipe("rl", [[xs, yBot], [xs - 30, yBot], [xs - 30, YMR], [stLeft, YMR]]);
-    pipe("rl", [[stRight, YMR], [xs + w + 30, YMR], [xs + w + 30, yBot], [xs + w, yBot]]);
-    // Absperrungen in all lines to and from the Speicher at the height of those of the generators, Entleerungen in the
-    // Rücklauf connections on both sides.
-    sym("ball", xs - 30, YBALL, "up");
-    sym("ball", xs + w + 30, YBALL, "down");
-    sym("drain", xs - 15, yBot, "left", { side: sideOf("left", "below") });
-    sym("drain", xs + w + 15, yBot, "left", { side: sideOf("left", "below") });
+    pipe("rl", [[xs, yBot], [xs - dR, yBot], [xs - dR, YMR], [stLeft, YMR]]);
+    pipe("rl", [[stRight, YMR], [xs + w + dR, YMR], [xs + w + dR, yBot], [xs + w, yBot]]);
+    // Absperrungen in all lines to and from the Speicher at the height of those of the generators, thermometers below
+    // them (facing away from the Speicher), Entleerungen in the Rücklauf connections on both sides.
+    const legs: [number, 1 | -1][] = [[xs - dR, -1], [xs + w + dR, 1]];
     if (data.storageConnection === "reduced") {
       const xc = xs + w / 2;
       pipe("vl", [[stLeft, YMV], [stRight, YMV]]);
       pipe("vl", [[xc, YMV], [xc, top]]);
       dot(xc, YMV, "vl");
-      sym("ball", xc, YBALL, "down");
+      legs.push([xc, 1]);
     } else {
-      pipe("vl", [[stLeft, YMV], [xs - 16, YMV], [xs - 16, yTop], [xs, yTop]]);
-      pipe("vl", [[xs + w, yTop], [xs + w + 16, yTop], [xs + w + 16, YMV], [stRight, YMV]]);
-      sym("ball", xs - 16, YBALL, "down");
-      sym("ball", xs + w + 16, YBALL, "up");
+      pipe("vl", [[stLeft, YMV], [xs - dV, YMV], [xs - dV, yTop], [xs, yTop]]);
+      pipe("vl", [[xs + w, yTop], [xs + w + dV, yTop], [xs + w + dV, YMV], [stRight, YMV]]);
+      legs.push([xs - dV, -1], [xs + w + dV, 1]);
     }
+    for (const [x, side] of legs) {
+      sym("ball", x, YBALL, "down");
+      sym("thermometer", x, YBALL + 26, "down", { side: sideOf("down", side < 0 ? "left" : "right") });
+    }
+    sym("drain", xs - dR / 2, yBot, "left", { side: sideOf("left", "below") });
+    sym("drain", xs + w + dR / 2, yBot, "left", { side: sideOf("left", "below") });
   } else {
     pipe("vl", [[stLeft, YMV], [stRight, YMV]]);
     pipe("rl", [[stRight, YMR], [stLeft, YMR]]);
@@ -1060,6 +1080,7 @@ export function buildGenerationSchema(
       sym("ball", xwG, YBALL, "down");
       sym("ball", xwG - 22, YBALL, "up");
       waterHeaterSafetyValve(xwG, YBALL + 68);
+      waterHeaterFittings(xwG, xIn, yIn, yOut);
       nw(`group:${wwGroup.id}`, xwG + 4, YBALL + 30, "start");
     }
   }
