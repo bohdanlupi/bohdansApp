@@ -1,5 +1,6 @@
 // Materialauszug of 242 Wärmeerzeugung: every component of the Prinzipschema. Wärmeerzeuger, Speicher, Wassererwärmer,
-// Erdwärmesonden and the Brunnen are neutral (no article); valves on Optipress-Therm from Nussbaum (Optipress-Kugelhahn,
+// Erdwärmesonden and the Brunnen are neutral (no article); pipes from the lengths per circuit (Optipress-Therm-Rohr
+// from Nussbaum, PE 100 SDR 11 HakaGerodur for the Erdwärmesonden); valves on Optipress-Therm from Nussbaum (Optipress-Kugelhahn,
 // Optipress-Therm-T-Stück with Füll- und Entleerkugelhahn, Rückflussverhinderer), the rest from Meier Tobler:
 // Sicherheitsventile Afriso (IMI DG/Hswiss where Afriso lacks the size or pressure) by Tabelle 5 of HE301-01,
 // Reflex N with Reflex SU Kappenventil, Biral pumps (by DN and flow only – check with the pump curve), Siemens valves
@@ -29,7 +30,7 @@ export type MaterialLine = {
   manufacturer: "Nussbaum" | "Meier Tobler" | null;
   article: string | null;
   label: string;
-  unit: "Stk";
+  unit: "Stk" | "m";
   quantity: number;
 };
 
@@ -154,18 +155,35 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
   const circuits = evaluateHydraulics(data, ews);
   const circuitOf = (key: string): Circuit | undefined => circuits.find((c) => c.key === key);
   const map = new Map<string, MaterialLine>();
-  const add = (line: Omit<MaterialLine, "quantity" | "unit">, amount = 1) => {
+  const add = (line: Omit<MaterialLine, "quantity" | "unit">, amount = 1, unit: MaterialLine["unit"] = "Stk") => {
     if (amount <= 0) return;
     const current = map.get(line.key);
     if (current) current.quantity += amount;
-    else map.set(line.key, { ...line, unit: "Stk", quantity: amount });
+    else map.set(line.key, { ...line, unit, quantity: amount });
   };
   type Ch = MaterialChapter;
-  const article = (group: MaterialGroup, chapter: Ch, manufacturer: "Nussbaum" | "Meier Tobler", a: A.Article | null | undefined, amount = 1, fallback?: string) => {
-    if (a) add({ key: `${group}|${a.number}`, group, chapter, manufacturer, article: a.number, label: a.text }, amount);
-    else if (fallback) neutral(group, chapter, fallback, amount);
+  type Unit = MaterialLine["unit"];
+  const article = (group: MaterialGroup, chapter: Ch, manufacturer: "Nussbaum" | "Meier Tobler", a: A.Article | null | undefined, amount = 1, fallback?: string, unit: Unit = "Stk") => {
+    if (a) add({ key: `${group}|${a.number}`, group, chapter, manufacturer, article: a.number, label: a.text }, amount, unit);
+    else if (fallback) neutral(group, chapter, fallback, amount, unit);
   };
-  const neutral = (group: MaterialGroup, chapter: Ch, label: string, amount = 1) => add({ key: `${group}|${label}`, group, chapter, manufacturer: null, article: null, label }, amount);
+  const neutral = (group: MaterialGroup, chapter: Ch, label: string, amount = 1, unit: Unit = "Stk") =>
+    add({ key: `${group}|${label}`, group, chapter, manufacturer: null, article: null, label }, amount, unit);
+
+  // Pipes (chapter 1): VL + RL of a circuit, 2 × its single length rounded up to whole metres.
+  const metres = (m: number) => Math.ceil(m - 1e-9);
+  /** Optipress-Therm-Rohr (Stange à 6 m) of the circuit's DN, when its length is entered. */
+  const pipes = (group: MaterialGroup, c: Circuit | undefined) => {
+    if (!c?.length) return;
+    const size = c.size;
+    article(group, 1, "Nussbaum", size ? A.thermPipes.find((x) => x.d === size.d) : undefined, metres(2 * c.length), `Optipress-Therm-Rohr ${size ? `DN ${size.dn}` : "(DN offen)"}`, "m");
+  };
+  /** PE 100 SDR 11 (HakaGerodur GEROthen PN16) of outer diameter d, in rolls of 100 m where they exist. */
+  const pePipe = (group: MaterialGroup, d: number, length: number, fallback: string) => {
+    if (length <= 0) return;
+    const roll = A.pePipes.filter((x) => x.d === d).sort((a, b) => b.roll - a.roll)[0];
+    article(group, 1, "Meier Tobler", roll, metres(length), `${fallback} PE ${d} SDR 11`, "m");
+  };
 
   // Fittings on Optipress-Therm.
   const ball = (group: MaterialGroup, size: PipeSize | null, amount: number) =>
@@ -223,6 +241,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     }
     // Pumps built into the generator are supplied with it.
     if (!u.internalPumps.heating) pump("source", "heating", c);
+    pipes("source", c);
     if (u.type === "district") neutral("source", 0, "Primärseite Fernwärme (Wärmezähler, Regelventil, Absperrungen) – Lieferung Fernwärmeversorger");
 
     // Sole- / Zwischenkreis.
@@ -232,6 +251,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
       ball("brine", sSize, 2);
       drain("brine", sSize, 2);
       if (!u.internalPumps.source) pump("brine", u.type === "hpBrine" ? "brine" : "heating", s);
+      pipes("brine", s);
       const sv = safety.sourceValves.find((v) => v.id === u.id);
       safetyValve("brine", sv?.power ?? null, data.safety.brine.pSV, sSize);
       if (u.type === "hpBrine") {
@@ -247,6 +267,10 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
           article("brine", 2, "Meier Tobler", bar("IS+F"), 1, `Erdsondenverteiler ${e.probes} × ${d} mm mit Durchflussreglern und Entleerung`);
         }
         const length = ews?.length ? `, je ${fmt(Math.ceil(ews.length / 5) * 5)} m` : "";
+        // Zuleitungen of the probes (to the Sondenverteiler or the WP) and, with a Sondenverteiler, the Solekreisleitung
+        // from it to the WP, VL + RL each.
+        pePipe("brine", e.feedDn, e.probes * 2 * e.feedLength, "Zuleitung Erdwärmesonden");
+        if (e.distributor !== "none") pePipe("brine", e.mainDn, 2 * e.mainLength, "Solekreisleitung Sondenverteiler – Wärmepumpe");
         neutral("brine", 0, `Erdwärmesonde Duplex ${e.diameter} mm${length}`, e.probes);
       } else {
         vessel("brine", safety.brine?.chosen ?? null, data.safety.brine.pSV, "Druckausdehnungsgefäss Zwischenkreis");
@@ -280,6 +304,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     safetyValve("hotWater", hotWaterPower(data), data.safety.pSV, c?.size ?? null);
     thermometer("hotWater", c?.size ?? null, 2);
     drain("hotWater", c?.size ?? null, 2);
+    if (data.hotWaterConnection !== "group") pipes("hotWater", c);
     if (data.hotWaterConnection === "diverter") actuated("hotWater", A.diverterValves, c, "GLB161.9E");
     if (data.hotWaterConnection === "generator") {
       if (!hotWaterUnit(data)?.internalPumps.hotWater) pump("hotWater", "heating", c);
@@ -300,10 +325,14 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
 
   // --- Verteiler und Heizgruppen -------------------------------------------------------------------------------------
   if (data.groups.length) neutral("distribution", 0, `Heizungsverteiler VL/RL für ${data.groups.length} Heizgruppe${data.groups.length > 1 ? "n" : ""}`);
-  if (data.distributor === "pressurized") pump("distribution", "heating", circuitOf("main"));
+  if (data.distributor === "pressurized") {
+    pump("distribution", "heating", circuitOf("main"));
+    pipes("distribution", circuitOf("main"));
+  }
   for (const g of data.groups) {
     const c = circuitOf(`group:${g.id}`);
     const size = c?.size ?? null;
+    pipes("distribution", c);
     ball("distribution", size, 4);
     drain("distribution", size, 4);
     thermometer("distribution", size, 2);
@@ -363,5 +392,7 @@ export function materialSections(lines: MaterialLine[]): MaterialSection[] {
     if (same) same.quantity += l.quantity;
     else section.lines.push({ ...l, key: `${key}|${id}` });
   }
+  // Pipes (m) before the pieces in each chapter.
+  for (const section of out.values()) section.lines.sort((a, b) => (a.unit === "m" ? 0 : 1) - (b.unit === "m" ? 0 : 1));
   return [...out.values()].sort((a, b) => a.key.localeCompare(b.key));
 }

@@ -3,6 +3,64 @@
 
 export type Article = { number: string; text: string };
 
+export const thermPipes: (Article & { d: number })[] = [
+  {
+    "number": "55080.22",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 15",
+    "d": 15
+  },
+  {
+    "number": "55080.23",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 18",
+    "d": 18
+  },
+  {
+    "number": "55080.24",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 22",
+    "d": 22
+  },
+  {
+    "number": "55080.25",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 28",
+    "d": 28
+  },
+  {
+    "number": "55080.26",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 35",
+    "d": 35
+  },
+  {
+    "number": "55080.27",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 42",
+    "d": 42
+  },
+  {
+    "number": "55080.28",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 54",
+    "d": 54
+  },
+  {
+    "number": "55080.29",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 76.1",
+    "d": 76.1
+  },
+  {
+    "number": "55080.30",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 88.9",
+    "d": 88.9
+  },
+  {
+    "number": "55080.31",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 108",
+    "d": 108
+  },
+  {
+    "number": "55080.32",
+    "text": "Optipress-Therm-Rohr, Stange à 6 m, 64",
+    "d": 64
+  }
+];
+
 export const ballValves: (Article & { d: number })[] = [
   {
     "number": "82100.22",
@@ -2083,6 +2141,121 @@ export const thermometers: (Article)[] = [
   {
     "number": "53020.151",
     "text": "Meier Tobler Thermometer mit Messingtauchhülse Ø 80 mm 0-120 100 mm"
+  }
+];
+
+export const pePipes: (Article & { d: number; wall: number; roll: number })[] = [
+  {
+    "number": "92100.120",
+    "text": "HakaGerodur GEROthen Druckrohr PE 20x2,0 mm PN16 50 m",
+    "d": 20,
+    "wall": 2,
+    "roll": 50
+  },
+  {
+    "number": "92100.121",
+    "text": "HakaGerodur GEROthen Druckrohr PE 20x2,0 mm PN16 100 m",
+    "d": 20,
+    "wall": 2,
+    "roll": 100
+  },
+  {
+    "number": "92100.125",
+    "text": "HakaGerodur GEROthen Druckrohr PE 25x2,3 mm PN16 50 m",
+    "d": 25,
+    "wall": 2.3,
+    "roll": 50
+  },
+  {
+    "number": "92100.126",
+    "text": "HakaGerodur GEROthen Druckrohr PE 25x2,3 mm PN16 100 m",
+    "d": 25,
+    "wall": 2.3,
+    "roll": 100
+  },
+  {
+    "number": "92100.132",
+    "text": "HakaGerodur GEROthen Druckrohr PE 32x2,9 mm PN16 50 m",
+    "d": 32,
+    "wall": 2.9,
+    "roll": 50
+  },
+  {
+    "number": "92100.133",
+    "text": "HakaGerodur GEROthen Druckrohr PE 2x2,9 mm PN16 100 m",
+    "d": 2,
+    "wall": 2.9,
+    "roll": 100
+  },
+  {
+    "number": "92100.140",
+    "text": "HakaGerodur GEROthen Druckrohr PE 40x3,7 mm PN16 50 m",
+    "d": 40,
+    "wall": 3.7,
+    "roll": 50
+  },
+  {
+    "number": "92100.141",
+    "text": "HakaGerodur GEROthen Druckrohr PE 40x3,7 mm PN16 100 m",
+    "d": 40,
+    "wall": 3.7,
+    "roll": 100
+  },
+  {
+    "number": "92100.150",
+    "text": "HakaGerodur GEROthen Druckrohr PE 50x4,6 mm PN16 50 m",
+    "d": 50,
+    "wall": 4.6,
+    "roll": 50
+  },
+  {
+    "number": "92100.151",
+    "text": "HakaGerodur GEROthen Druckrohr PE 50x4,6 mm PN16 100 m",
+    "d": 50,
+    "wall": 4.6,
+    "roll": 100
+  },
+  {
+    "number": "92100.163",
+    "text": "HakaGerodur GEROthen Druckrohr PE 63x5,8 mm PN16 50 m",
+    "d": 63,
+    "wall": 5.8,
+    "roll": 50
+  },
+  {
+    "number": "92100.164",
+    "text": "HakaGerodur GEROthen Druckrohr PE 63x5,8 mm PN16 100 m",
+    "d": 63,
+    "wall": 5.8,
+    "roll": 100
+  },
+  {
+    "number": "92100.175",
+    "text": "HakaGerodur GEROthen Druckrohr PE 75x6,8 mm PN16 50 m",
+    "d": 75,
+    "wall": 6.8,
+    "roll": 50
+  },
+  {
+    "number": "92100.176",
+    "text": "HakaGerodur GEROthen Druckrohr PE 75x6,8 mm PN16 100 m",
+    "d": 75,
+    "wall": 6.8,
+    "roll": 100
+  },
+  {
+    "number": "92100.190",
+    "text": "HakaGerodur GEROthen Druckrohr PE 90x8,2 mm PN16 50 m",
+    "d": 90,
+    "wall": 8.2,
+    "roll": 50
+  },
+  {
+    "number": "92100.191",
+    "text": "HakaGerodur GEROthen Druckrohr PE 90x8,2 mm PN16 100 m",
+    "d": 90,
+    "wall": 8.2,
+    "roll": 100
   }
 ];
 
