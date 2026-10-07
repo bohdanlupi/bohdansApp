@@ -356,11 +356,11 @@ function fuel(kind: "solid" | "liquid" | "gas", x: number, y: number): Prim[] {
 
 /**
  * Elektroeinsatz: connection head (box) outside the wall at x, the heating element as a zigzag reaching `length`
- * into the Speicher (to the left) at height y.
+ * into the Speicher at height y; `dir` is the direction into the Speicher (1: from the left wall, -1: from the right).
  */
-function electricHeater(x: number, y: number, length: number): Prim[] {
-  const zig = Array.from({ length: Math.floor((length - 6) / 3) + 1 }, (_, i) => `L${x - 6 - i * 3},${y + (i % 2 ? 2.5 : -2.5)}`).join(" ");
-  return [rect(x, y - 4, 8, 8, "bg", 0.9), path(`M${x},${y} L${x - 6},${y} ${zig}`, 0.8)];
+function electricHeater(x: number, y: number, length: number, dir: 1 | -1): Prim[] {
+  const zig = Array.from({ length: Math.floor((length - 6) / 3) + 1 }, (_, i) => `L${x + dir * (6 + i * 3)},${y + (i % 2 ? 2.5 : -2.5)}`).join(" ");
+  return [rect(dir > 0 ? x - 8 : x, y - 4, 8, 8, "bg", 0.9), path(`M${x},${y} L${x + dir * 6},${y} ${zig}`, 0.8)];
 }
 
 /** Coil «<» of a Wärmetauscher (2.2.4) between y1 and y2, entering from the left at x over width w. */
@@ -906,12 +906,13 @@ export function buildGenerationSchema(
     add(rect(xT, top, 64, 150), rect(xT, top, 64, 16, "bg", 1));
     tankSensor(data.hotWaterSensor, xT, top);
     tankThermometers(data.hotWaterThermometers, xT, top);
-    // Elektroeinsatz (when it has a power) from the right side between the Register, its power beside the head.
+    // Elektroeinsatz (when it has a power) from the left side above the upper Register (clear of the Fühler on the
+    // right and the connections on the left), its power beside the element inside the Wassererwärmer.
     if (data.hotWaterElectric > 0) {
-      const yE = G - 63;
+      const yE = G - 122;
       used.add("electricHeater");
-      add(...electricHeater(xT + 64, yE, 30));
-      text(xT + 75, yE + 2.5, `${(Math.round(data.hotWaterElectric * 10) / 10).toLocaleString("de-CH")} kW`, 6, { anchor: "start", muted: true });
+      add(...electricHeater(xT, yE, 30, 1));
+      text(xT + 34, yE + 2.5, `${(Math.round(data.hotWaterElectric * 10) / 10).toLocaleString("de-CH")} kW`, 6, { anchor: "start", muted: true });
     }
     if (external) {
       // Platten-WT; Ladepumpe from the bottom of the Speicher through the WT back into its top.
@@ -1262,7 +1263,7 @@ export function legendSymbol(key: SymbolKey): Prim[] {
     case "waterHeater":
       return [rect(11, 1, 18, 28), rect(11, 1, 18, 7, "bg", 0.8), coil(12, 18, 26, 12)];
     case "electricHeater":
-      return electricHeater(29, 15, 20);
+      return electricHeater(29, 15, 20, -1);
     case "ews":
       return [ln(4, 6, 36, 6), path("M14,6 L14,22 A6,6 0 0 0 26,22 L26,6", 1.4)];
     case "distributor":
