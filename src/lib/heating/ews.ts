@@ -22,6 +22,7 @@ import {
 import { evaluateSite } from "./heat-load";
 import type { HeatingPlan } from "./plan-schema";
 import type { PlantData } from "./plant-schema";
+import { CP_WATER } from "./water";
 
 /** Values of the project the EWS calculation takes as defaults. */
 export type EwsContext = {
@@ -208,7 +209,7 @@ export function evaluateEws(data: PlantData, ctx: EwsContext): EwsResult {
   const heatLoad = e.heatLoad ?? ctx.heatLoad ?? 0;
   const hp = e.heatingCapacity ?? 0;
   const hoursHeating = hp > 0 ? (hoursNorm * heatLoad) / hp : 0;
-  const qW = e.hotWater ? (e.hotWaterLitres * (e.hotWaterTemp - e.coldWaterTemp) * 4.182 * 365) / 3600 : 0;
+  const qW = e.hotWater ? (e.hotWaterLitres * (e.hotWaterTemp - e.coldWaterTemp) * CP_WATER * 365) / 3600 : 0;
   const hpW = e.heatingCapacityHotWater ?? hp;
   const hours = Math.max(1800, hoursHeating + (hpW > 0 ? qW / hpW : 0));
 

@@ -6,6 +6,7 @@ import type { EwsResult } from "./ews";
 import { brineMedia } from "./ews-data";
 import type { GeneratorType } from "./plan-schema";
 import type { PlantData } from "./plant-schema";
+import { CP_WATER } from "./water";
 
 /** Optipress-Therm sizes: DN, outer diameter d and inner diameter di [mm], thread of the valves at this DN [inch]. */
 export const pipeSizes = [
@@ -55,7 +56,7 @@ export type Circuit = {
 export const pipeContent = (size: PipeSize | null, length: number | null) =>
   size && length ? 2 * length * 10 * (Math.PI / 4) * (size.di / 100) ** 2 : null; // m → dm, mm → dm
 
-const WATER = { rho: 990, cp: 4.18 };
+const WATER = { rho: 990, cp: CP_WATER };
 
 /** Volumenstrom [m³/h] of Φ [kW] at ΔT [K]. */
 const flowOf = (power: number | null, deltaT: number | null, medium = WATER) =>

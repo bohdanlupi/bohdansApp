@@ -5,6 +5,7 @@
 // (17/13 at 100 kg/h: 58 Pa/m; the guide text says 64 Pa/m).
 
 import { hakaData } from "./haka-data";
+import { CP_WATER } from "./water";
 
 type Polyline = readonly (readonly [number, number])[];
 
@@ -16,7 +17,8 @@ export const floorPipes = hakaData.pipes.filter((p) => p.da <= 20).map((p) => p.
 /** Surface temperature limits as specific output [W/m²]: 28 °C occupied zone, 30 °C bathrooms (charts B1–B9). */
 export const surfaceLimit = { occupied: hakaData.surfaceLimits["28"], bath: hakaData.surfaceLimits["30"] };
 export const specificLoadLimit = 80;
-const cWater = 1.163;
+/** cp of water [Wh/(kg·K)]. */
+const cWater = CP_WATER / 3.6;
 /** Chart reading tolerance [W/m²] (the guide reads 49.8 as 50). */
 const tolerance = 0.5;
 

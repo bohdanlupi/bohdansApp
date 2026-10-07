@@ -3,6 +3,8 @@
 // Figuren 3, 12 and 13–21 read off at their grid lines. They are Richtwerte with an accuracy of about ±1 % (Figur 9
 // gives 37.7 W/m for example D.4.8.1, the norm reads 37.9 W/m).
 
+import { CP_WATER } from "./water";
+
 /** Figur 9: specific Normleistung of a Duplex-EWS De 32 mm [W/m] by λ (1.0 … 4.0 W/mK) for ρ·c 1.5 / 2.0 / 2.5 MJ/m³K. */
 export const normPower32: { lambda: number; c15: number; c20: number; c25: number }[] = [
   { lambda: 1.0, c15: 19.0, c20: 19.6, c25: 20.27 },
@@ -96,7 +98,7 @@ export type RockType = keyof typeof rockTypes;
 
 /**
  * Tabelle 14: Wärmeträger (density and kinematic viscosity at 0 °C, ΔV/V0 from 0 to 20 °C). The specific heat
- * capacity is not in the norm: typical manufacturer values at 0 °C (Clariant), editable in the input.
+ * capacity is not in the norm: typical manufacturer values at 0 °C (Clariant), water CP_WATER; editable in the input.
  */
 export const brineMedia = {
   eg20: { rho: 1037, nu: 3.49, frost: -10.6, expansion: 0.0045, cp: 3.85 },
@@ -105,7 +107,7 @@ export const brineMedia = {
   pg25: { rho: 1032, nu: 5.97, frost: -10.1, expansion: 0.0076, cp: 3.95 },
   pg30: { rho: 1038, nu: 7.58, frost: -13.5, expansion: 0.0083, cp: 3.89 },
   pg35: { rho: 1044, nu: 9.65, frost: -18.5, expansion: 0.009, cp: 3.83 },
-  water: { rho: 1000, nu: 1.5, frost: 0, expansion: 0.0016, cp: 4.2 },
+  water: { rho: 1000, nu: 1.5, frost: 0, expansion: 0.0016, cp: CP_WATER },
   eth20: { rho: 978, nu: 4.64, frost: -7.8, expansion: 0.007, cp: 4.25 },
   eth25: { rho: 976, nu: 5.57, frost: -10.7, expansion: 0.0113, cp: 4.18 },
   eth30: { rho: 975, nu: 5.59, frost: -14.3, expansion: 0.0167, cp: 4.1 },
