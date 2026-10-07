@@ -327,10 +327,6 @@ export function GenerationEditor({
         )}
       </Section>
 
-      <SafetySection data={d} result={safety} editable={editable} setSafety={(patch) => setPlant({ safety: { ...d.safety, ...patch } })} />
-
-      {ews && <EwsSection data={d} ctx={ewsCtx} result={ews} editable={editable} setEws={(patch) => setPlant({ ews: { ...d.ews, ...patch } })} />}
-
       <Section
         title={tg("schemaTitle")}
         collapseKey="heating-generation:schema"
@@ -349,6 +345,10 @@ export function GenerationEditor({
       >
         <GenerationSchemaView schema={schema} label={tg("schemaTitle")} />
       </Section>
+
+      <SafetySection data={d} result={safety} editable={editable} setSafety={(patch) => setPlant({ safety: { ...d.safety, ...patch } })} />
+
+      {ews && <EwsSection data={d} ctx={ewsCtx} result={ews} editable={editable} setEws={(patch) => setPlant({ ews: { ...d.ews, ...patch } })} />}
 
       <MaterialSection
         number={ews ? 7 : 6}

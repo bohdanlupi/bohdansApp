@@ -259,8 +259,6 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     if (data.hotWaterConnection === "diverter") actuated("hotWater", A.diverterValves, c, "GLB161.9E");
     if (data.hotWaterConnection === "generator") {
       if (!hotWaterUnit(data)?.internalPumps.hotWater) pump("hotWater", "heating", c);
-      const size = c?.size;
-      article("hotWater", "Nussbaum", size ? A.checkValves.find((v) => v.d === size.d) : undefined, 1, "Rückflussverhinderer");
     }
   }
 
