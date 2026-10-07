@@ -123,7 +123,7 @@ export function GenerationEditor({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => anlage.update((x) => ({ ...x, generators: [...x.generators, { id: crypto.randomUUID(), type: x.generators.at(-1)?.type ?? "hpAir", name: "", power: null, deltaT: null, internalPumps: { source: false, heating: false, hotWater: false } }] }))}
+                onClick={() => anlage.update((x) => ({ ...x, generators: [...x.generators, { id: crypto.randomUUID(), type: x.generators.at(-1)?.type ?? "hpAir", name: "", power: null, deltaT: null, internalPumps: { source: false, sourceValve: false, sourceVessel: false, heating: false, heatingValve: false, hotWater: false } }] }))}
               >
                 <Plus /> {tg("addGenerator")}
               </Button>
@@ -407,8 +407,9 @@ function InternalPumps({
 }) {
   const tg = useTranslations("heatingPlan.generation.internalPumps");
   const keys = [
-    ...(unit.type === "hpBrine" || unit.type === "hpWater" ? (["source"] as const) : []),
+    ...(unit.type === "hpBrine" || unit.type === "hpWater" ? (["source", "sourceValve", "sourceVessel"] as const) : []),
     ...(forced ? [] : (["heating"] as const)),
+    "heatingValve" as const,
     ...(wwUnit?.id === unit.id ? (["hotWater"] as const) : []),
   ];
   if (!keys.length) return null;

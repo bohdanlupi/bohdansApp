@@ -1907,7 +1907,7 @@
     },
     "generation": {
       "sectors": {
-        "source": "Fonte di calore",
+        "source": "Generatori di calore",
         "hotWater": "Acqua calda",
         "storage": "Accumulatore di energia",
         "distribution": "Distributore e gruppi",
@@ -2179,9 +2179,12 @@
       "noGenerators": "Ancora nessun generatore.",
       "internalPumps": {
         "source": "Pompa della sorgente nel generatore",
+        "sourceValve": "Valvola di sicurezza sorgente nel generatore",
+        "sourceVessel": "Vaso d’espansione salamoia nel generatore",
         "heating": "Pompa di riscaldamento nel generatore",
+        "heatingValve": "Valvola di sicurezza riscaldamento nel generatore",
         "hotWater": "Pompa di carico ACS nel generatore",
-        "hint": "Pompa integrata nel generatore di calore: non viene disegnata nello schema di principio né ripresa nell’estratto materiale."
+        "hint": "Integrato nel generatore di calore: non viene disegnato nello schema di principio né ripreso nell’estratto materiale."
       },
       "generatorColumns": {
         "type": "Tipo",

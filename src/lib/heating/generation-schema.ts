@@ -586,7 +586,7 @@ export function buildGenerationSchema(
     // Entleerungen below the Absperrungen, on the side of the generator.
     sym("drain", xv, YBALL + 14, "up", { side: sideOf("up", "left") });
     sym("drain", xr, YBALL + 14, "down", { side: sideOf("down", "left") });
-    if (g !== null) {
+    if (g !== null && !(unit && pumpsInside(data, unit).heatingValve)) {
       // Sicherheitsventil on the VL between generator and Absperrung, unabsperrbar (HE301-01 6.2.4).
       const ySV = top - 12;
       pipe("vl", [[xv, ySV], [xv + 10, ySV]]);
@@ -771,7 +771,11 @@ export function buildGenerationSchema(
   /** Sole circuit to the Erdwärmesonden, or Zwischenkreis to a Platten-WT on the ground with the Brunnen below it. */
   function drawSourceLoop(g: "hpBrine" | "hpWater", gx: number, top: number, id: string) {
     // Quellenpumpe, unless built into the WP.
-    const sourcePump = !data.generators.find((u) => u.id === id)?.internalPumps.source;
+    // Quellenpumpe, Sicherheitsventil and Ausdehnungsgefäss of the circuit, unless built into the WP.
+    const inside = data.generators.find((u) => u.id === id)?.internalPumps;
+    const sourcePump = !inside?.source;
+    const sourceValve = !inside?.sourceValve;
+    const sourceVessel = !inside?.sourceVessel;
     const xb = gx - 34 - SOURCE_GAP; // back to the evaporator
     const xa = xb - 30; // to the source (cooled)
     if (g === "hpBrine") {
@@ -813,13 +817,17 @@ export function buildGenerationSchema(
         sym("pump", xb, YPUMP, "down");
         typeText(`pump:source:${id}`, xb + 10, YPUMP - 3, "start");
       }
-      sourceSafetyValve(xb, top - 12, 10);
-      typeText(`sv:source:${id}`, xb + 17, top - 48);
+      if (sourceValve) {
+        sourceSafetyValve(xb, top - 12, 10);
+        typeText(`sv:source:${id}`, xb + 17, top - 48);
+      }
       nw(`source:${id}`, (xa + xb) / 2, YBALL + 36);
-      pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
-      dot(xa, Y_VESSEL, "brineR");
-      const v = safety.brine;
-      expansionVessel("brineR", xa - 30, 1, v && v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel, "", "vessel:source");
+      if (sourceVessel) {
+        pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
+        dot(xa, Y_VESSEL, "brineR");
+        const v = safety.brine;
+        expansionVessel("brineR", xa - 30, 1, v && v.chosen !== null ? `${labels.vessel} ${Math.round(v.chosen)} l` : labels.vessel, "", "vessel:source");
+      }
       return;
     }
     // Zwischenkreis: the lines leave the evaporator, rise over the source side and drop to the Platten-WT.
@@ -830,18 +838,22 @@ export function buildGenerationSchema(
     pipe("brine", [[xb, yLow], [xb, yB], [xb + 12, yB], [xb + 12, top + 16], [gx, top + 16]]);
     sym("ball", xa, yA + 26, "down");
     sym("drain", xa, yA + 40, "down", { side: sideOf("down", "left") });
-    pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
-    dot(xa, Y_VESSEL, "brineR");
-    const vz = safety.brine;
-    expansionVessel("brineR", xa - 30, 1, vz && vz.chosen !== null ? `${labels.vessel} ${Math.round(vz.chosen)} l` : labels.vessel, "", "vessel:source");
+    if (sourceVessel) {
+      pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
+      dot(xa, Y_VESSEL, "brineR");
+      const vz = safety.brine;
+      expansionVessel("brineR", xa - 30, 1, vz && vz.chosen !== null ? `${labels.vessel} ${Math.round(vz.chosen)} l` : labels.vessel, "", "vessel:source");
+    }
     sym("ball", xb, yB + 20, "up");
     sym("drain", xb, yB + 34, "up", { side: sideOf("up", "left") });
     if (sourcePump) {
       sym("pump", xb, yB + 62, "up");
       typeText(`pump:source:${id}`, xb - 10, yB + 59, "end");
     }
-    sourceSafetyValve(xb, top - 12, -16);
-    typeText(`sv:source:${id}`, xb - 12, top - 4);
+    if (sourceValve) {
+      sourceSafetyValve(xb, top - 12, -16);
+      typeText(`sv:source:${id}`, xb - 12, top - 4);
+    }
     nw(`source:${id}`, (xa + xb) / 2, yA - 19);
     // Zwischenkreis → Platten-WT (on the ground) → Grundwasser: Förderbrunnen (Unterwasserpumpe), Rückgabebrunnen.
     used.add("plateHx");

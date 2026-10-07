@@ -1907,7 +1907,7 @@
     },
     "generation": {
       "sectors": {
-        "source": "Source de chaleur",
+        "source": "Générateurs de chaleur",
         "hotWater": "Eau chaude",
         "storage": "Accumulateur d’énergie",
         "distribution": "Distributeur et groupes",
@@ -2179,9 +2179,12 @@
       "noGenerators": "Pas encore de producteurs.",
       "internalPumps": {
         "source": "Pompe de source intégrée au générateur",
+        "sourceValve": "Soupape de sécurité source intégrée au générateur",
+        "sourceVessel": "Vase d’expansion eau glycolée intégré au générateur",
         "heating": "Pompe de chauffage intégrée au générateur",
+        "heatingValve": "Soupape de sécurité chauffage intégrée au générateur",
         "hotWater": "Pompe de charge ECS intégrée au générateur",
-        "hint": "Pompe intégrée au générateur de chaleur : elle n’est ni dessinée dans le schéma de principe ni reprise dans l’extrait de matériel."
+        "hint": "Intégré au générateur de chaleur : n’est ni dessiné dans le schéma de principe ni repris dans l’extrait de matériel."
       },
       "generatorColumns": {
         "type": "Type",

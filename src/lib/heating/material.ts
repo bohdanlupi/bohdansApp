@@ -243,7 +243,8 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     neutral("source", 0, `${name === typeNames[u.type] ? name : `${typeNames[u.type]} «${name}»`}${u.power !== null ? `, ΦN ${fmt(u.power, 1)} kW` : ""}`);
     ball("source", size, 2);
     drain("source", size, 2);
-    safetyValve("source", u.power, data.safety.pSV, size);
+    const inside = pumpsInside(data, u);
+    if (!inside.heatingValve) safetyValve("source", u.power, data.safety.pSV, size);
     if (u.type === "pellets" || u.type === "logWood") {
       // Rücklaufhochhaltung: Dreiwegventil with actuator.
       actuated("source", A.mixingValves, c, "SAS61.03");
@@ -262,9 +263,9 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
       if (!u.internalPumps.source) pump("brine", u.type === "hpBrine" ? "brine" : "heating", s);
       pipes("brine", s);
       const sv = safety.sourceValves.find((v) => v.id === u.id);
-      safetyValve("brine", sv?.power ?? null, data.safety.brine.pSV, sSize);
+      if (!inside.sourceValve) safetyValve("brine", sv?.power ?? null, data.safety.brine.pSV, sSize);
       if (u.type === "hpBrine") {
-        vessel("brine", safety.brine?.chosen ?? null, data.safety.brine.pSV, "Druckausdehnungsgefäss Solekreis");
+        if (!inside.sourceVessel) vessel("brine", safety.brine?.chosen ?? null, data.safety.brine.pSV, "Druckausdehnungsgefäss Solekreis");
         const e = data.ews;
         if (e.distributor !== "none") {
           // HakaGerodur SAVE: Sammler with Kugelhähnen (VL from the probes) and Verteiler with Inline-Setter (RL), each
@@ -282,7 +283,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
         if (e.distributor !== "none") pePipe("brine", e.mainDn, 2 * e.mainLength, "Solekreisleitung Sondenverteiler – Wärmepumpe");
         neutral("brine", 0, `Erdwärmesonde Duplex ${e.diameter} mm${length}`, e.probes);
       } else {
-        vessel("brine", safety.brine?.chosen ?? null, data.safety.brine.pSV, "Druckausdehnungsgefäss Zwischenkreis");
+        if (!inside.sourceVessel) vessel("brine", safety.brine?.chosen ?? null, data.safety.brine.pSV, "Druckausdehnungsgefäss Zwischenkreis");
         neutral("brine", 0, "Platten-Wärmetauscher Zwischenkreis / Grundwasser");
         neutral("brine", 0, "Förderbrunnen mit Unterwasserpumpe");
         neutral("brine", 0, "Rückgabebrunnen");

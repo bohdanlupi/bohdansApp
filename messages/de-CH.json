@@ -1907,7 +1907,7 @@
     },
     "generation": {
       "sectors": {
-        "source": "Wärmequelle",
+        "source": "Wärmeerzeuger",
         "hotWater": "Warmwasser",
         "storage": "Energiespeicher",
         "distribution": "Verteiler und Heizgruppen",
@@ -2179,9 +2179,12 @@
       "noGenerators": "Noch keine Wärmeerzeuger.",
       "internalPumps": {
         "source": "Quellenpumpe im Erzeuger",
+        "sourceValve": "Sicherheitsventil Quelle im Erzeuger",
+        "sourceVessel": "Expansionsgefäss Sole im Erzeuger",
         "heating": "Heizungspumpe im Erzeuger",
+        "heatingValve": "Sicherheitsventil Heizung im Erzeuger",
         "hotWater": "WW-Ladepumpe im Erzeuger",
-        "hint": "Pumpe im Wärmeerzeuger eingebaut: wird im Prinzipschema nicht gezeichnet und nicht in den Materialauszug übernommen."
+        "hint": "Im Wärmeerzeuger eingebaut: wird im Prinzipschema nicht gezeichnet und nicht in den Materialauszug übernommen."
       },
       "generatorColumns": {
         "type": "Typ",

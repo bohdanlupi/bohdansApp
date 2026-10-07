@@ -86,12 +86,20 @@ const generatorSchema = z.object({
   /** Spreizung VL – RL at the generator [K] (null = by type, see hydraulics.ts). */
   deltaT: num(1, 60),
   /**
-   * Pumps built into the generator: Quellenpumpe (Sole- / Zwischenkreis of a Sole/Wasser- or Wasser/Wasser-WP),
-   * Heizungspumpe, WW-Ladepumpe of the separate Warmwasser connection. They are neither drawn nor in the Materialauszug.
+   * Components built into the generator (neither drawn nor in the Materialauszug): Quellenpumpe, Sicherheitsventil and
+   * Ausdehnungsgefäss of the Sole- / Zwischenkreis of a Sole/Wasser- or Wasser/Wasser-WP; Heizungspumpe and
+   * Sicherheitsventil Heizung; WW-Ladepumpe of the separate Warmwasser connection. (The name stems from the pumps.)
    */
   internalPumps: z
-    .object({ source: z.boolean().catch(false), heating: z.boolean().catch(false), hotWater: z.boolean().catch(false) })
-    .catch({ source: false, heating: false, hotWater: false }),
+    .object({
+      source: z.boolean().catch(false),
+      sourceValve: z.boolean().catch(false),
+      sourceVessel: z.boolean().catch(false),
+      heating: z.boolean().catch(false),
+      heatingValve: z.boolean().catch(false),
+      hotWater: z.boolean().catch(false),
+    })
+    .catch({ source: false, sourceValve: false, sourceVessel: false, heating: false, heatingValve: false, hotWater: false }),
 });
 
 export type GeneratorUnit = z.infer<typeof generatorSchema>;
@@ -290,12 +298,13 @@ export const hotWaterUnit = (data: PlantData): GeneratorUnit | null =>
     : null;
 
 /**
- * Pumps built into a generator: as chosen, and with «Separater Vorlauf, Umschaltung intern» the Heizungs- and the
- * WW-Ladepumpe of the loading generator (forced). Such pumps are neither drawn nor in the Materialauszug.
+ * Components built into a generator: as chosen, and with «Separater Vorlauf, Umschaltung intern» the Heizungs- and
+ * the WW-Ladepumpe of the loading generator (forced). They are neither drawn nor in the Materialauszug.
  */
 export function pumpsInside(data: PlantData, unit: GeneratorUnit) {
   const forced = data.hotWaterConnection === "internal" && hotWaterUnit(data)?.id === unit.id;
-  return { source: unit.internalPumps.source, heating: unit.internalPumps.heating || forced, hotWater: unit.internalPumps.hotWater || forced, forced };
+  const i = unit.internalPumps;
+  return { ...i, heating: i.heating || forced, hotWater: i.hotWater || forced, forced };
 }
 
 /** Name of a generator: its own, else the type, numbered when the type occurs more than once. */
