@@ -74,6 +74,17 @@ function safetyValveFor(power: number | null, pSV: number) {
 /** Reflex N: the next size ≥ VN. */
 const vesselFor = (vn: number | null) => (vn !== null ? [...A.vessels].sort((a, b) => a.volume - b.volume).find((x) => x.volume >= vn - 1e-9) : undefined);
 
+/**
+ * Power for the Sicherheitsventil on the heating side of the Wassererwärmer: the loading generator, the WW-Ladegruppe,
+ * else (Umschaltventil) all generators; null when unknown.
+ */
+function hotWaterPower(data: PlantData): number | null {
+  if (data.hotWaterConnection === "generator") return hotWaterUnit(data)?.power ?? null;
+  if (data.hotWaterConnection === "group") return data.groups.find((g) => g.id === data.hotWaterGroup)?.power ?? null;
+  const powers = data.generators.map((u) => u.power).filter((p): p is number => p !== null);
+  return powers.length ? powers.reduce((s, p) => s + p, 0) : null;
+}
+
 /** Short type of a Biral pump from its catalogue text, e.g. ["PrimAX", "25-6"]. */
 const pumpType = (text: string) => {
   const m = /^Biral (\w+) \S+ (\d+F?-\d+)/.exec(text);
@@ -117,6 +128,7 @@ export function componentTypes(data: PlantData, ews: EwsResult | null): Map<stri
   if (vh) out.set("vessel:heating", [`Reflex N ${vh.volume}`]);
   const vs = vesselFor(safety.brine?.chosen ?? null);
   if (vs) out.set("vessel:source", [`Reflex N ${vs.volume}`]);
+  if (data.hotWater) sv("hotWater", hotWaterPower(data), data.safety.pSV);
   if (data.hotWater && data.hotWaterConnection === "diverter") valve3("hotWater", A.diverterValves, "GLB161.9E");
   const wwUnit = hotWaterUnit(data);
   if (wwUnit && !wwUnit.internalPumps.hotWater) pump("hotWater", "heating");
@@ -256,6 +268,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     }
     const c = data.hotWaterConnection === "group" ? circuitOf(`group:${data.hotWaterGroup}`) : circuitOf("hotWater");
     ball("hotWater", c?.size ?? null, 2);
+    safetyValve("hotWater", hotWaterPower(data), data.safety.pSV, c?.size ?? null);
     if (data.hotWaterConnection === "diverter") actuated("hotWater", A.diverterValves, c, "GLB161.9E");
     if (data.hotWaterConnection === "generator") {
       if (!hotWaterUnit(data)?.internalPumps.hotWater) pump("hotWater", "heating", c);
