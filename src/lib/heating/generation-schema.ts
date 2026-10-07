@@ -895,7 +895,7 @@ export function buildGenerationSchema(
       nw("hotWater", xw + 4, YBALL - 28, "start");
     } else if (ww === "generator" && wwGen) {
       // Own pair from the side of the generator, just below the mains: Absperrungen and thermometers as at the other
-      // connections, Sicherheitsventil and Ladepumpe below them.
+      // connections, the Sicherheitsventil below them in the VL, the Ladepumpe in the RL.
       const { gx, top: gTop } = wwGen;
       const yV = YMR + 16;
       const yR = YMR + 26;
@@ -906,9 +906,10 @@ export function buildGenerationSchema(
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [xR, yR], [xR, gTop + 28], [gx + 44, gTop + 28]]);
       waterHeaterFittings(xw, xIn, yIn, yOut);
       waterHeaterSafetyValve(xw, 262);
+      // Ladepumpe in the RL back to the generator, at the height of the pumps of the generators.
       if (!wwUnit?.internalPumps.hotWater) {
-        sym("pump", xw, 280, "down");
-        typeText("pump:hotWater", xw + 10, 277, "start");
+        sym("pump", xw - 22, YPUMP, "up");
+        typeText("pump:hotWater", xw - 32, YPUMP - 3, "end");
       }
       nw("hotWater", xw + 4, yV - 2, "start");
     }
