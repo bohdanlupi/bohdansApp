@@ -22,7 +22,7 @@
 import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
 
 import type { EmitterType, GeneratorType } from "./plan-schema";
-import { type CircuitType, generatorName, type PlantData } from "./plant-schema";
+import { type CircuitType, generatorName, hotWaterUnit, type PlantData } from "./plant-schema";
 import { emptyEwsContext, type EwsContext, evaluateEws } from "./ews";
 import { evaluateHydraulics, storageTemperatures } from "./hydraulics";
 import { componentTypes } from "./material";
@@ -444,7 +444,7 @@ export function buildGenerationSchema(
   // Generators stand on the ground; their legs rise to the mains, which run over all sectors.
   // A Sondenverteiler im Technikraum lies at the height of the mains, so its Sole/Wasser-WP is drawn first (left of them);
   // the generator with the separate Warmwasser connection last, so its lines pass no other generator.
-  const wwGenId = data.hotWater && data.hotWaterConnection === "generator" ? (data.hotWaterGenerator ?? data.generators[0]?.id) : undefined;
+  const wwGenId = hotWaterUnit(data)?.id;
   const order = (u: (typeof data.generators)[number]) => (u.type === "hpBrine" && data.ews.distributor === "inside" ? 0 : u.id === wwGenId ? 2 : 1);
   const gens = data.generators.length ? [...data.generators].sort((a, b) => order(a) - order(b)) : [null];
   const x0 = 24;
@@ -468,7 +468,7 @@ export function buildGenerationSchema(
   let firstLeg = Infinity;
   // Wassererwärmer loading: generator of the separate connection, Heizgruppe of the WW-Ladegruppe.
   const ww = data.hotWater ? data.hotWaterConnection : null;
-  const wwUnit = data.generators.find((u) => u.id === data.hotWaterGenerator) ?? data.generators[0] ?? null;
+  const wwUnit = hotWaterUnit(data);
   const wwGroup = ww === "group" ? (data.groups.find((g) => g.id === data.hotWaterGroup) ?? null) : null;
   let wwGen: { gx: number; top: number } | null = null;
   for (const unit of gens) {
@@ -506,14 +506,13 @@ export function buildGenerationSchema(
       pipe("vl", [[xv, YMR + 72], [xr - 6, YMR + 72]]);
       dot(xv, YMR + 72, "vl");
       sym("valve3", xr, YMR + 72, "down", { port: sideOf("down", "left") });
-      sym("pump", xr, YMR + 104, "down");
-      if (unit) {
-        typeText(`valve3:gen:${unit.id}`, xv - 4, YMR + 70, "end");
-        typeText(`pump:gen:${unit.id}`, xr - 10, YMR + 101, "end");
-      }
-    } else if (g) {
-      sym("pump", xr, YPUMP, "down");
-      if (unit) typeText(`pump:gen:${unit.id}`, xr - 10, YPUMP - 3, "end");
+      if (unit) typeText(`valve3:gen:${unit.id}`, xv - 4, YMR + 70, "end");
+    }
+    // Heizungspumpe (with a Rücklaufhochhaltung below its Dreiwegventil), unless built into the generator.
+    if (g && !unit?.internalPumps.heating) {
+      const yP = g === "pellets" || g === "logWood" ? YMR + 104 : YPUMP;
+      sym("pump", xr, yP, "down");
+      if (unit) typeText(`pump:gen:${unit.id}`, xr - 10, yP - 3, "end");
     }
     colX += w;
   }
@@ -672,6 +671,8 @@ export function buildGenerationSchema(
 
   /** Sole circuit to the Erdwärmesonden, or Zwischenkreis to a Platten-WT on the ground with the Brunnen below it. */
   function drawSourceLoop(g: "hpBrine" | "hpWater", gx: number, top: number, id: string) {
+    // Quellenpumpe, unless built into the WP.
+    const sourcePump = !data.generators.find((u) => u.id === id)?.internalPumps.source;
     const xb = gx - 34; // back to the evaporator
     const xa = xb - 30; // to the source (cooled)
     if (g === "hpBrine") {
@@ -709,9 +710,11 @@ export function buildGenerationSchema(
       sym("ball", xb, YBALL, "down");
       sym("drain", xa, YBALL + 14, "up", { side: sideOf("up", "left") });
       sym("drain", xb, YBALL + 14, "down", { side: sideOf("down", "left") });
-      sym("pump", xb, YPUMP, "down");
+      if (sourcePump) {
+        sym("pump", xb, YPUMP, "down");
+        typeText(`pump:source:${id}`, xb + 10, YPUMP - 3, "start");
+      }
       sourceSafetyValve(xb, top - 12, 10);
-      typeText(`pump:source:${id}`, xb + 10, YPUMP - 3, "start");
       typeText(`sv:source:${id}`, xb + 17, top - 48);
       nw(`source:${id}`, (xa + xb) / 2, YBALL + 36);
       pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
@@ -734,9 +737,11 @@ export function buildGenerationSchema(
     expansionVessel("brineR", xa - 30, 1, vz && vz.chosen !== null ? `${labels.vessel} ${Math.round(vz.chosen)} l` : labels.vessel, "", "vessel:source");
     sym("ball", xb, yB + 20, "up");
     sym("drain", xb, yB + 34, "up", { side: sideOf("up", "left") });
-    sym("pump", xb, yB + 62, "up");
+    if (sourcePump) {
+      sym("pump", xb, yB + 62, "up");
+      typeText(`pump:source:${id}`, xb - 10, yB + 59, "end");
+    }
     sourceSafetyValve(xb, top - 12, -16);
-    typeText(`pump:source:${id}`, xb - 10, yB + 59, "end");
     typeText(`sv:source:${id}`, xb - 12, top - 4);
     nw(`source:${id}`, (xa + xb) / 2, yA - 19);
     // Zwischenkreis → Platten-WT (on the ground) → Grundwasser: Förderbrunnen (Unterwasserpumpe), Rückgabebrunnen.
@@ -809,8 +814,10 @@ export function buildGenerationSchema(
       pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn], [xIn, yIn]]);
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
       sym("ball", xw, 236, "down");
-      sym("pump", xw, 256, "down");
-      typeText("pump:hotWater", xw + 10, 239, "start");
+      if (!wwUnit?.internalPumps.hotWater) {
+        sym("pump", xw, 256, "down");
+        typeText("pump:hotWater", xw + 10, 239, "start");
+      }
       sym("check", xw, 278, "down");
       sym("ball", xw - 22, 280, "up");
       nw("hotWater", xw + 4, yV - 2, "start");

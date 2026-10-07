@@ -2142,6 +2142,12 @@
       "addGenerator": "Wärmeerzeuger hinzufügen",
       "removeGenerator": "Wärmeerzeuger entfernen",
       "noGenerators": "Noch keine Wärmeerzeuger.",
+      "internalPumps": {
+        "source": "Quellenpumpe im Erzeuger",
+        "heating": "Heizungspumpe im Erzeuger",
+        "hotWater": "WW-Ladepumpe im Erzeuger",
+        "hint": "Pumpe im Wärmeerzeuger eingebaut: wird im Prinzipschema nicht gezeichnet und nicht in den Materialauszug übernommen."
+      },
       "generatorColumns": {
         "type": "Typ",
         "name": "Bezeichnung",

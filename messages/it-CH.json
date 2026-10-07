@@ -2142,6 +2142,12 @@
       "addGenerator": "Aggiungi generatore",
       "removeGenerator": "Rimuovi generatore",
       "noGenerators": "Ancora nessun generatore.",
+      "internalPumps": {
+        "source": "Pompa della sorgente nel generatore",
+        "heating": "Pompa di riscaldamento nel generatore",
+        "hotWater": "Pompa di carico ACS nel generatore",
+        "hint": "Pompa integrata nel generatore di calore: non viene disegnata nello schema di principio né ripresa nell’estratto materiale."
+      },
       "generatorColumns": {
         "type": "Tipo",
         "name": "Designazione",

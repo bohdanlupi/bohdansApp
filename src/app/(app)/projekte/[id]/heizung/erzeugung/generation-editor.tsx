@@ -2,7 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo } from "react";
+import { Fragment, useCallback, useMemo } from "react";
 
 import { NativeSelect } from "@/components/form";
 import { NumberField, Notice, Section } from "@/components/planning/fields";
@@ -23,6 +23,7 @@ import {
   hotWaterCoilTypes,
   hotWaterConnections,
   hotWaterHeaters,
+  hotWaterUnit,
   type HeatingGroup,
   type PlantData,
   storageConnections,
@@ -31,6 +32,7 @@ import { evaluateEws, ewsContextOf } from "@/lib/heating/ews";
 import { evaluateSafety } from "@/lib/heating/safety";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { formatNumber } from "@/lib/number-input";
+import { cn } from "@/lib/utils";
 
 import type { LvWithChapters } from "../../lueftung/anlagen/[systemId]/quantities-panel";
 import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
@@ -84,6 +86,7 @@ export function GenerationEditor({
   const schema = useMemo(() => buildGenerationSchema(d, labels, { ews: ewsCtx }), [d, labels, ewsCtx]);
   const safety = useMemo(() => evaluateSafety(d, ews), [d, ews]);
   const temps = useMemo(() => storageTemperatures(d), [d]);
+  const wwUnit = hotWaterUnit(d);
   const mismatched = d.groups.filter((g) => circuitMismatch(g.circuit, d.distributor));
 
   return (
@@ -114,7 +117,7 @@ export function GenerationEditor({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => anlage.update((x) => ({ ...x, generators: [...x.generators, { id: crypto.randomUUID(), type: x.generators.at(-1)?.type ?? "hpAir", name: "", power: null, deltaT: null }] }))}
+                onClick={() => anlage.update((x) => ({ ...x, generators: [...x.generators, { id: crypto.randomUUID(), type: x.generators.at(-1)?.type ?? "hpAir", name: "", power: null, deltaT: null, internalPumps: { source: false, heating: false, hotWater: false } }] }))}
               >
                 <Plus /> {tg("addGenerator")}
               </Button>
@@ -135,30 +138,33 @@ export function GenerationEditor({
                 </thead>
                 <tbody>
                   {d.generators.map((u) => (
-                    <tr key={u.id} className="border-t">
-                      <td className="py-1.5 pr-2">
-                        <NativeSelect value={u.type} disabled={!editable} aria-label={tg("generatorColumns.type")} onChange={(e) => setUnit(u.id, { type: e.target.value as GeneratorUnit["type"] })}>
-                          {generatorTypes.map((g) => (
-                            <option key={g} value={g}>
-                              {o("generators")(g)}
-                            </option>
-                          ))}
-                        </NativeSelect>
-                      </td>
-                      <td className="py-1.5 pr-2">
-                        <Input value={u.name} maxLength={60} disabled={!editable} placeholder={unitName(u)} aria-label={tg("generatorColumns.name")} onChange={(e) => setUnit(u.id, { name: e.target.value })} className="h-8 bg-field" />
-                      </td>
-                      <td className="py-1.5 pr-2">
-                        <NumberField value={u.power} decimals={1} label={tg("generatorColumns.power")} disabled={!editable} onChange={(v) => setUnit(u.id, { power: v })} className="h-8 rounded-lg" />
-                      </td>
-                      <td className="py-1.5 text-right">
-                        {editable && (
-                          <Button size="icon" variant="ghost" aria-label={tg("removeGenerator")} onClick={() => anlage.update((x) => ({ ...x, generators: x.generators.filter((y) => y.id !== u.id) }))}>
-                            <Trash2 />
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
+                    <Fragment key={u.id}>
+                      <tr className="border-t">
+                        <td className="py-1.5 pr-2">
+                          <NativeSelect value={u.type} disabled={!editable} aria-label={tg("generatorColumns.type")} onChange={(e) => setUnit(u.id, { type: e.target.value as GeneratorUnit["type"] })}>
+                            {generatorTypes.map((g) => (
+                              <option key={g} value={g}>
+                                {o("generators")(g)}
+                              </option>
+                            ))}
+                          </NativeSelect>
+                        </td>
+                        <td className="py-1.5 pr-2">
+                          <Input value={u.name} maxLength={60} disabled={!editable} placeholder={unitName(u)} aria-label={tg("generatorColumns.name")} onChange={(e) => setUnit(u.id, { name: e.target.value })} className="h-8 bg-field" />
+                        </td>
+                        <td className="py-1.5 pr-2">
+                          <NumberField value={u.power} decimals={1} label={tg("generatorColumns.power")} disabled={!editable} onChange={(v) => setUnit(u.id, { power: v })} className="h-8 rounded-lg" />
+                        </td>
+                        <td className="py-1.5 text-right">
+                          {editable && (
+                            <Button size="icon" variant="ghost" aria-label={tg("removeGenerator")} onClick={() => anlage.update((x) => ({ ...x, generators: x.generators.filter((y) => y.id !== u.id) }))}>
+                              <Trash2 />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                      <InternalPumps unit={u} wwUnit={wwUnit} editable={editable} onChange={(internalPumps) => setUnit(u.id, { internalPumps })} />
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
@@ -325,20 +331,6 @@ export function GenerationEditor({
 
       {ews && <EwsSection data={d} ctx={ewsCtx} result={ews} editable={editable} setEws={(patch) => setPlant({ ews: { ...d.ews, ...patch } })} />}
 
-      <MaterialSection
-        number={ews ? 7 : 6}
-        data={d}
-        ews={ews}
-        plantId={plant.id}
-        plantName={plant.name}
-        projectId={projectId}
-        lvs={lvs}
-        dirty={anlage.status !== "saved"}
-        editable={editable}
-        setPlant={setPlant}
-        setUnit={setUnit}
-      />
-
       <Section
         title={tg("schemaTitle")}
         collapseKey="heating-generation:schema"
@@ -358,9 +350,71 @@ export function GenerationEditor({
         <GenerationSchemaView schema={schema} label={tg("schemaTitle")} />
       </Section>
 
+      <MaterialSection
+        number={ews ? 7 : 6}
+        data={d}
+        ews={ews}
+        plantId={plant.id}
+        plantName={plant.name}
+        projectId={projectId}
+        lvs={lvs}
+        dirty={anlage.status !== "saved"}
+        editable={editable}
+        setPlant={setPlant}
+        setUnit={setUnit}
+      />
+
       <Section title={t("system.notes")} collapseKey="heating-generation:notes">
         <Textarea id="plant-notes" aria-label={t("system.notes")} value={d.notes} maxLength={4000} disabled={!editable} onChange={(e) => setPlant({ notes: e.target.value })} className="min-h-24 bg-field" />
       </Section>
     </div>
+  );
+}
+
+/**
+ * Pumps built into a generator (Quellenpumpe of a Sole/Wasser- or Wasser/Wasser-WP, Heizungspumpe, WW-Ladepumpe of the
+ * separate Warmwasser connection) as toggle buttons below its row: pressed, the pump is neither drawn in the schema
+ * nor listed in the Materialauszug.
+ */
+function InternalPumps({
+  unit,
+  wwUnit,
+  editable,
+  onChange,
+}: {
+  unit: GeneratorUnit;
+  wwUnit: GeneratorUnit | null;
+  editable: boolean;
+  onChange: (value: GeneratorUnit["internalPumps"]) => void;
+}) {
+  const tg = useTranslations("heatingPlan.generation.internalPumps");
+  const keys = [
+    ...(unit.type === "hpBrine" || unit.type === "hpWater" ? (["source"] as const) : []),
+    "heating" as const,
+    ...(wwUnit?.id === unit.id ? (["hotWater"] as const) : []),
+  ];
+  return (
+    <tr>
+      <td colSpan={4} className="pb-2">
+        <div className="flex flex-wrap gap-1.5">
+          {keys.map((k) => (
+            <button
+              key={k}
+              type="button"
+              disabled={!editable}
+              aria-pressed={unit.internalPumps[k]}
+              title={tg("hint")}
+              onClick={() => onChange({ ...unit.internalPumps, [k]: !unit.internalPumps[k] })}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted disabled:pointer-events-none disabled:opacity-60",
+                "aria-pressed:border-brand aria-pressed:bg-brand/10 aria-pressed:text-foreground",
+              )}
+            >
+              {tg(k)}
+            </button>
+          ))}
+        </div>
+      </td>
+    </tr>
   );
 }

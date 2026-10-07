@@ -2142,6 +2142,12 @@
       "addGenerator": "Ajouter un producteur",
       "removeGenerator": "Supprimer le producteur",
       "noGenerators": "Pas encore de producteurs.",
+      "internalPumps": {
+        "source": "Pompe de source intégrée au générateur",
+        "heating": "Pompe de chauffage intégrée au générateur",
+        "hotWater": "Pompe de charge ECS intégrée au générateur",
+        "hint": "Pompe intégrée au générateur de chaleur : elle n’est ni dessinée dans le schéma de principe ni reprise dans l’extrait de matériel."
+      },
       "generatorColumns": {
         "type": "Type",
         "name": "Désignation",

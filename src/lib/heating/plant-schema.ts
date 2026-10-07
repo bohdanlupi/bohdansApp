@@ -71,6 +71,13 @@ const generatorSchema = z.object({
   power: num(0, 100000),
   /** Spreizung VL – RL at the generator [K] (null = by type, see hydraulics.ts). */
   deltaT: num(1, 60),
+  /**
+   * Pumps built into the generator: Quellenpumpe (Sole- / Zwischenkreis of a Sole/Wasser- or Wasser/Wasser-WP),
+   * Heizungspumpe, WW-Ladepumpe of the separate Warmwasser connection. They are neither drawn nor in the Materialauszug.
+   */
+  internalPumps: z
+    .object({ source: z.boolean().catch(false), heating: z.boolean().catch(false), hotWater: z.boolean().catch(false) })
+    .catch({ source: false, heating: false, hotWater: false }),
 });
 
 export type GeneratorUnit = z.infer<typeof generatorSchema>;
@@ -255,6 +262,10 @@ export const parsePlant = (value: unknown): PlantData => plantSchema.catch(empty
 
 /** Types of the generators, without duplicates (checklists). */
 export const generatorTypesOf = (data: PlantData): GeneratorType[] => generatorTypes.filter((t) => data.generators.some((g) => g.type === t));
+
+/** Generator with the separate Warmwasser connection (its own Ladepumpe), null with another connection. */
+export const hotWaterUnit = (data: PlantData): GeneratorUnit | null =>
+  data.hotWater && data.hotWaterConnection === "generator" ? (data.generators.find((u) => u.id === data.hotWaterGenerator) ?? data.generators[0] ?? null) : null;
 
 /** Name of a generator: its own, else the type, numbered when the type occurs more than once. */
 export function generatorName(units: GeneratorUnit[], unit: GeneratorUnit, typeName: (t: GeneratorType) => string): string {
