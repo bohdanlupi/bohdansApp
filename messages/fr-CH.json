@@ -2501,6 +2501,14 @@
         "upper": "2 registres, supérieur raccordé",
         "series": "2 registres raccordés en série"
       },
+      "tankSensor": "Sonde de température",
+      "tankSensors": {
+        "none": "Aucune sonde",
+        "topProbe": "Sonde plongeuse par le haut",
+        "sideProbe": "Sonde plongeuse latérale",
+        "sideThermostat": "Thermostat latéral",
+        "onOff": "Sondes plongeuses marche & arrêt"
+      },
       "storageConnection": "Raccordement",
       "storageConnections": {
         "conventional": "Raccordement conventionnel",

@@ -28,6 +28,7 @@ import {
   pumpsInside,
   type PlantData,
   storageConnections,
+  tankSensors,
 } from "@/lib/heating/plant-schema";
 import { evaluateEws, ewsContextOf } from "@/lib/heating/ews";
 import { evaluateSafety } from "@/lib/heating/safety";
@@ -185,6 +186,7 @@ export function GenerationEditor({
               {d.hotWaterHeater === "coil" && (
                 <OptionField label={tg("hotWaterCoils")} value={d.hotWaterCoils} options={hotWaterCoilTypes} optionLabel={(v) => tg(`hotWaterCoilTypes.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterCoils: v })} />
               )}
+              <OptionField label={tg("tankSensor")} value={d.hotWaterSensor} options={tankSensors} optionLabel={(v) => tg(`tankSensors.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterSensor: v })} />
               <NumberParam label={tg("hotWaterElectric")} value={d.hotWaterElectric} decimals={1} editable={editable} onChange={(v) => setPlant({ hotWaterElectric: v ?? 0 })} hint={tg("hotWaterElectricHint")} />
               <OptionField label={tg("hotWaterConnection")} value={d.hotWaterConnection} options={hotWaterConnections} optionLabel={(v) => tg(`hotWaterConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterConnection: v })} />
               {(d.hotWaterConnection === "generator" || d.hotWaterConnection === "internal") && d.generators.length > 1 && (
@@ -223,6 +225,7 @@ export function GenerationEditor({
             <div className="grid gap-4 sm:grid-cols-2">
               <NumberParam label={tg("volume")} value={d.storageVolume} editable={editable} onChange={(v) => setPlant({ storageVolume: v })} />
               <OptionField label={tg("storageConnection")} value={d.storageConnection} options={storageConnections} optionLabel={(v) => tg(`storageConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ storageConnection: v })} hint={tg(`storageConnectionHint.${d.storageConnection}`)} />
+              <OptionField label={tg("tankSensor")} value={d.storageSensor} options={tankSensors} optionLabel={(v) => tg(`tankSensors.${v}`)} editable={editable} onChange={(v) => setPlant({ storageSensor: v })} />
               <Fact label={tg("storageTemp")} value={temps.storage !== null ? `${formatNumber(temps.storage, 0)} °C` : tg("storageTempNone")} />
               <Fact label={tg("storageReturn")} value={temps.ret !== null ? `${formatNumber(temps.ret, 1)} °C${temps.flow !== null ? ` · ${formatNumber(temps.flow * 1000, 0)} l/h` : ""}` : "–"} />
             </div>

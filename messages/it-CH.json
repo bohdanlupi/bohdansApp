@@ -2501,6 +2501,14 @@
         "upper": "2 registri, superiore allacciato",
         "series": "2 registri allacciati in serie"
       },
+      "tankSensor": "Sonda di temperatura",
+      "tankSensors": {
+        "none": "Nessuna sonda",
+        "topProbe": "Sonda a immersione dall’alto",
+        "sideProbe": "Sonda a immersione laterale",
+        "sideThermostat": "Termostato laterale",
+        "onOff": "Sonde a immersione on & off"
+      },
       "storageConnection": "Allacciamento",
       "storageConnections": {
         "conventional": "Allacciamento convenzionale",

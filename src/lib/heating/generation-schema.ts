@@ -22,7 +22,7 @@
 import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
 
 import type { EmitterType, GeneratorType } from "./plan-schema";
-import { type CircuitType, generatorName, hotWaterUnit, type PlantData, pumpsInside } from "./plant-schema";
+import { type CircuitType, generatorName, hotWaterUnit, type PlantData, pumpsInside, type TankSensor } from "./plant-schema";
 import { emptyEwsContext, type EwsContext, evaluateEws } from "./ews";
 import { evaluateHydraulics, storageTemperatures } from "./hydraulics";
 import { componentTypes } from "./material";
@@ -463,6 +463,34 @@ export function buildGenerationSchema(
     maxY = Math.max(maxY, y + 4);
   };
 
+  /**
+   * Temperaturfühler / Thermostat of a Speicher (64 wide from x, from `top` down to the ground): a Tauchfühler from the
+   * top with its head above the Speicher and the stem down to 2/3 of its height, or on the right side in the middle
+   * (Fühler or Thermostat) or at 1/3 and 2/3 of the height (Ein & Aus).
+   */
+  function tankSensor(kind: TankSensor, x: number, top: number) {
+    const h = G - top;
+    const side = (y: number, key: "sensor" | "safetyThermostat") => sym(key, x + 64, y, "down", { side: sideOf("down", "right") });
+    switch (kind) {
+      case "topProbe": {
+        const cx = x + 56; // right of the volume text and of the Register
+        used.add("sensor");
+        add(ln(cx, top - 5.4, cx, top + (h * 2) / 3, 0.8), { t: "circle", cx, cy: top - 8, r: 2.6, fill: "bg", stroke: "ink", sw: 0.8 });
+        break;
+      }
+      case "sideProbe":
+        side(top + h / 2, "sensor");
+        break;
+      case "sideThermostat":
+        side(top + h / 2, "safetyThermostat");
+        break;
+      case "onOff":
+        side(G - h / 3, "sensor");
+        side(G - (h * 2) / 3, "sensor");
+        break;
+    }
+  }
+
   // Sector separators (drawn at the end, over the full height).
   const separators: number[] = [];
   const separator = (x: number) => separators.push(x);
@@ -832,6 +860,7 @@ export function buildGenerationSchema(
     const coils = data.hotWaterCoils;
     used.add("waterHeater");
     add(rect(xT, top, 64, 150), rect(xT, top, 64, 16, "bg", 1));
+    tankSensor(data.hotWaterSensor, xT, top);
     if (external) {
       // Platten-WT; Ladepumpe from the bottom of the Speicher through the WT back into its top.
       used.add("plateHx");
@@ -955,6 +984,7 @@ export function buildGenerationSchema(
     const yBot = G - 20;
     used.add("storage");
     add(rect(xs, top, w, 150), rect(xs, top, w, 16, "bg", 1));
+    tankSensor(data.storageSensor, xs, top);
     text(xs + w / 2, top + 11, data.storageVolume ? `${Math.round(data.storageVolume)} l` : "– l", 7, { bold: true });
     text(xs + w / 2, G + 14, labels.storage, 7.5, { bold: true });
     // Speicher at the highest VL of the groups, the mixed Rücklauf of the groups.

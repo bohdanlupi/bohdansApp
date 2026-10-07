@@ -2501,6 +2501,14 @@
         "upper": "2 Register, oberes angeschlossen",
         "series": "2 Register in Serie angeschlossen"
       },
+      "tankSensor": "Temperaturfühler",
+      "tankSensors": {
+        "none": "Kein Fühler",
+        "topProbe": "Tauchfühler von oben",
+        "sideProbe": "Tauchfühler seitlich",
+        "sideThermostat": "Thermostat seitlich",
+        "onOff": "Tauchfühler Ein & Aus"
+      },
       "storageConnection": "Anschluss",
       "storageConnections": {
         "conventional": "Anschluss konventionell",

@@ -10,7 +10,7 @@ import type { EwsResult } from "./ews";
 import { type Circuit, evaluateHydraulics, type PipeSize } from "./hydraulics";
 import * as A from "./material-data";
 import type { GeneratorType } from "./plan-schema";
-import { generatorName, hotWaterUnit, type PlantData, pumpsInside } from "./plant-schema";
+import { generatorName, hotWaterUnit, type PlantData, pumpsInside, type TankSensor } from "./plant-schema";
 import { evaluateSafety, expansionValveLines } from "./safety";
 
 export const materialGroups = ["source", "brine", "expansion", "hotWater", "storage", "distribution"] as const;
@@ -149,6 +149,15 @@ export function componentTypes(data: PlantData, ews: EwsResult | null): Map<stri
   }
   return out;
 }
+
+/** Neutral lines of the Temperaturfühler / Thermostat of a Speicher (Lieferung MSRL). */
+const tankSensorLines: Record<TankSensor, [string, number] | null> = {
+  none: null,
+  topProbe: ["Tauchfühler von oben (Lieferung MSRL)", 1],
+  sideProbe: ["Tauchfühler (Lieferung MSRL)", 1],
+  sideThermostat: ["Speicherthermostat (Lieferung MSRL)", 1],
+  onOff: ["Tauchfühler (Lieferung MSRL)", 2],
+};
 
 export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialLine[] {
   const safety = evaluateSafety(data, ews);
@@ -299,6 +308,8 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
       const thread = dnThread(safety.hotWaterValve.isv ?? 15) ?? 0.5;
       article("hotWater", 3, "Nussbaum", A.potableSafetyValves.find((v) => v.thread === thread), 1, "Sicherheitsventil Wassererwärmer 6 bar");
     }
+    const sensor = tankSensorLines[data.hotWaterSensor];
+    if (sensor) neutral("hotWater", 3, ...sensor);
     const c = data.hotWaterConnection === "group" ? circuitOf(`group:${data.hotWaterGroup}`) : circuitOf("hotWater");
     ball("hotWater", c?.size ?? null, 2);
     safetyValve("hotWater", hotWaterPower(data), data.safety.pSV, c?.size ?? null);
@@ -314,6 +325,8 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
 
   // --- Energiespeicher -----------------------------------------------------------------------------------------------
   if (data.storage) {
+    const sensor = tankSensorLines[data.storageSensor];
+    if (sensor) neutral("storage", 3, ...sensor);
     neutral("storage", 0, `Technischer Speicher${data.storageVolume ? ` ${fmt(data.storageVolume)} l` : ""}`);
     // Absperrungen and thermometers in all lines to and from the Speicher (reduziert: 3, konventionell: 4),
     // Entleerungen in both RL connections; sized like the mains (the largest generator circuit).

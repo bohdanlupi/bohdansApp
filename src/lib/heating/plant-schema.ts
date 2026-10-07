@@ -28,6 +28,13 @@ export const hotWaterHeaters = ["coil", "external"] as const;
 export const hotWaterCoilTypes = ["single", "lower", "upper", "series"] as const;
 /** Energiespeicher: konventionell (VL and RL through the Speicher) or reduziert (VL teed off, RL through it). */
 export const storageConnections = ["conventional", "reduced"] as const;
+/**
+ * Temperaturfühler / Thermostat of the Wassererwärmer and the Technischer Speicher: Tauchfühler from the top (down to
+ * 2/3 of the height), one Tauchfühler or a Thermostat on the side in the middle, two Tauchfühler (Ein & Aus) on the
+ * side at 1/3 and 2/3 of the height.
+ */
+export const tankSensors = ["none", "topProbe", "sideProbe", "sideThermostat", "onOff"] as const;
+export type TankSensor = (typeof tankSensors)[number];
 
 export type CircuitType = (typeof circuitTypes)[number];
 export type HotWaterConnection = (typeof hotWaterConnections)[number];
@@ -220,6 +227,7 @@ export const plantSchema = z.object({
   hotWaterConnection: z.enum(hotWaterConnections).catch("diverter"),
   hotWaterHeater: z.enum(hotWaterHeaters).catch("coil"),
   hotWaterCoils: z.enum(hotWaterCoilTypes).catch("single"),
+  hotWaterSensor: z.enum(tankSensors).catch("none"),
   /** Id of the generator of the separate connection (null = the first one). */
   hotWaterGenerator: z.string().max(64).nullable().catch(null),
   /** Id of the Heizgruppe loading the Wassererwärmer. */
@@ -228,6 +236,7 @@ export const plantSchema = z.object({
   storage: z.boolean().catch(false),
   storageVolume: num(0, 1000000),
   storageConnection: z.enum(storageConnections).catch("conventional"),
+  storageSensor: z.enum(tankSensors).catch("none"),
   distributor: z.enum(distributorTypes).catch("unpressurized"),
   groups: z
     .array(z.unknown())
