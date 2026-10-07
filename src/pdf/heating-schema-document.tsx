@@ -4,7 +4,7 @@ import { type GenerationSchema, legendSymbol, type PipeKind, pipeColors, pipeDas
 import type { SchemaRevision } from "@/lib/kwl/schema-plan";
 import type { FirmSettings } from "@/lib/supabase/types";
 
-import { MARGIN, PAD, PdfPrims, type PlankopfLabels, svgText, TB_H, TB_W, TitleBlock } from "./kwl-schema-document";
+import { type LegendBox, legendCell, LegendFrame, MARGIN, PdfPrims, type PlankopfLabels, svgText, TB_H, TB_W, TitleBlock } from "./kwl-schema-document";
 import type { LogoSource } from "./letterhead";
 import { sanitarySheet } from "./sanitary-schema-document";
 
@@ -16,7 +16,6 @@ const ink = "#111111";
 /** Red of the trade Heizung in the title block (the Vorlauf red of the schema). */
 const HEATING_RED = "#e3001b";
 
-const LEGEND_ROW = 17;
 const LEGEND_COL = 300;
 
 export type HeatingLegend = {
@@ -35,15 +34,12 @@ const legendEntries = (schema: GenerationSchema, labels: HeatingLegend): Entry[]
   { note: labels.note },
 ];
 
-function Legend({ x, y, w, h, entries, labels }: { x: number; y: number; w: number; h: number; entries: Entry[]; labels: HeatingLegend }) {
-  const rows = Math.max(1, Math.floor((h - 26) / LEGEND_ROW));
-  const columns = Math.min(Math.ceil(entries.length / rows), Math.max(1, Math.floor(w / LEGEND_COL)));
+function Legend({ x, y, box, entries, labels }: { x: number; y: number; box: LegendBox; entries: Entry[]; labels: HeatingLegend }) {
   return (
     <G>
-      {svgText(x, y + 12, labels.title, 10, { bold: true })}
-      {entries.slice(0, rows * columns).map((e, i) => {
-        const cx = x + Math.floor(i / rows) * LEGEND_COL;
-        const cy = y + 32 + (i % rows) * LEGEND_ROW;
+      <LegendFrame x={x} y={y} box={box} title={labels.title} />
+      {entries.slice(0, box.rows * box.columns).map((e, i) => {
+        const { cx, cy } = legendCell(box, x, y, i);
         if ("pipe" in e) {
           return (
             <G key={e.pipe}>
@@ -89,16 +85,12 @@ export function HeatingSchemaDocument({
   logo: LogoSource | null;
 }) {
   const entries = legendEntries(schema, legend);
-  const sheet = sanitarySheet(schema, entries.length);
-  const { scale } = sheet;
+  const sheet = sanitarySheet(schema, entries.length, LEGEND_COL);
+  const { scale, dx, dy } = sheet;
   const W = sheet.w;
   const H = sheet.h;
   const tbX = W - MARGIN - TB_W;
   const tbY = H - MARGIN - TB_H;
-  const areaW = W - 2 * MARGIN - 2 * PAD;
-  const areaH = H - 2 * MARGIN - TB_H - 3 * PAD;
-  const dx = MARGIN + PAD + (areaW - schema.width * scale) / 2;
-  const dy = MARGIN + PAD + (areaH - schema.height * scale) / 2;
 
   return (
     <Document title={`${plankopf.plan} ${plant}`}>
@@ -113,7 +105,7 @@ export function HeatingSchemaDocument({
               <PdfPrims key={`g${i}`} prims={g.prims} />
             ))}
           </G>
-          <Legend x={MARGIN + PAD} y={tbY} w={tbX - MARGIN - 2 * PAD} h={TB_H - PAD} entries={entries} labels={legend} />
+          <Legend x={tbX} y={tbY - sheet.legend.h} box={sheet.legend} entries={entries} labels={legend} />
           <TitleBlock x={tbX} y={tbY} project={project} system={plant} phase={phase} format={sheet.name} revisions={revisions} firm={firm} labels={plankopf} tradeColor={HEATING_RED} />
         </Svg>
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}

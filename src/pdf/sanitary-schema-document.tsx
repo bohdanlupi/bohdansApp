@@ -6,7 +6,7 @@ import { insulationStyle } from "@/lib/sanitary/pipes";
 import { drawSymbol, mediumColors, type SanitarySchema, type SymbolKey } from "@/lib/sanitary/schema";
 import type { FirmSettings } from "@/lib/supabase/types";
 
-import { MARGIN, PAD, PdfPrims, type PlankopfLabels, svgText, TB_H, TB_W, TitleBlock } from "./kwl-schema-document";
+import { legendBox, type LegendBox, legendCell, LegendFrame, MARGIN, PAD, PdfPrims, placeSchema, type PlankopfLabels, svgText, TB_H, TB_W, TitleBlock } from "./kwl-schema-document";
 import type { LogoSource } from "./letterhead";
 
 // Prinzipschema of a Sanitäranlage as a plan: frame and LUPI title block like the Lüftung schema
@@ -24,25 +24,34 @@ const WIDTH_STEP = 210;
 const MIN_SCALE = 0.75;
 const MAX_SCALE = 1;
 
-const LEGEND_ROW = 17;
 const LEGEND_COL = 340;
-const legendRows = Math.max(1, Math.floor((TB_H - PAD - 26) / LEGEND_ROW));
 
 /** Entries of the legend: lines, insulation classes, symbols, the note on the sizes. */
 const legendEntries = (schema: SanitarySchema) => 3 + (schema.insulated ? 1 : 0) + schema.used.length + 1;
 
 /**
- * Sheet [mm] and scale: the lowest height that draws the schema at MIN_SCALE, the width it needs in steps of 210 mm –
- * at least the title block with all legend columns beside it.
+ * Sheet [mm], legend box and placement of the schema: the lowest height that draws the schema at MIN_SCALE – left of
+ * the legend + title block column at full height, or above it at full width – and the narrower width it needs in steps
+ * of 210 mm.
  */
-export function sanitarySheet(layout: { width: number; height: number }, legendCount = 0) {
-  const fit = (hMm: number) => Math.min((hMm * MM - 2 * MARGIN - TB_H - 3 * PAD) / layout.height, MAX_SCALE);
-  const hMm = HEIGHTS.find((h) => fit(h) >= MIN_SCALE) ?? HEIGHTS[HEIGHTS.length - 1];
-  const scale = fit(hMm);
-  const needed = (layout.width * scale + 2 * MARGIN + 2 * PAD) / MM;
-  const legend = (Math.ceil(legendCount / legendRows) * LEGEND_COL + TB_W + 2 * MARGIN + 3 * PAD) / MM;
-  const wMm = Math.max(2, Math.ceil(Math.max(needed, legend) / WIDTH_STEP - 1e-9)) * WIDTH_STEP;
-  return { wMm, hMm, w: wMm * MM, h: hMm * MM, scale, name: `${hMm} × ${wMm}` };
+export function sanitarySheet(layout: { width: number; height: number }, legendCount = 0, legendCol = LEGEND_COL) {
+  const widthMm = (pt: number) => Math.max(2, Math.ceil(pt / MM / WIDTH_STEP - 1e-9)) * WIDTH_STEP;
+  const candidates = HEIGHTS.flatMap((hMm) => {
+    const h = hMm * MM;
+    const legend = legendBox(legendCount, legendCol, h);
+    const left = Math.min((h - 2 * MARGIN - 2 * PAD) / layout.height, MAX_SCALE);
+    const above = Math.min((h - 2 * MARGIN - 3 * PAD - legend.h - TB_H) / layout.height, MAX_SCALE);
+    return [
+      { hMm, scale: left, wMm: widthMm(layout.width * left + 2 * MARGIN + 3 * PAD + TB_W) },
+      { hMm, scale: above, wMm: widthMm(Math.max(layout.width * above, TB_W) + 2 * MARGIN + 2 * PAD) },
+    ];
+  });
+  const fitting = candidates.filter((c) => c.scale >= MIN_SCALE).sort((a, b) => a.hMm - b.hMm || a.wMm - b.wMm);
+  const { hMm, wMm } = fitting[0] ?? candidates.filter((c) => c.hMm === HEIGHTS[HEIGHTS.length - 1]).sort((a, b) => b.scale - a.scale)[0];
+  const w = wMm * MM;
+  const h = hMm * MM;
+  const legend = legendBox(legendCount, legendCol, h);
+  return { wMm, hMm, w, h, legend, ...placeSchema(w, h, layout, legend.h + TB_H, MAX_SCALE), name: `${hMm} × ${wMm}` };
 }
 
 export type SanitaryLegend = {
@@ -54,9 +63,7 @@ export type SanitaryLegend = {
   sizes: string;
 };
 
-function Legend({ x, y, w, h, schema, labels }: { x: number; y: number; w: number; h: number; schema: SanitarySchema; labels: SanitaryLegend }) {
-  const ROW = LEGEND_ROW;
-  const COL = LEGEND_COL;
+function Legend({ x, y, box, schema, labels }: { x: number; y: number; box: LegendBox; schema: SanitarySchema; labels: SanitaryLegend }) {
   const media: Medium[] = ["pwc", "pwh", "pwhc"];
   const entries = [
     ...media.map((m) => ({ medium: m })),
@@ -64,14 +71,11 @@ function Legend({ x, y, w, h, schema, labels }: { x: number; y: number; w: numbe
     ...schema.used.map((k) => ({ key: k })),
     { note: labels.sizes },
   ];
-  const rows = Math.max(1, Math.floor((h - 26) / ROW));
-  const columns = Math.min(Math.ceil(entries.length / rows), Math.max(1, Math.floor(w / COL)));
   return (
     <G>
-      {svgText(x, y + 12, labels.title, 10, { bold: true })}
-      {entries.slice(0, rows * columns).map((e, i) => {
-        const cx = x + Math.floor(i / rows) * COL;
-        const cy = y + 32 + (i % rows) * ROW;
+      <LegendFrame x={x} y={y} box={box} title={labels.title} />
+      {entries.slice(0, box.rows * box.columns).map((e, i) => {
+        const { cx, cy } = legendCell(box, x, y, i);
         if ("medium" in e) {
           return (
             <G key={e.medium}>
@@ -126,15 +130,11 @@ export function SanitarySchemaDocument({
   logo: LogoSource | null;
 }) {
   const sheet = sanitarySheet(schema, legendEntries(schema));
-  const { scale } = sheet;
+  const { scale, dx, dy } = sheet;
   const W = sheet.w;
   const H = sheet.h;
   const tbX = W - MARGIN - TB_W;
   const tbY = H - MARGIN - TB_H;
-  const areaW = W - 2 * MARGIN - 2 * PAD;
-  const areaH = H - 2 * MARGIN - TB_H - 3 * PAD;
-  const dx = MARGIN + PAD + (areaW - schema.width * scale) / 2;
-  const dy = MARGIN + PAD + (areaH - schema.height * scale) / 2;
 
   return (
     <Document title={`${plankopf.plan} ${system}`}>
@@ -155,7 +155,7 @@ export function SanitarySchemaDocument({
               <PdfPrims key={`g${i}`} prims={g.prims} />
             ))}
           </G>
-          <Legend x={MARGIN + PAD} y={tbY} w={tbX - MARGIN - 2 * PAD} h={TB_H - PAD} schema={schema} labels={legend} />
+          <Legend x={tbX} y={tbY - sheet.legend.h} box={sheet.legend} schema={schema} labels={legend} />
           <TitleBlock x={tbX} y={tbY} project={project} system={system} phase={phase} format={sheet.name} revisions={revisions} firm={firm} labels={plankopf} tradeColor={SANITARY_GREEN} />
         </Svg>
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
