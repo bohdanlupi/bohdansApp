@@ -847,12 +847,15 @@ export function buildGenerationSchema(
 
   /**
    * Absperrungen of the Wassererwärmer at the height of those of the generators with thermometers below them at the
-   * height of those of the Speicher (VL facing right, RL left), a thermischer Siphon in the VL and Entleerungen in VL and
-   * RL on their horizontals just before the connections at xIn.
+   * height of those of the Speicher (VL facing right, RL left), the VL into the connection (with innenliegenden
+   * Registern through a thermischer Siphon) and Entleerungen in VL and RL on their horizontals just before the
+   * connections at xIn.
    */
   function waterHeaterFittings(xw: number, xIn: number, yIn: number, yOut: number) {
-    // Thermischer Siphon in the VL just before the Entleerung and the connection.
-    siphonPipe(xIn - 42, yIn, xIn - 40, xIn);
+    // VL from its leg to the connection: with innenliegenden Registern a thermischer Siphon right at the leg (as at the
+    // Speicher), not with an aussenliegenden Wärmetauscher.
+    if (external) pipe("vl", [[xw, yIn], [xIn, yIn]]);
+    else siphonPipe(xw, yIn, xw, xIn);
     sym("ball", xw, YBALL, "down");
     sym("ball", xw - 22, YBALL, "up");
     sym("thermometer", xw, YBALL + 26, "down", { side: sideOf("down", "right") });
@@ -881,7 +884,7 @@ export function buildGenerationSchema(
     const { xIn, yIn, yOut } = drawWaterHeater(xw);
     if (ww === "diverter") {
       // Umschaltventil (Dreiweg) in the supply main.
-      pipe("vl", [[xw, YMV], [xw, yIn], [xIn - 42, yIn]]);
+      pipe("vl", [[xw, YMV], [xw, yIn]]);
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, YMR]]);
       dot(xw - 22, YMR, "rl");
       sym("valve3", xw, YMV, "right", { port: sideOf("right", "below") });
@@ -895,7 +898,7 @@ export function buildGenerationSchema(
       const { gx, top: gTop } = wwGen;
       const yV = YMR + 16;
       const yR = YMR + 26;
-      pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn], [xIn - 42, yIn]]);
+      pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn]]);
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
       waterHeaterFittings(xw, xIn, yIn, yOut);
       waterHeaterSafetyValve(xw, 262);
@@ -1099,7 +1102,7 @@ export function buildGenerationSchema(
     const { xIn, yIn, yOut } = drawWaterHeater(xwG);
     if (wwGroup) {
       // The lines of the WW-Ladegruppe come over the groups from the left.
-      pipe("vl", [[xwG, WW_VL], [xwG, yIn], [xIn - 42, yIn]]);
+      pipe("vl", [[xwG, WW_VL], [xwG, yIn]]);
       pipe("rl", [[xIn, yOut], [xwG - 22, yOut], [xwG - 22, WW_RL]]);
       waterHeaterFittings(xwG, xIn, yIn, yOut);
       waterHeaterSafetyValve(xwG, YBALL + 68);
