@@ -310,6 +310,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     }
     const sensor = tankSensorLines[data.hotWaterSensor];
     if (sensor) neutral("hotWater", 3, ...sensor);
+    article("hotWater", 2, "Meier Tobler", A.thermometers[0], data.hotWaterThermometers);
     const c = data.hotWaterConnection === "group" ? circuitOf(`group:${data.hotWaterGroup}`) : circuitOf("hotWater");
     ball("hotWater", c?.size ?? null, 2);
     safetyValve("hotWater", hotWaterPower(data), data.safety.pSV, c?.size ?? null);
@@ -327,6 +328,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
   if (data.storage) {
     const sensor = tankSensorLines[data.storageSensor];
     if (sensor) neutral("storage", 3, ...sensor);
+    article("storage", 2, "Meier Tobler", A.thermometers[0], data.storageThermometers);
     neutral("storage", 0, `Technischer Speicher${data.storageVolume ? ` ${fmt(data.storageVolume)} l` : ""}`);
     // Absperrungen and thermometers in all lines to and from the Speicher (reduziert: 3, konventionell: 4),
     // Entleerungen in both RL connections; sized like the mains (the largest generator circuit).

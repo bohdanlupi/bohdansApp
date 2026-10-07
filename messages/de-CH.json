@@ -2501,6 +2501,8 @@
         "upper": "2 Register, oberes angeschlossen",
         "series": "2 Register in Serie angeschlossen"
       },
+      "tankThermometers": "Thermometer",
+      "tankThermometersNone": "Keine",
       "tankSensor": "Temperaturfühler",
       "tankSensors": {
         "none": "Kein Fühler",

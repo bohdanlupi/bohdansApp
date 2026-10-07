@@ -228,6 +228,8 @@ export const plantSchema = z.object({
   hotWaterHeater: z.enum(hotWaterHeaters).catch("coil"),
   hotWaterCoils: z.enum(hotWaterCoilTypes).catch("single"),
   hotWaterSensor: z.enum(tankSensors).catch("none"),
+  /** Thermometers on the Wassererwärmer (0–3, centred at 1/2 – 1/3 and 2/3 – 1/3, 1/2 and 2/3 of its height). */
+  hotWaterThermometers: z.number().int().min(0).max(3).catch(0),
   /** Id of the generator of the separate connection (null = the first one). */
   hotWaterGenerator: z.string().max(64).nullable().catch(null),
   /** Id of the Heizgruppe loading the Wassererwärmer. */
@@ -237,6 +239,8 @@ export const plantSchema = z.object({
   storageVolume: num(0, 1000000),
   storageConnection: z.enum(storageConnections).catch("conventional"),
   storageSensor: z.enum(tankSensors).catch("none"),
+  /** Thermometers on the Technischer Speicher (as on the Wassererwärmer). */
+  storageThermometers: z.number().int().min(0).max(3).catch(0),
   distributor: z.enum(distributorTypes).catch("unpressurized"),
   groups: z
     .array(z.unknown())

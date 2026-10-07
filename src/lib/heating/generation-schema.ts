@@ -491,6 +491,27 @@ export function buildGenerationSchema(
     }
   }
 
+  /**
+   * Thermometers on the front of a Speicher (64 wide from x, from `top` down to the ground), centred: one at 1/2 of
+   * the height, two at 1/3 and 2/3, three at 1/3, 1/2 and 2/3 (over a Register of the Wassererwärmer).
+   */
+  function tankThermometers(count: number, x: number, top: number) {
+    if (count <= 0) return;
+    const h = G - top;
+    const heights = count === 1 ? [1 / 2] : count === 2 ? [1 / 3, 2 / 3] : [1 / 3, 1 / 2, 2 / 3];
+    const cx = x + 32;
+    used.add("thermometer");
+    for (const f of heights) {
+      const y = G - h * f;
+      // 1.28.11 Direktanzeige-Instrument «T» without its stub.
+      add(
+        { t: "circle", cx, cy: y, r: 5, fill: "bg", stroke: "ink", sw: 0.8 },
+        ln(cx - 3.5, y + 3.5, cx + 3.5, y - 3.5, 0.7),
+        { t: "text", x: cx + 6, y: y + 7.6, text: "T", size: 4.5, anchor: "middle", fill: "ink", bold: true },
+      );
+    }
+  }
+
   // Sector separators (drawn at the end, over the full height).
   const separators: number[] = [];
   const separator = (x: number) => separators.push(x);
@@ -861,6 +882,7 @@ export function buildGenerationSchema(
     used.add("waterHeater");
     add(rect(xT, top, 64, 150), rect(xT, top, 64, 16, "bg", 1));
     tankSensor(data.hotWaterSensor, xT, top);
+    tankThermometers(data.hotWaterThermometers, xT, top);
     if (external) {
       // Platten-WT; Ladepumpe from the bottom of the Speicher through the WT back into its top.
       used.add("plateHx");
@@ -985,6 +1007,7 @@ export function buildGenerationSchema(
     used.add("storage");
     add(rect(xs, top, w, 150), rect(xs, top, w, 16, "bg", 1));
     tankSensor(data.storageSensor, xs, top);
+    tankThermometers(data.storageThermometers, xs, top);
     text(xs + w / 2, top + 11, data.storageVolume ? `${Math.round(data.storageVolume)} l` : "– l", 7, { bold: true });
     text(xs + w / 2, G + 14, labels.storage, 7.5, { bold: true });
     // Speicher at the highest VL of the groups, the mixed Rücklauf of the groups.

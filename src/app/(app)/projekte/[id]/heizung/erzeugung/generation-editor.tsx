@@ -44,6 +44,10 @@ import { EwsSection } from "./ews-section";
 import { MaterialSection } from "./material-section";
 import { SafetySection } from "./safety-section";
 
+/** Number of thermometers on a Speicher (choice). */
+const thermometerCounts = ["0", "1", "2", "3"] as const;
+type ThermometerCount = (typeof thermometerCounts)[number];
+
 /**
  * 242 Wärmeerzeugung: the building data of the project (for the checklists) and the chosen Anlage in four sectors –
  * Wärmequelle, Warmwasser, Energiespeicher, Verteiler with the Heizgruppen – with its Prinzipschema drawn live below.
@@ -187,6 +191,7 @@ export function GenerationEditor({
                 <OptionField label={tg("hotWaterCoils")} value={d.hotWaterCoils} options={hotWaterCoilTypes} optionLabel={(v) => tg(`hotWaterCoilTypes.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterCoils: v })} />
               )}
               <OptionField label={tg("tankSensor")} value={d.hotWaterSensor} options={tankSensors} optionLabel={(v) => tg(`tankSensors.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterSensor: v })} />
+              <OptionField label={tg("tankThermometers")} value={String(d.hotWaterThermometers) as ThermometerCount} options={thermometerCounts} optionLabel={(v) => (v === "0" ? tg("tankThermometersNone") : v)} editable={editable} onChange={(v) => setPlant({ hotWaterThermometers: Number(v) })} />
               <NumberParam label={tg("hotWaterElectric")} value={d.hotWaterElectric} decimals={1} editable={editable} onChange={(v) => setPlant({ hotWaterElectric: v ?? 0 })} hint={tg("hotWaterElectricHint")} />
               <OptionField label={tg("hotWaterConnection")} value={d.hotWaterConnection} options={hotWaterConnections} optionLabel={(v) => tg(`hotWaterConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ hotWaterConnection: v })} />
               {(d.hotWaterConnection === "generator" || d.hotWaterConnection === "internal") && d.generators.length > 1 && (
@@ -226,6 +231,7 @@ export function GenerationEditor({
               <NumberParam label={tg("volume")} value={d.storageVolume} editable={editable} onChange={(v) => setPlant({ storageVolume: v })} />
               <OptionField label={tg("storageConnection")} value={d.storageConnection} options={storageConnections} optionLabel={(v) => tg(`storageConnections.${v}`)} editable={editable} onChange={(v) => setPlant({ storageConnection: v })} hint={tg(`storageConnectionHint.${d.storageConnection}`)} />
               <OptionField label={tg("tankSensor")} value={d.storageSensor} options={tankSensors} optionLabel={(v) => tg(`tankSensors.${v}`)} editable={editable} onChange={(v) => setPlant({ storageSensor: v })} />
+              <OptionField label={tg("tankThermometers")} value={String(d.storageThermometers) as ThermometerCount} options={thermometerCounts} optionLabel={(v) => (v === "0" ? tg("tankThermometersNone") : v)} editable={editable} onChange={(v) => setPlant({ storageThermometers: Number(v) })} />
               <Fact label={tg("storageTemp")} value={temps.storage !== null ? `${formatNumber(temps.storage, 0)} °C` : tg("storageTempNone")} />
               <Fact label={tg("storageReturn")} value={temps.ret !== null ? `${formatNumber(temps.ret, 1)} °C${temps.flow !== null ? ` · ${formatNumber(temps.flow * 1000, 0)} l/h` : ""}` : "–"} />
             </div>

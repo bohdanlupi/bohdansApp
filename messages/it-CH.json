@@ -2501,6 +2501,8 @@
         "upper": "2 registri, superiore allacciato",
         "series": "2 registri allacciati in serie"
       },
+      "tankThermometers": "Termometri",
+      "tankThermometersNone": "Nessuno",
       "tankSensor": "Sonda di temperatura",
       "tankSensors": {
         "none": "Nessuna sonda",

@@ -2501,6 +2501,8 @@
         "upper": "2 registres, supérieur raccordé",
         "series": "2 registres raccordés en série"
       },
+      "tankThermometers": "Thermomètres",
+      "tankThermometersNone": "Aucun",
       "tankSensor": "Sonde de température",
       "tankSensors": {
         "none": "Aucune sonde",
