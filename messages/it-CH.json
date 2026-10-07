@@ -1910,7 +1910,10 @@
         "source": "Fonte di calore",
         "hotWater": "Acqua calda",
         "storage": "Accumulatore di energia",
-        "distribution": "Distributore e gruppi"
+        "distribution": "Distributore e gruppi",
+        "supply": "Fornitura di vettori energetici",
+        "generation": "Produzione di calore",
+        "emission": "Emissione di calore"
       },
       "short": {
         "hpAir": "PdC aria/acqua",

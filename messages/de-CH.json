@@ -1910,7 +1910,10 @@
         "source": "Wärmequelle",
         "hotWater": "Warmwasser",
         "storage": "Energiespeicher",
-        "distribution": "Verteiler und Heizgruppen"
+        "distribution": "Verteiler und Heizgruppen",
+        "supply": "Zulieferung Energieträger",
+        "generation": "Wärmeerzeugung",
+        "emission": "Wärmeabgabe"
       },
       "short": {
         "hpAir": "WP Luft/Wasser",

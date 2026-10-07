@@ -111,7 +111,7 @@ export const symbolRefs: Record<SymbolKey, string> = {
 };
 
 export type GenerationLabels = {
-  sectors: { source: string; hotWater: string; storage: string; distribution: string };
+  sectors: { source: string; hotWater: string; storage: string; distribution: string; supply: string; generation: string; emission: string };
   generators: Record<GeneratorType, string>;
   emitters: Record<EmitterType, string>;
   circuits: Record<CircuitType, string>;
@@ -152,7 +152,7 @@ const schemaTextKeys = ["noGenerator", "boreholes", "distributor", "supplyWell",
 export function generationLabels(t: (key: string) => string): GenerationLabels {
   const map = <K extends string>(keys: readonly K[], prefix: string) => Object.fromEntries(keys.map((k) => [k, t(`${prefix}.${k}`)])) as Record<K, string>;
   return {
-    sectors: map(["source", "hotWater", "storage", "distribution"] as const, "sectors"),
+    sectors: map(["source", "hotWater", "storage", "distribution", "supply", "generation", "emission"] as const, "sectors"),
     generators: map(generatorKeys, "short"),
     emitters: map(emitterKeys, "emitterShort"),
     circuits: map(circuitKeys, "circuitShort"),
@@ -409,10 +409,12 @@ const Y_VESSEL = YMR + 150; // tee of the Ausdehnungsgefässe (Heizung and Solek
 function genWidth(g: GeneratorType | null, data: PlantData) {
   if (g === "hpBrine") {
     const extra = data.ews.distributor === "none" ? 0 : (Math.min(data.ews.probes, 4) - 1) * PROBE_PITCH;
-    return (data.ews.distributor === "outside" ? 290 : 250) + extra;
+    return (data.ews.distributor === "outside" ? 290 : 250) + extra + SOURCE_GAP;
   }
-  return g === "hpWater" ? 270 : g === "district" ? 190 : 120;
+  return g === "hpWater" ? 270 + SOURCE_GAP : g === "district" ? 190 : 120;
 }
+/** Extra room between the Sole- / Zwischenkreis and its WP for the line between 241 and 242. */
+const SOURCE_GAP = 24;
 /** Height of the generator symbol standing on the ground. */
 const genHeight = (g: GeneratorType | null) => (g === "district" ? 44 : g === "hpAir" || g === "hpBrine" || g === "hpWater" ? 72 : 60);
 
@@ -461,12 +463,18 @@ export function buildGenerationSchema(
     maxY = Math.max(maxY, y + 4);
   };
 
-  // --- 1 Wärmequelle ------------------------------------------------------------------------------------------
+  // Sector separators (drawn at the end, over the full height).
+  const separators: number[] = [];
+  const separator = (x: number) => separators.push(x);
+
+  // --- 241 Zulieferung Energieträger / 242 Wärmeerzeugung ------------------------------------------------------
   // Generators stand on the ground; their legs rise to the mains, which run over all sectors.
-  // A Sondenverteiler im Technikraum lies at the height of the mains, so its Sole/Wasser-WP is drawn first (left of them);
-  // the generator with the separate Warmwasser connection last, so its lines pass no other generator.
+  // WPs with Erdwärmesonden or Grundwasser are drawn first, their source (241) left of the line beside them (also a
+  // Sondenverteiler im Technikraum at the height of the mains); the generator with the separate Warmwasser connection
+  // last, so its lines pass no other generator.
   const wwGenId = hotWaterUnit(data)?.id;
-  const order = (u: (typeof data.generators)[number]) => (u.type === "hpBrine" && data.ews.distributor === "inside" ? 0 : u.id === wwGenId ? 2 : 1);
+  const hasSource = (t: GeneratorType | null) => t === "hpBrine" || t === "hpWater";
+  const order = (u: (typeof data.generators)[number]) => (hasSource(u.type) ? 0 : u.id === wwGenId ? 2 : 1);
   const gens = data.generators.length ? [...data.generators].sort((a, b) => order(a) - order(b)) : [null];
   const x0 = 24;
   const ews = data.generators.some((g) => g.type === "hpBrine") ? evaluateEws(data, opts.ews ?? emptyEwsContext) : null;
@@ -488,6 +496,7 @@ export function buildGenerationSchema(
   let colX = x0;
   let firstLeg = Infinity;
   let lastReturn = 0; // RL leg of the rightmost generator (Ausdehnungsgefäss)
+  let supplyEnd: number | null = null;
   // Wassererwärmer loading: generator of the separate connection, Heizgruppe of the WW-Ladegruppe.
   const ww = data.hotWater ? data.hotWaterConnection : null;
   const wwUnit = hotWaterUnit(data);
@@ -502,6 +511,8 @@ export function buildGenerationSchema(
     const xr = gx + 38; // RL in
     firstLeg = Math.min(firstLeg, xv);
     lastReturn = xr;
+    // Erdwärmesonden / Grundwasser (241 Zulieferung Energieträger) end just left of the first WP with a source.
+    if (hasSource(g) && supplyEnd === null) supplyEnd = gx - 12;
     drawGenerator(g, colX, gx, top, unit ? generatorName(data.generators, unit, (t) => labels.generators[t]) : "", unit?.id ?? "");
     if (ww === "generator" && unit && unit.id === wwUnit?.id) wwGen = { gx, top };
     if (unit) nw(`gen:${unit.id}`, (xv + xr) / 2, YBALL - 22);
@@ -550,7 +561,13 @@ export function buildGenerationSchema(
     expansionVessel("rl", xm, -1, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, v.vn !== null ? `p0 ${v.p0.toFixed(1)} bar` : "", "vessel:heating");
   }
   pipe("rl", [[sourceRight, YMR], [firstLeg + 32, YMR]]);
-  text(x0, TITLE_Y, labels.sectors.source.toUpperCase(), 8, { anchor: "start", bold: true });
+  // 241 Zulieferung Energieträger (only with Erdwärmesonden or Grundwasser) and 242 Wärmeerzeugung.
+  const sectorTitle = (x: number, value: string) => text(x, TITLE_Y, value.toUpperCase(), 8, { anchor: "start", bold: true });
+  if (supplyEnd !== null) {
+    separator(supplyEnd);
+    sectorTitle(x0, `241 ${labels.sectors.supply}`);
+    sectorTitle(supplyEnd + 12, `242 ${labels.sectors.generation}`);
+  } else sectorTitle(x0, `242 ${labels.sectors.generation}`);
 
   function drawGenerator(g: GeneratorType | null, cx: number, gx: number, top: number, name: string, id: string) {
     const mid = gx + 22;
@@ -695,7 +712,7 @@ export function buildGenerationSchema(
   function drawSourceLoop(g: "hpBrine" | "hpWater", gx: number, top: number, id: string) {
     // Quellenpumpe, unless built into the WP.
     const sourcePump = !data.generators.find((u) => u.id === id)?.internalPumps.source;
-    const xb = gx - 34; // back to the evaporator
+    const xb = gx - 34 - SOURCE_GAP; // back to the evaporator
     const xa = xb - 30; // to the source (cooled)
     if (g === "hpBrine") {
       // The lines rise straight from the evaporator. In all variants the same sequence at the same heights:
@@ -749,8 +766,8 @@ export function buildGenerationSchema(
     const yA = YMR + 50;
     const yB = yA + 12;
     const yLow = G - 44;
-    pipe("brineR", [[gx, top + 8], [gx - 12, top + 8], [gx - 12, yA], [xa, yA], [xa, yLow]]);
-    pipe("brine", [[xb, yLow], [xb, yB], [gx - 22, yB], [gx - 22, top + 16], [gx, top + 16]]);
+    pipe("brineR", [[gx, top + 8], [xb + 22, top + 8], [xb + 22, yA], [xa, yA], [xa, yLow]]);
+    pipe("brine", [[xb, yLow], [xb, yB], [xb + 12, yB], [xb + 12, top + 16], [gx, top + 16]]);
     sym("ball", xa, yA + 26, "down");
     sym("drain", xa, yA + 40, "down", { side: sideOf("down", "left") });
     pipe("brineR", [[xa, Y_VESSEL], [xa - 30, Y_VESSEL]]);
@@ -787,10 +804,6 @@ export function buildGenerationSchema(
     }
     sym("pump", wa, G + 76, "up");
   }
-
-  // Sector separators (drawn at the end, over the full height).
-  const separators: number[] = [];
-  const separator = (x: number) => separators.push(x);
 
   // --- 2 Warmwasser ---------------------------------------------------------------------------------------------
   // Loaded by a Heizgruppe (WW-Ladegruppe), the Wassererwärmer stands right of the Verteiler in its own sector and the
@@ -1114,9 +1127,13 @@ export function buildGenerationSchema(
       nw(`group:${wwGroup.id}`, xwG + 4, YBALL - 28, "start");
     }
   }
+  // 243 Wärmeabgabe beyond the Verteiler (or the Warmwasser of a WW-Ladegruppe right of it): only its line and title.
+  const emission = wwAtGroup ? wwGroupLeft + WW_SECTOR : b1 + 40;
+  separator(emission);
+  text(emission + 12, TITLE_Y, `243 ${labels.sectors.emission}`.toUpperCase(), 8, { anchor: "start", bold: true });
   for (const x of separators) add(ln(x, 8, x, maxY + 10, 0.6, "6 3 1.5 3"));
   // Ground line with hatching below it.
-  const sheetRight = Math.max(wwAtGroup ? wwGroupLeft + WW_SECTOR : b1 + 40, 600);
+  const sheetRight = Math.max(emission + 110, 600);
   const right = sheetRight - 10;
   add(ln(10, G, right, G, 1.2));
   for (let x = 16; x <= right; x += 10) add(ln(x, G, x - 5, G + 5, 0.5));

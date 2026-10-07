@@ -1910,7 +1910,10 @@
         "source": "Source de chaleur",
         "hotWater": "Eau chaude",
         "storage": "Accumulateur d’énergie",
-        "distribution": "Distributeur et groupes"
+        "distribution": "Distributeur et groupes",
+        "supply": "Approvisionnement en agents énergétiques",
+        "generation": "Production de chaleur",
+        "emission": "Émission de chaleur"
       },
       "short": {
         "hpAir": "PAC air/eau",
