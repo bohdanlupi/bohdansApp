@@ -487,6 +487,7 @@ export function buildGenerationSchema(
   const sourceRight = x0 + gens.reduce((s, u) => s + genWidth(u?.type ?? null, data), 0) + 10 + MAG_ROOM;
   let colX = x0;
   let firstLeg = Infinity;
+  let lastReturn = 0; // RL leg of the rightmost generator (Ausdehnungsgefäss)
   // Wassererwärmer loading: generator of the separate connection, Heizgruppe of the WW-Ladegruppe.
   const ww = data.hotWater ? data.hotWaterConnection : null;
   const wwUnit = hotWaterUnit(data);
@@ -500,6 +501,7 @@ export function buildGenerationSchema(
     const xv = gx + 6; // VL out
     const xr = gx + 38; // RL in
     firstLeg = Math.min(firstLeg, xv);
+    lastReturn = xr;
     drawGenerator(g, colX, gx, top, unit ? generatorName(data.generators, unit, (t) => labels.generators[t]) : "", unit?.id ?? "");
     if (ww === "generator" && unit && unit.id === wwUnit?.id) wwGen = { gx, top };
     if (unit) nw(`gen:${unit.id}`, (xv + xr) / 2, YBALL - 22);
@@ -538,13 +540,12 @@ export function buildGenerationSchema(
     colX += w;
   }
   pipe("vl", [[firstLeg, YMV], [sourceRight, YMV]]);
-  // Druckausdehnungsgefäss on the Rücklauf to the generators (suction side), plombierte Absperrung (HE301-01 3.2.2):
-  // mirror image of the one of the Solekreis, at the same height.
+  // Druckausdehnungsgefäss with plombierter Absperrung (HE301-01 3.2.2) teed off the Rücklauf leg of the rightmost
+  // generator, between its pump and the generator: mirror image of the one of the Solekreis, at the same height.
   {
-    const xd = sourceRight - 72;
-    const xm = xd + 30;
-    pipe("rl", [[xd, YMR], [xd, Y_VESSEL], [xm, Y_VESSEL]]);
-    dot(xd, YMR, "rl");
+    const xm = lastReturn + 30;
+    pipe("rl", [[lastReturn, Y_VESSEL], [xm, Y_VESSEL]]);
+    dot(lastReturn, Y_VESSEL, "rl");
     const v = safety.vessel;
     expansionVessel("rl", xm, -1, v.vn !== null ? `${labels.vessel} ${Math.round(v.vn)} l` : labels.vessel, v.vn !== null ? `p0 ${v.p0.toFixed(1)} bar` : "", "vessel:heating");
   }
@@ -898,8 +899,11 @@ export function buildGenerationSchema(
       const { gx, top: gTop } = wwGen;
       const yV = YMR + 16;
       const yR = YMR + 26;
-      pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn]]);
-      pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
+      // The pair rises right of the Ausdehnungsgefäss of the Heizung (which hangs on the RL leg of this generator).
+      const xV = sourceRight - 40;
+      const xR = sourceRight - 30;
+      pipe("vl", [[gx + 44, gTop + 12], [xV, gTop + 12], [xV, yV], [xw, yV], [xw, yIn]]);
+      pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [xR, yR], [xR, gTop + 28], [gx + 44, gTop + 28]]);
       waterHeaterFittings(xw, xIn, yIn, yOut);
       waterHeaterSafetyValve(xw, 262);
       if (!wwUnit?.internalPumps.hotWater) {
