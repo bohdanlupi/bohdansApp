@@ -897,14 +897,23 @@ export function buildGenerationSchema(
     if (temps.ret !== null) text(xs + w / 2, yBot - 8, `${labels.return} ${(Math.round(temps.ret * 10) / 10).toLocaleString("de-CH")} °C`, 6.5, { muted: true });
     pipe("rl", [[xs, yBot], [xs - 30, yBot], [xs - 30, YMR], [stLeft, YMR]]);
     pipe("rl", [[stRight, YMR], [xs + w + 30, YMR], [xs + w + 30, yBot], [xs + w, yBot]]);
+    // Absperrungen in all lines to and from the Speicher at the height of those of the generators, Entleerungen in the
+    // Rücklauf connections on both sides.
+    sym("ball", xs - 30, YBALL, "up");
+    sym("ball", xs + w + 30, YBALL, "down");
+    sym("drain", xs - 15, yBot, "left", { side: sideOf("left", "below") });
+    sym("drain", xs + w + 15, yBot, "left", { side: sideOf("left", "below") });
     if (data.storageConnection === "reduced") {
       const xc = xs + w / 2;
       pipe("vl", [[stLeft, YMV], [stRight, YMV]]);
       pipe("vl", [[xc, YMV], [xc, top]]);
       dot(xc, YMV, "vl");
+      sym("ball", xc, YBALL, "down");
     } else {
       pipe("vl", [[stLeft, YMV], [xs - 16, YMV], [xs - 16, yTop], [xs, yTop]]);
       pipe("vl", [[xs + w, yTop], [xs + w + 16, yTop], [xs + w + 16, YMV], [stRight, YMV]]);
+      sym("ball", xs - 16, YBALL, "down");
+      sym("ball", xs + w + 16, YBALL, "up");
     }
   } else {
     pipe("vl", [[stLeft, YMV], [stRight, YMV]]);

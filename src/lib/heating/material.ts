@@ -276,7 +276,14 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
   }
 
   // --- Energiespeicher -----------------------------------------------------------------------------------------------
-  if (data.storage) neutral("storage", `Technischer Speicher${data.storageVolume ? ` ${fmt(data.storageVolume)} l` : ""}`);
+  if (data.storage) {
+    neutral("storage", `Technischer Speicher${data.storageVolume ? ` ${fmt(data.storageVolume)} l` : ""}`);
+    // Absperrungen in all lines to and from the Speicher (reduziert: 3, konventionell: 4), Entleerungen in both RL
+    // connections; sized like the mains (the largest generator circuit).
+    const mains = circuits.filter((c) => c.kind === "generator" && c.size).sort((a, b) => b.size!.d - a.size!.d)[0]?.size ?? null;
+    ball("storage", mains, data.storageConnection === "reduced" ? 3 : 4);
+    drain("storage", mains, 2);
+  }
 
   // --- Verteiler und Heizgruppen -------------------------------------------------------------------------------------
   if (data.groups.length) neutral("distribution", `Heizungsverteiler VL/RL für ${data.groups.length} Heizgruppe${data.groups.length > 1 ? "n" : ""}`);
