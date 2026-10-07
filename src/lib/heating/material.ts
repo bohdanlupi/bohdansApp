@@ -299,6 +299,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     drain("distribution", size, 4);
     thermometer("distribution", size, 2);
     neutral("distribution", "Vorlauffühler (Lieferung MSRL)");
+    if (g.safetyThermostat) neutral("distribution", "Sicherheitsthermostat (Anlegethermostat, Lieferung MSRL)");
     if (g.heatMeter) {
       const meter = c?.flow != null ? [...A.heatMeters].sort((a, b) => a.qp - b.qp || a.thread - b.thread).find((m) => m.qp >= c.flow! && (size === null || m.thread >= size.thread)) : undefined;
       article("distribution", "Meier Tobler", meter, 1, `Wärmezähler${c?.flow != null ? ` qp ≥ ${fmt(c.flow, 1)} m³/h` : ""}`);

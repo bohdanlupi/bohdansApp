@@ -1960,7 +1960,8 @@
         "power": "Puissance [kW]",
         "supply": "D [°C]",
         "return": "R [°C]",
-        "heatMeter": "Compteur de chaleur"
+        "heatMeter": "Compteur de chaleur",
+        "safetyThermostat": "Thermostat de sécurité"
       },
       "mismatch": {
         "pressurized": "Les montages en mélange vont sur un distributeur sans pression (la pression différentielle perturbe le mélange) : {groups}.",
@@ -1990,6 +1991,7 @@
         "pump": "Circulateur",
         "thermometer": "Thermomètre",
         "sensor": "Sonde de température",
+        "safetyThermostat": "Thermostat de sécurité",
         "heatMeter": "Compteur de chaleur",
         "expansion": "Vase d’expansion à membrane",
         "boilerSolid": "Chaudière combustible solide",

@@ -41,6 +41,8 @@ const groupSchema = z.object({
   supplyTemp: num(0, 150),
   returnTemp: num(0, 150),
   heatMeter: z.boolean().catch(false),
+  /** Sicherheitsthermostat (Anlegethermostat) in the Vorlauf below the Vorlauffühler, e.g. for a Fussbodenheizung. */
+  safetyThermostat: z.boolean().catch(false),
 });
 
 export type HeatingGroup = z.infer<typeof groupSchema>;

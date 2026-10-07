@@ -1960,7 +1960,8 @@
         "power": "Potenza [kW]",
         "supply": "M [°C]",
         "return": "R [°C]",
-        "heatMeter": "Contatore di calore"
+        "heatMeter": "Contatore di calore",
+        "safetyThermostat": "Termostato di sicurezza"
       },
       "mismatch": {
         "pressurized": "I circuiti miscelatori vanno su un distributore senza pressione (la pressione differenziale disturba la miscelazione): {groups}.",
@@ -1990,6 +1991,7 @@
         "pump": "Circolatore",
         "thermometer": "Termometro",
         "sensor": "Sonda di temperatura",
+        "safetyThermostat": "Termostato di sicurezza",
         "heatMeter": "Contatore di calore",
         "expansion": "Vaso d’espansione a membrana",
         "boilerSolid": "Caldaia combustibile solido",

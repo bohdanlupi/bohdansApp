@@ -55,6 +55,7 @@ export const symbolKeys = [
   "pump",
   "thermometer",
   "sensor",
+  "safetyThermostat",
   "heatMeter",
   "expansion",
   "safetyValve",
@@ -87,6 +88,7 @@ export const symbolRefs: Record<SymbolKey, string> = {
   pump: "1.27.3",
   thermometer: "1.28.11",
   sensor: "1.28.2",
+  safetyThermostat: "~ 1.28.2",
   heatMeter: "1.210.3",
   expansion: "2.4.2",
   safetyValve: "1.26.10",
@@ -278,6 +280,9 @@ export function drawSymbol(key: SymbolKey, x: number, y: number, dir: Dir = "rig
     case "sensor":
       // 1.28.2 Messfühler Temperatur: the stem touches the pipe, the sensing element (circle) at its end.
       return [g.line(0, 0, 0, 10 * s, 0.8), g.circle(0, 12.6 * s, 2.6, "bg", 0.8)];
+    case "safetyThermostat":
+      // Sicherheitsthermostat (Anlegethermostat): box «ST» on a short stem at side s.
+      return [g.line(0, 0, 0, 6 * s, 0.8), g.box(0, 13 * s, 9, 14, "bg", 0.8), g.text(0, 13 * s, "ST", 4.5)];
     case "heatMeter":
       // 1.210.3 Wärmezähler mit elektronischem Zählwerk: Volumenstromzähler in the pipe, Rechenwerk beside it.
       return [
@@ -775,7 +780,9 @@ export function buildGenerationSchema(
   // mains run straight from the Wärmequelle to the Energiespeicher.
   const external = data.hotWater && data.hotWaterHeater === "external";
   const wwAtGroup = data.hotWater && ww === "group";
-  const WW_SECTOR = 210 + (external ? 80 : 0);
+  const WW_SECTOR = 222 + (external ? 80 : 0);
+  /** Heating legs of the Wassererwärmer: VL at xw, RL at xw - 22, from the left edge of its sector. */
+  const WW_LEG = 52;
   const wwLeft = sourceRight;
   const wwRight = wwAtGroup ? wwLeft : wwLeft + WW_SECTOR;
   // WW-Ladegruppe: lines above the boxes of the groups, the VL above the RL (they run to the right without crossing).
@@ -823,16 +830,17 @@ export function buildGenerationSchema(
   }
 
   /**
-   * Thermometers (above) and Entleerungen (below) in the heating VL and RL of the Wassererwärmer, on their horizontals
-   * between the legs at xw / xw - 22 and the connections at xIn.
+   * Absperrungen of the Wassererwärmer at the height of those of the generators with thermometers below them at the
+   * height of those of the Speicher (VL facing right, RL left), and Entleerungen in VL and RL on their horizontals just
+   * before the connections at xIn.
    */
   function waterHeaterFittings(xw: number, xIn: number, yIn: number, yOut: number) {
-    const xt = xIn - 34;
-    const xd = xIn - 16;
-    sym("thermometer", xt, yIn, "right", { side: sideOf("right", "above") });
-    sym("thermometer", xt, yOut, "left", { side: sideOf("left", "above") });
-    sym("drain", xd, yIn, "right", { side: sideOf("right", "below") });
-    sym("drain", xd, yOut, "left", { side: sideOf("left", "below") });
+    sym("ball", xw, YBALL, "down");
+    sym("ball", xw - 22, YBALL, "up");
+    sym("thermometer", xw, YBALL + 26, "down", { side: sideOf("down", "right") });
+    sym("thermometer", xw - 22, YBALL + 26, "up", { side: sideOf("up", "left") });
+    sym("drain", xIn - 16, yIn, "right", { side: sideOf("right", "below") });
+    sym("drain", xIn - 16, yOut, "left", { side: sideOf("left", "below") });
   }
 
   /** Sicherheitsventil on the heating VL of the Wassererwärmer, between its Absperrung and it; outlet to the right. */
@@ -851,7 +859,7 @@ export function buildGenerationSchema(
     pipe("rl", [[wwRight, YMR], [wwLeft, YMR]]);
   }
   if (data.hotWater && !wwAtGroup) {
-    const xw = wwLeft + 40;
+    const xw = wwLeft + WW_LEG;
     const { xIn, yIn, yOut } = drawWaterHeater(xw);
     if (ww === "diverter") {
       // Umschaltventil (Dreiweg) in the supply main.
@@ -860,27 +868,22 @@ export function buildGenerationSchema(
       dot(xw - 22, YMR, "rl");
       sym("valve3", xw, YMV, "right", { port: sideOf("right", "below") });
       typeText("valve3:hotWater", xw + 14, YMV - 20, "start");
-      sym("ball", xw, YBALL, "down");
-      sym("ball", xw - 22, YBALL, "up");
-      waterHeaterSafetyValve(xw, YBALL + 68);
       waterHeaterFittings(xw, xIn, yIn, yOut);
-      nw("hotWater", xw + 4, YBALL + 30, "start");
+      waterHeaterSafetyValve(xw, YBALL + 68);
+      nw("hotWater", xw + 4, YBALL - 28, "start");
     } else if (ww === "generator" && wwGen) {
-      // Own pair from the side of the generator, below the mains: Absperrungen at one height, Sicherheitsventil and
-      // Ladepumpe below.
+      // Own pair from the side of the generator, just below the mains: Absperrungen and thermometers as at the other
+      // connections, Sicherheitsventil and Ladepumpe below them.
       const { gx, top: gTop } = wwGen;
-      // Over the Ausdehnungsgefäss of the Heizung (below the Entleerungen of the generator legs).
-      const yV = YMR + 56;
-      const yR = YMR + 66;
+      const yV = YMR + 16;
+      const yR = YMR + 26;
       pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn], [xIn, yIn]]);
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
-      sym("ball", xw, 240, "down");
-      sym("ball", xw - 22, 240, "up");
-      waterHeaterSafetyValve(xw, 266);
       waterHeaterFittings(xw, xIn, yIn, yOut);
+      waterHeaterSafetyValve(xw, 262);
       if (!wwUnit?.internalPumps.hotWater) {
-        sym("pump", xw, 284, "down");
-        typeText("pump:hotWater", xw + 10, 281, "start");
+        sym("pump", xw, 280, "down");
+        typeText("pump:hotWater", xw + 10, 277, "start");
       }
       nw("hotWater", xw + 4, yV - 2, "start");
     }
@@ -954,7 +957,7 @@ export function buildGenerationSchema(
   const pressurized = data.distributor === "pressurized";
   // Warmwasser sector of the WW-Ladegruppe right of the Verteiler: its heating VL / RL legs.
   const wwGroupLeft = b1 + 40;
-  const xwG = wwGroupLeft + 40;
+  const xwG = wwGroupLeft + WW_LEG;
   pipe("vl", [[dLeft, YMV], [xdV, YMV], [xdV, YVD], [b0, YVD]]);
   pipe("rl", [[b0, YRD], [xdR, YRD], [xdR, YMR], [dLeft, YMR]]);
   // Verteiler bars (thicker).
@@ -1005,7 +1008,9 @@ export function buildGenerationSchema(
     sym("ball", a, 312, "up");
     sym("ball", b, 312, "down");
     // After the pump (consumer side): Vorlauffühler, thermometers and Absperrungen in VL and RL.
-    sym("sensor", a, 166, "up", { side: sideOf("up", "left") });
+    sym("sensor", a, 160, "up", { side: sideOf("up", "left") });
+    // Sicherheitsthermostat below the Vorlauffühler.
+    if (group.safetyThermostat) sym("safetyThermostat", a, 173, "up", { side: sideOf("up", "left") });
     sym("thermometer", a, 146, "up", { side: sideOf("up", "left") });
     sym("thermometer", b, 146, "down", { side: sideOf("down", "right") });
     sym("ball", a, 126, "up");
@@ -1077,11 +1082,9 @@ export function buildGenerationSchema(
       // The lines of the WW-Ladegruppe come over the groups from the left.
       pipe("vl", [[xwG, WW_VL], [xwG, yIn], [xIn, yIn]]);
       pipe("rl", [[xIn, yOut], [xwG - 22, yOut], [xwG - 22, WW_RL]]);
-      sym("ball", xwG, YBALL, "down");
-      sym("ball", xwG - 22, YBALL, "up");
-      waterHeaterSafetyValve(xwG, YBALL + 68);
       waterHeaterFittings(xwG, xIn, yIn, yOut);
-      nw(`group:${wwGroup.id}`, xwG + 4, YBALL + 30, "start");
+      waterHeaterSafetyValve(xwG, YBALL + 68);
+      nw(`group:${wwGroup.id}`, xwG + 4, YBALL - 28, "start");
     }
   }
   for (const x of separators) add(ln(x, 8, x, maxY + 10, 0.6, "6 3 1.5 3"));
@@ -1139,7 +1142,7 @@ export function legendSymbol(key: SymbolKey): Prim[] {
       return [{ t: "line", x1: 6, y1: 27, x2: 34, y2: 27, stroke: "muted", sw: 1 }, ...safetyValve(22, 27)];
     default: {
       // Pipe symbols on a short pipe: parts beside the pipe hang below it, drives point up.
-      const offPipe = key === "thermometer" || key === "sensor" || key === "heatMeter" || key === "expansion" || key === "drain";
+      const offPipe = key === "thermometer" || key === "sensor" || key === "safetyThermostat" || key === "heatMeter" || key === "expansion" || key === "drain";
       const y = key === "expansion" ? 5 : offPipe ? 8 : key === "valve2" || key === "valve3" ? 22 : 15;
       return [{ t: "line", x1: 2, y1: y, x2: 38, y2: y, stroke: "muted", sw: 1 }, ...drawSymbol(key, 20, y, "right", { side: offPipe ? 1 : -1, port: 1 })];
     }

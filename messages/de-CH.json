@@ -1960,7 +1960,8 @@
         "power": "Leistung [kW]",
         "supply": "VL [°C]",
         "return": "RL [°C]",
-        "heatMeter": "Wärmezähler"
+        "heatMeter": "Wärmezähler",
+        "safetyThermostat": "Sicherheitsthermostat"
       },
       "mismatch": {
         "pressurized": "Beimischschaltungen gehören an einen drucklosen Verteiler (der Differenzdruck stört die Mischung): {groups}.",
@@ -1990,6 +1991,7 @@
         "pump": "Umwälzpumpe",
         "thermometer": "Thermometer",
         "sensor": "Temperaturfühler",
+        "safetyThermostat": "Sicherheitsthermostat",
         "heatMeter": "Wärmezähler",
         "expansion": "Membran-Ausdehnungsgefäss",
         "boilerSolid": "Heizkessel fester Brennstoff",

@@ -241,7 +241,7 @@ export function GenerationEditor({
               onClick={() =>
                 anlage.update((x) => ({
                   ...x,
-                  groups: [...x.groups, { id: crypto.randomUUID(), name: "", circuit: x.distributor === "pressurized" ? "injection3" : "mixing", emitter: null, power: null, supplyTemp: null, returnTemp: null, heatMeter: false }],
+                  groups: [...x.groups, { id: crypto.randomUUID(), name: "", circuit: x.distributor === "pressurized" ? "injection3" : "mixing", emitter: null, power: null, supplyTemp: null, returnTemp: null, heatMeter: false, safetyThermostat: false }],
                 }))
               }
             >
@@ -267,6 +267,7 @@ export function GenerationEditor({
                   <th className="w-16 py-1 pr-2 text-right font-medium">{tg("columns.supply")}</th>
                   <th className="w-16 py-1 pr-2 text-right font-medium">{tg("columns.return")}</th>
                   <th className="py-1 pr-2 text-center font-medium">{tg("columns.heatMeter")}</th>
+                  <th className="py-1 pr-2 text-center font-medium">{tg("columns.safetyThermostat")}</th>
                   <th />
                 </tr>
               </thead>
@@ -306,6 +307,9 @@ export function GenerationEditor({
                     </td>
                     <td className="py-1.5 pr-2 text-center">
                       <input type="checkbox" checked={g.heatMeter} disabled={!editable} aria-label={tg("columns.heatMeter")} onChange={(e) => setGroup(g.id, { heatMeter: e.target.checked })} />
+                    </td>
+                    <td className="py-1.5 pr-2 text-center">
+                      <input type="checkbox" checked={g.safetyThermostat} disabled={!editable} aria-label={tg("columns.safetyThermostat")} onChange={(e) => setGroup(g.id, { safetyThermostat: e.target.checked })} />
                     </td>
                     <td className="py-1.5 text-right">
                       {editable && (
