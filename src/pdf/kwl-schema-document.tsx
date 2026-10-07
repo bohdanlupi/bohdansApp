@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Circle, Document, G, Image, Line, Page, Path, Polygon, Rect, Svg, Text } from "@react-pdf/renderer";
 
 import type { NetNode } from "@/lib/kwl/network";
@@ -12,9 +14,9 @@ import type { FirmSettings } from "@/lib/supabase/types";
 import { winAnsi } from "./kwl-document";
 import type { LogoSource } from "./letterhead";
 
-// Prinzipschema of a ventilation system as a plan: ISO landscape sheet (A3, else A2 / A1 / A0 when the schema would
-// get too small to read), frame, the schema, a legend of the symbols it uses and the LUPI title block (Plankopf,
-// after vorlagen/Vorlage_Plankopf.pdf: project, address, logo + firm, Anlage, SIA phase, plan type, format, trade,
+// Prinzipschema of a ventilation system as a plan: sheet like the Sanitär and Heizung plans (height 297 / 420 /
+// 594 mm, width a multiple of 210 mm, wider than high), frame, the schema, a legend of the symbols it uses over the
+// LUPI title block (Plankopf, after vorlagen/Vorlage_Plankopf.pdf: project, address, logo + firm, Anlage, SIA phase, plan type, format, trade,
 // revision list A–F).
 
 const ink = "#111111";
@@ -23,55 +25,116 @@ const blue = "#0000ff";
 
 const pdfPaint = (p: Paint | undefined) => (p === undefined ? undefined : p === "ink" ? ink : p === "bg" ? "#ffffff" : p === "muted" ? muted : p);
 
-/** ISO sheets, landscape [pt]. */
-const formats = [
-  { name: "A3", w: 1190.55, h: 841.89 },
-  { name: "A2", w: 1683.78, h: 1190.55 },
-  { name: "A1", w: 2383.94, h: 1683.78 },
-  { name: "A0", w: 3370.39, h: 2383.94 },
-] as const;
+const MM = 72 / 25.4;
+/** Plan sheets: height 297, 420 or 594 mm, width a multiple of 210 mm (folds to A4), always wider than high. */
+const HEIGHTS = [297, 420, 594];
+const WIDTH_STEP = 210;
 /** Frame distance from the sheet edge and padding inside the frame [pt]. */
 export const MARGIN = 14;
 export const PAD = 12;
 /** Title block of the template (same physical size on every format) [pt]. */
 export const TB_W = 566;
 export const TB_H = 213;
-/** Smallest scale of the schema that keeps its smallest texts (7.5–8 units) readable on paper (≈ 6 pt). */
-const MIN_SCALE = 0.75;
-const MAX_SCALE = 1.3;
 
-/** Legend box above the title block (same width): title band, entries in rows of LEGEND_ROW. */
-const LEGEND_ROW = 17;
-const LEGEND_HEAD = 24;
+/** Legend box above the title block (same width): title band, entries in rows of LEGEND_ROW, drawn LEGEND_SCALE up. */
+const LEGEND_SCALE = 1.25;
+const LEGEND_ROW = 21;
+const LEGEND_HEAD = 28;
 const LEGEND_PAD = 10;
-export type LegendBox = { columns: number; rows: number; colW: number; h: number };
+/** Entries draw their line or symbol at 0…30 (local units, centre line y = 0) and the text from 40. */
+const LEGEND_TEXT_X = 40;
+const LEGEND_TEXT = 8;
+const LEGEND_NOTE = 7.5;
+/** Line distance of a label wrapped onto two rows (local units). */
+const LEGEND_LINE = 10;
 
-/**
- * Legend box for `count` entries: as many columns of at least `minCol` as fit the title block width, more (narrower)
- * ones only when the rows would not fit the sheet height above the title block.
- */
-export function legendBox(count: number, minCol: number, sheetH: number): LegendBox {
-  const inner = TB_W - 2 * LEGEND_PAD;
-  const maxRows = Math.max(1, Math.floor((sheetH - 2 * MARGIN - 2 * PAD - TB_H - LEGEND_HEAD - 2) / LEGEND_ROW));
-  const wide = Math.max(1, Math.floor(inner / minCol));
-  const columns = Math.max(1, Math.min(Math.max(wide, Math.ceil(count / maxRows)), Math.max(count, 1)));
-  const rows = Math.max(1, Math.ceil(count / columns));
-  return { columns, rows, colW: inner / columns, h: LEGEND_HEAD + rows * LEGEND_ROW + 2 };
+/** Advance widths of Helvetica (1/1000 em) for ASCII 32–126; other characters count as 556. */
+const HELVETICA = [
+  278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 278, 278, 584, 584, 584, 556, 1015, 667, 667,
+  722, 722, 667, 611, 778, 722, 278, 500, 667, 556, 833, 722, 778, 667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611, 278, 278, 278, 469, 556, 333, 556, 556, 500, 556, 556,
+  278, 556, 556, 222, 222, 500, 222, 833, 556, 556, 556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500, 334, 260, 334, 584,
+];
+const textWidth = (text: string, size: number) =>
+  ([...text].reduce((s, c) => {
+    const code = c.charCodeAt(0);
+    return s + (code >= 32 && code <= 126 ? HELVETICA[code - 32] : c === "·" ? 278 : 556);
+  }, 0) *
+    size) /
+  1000;
+
+/** Text lines of a label in `width` (local units): one line, else wrapped at the word closest to the middle. */
+function wrapLabel(text: string, size: number, width: number): string[] {
+  if (textWidth(text, size) <= width) return [text];
+  const words = text.split(" ");
+  let best: string[] = [text];
+  let bestWidth = Infinity;
+  for (let i = 1; i < words.length; i++) {
+    const lines = [words.slice(0, i).join(" "), words.slice(i).join(" ")];
+    const w = Math.max(...lines.map((l) => textWidth(l, size)));
+    if (w < bestWidth) [best, bestWidth] = [lines, w];
+  }
+  return best;
 }
 
-/** Position of entry i in the legend box at (x, y): left end and centre line of its row. */
-export const legendCell = (box: LegendBox, x: number, y: number, i: number) => ({
-  cx: x + LEGEND_PAD + Math.floor(i / box.rows) * box.colW,
-  cy: y + LEGEND_HEAD + 9 + (i % box.rows) * LEGEND_ROW,
-});
+/** One legend entry: its line or symbol (drawn at 0…30 around y = 0) and label; a note has no symbol, smaller grey text. */
+export type LegendItem = { key: string; label: string; symbol?: ReactNode; note?: boolean };
+type LegendCell = { item: LegendItem; lines: string[]; col: number; row: number };
+export type LegendBox = { colW: number; h: number; cells: LegendCell[] };
 
-/** Frame and title of the legend box; the entries are drawn by the trade's legend. */
-export function LegendFrame({ x, y, box, title }: { x: number; y: number; box: LegendBox; title: string }) {
+/**
+ * Legend box for the items: two columns (more only when the rows would not fit the sheet height above the title
+ * block). Labels too long for a column wrap onto two rows; those entries go last, to the bottom of the right column.
+ */
+export function legendBox(items: LegendItem[], sheetH: number): LegendBox {
+  const inner = TB_W - 2 * LEGEND_PAD;
+  const maxRows = Math.max(1, Math.floor((sheetH - 2 * MARGIN - 2 * PAD - TB_H - LEGEND_HEAD - 2) / LEGEND_ROW));
+  let box: LegendBox = { colW: inner, h: LEGEND_HEAD + 2, cells: [] };
+  for (let columns = 2; columns <= 6; columns++) {
+    const colW = inner / columns;
+    const room = colW / LEGEND_SCALE - 6;
+    const measured = items.map((item) => ({ item, lines: item.note ? wrapLabel(item.label, LEGEND_NOTE, room) : wrapLabel(item.label, LEGEND_TEXT, room - LEGEND_TEXT_X) }));
+    const ordered = [...measured.filter((m) => m.lines.length === 1), ...measured.filter((m) => m.lines.length > 1)];
+    const slots = ordered.reduce((s, m) => s + m.lines.length, 0);
+    // Fewest rows that take all entries column by column (an entry is never split between two columns).
+    for (let rows = Math.max(1, Math.ceil(slots / columns)); ; rows++) {
+      const cells: LegendCell[] = [];
+      let col = 0;
+      let row = 0;
+      for (const m of ordered) {
+        if (row + m.lines.length > rows) [col, row] = [col + 1, 0];
+        cells.push({ ...m, col, row });
+        row += m.lines.length;
+      }
+      if (col < columns) {
+        box = { colW, h: LEGEND_HEAD + rows * LEGEND_ROW + 2, cells };
+        break;
+      }
+    }
+    if ((box.h - LEGEND_HEAD - 2) / LEGEND_ROW <= maxRows) break;
+  }
+  return box;
+}
+
+/** The legend box at (x, y): frame, title and the entries. */
+export function Legend({ x, y, box, title }: { x: number; y: number; box: LegendBox; title: string }) {
   return (
     <G>
       <Rect x={x} y={y} width={TB_W} height={box.h} fill="#ffffff" stroke={ink} strokeWidth={0.8} />
-      {svgText(x + LEGEND_PAD, y + 15, title, 10, { bold: true })}
-      <Line x1={x} y1={y + 22} x2={x + TB_W} y2={y + 22} stroke={ink} strokeWidth={0.4} />
+      {svgText(x + LEGEND_PAD, y + 18, title, 12.5, { bold: true })}
+      <Line x1={x} y1={y + 26} x2={x + TB_W} y2={y + 26} stroke={ink} strokeWidth={0.4} />
+      {box.cells.map(({ item, lines, col, row }) => {
+        // Origin on the centre line of the entry (between its rows when wrapped), scaled up by LEGEND_SCALE.
+        const cy = y + LEGEND_HEAD + 11 + (row + (lines.length - 1) / 2) * LEGEND_ROW;
+        const top = (-(lines.length - 1) * LEGEND_LINE) / 2 + 3;
+        return (
+          <G key={item.key} transform={`translate(${x + LEGEND_PAD + col * box.colW}, ${cy}) scale(${LEGEND_SCALE})`}>
+            {item.symbol}
+            {lines.map((l, i) => (
+              <G key={i}>{item.note ? svgText(0, top + i * LEGEND_LINE, l, LEGEND_NOTE, { fill: muted }) : svgText(LEGEND_TEXT_X, top + i * LEGEND_LINE, l, LEGEND_TEXT)}</G>
+            ))}
+          </G>
+        );
+      })}
     </G>
   );
 }
@@ -89,13 +152,29 @@ export function placeSchema(W: number, H: number, layout: { width: number; heigh
   return { scale, dx: MARGIN + PAD + (area.w - layout.width * scale) / 2, dy: MARGIN + PAD + (area.h - layout.height * scale) / 2 };
 }
 
-/** Sheet and placement for a schema: the smallest format on which it is drawn at least at MIN_SCALE. */
-export function schemaSheet(layout: { width: number; height: number }, legendCount: number) {
-  const on = (f: (typeof formats)[number]) => {
-    const legend = legendBox(legendCount, LEGEND_COL, f.h);
-    return { format: f, legend, ...placeSchema(f.w, f.h, layout, legend.h + TB_H, MAX_SCALE) };
-  };
-  return formats.map(on).find((s) => s.scale >= MIN_SCALE) ?? on(formats[formats.length - 1]);
+/**
+ * Sheet [mm], legend box and placement of a schema (Lüftung, Sanitär, Heizung): the lowest height that draws it at
+ * `minScale` – left of the legend + title block column at full height, or above it at full width – and the narrower
+ * width it needs in steps of 210 mm, at least one step wider than high.
+ */
+export function planSheet(layout: { width: number; height: number }, items: LegendItem[], { minScale, maxScale }: { minScale: number; maxScale: number }) {
+  const widthMm = (pt: number, hMm: number) => Math.max(Math.floor(hMm / WIDTH_STEP) + 1, Math.ceil(pt / MM / WIDTH_STEP - 1e-9)) * WIDTH_STEP;
+  const candidates = HEIGHTS.flatMap((hMm) => {
+    const h = hMm * MM;
+    const legend = legendBox(items, h);
+    const left = Math.min((h - 2 * MARGIN - 2 * PAD) / layout.height, maxScale);
+    const above = Math.min((h - 2 * MARGIN - 3 * PAD - legend.h - TB_H) / layout.height, maxScale);
+    return [
+      { hMm, scale: left, wMm: widthMm(layout.width * left + 2 * MARGIN + 3 * PAD + TB_W, hMm) },
+      { hMm, scale: above, wMm: widthMm(Math.max(layout.width * above, TB_W) + 2 * MARGIN + 2 * PAD, hMm) },
+    ];
+  });
+  const fitting = candidates.filter((c) => c.scale >= minScale).sort((a, b) => a.hMm - b.hMm || a.wMm - b.wMm);
+  const { hMm, wMm } = fitting[0] ?? candidates.filter((c) => c.hMm === HEIGHTS[HEIGHTS.length - 1]).sort((a, b) => b.scale - a.scale)[0];
+  const w = wMm * MM;
+  const h = hMm * MM;
+  const legend = legendBox(items, h);
+  return { wMm, hMm, w, h, legend, ...placeSchema(w, h, layout, legend.h + TB_H, maxScale), name: `${hMm} × ${wMm}` };
 }
 
 export function PdfPrims({ prims }: { prims: Prim[] }) {
@@ -197,59 +276,52 @@ function SchemaDrawing({ layout, labels, info }: { layout: SchemaLayout; labels:
   );
 }
 
-const LEGEND_COL = 190;
+/** Scale of the schema: at least 0.94 (smallest texts, 7.5–8 units, ≈ 7 pt on paper), at most 1.6. */
+const MIN_SCALE = 0.94;
+const MAX_SCALE = 1.6;
 const legendAirs: AirKind[] = ["outdoor", "supply", "extract", "exhaust"];
-/** Entries of the legend: air types (line colours), insulation classes, then the symbols. */
-const legendEntries = (keys: LegendKey[], insulation: InsulationClass[]) => [
-  ...legendAirs.map((a) => ({ air: a })),
-  ...insulation.map((c) => ({ insulation: c })),
-  ...keys.map((k) => ({ key: k })),
-];
 
-/** Legend in its box over the title block, in columns. */
-function Legend({ x, y, box, keys, insulation, labels }: { x: number; y: number; box: LegendBox; keys: LegendKey[]; insulation: InsulationClass[]; labels: SchemaLabels }) {
-  const entries = legendEntries(keys, insulation);
-  return (
-    <G>
-      <LegendFrame x={x} y={y} box={box} title={labels.legendTitle} />
-      {entries.slice(0, box.rows * box.columns).map((e, i) => {
-        const { cx, cy } = legendCell(box, x, y, i);
-        if ("air" in e && e.air) {
-          return (
-            <G key={e.air}>
-              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={airColors[e.air]} strokeWidth={2} />
-              {svgText(cx + 40, cy + 3, `${labels.airShort[e.air]}  ${labels.air[e.air]}`, 8)}
-            </G>
-          );
-        }
-        if ("insulation" in e && e.insulation) {
-          const style = insulationStyles[e.insulation];
-          return (
-            <G key={e.insulation}>
-              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={style.edge} strokeWidth={style.width} strokeDasharray="1.2 2.2" />
-              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={style.fill} strokeWidth={style.width - 2.4} />
-              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke="#555555" strokeWidth={1.2} />
-              {svgText(cx + 40, cy + 3, labels.insulation[e.insulation], 8)}
-            </G>
-          );
-        }
-        const key = (e as { key: LegendKey }).key;
-        // Symbols scaled to the row height (at most 80 %), on a short grey line where they sit on a duct.
-        const onLine = ["flow", "bend", "tee", "reducer", "supplyTerminal", "extractTerminal"].includes(key);
-        const { prims, top } = drawSymbol(key, 0, 0, "#555555", 1);
-        const size = Math.min(0.8, 13 / (2 * top));
-        return (
-          <G key={key}>
-            {onLine && <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke="#555555" strokeWidth={1.2} />}
-            <G transform={`translate(${cx + 15}, ${cy}) scale(${size})`}>
+/** Legend entries: air types (line colours), insulation classes, then the symbols. */
+function legendItems(keys: LegendKey[], insulation: InsulationClass[], labels: SchemaLabels): LegendItem[] {
+  return [
+    ...legendAirs.map((a) => ({
+      key: a,
+      label: `${labels.airShort[a]}  ${labels.air[a]}`,
+      symbol: <Line x1={0} y1={0} x2={30} y2={0} stroke={airColors[a]} strokeWidth={2} />,
+    })),
+    ...insulation.map((c) => {
+      const style = insulationStyles[c];
+      return {
+        key: c,
+        label: labels.insulation[c],
+        symbol: (
+          <G>
+            <Line x1={0} y1={0} x2={30} y2={0} stroke={style.edge} strokeWidth={style.width} strokeDasharray="1.2 2.2" />
+            <Line x1={0} y1={0} x2={30} y2={0} stroke={style.fill} strokeWidth={style.width - 2.4} />
+            <Line x1={0} y1={0} x2={30} y2={0} stroke="#555555" strokeWidth={1.2} />
+          </G>
+        ),
+      };
+    }),
+    ...keys.map((key) => {
+      // Symbols scaled to the row height (at most 80 %), on a short grey line where they sit on a duct.
+      const onLine = ["flow", "bend", "tee", "reducer", "supplyTerminal", "extractTerminal"].includes(key);
+      const { prims, top } = drawSymbol(key, 0, 0, "#555555", 1);
+      const size = Math.min(0.8, 13 / (2 * top));
+      return {
+        key,
+        label: labels.legend[key],
+        symbol: (
+          <G>
+            {onLine && <Line x1={0} y1={0} x2={30} y2={0} stroke="#555555" strokeWidth={1.2} />}
+            <G transform={`translate(15, 0) scale(${size})`}>
               <PdfPrims prims={prims} />
             </G>
-            {svgText(cx + 40, cy + 3, labels.legend[key], 8)}
           </G>
-        );
-      })}
-    </G>
-  );
+        ),
+      };
+    }),
+  ];
 }
 
 export type PlankopfLabels = {
@@ -376,9 +448,11 @@ export function KwlSchemaDocument({
   logo: LogoSource | null;
 }) {
   const insulation = insulationClasses.filter((c) => layout.edges.some((e) => e.insulation === c));
-  const { format, scale, dx, dy, legend: box } = schemaSheet(layout, legendEntries(legend, insulation).length);
-  const W = format.w;
-  const H = format.h;
+  const items = legendItems(legend, insulation, labels);
+  const sheet = planSheet(layout, items, { minScale: MIN_SCALE, maxScale: MAX_SCALE });
+  const { scale, dx, dy, legend: box } = sheet;
+  const W = sheet.w;
+  const H = sheet.h;
   const tbX = W - MARGIN - TB_W;
   const tbY = H - MARGIN - TB_H;
 
@@ -391,8 +465,8 @@ export function KwlSchemaDocument({
           <G transform={`translate(${dx}, ${dy}) scale(${scale})`}>
             <SchemaDrawing layout={layout} labels={labels} info={info} />
           </G>
-          <Legend x={tbX} y={tbY - box.h} box={box} keys={legend} insulation={insulation} labels={labels} />
-          <TitleBlock x={tbX} y={tbY} project={project} system={system} phase={phase} format={format.name} revisions={revisions} firm={firm} labels={plankopf} />
+          <Legend x={tbX} y={tbY - box.h} box={box} title={labels.legendTitle} />
+          <TitleBlock x={tbX} y={tbY} project={project} system={system} phase={phase} format={sheet.name} revisions={revisions} firm={firm} labels={plankopf} />
         </Svg>
         {/* Logo in the logo column of the title block (after the drawing, which fills the block white). */}
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}

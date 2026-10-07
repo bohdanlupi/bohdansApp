@@ -60,7 +60,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
         title: k("legend"),
         pipes: Object.fromEntries(pipeKinds.map((p) => [p, g(`pipes.${p}`)])) as Record<PipeKind, string>,
         symbols: Object.fromEntries(symbolKeys.map((s) => [s, g(`legend.${s}`)])) as Record<SymbolKey, string>,
-        note: g("legendHint"),
       }}
       plankopf={{
         plan: g("plankopf.plan"),

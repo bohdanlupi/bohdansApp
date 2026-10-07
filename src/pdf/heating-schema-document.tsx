@@ -1,67 +1,45 @@
 import { Document, G, Image, Line, Page, Path, Rect, Svg } from "@react-pdf/renderer";
 
-import { type GenerationSchema, legendSymbol, type PipeKind, pipeColors, pipeDashed, type SymbolKey, symbolRefs } from "@/lib/heating/generation-schema";
+import { type GenerationSchema, legendSymbol, type PipeKind, pipeColors, pipeDashed, type SymbolKey } from "@/lib/heating/generation-schema";
 import type { SchemaRevision } from "@/lib/kwl/schema-plan";
 import type { FirmSettings } from "@/lib/supabase/types";
 
-import { type LegendBox, legendCell, LegendFrame, MARGIN, PdfPrims, type PlankopfLabels, svgText, TB_H, TB_W, TitleBlock } from "./kwl-schema-document";
+import { Legend, type LegendItem, MARGIN, PdfPrims, type PlankopfLabels, TB_H, TB_W, TitleBlock } from "./kwl-schema-document";
 import type { LogoSource } from "./letterhead";
 import { sanitarySheet } from "./sanitary-schema-document";
 
 // Prinzipschema Wärmeerzeugung (242) as a plan: frame and LUPI title block like the Lüftung and Sanitär schemas, the
-// schema of src/lib/heating/generation-schema.ts and a legend of the pipes and SIA 410 symbols it uses. Sheet as the
+// schema of src/lib/heating/generation-schema.ts and a legend of the pipes and symbols (after SIA 410) it uses. Sheet as the
 // Sanitär plan: height 297 / 420 / 594 mm, width a multiple of 210 mm (folds to A4).
 
 const ink = "#111111";
 /** Red of the trade Heizung in the title block (the Vorlauf red of the schema). */
 const HEATING_RED = "#e3001b";
 
-const LEGEND_COL = 300;
-
 export type HeatingLegend = {
   title: string;
   pipes: Record<PipeKind, string>;
   symbols: Record<SymbolKey, string>;
-  /** Note on the «~» references (built from SIA 410 parts). */
-  note: string;
 };
 
-type Entry = { pipe: PipeKind } | { key: SymbolKey } | { note: string };
-
-const legendEntries = (schema: GenerationSchema, labels: HeatingLegend): Entry[] => [
-  ...schema.pipes.map((pipe) => ({ pipe })),
-  ...schema.used.map((key) => ({ key })),
-  { note: labels.note },
+/** Legend entries: the pipes, then the symbols (what they mean, without the SIA 410 references). */
+const legendItems = (schema: GenerationSchema, labels: HeatingLegend): LegendItem[] => [
+  ...schema.pipes.map((pipe) => ({
+    key: pipe,
+    label: labels.pipes[pipe],
+    symbol: <Line x1={0} y1={0} x2={30} y2={0} stroke={pipeColors[pipe]} strokeWidth={2} strokeDasharray={pipeDashed(pipe) ? "6 3" : undefined} />,
+  })),
+  ...schema.used.map((key) => ({
+    key,
+    label: labels.symbols[key],
+    // legendSymbol draws into a 40 × 30 box; scaled to the row height.
+    symbol: (
+      <G transform="translate(0, -8) scale(0.53)">
+        <PdfPrims prims={legendSymbol(key)} />
+      </G>
+    ),
+  })),
 ];
-
-function Legend({ x, y, box, entries, labels }: { x: number; y: number; box: LegendBox; entries: Entry[]; labels: HeatingLegend }) {
-  return (
-    <G>
-      <LegendFrame x={x} y={y} box={box} title={labels.title} />
-      {entries.slice(0, box.rows * box.columns).map((e, i) => {
-        const { cx, cy } = legendCell(box, x, y, i);
-        if ("pipe" in e) {
-          return (
-            <G key={e.pipe}>
-              <Line x1={cx} y1={cy} x2={cx + 30} y2={cy} stroke={pipeColors[e.pipe]} strokeWidth={2} strokeDasharray={pipeDashed(e.pipe) ? "6 3" : undefined} />
-              {svgText(cx + 40, cy + 3, labels.pipes[e.pipe], 8)}
-            </G>
-          );
-        }
-        if ("note" in e) return <G key="note">{svgText(cx, cy + 3, e.note, 7.5, { fill: "#666666" })}</G>;
-        return (
-          <G key={e.key}>
-            {/* legendSymbol draws into a 40 × 30 box; scaled to the row height. */}
-            <G transform={`translate(${cx}, ${cy - 8}) scale(0.53)`}>
-              <PdfPrims prims={legendSymbol(e.key)} />
-            </G>
-            {svgText(cx + 40, cy + 3, `${labels.symbols[e.key]}  (SIA 410 ${symbolRefs[e.key]})`, 8)}
-          </G>
-        );
-      })}
-    </G>
-  );
-}
 
 export function HeatingSchemaDocument({
   schema,
@@ -84,8 +62,7 @@ export function HeatingSchemaDocument({
   firm: FirmSettings;
   logo: LogoSource | null;
 }) {
-  const entries = legendEntries(schema, legend);
-  const sheet = sanitarySheet(schema, entries.length, LEGEND_COL);
+  const sheet = sanitarySheet(schema, legendItems(schema, legend));
   const { scale, dx, dy } = sheet;
   const W = sheet.w;
   const H = sheet.h;
@@ -105,7 +82,7 @@ export function HeatingSchemaDocument({
               <PdfPrims key={`g${i}`} prims={g.prims} />
             ))}
           </G>
-          <Legend x={tbX} y={tbY - sheet.legend.h} box={sheet.legend} entries={entries} labels={legend} />
+          <Legend x={tbX} y={tbY - sheet.legend.h} box={sheet.legend} title={legend.title} />
           <TitleBlock x={tbX} y={tbY} project={project} system={plant} phase={phase} format={sheet.name} revisions={revisions} firm={firm} labels={plankopf} tradeColor={HEATING_RED} />
         </Svg>
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
