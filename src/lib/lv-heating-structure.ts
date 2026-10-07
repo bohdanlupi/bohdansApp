@@ -69,3 +69,35 @@ export function heatingStructure(mode: HeatingStructureMode, groups: string[], b
   });
   return out;
 }
+
+/** Name of the chapter `bkp`.`chapter` (0–6) in the LV language. */
+export const heatingChapterName = (bkp: HeatingBkp, chapter: number, language: AppLanguage) =>
+  chapter === 4 ? chapters[language].fourth[bkp] : chapters[language].common[chapter];
+
+type LvGroup = { id: string; parentId: string | null; number: string | null; text: string };
+
+/**
+ * Groups of an LV that hold the BKPs 241–243 of the structure «Heizung»: the chapter 24 itself (no subdivision) or its
+ * Lose / Häuser. Without a chapter 24, the LV itself when it has the BKPs on top level (id null).
+ */
+export function heatingBases(groups: LvGroup[]): { id: string | null; label: string }[] {
+  const isBkp = (g: LvGroup) => heatingBkps.some((b) => g.number === b || g.number?.startsWith(`${b}.`));
+  const top = groups.find((g) => !g.parentId && g.number === heatingRoot);
+  if (!top) return groups.some((g) => !g.parentId && isBkp(g)) ? [{ id: null, label: "" }] : [];
+  const children = groups.filter((g) => g.parentId === top.id);
+  if (children.some(isBkp)) return [{ id: top.id, label: `${top.number} ${top.text}` }];
+  return children.map((g) => ({ id: g.id, label: `${g.number ?? ""} ${g.text}`.trim() }));
+}
+
+/** The base whose name matches the Anlage (one contains the other), else the first. */
+export function defaultHeatingBase(bases: { id: string | null; label: string }[], plantName: string) {
+  const name = plantName.trim().toLowerCase();
+  return (name ? bases.find((b) => b.label.toLowerCase().includes(name) || name.includes(b.label.replace(/^\S+\s/, "").toLowerCase())) : undefined) ?? bases[0];
+}
+
+/** Chapter `bkp`.x.`chapter` below a base (see heatingBases), null when the LV lacks it. */
+export function heatingChapterId(groups: LvGroup[], baseId: string | null, bkp: HeatingBkp, chapter: number): string | null {
+  const bkpGroup = groups.find((g) => g.parentId === baseId && (g.number === bkp || g.number?.startsWith(`${bkp}.`)));
+  if (!bkpGroup) return null;
+  return groups.find((g) => g.parentId === bkpGroup.id && g.number?.split(".").at(-1) === String(chapter))?.id ?? null;
+}

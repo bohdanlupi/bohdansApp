@@ -2439,7 +2439,7 @@
       "hotWaterElectricHint": "Üblich 9 kW, 0 = ohne. Bemisst das Sicherheitsventil des Wassererwärmers.",
       "material": {
         "title": "Materialauszug",
-        "hint": "Alle Komponenten des Prinzipschemas. Wärmeerzeuger, Speicher, Wassererwärmer, Erdwärmesonden und Brunnen neutral; Armaturen auf Optipress-Therm von Nussbaum, übrige Komponenten aus dem Meier-Tobler-Katalog.",
+        "hint": "Alle Komponenten des Prinzipschemas. Wärmeerzeuger, Speicher, Wassererwärmer, Erdwärmesonden und Brunnen neutral; Armaturen auf Optipress-Therm von Nussbaum, übrige Komponenten aus dem Meier-Tobler-Katalog. Nach LV-Kapiteln geordnet: Sole-/Zwischenkreis mit Erdwärmesonden und Brunnen in 241, alles übrige in 242; beim Übernehmen werden die Kapitel der Struktur Heizung des gewählten LV vorgeschlagen.",
         "hydraulics": "Volumenströme und Nennweiten",
         "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT); DN = kleinste Optipress-Therm-Dimension mit v ≤ {v1} m/s (bis DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (grösser). Sole-/Zwischenkreis: Kälteleistung aus den Erdwärmesonden, sonst 75 % der Heizleistung. Warmwasser: Volumenstrom der Wärmeerzeuger. Länge = einfache Leitungslänge; Inhalt = VL + RL mit dem Innendurchmesser der gewählten Dimension.",
         "columns": {
@@ -2467,14 +2467,6 @@
         },
         "list": "Materialliste",
         "listHint": "Pumpen nur nach Nennweite und Volumenstrom vorgeschlagen (Förderhöhe 6 m) – mit der Pumpenkennlinie prüfen. Regelventile mit kvs bei Δp 10 kPa. Reflex N: Anschluss und max. Betriebsdruck mit dem Datenblatt prüfen.",
-        "groups": {
-          "source": "Wärmeerzeugung",
-          "brine": "Sole- / Zwischenkreis",
-          "expansion": "Druckhaltung Heizung",
-          "hotWater": "Warmwasser",
-          "storage": "Energiespeicher",
-          "distribution": "Verteiler und Heizgruppen"
-        },
         "article": "Artikel",
         "text": "Bezeichnung",
         "quantity": "Menge",
@@ -2482,6 +2474,9 @@
         "chapter": "Kapitel",
         "newGroupOption": "Neue Gruppe",
         "targetLv": "Leistungsverzeichnis",
+        "base": "Los / Haus",
+        "noStructure": "Dieses LV hat noch keine Kapitelstruktur Heizung (BKP 24). Lege sie im LV mit «Struktur Heizung» an, dann werden die Kapitel vorgeschlagen.",
+        "toLv": "Zum LV",
         "groupTitle": "Titel der neuen Gruppe",
         "lvGroup": "Wärmeerzeugung {name}",
         "insertIntoLv": "Ins LV übernehmen",

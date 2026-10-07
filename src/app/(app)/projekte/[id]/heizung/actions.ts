@@ -11,7 +11,7 @@ import { emptyHeatLoad, parseHeatLoad } from "@/lib/heating/heat-load-schema";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
 import { evaluateEws, ewsContextOf } from "@/lib/heating/ews";
 import { evaluateHeatLoad } from "@/lib/heating/heat-load";
-import { type MaterialGroup, materialGroups, type MaterialLine, plantMaterial } from "@/lib/heating/material";
+import { type MaterialLine, materialSections, plantMaterial } from "@/lib/heating/material";
 import { emptyPlant, parsePlant } from "@/lib/heating/plant-schema";
 import { initialsOf, nextRevisionIndex, parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import type { Json } from "@/lib/supabase/database.types";
@@ -273,19 +273,20 @@ const makeLabel: Record<AppLanguage, { make: string; number: string }> = {
   it: { make: "Fabbricante", number: "N. art." },
 };
 
-const materialTargets = z.record(z.enum(materialGroups), z.uuid().nullable());
+/** Target LV group per chapter of the Materialauszug («241.0» … «242.4», see materialSections). */
+const materialTargets = z.record(z.string().regex(/^24[12]\.[0-4]$/), z.uuid().nullable());
 
 /**
- * Inserts the Materialauszug of an Anlage into an LV: each group (Wärmeerzeugung, Sole-/Zwischenkreis, Druckhaltung,
- * Warmwasser, Energiespeicher, Verteilung) into its chosen chapter, groups without one into a new group `groupTitle`.
- * Articles of the Nussbaum and Meier Tobler IGH catalogues become catalogue positions, the neutral parts R-positions.
+ * Inserts the Materialauszug of an Anlage into an LV: the lines of each chapter (241.0 … 242.4) into their chosen LV
+ * group, chapters without one into a new group `groupTitle`. Articles of the Nussbaum and Meier Tobler IGH catalogues
+ * become catalogue positions, the neutral parts R-positions.
  */
 export async function insertHeatingMaterial(
   plantId: string,
   projectId: string,
   lvId: string,
   groupTitle: string,
-  targets: Partial<Record<MaterialGroup, string | null>> = {},
+  targets: Record<string, string | null> = {},
 ): Promise<{ error?: string; count?: number }> {
   await assertRole("admin", "planer");
   const parsedTargets = materialTargets.safeParse(targets);
@@ -303,7 +304,8 @@ export async function insertHeatingMaterial(
   const data = parsePlant(plant.data);
   const load = calcs.reduce((s, c) => s + evaluateHeatLoad(c.data, plan.site, plan.catalog).building, 0);
   const ews = data.generators.some((g) => g.type === "hpBrine") ? evaluateEws(data, ewsContextOf(plan, load)) : null;
-  const lines = plantMaterial(data, ews).filter((l) => l.quantity > 0);
+  const sections = materialSections(plantMaterial(data, ews).filter((l) => l.quantity > 0));
+  const lines = sections.flatMap((x) => x.lines);
   if (!lines.length) return { error: "invalidInput" };
 
   // Chapters must be groups of this LV; lines without one need the title of the new group.
@@ -312,11 +314,11 @@ export async function insertHeatingMaterial(
     ? await supabase.from("lv_nodes").select("id").eq("lv_id", lvId).eq("kind", "group").in("id", chosen)
     : { data: [] as { id: string }[] };
   const valid = new Set((groups ?? []).map((g) => g.id));
-  const chapterOf = (group: MaterialGroup) => {
-    const id = parsedTargets.data[group];
+  const chapterOf = (section: string) => {
+    const id = parsedTargets.data[section];
     return id && valid.has(id) ? id : null;
   };
-  const needsGroup = lines.some((l) => !chapterOf(l.group));
+  const needsGroup = sections.some((x) => !chapterOf(x.key));
   const title = nameSchema.safeParse(groupTitle);
   if (needsGroup && !title.success) return { error: "invalidInput" };
 
@@ -344,8 +346,8 @@ export async function insertHeatingMaterial(
     ? [{ id: groupId, lv_id: lvId, parent_id: null, kind: "group", short_text: { [language]: title.data }, long_text: {}, sort: 1_000_000 }]
     : [];
   let sort = 1_000_001;
-  for (const l of lines) {
-    const parentId = chapterOf(l.group) ?? groupId;
+  for (const [section, l] of sections.flatMap((x) => x.lines.map((line) => [x.key, line] as const))) {
+    const parentId = chapterOf(section) ?? groupId;
     const entry = l.article ? entryOf(l) : undefined;
     if (entry) {
       const longText = { ...(entry.long_text as Record<string, string>) };

@@ -15,9 +15,17 @@ import { evaluateSafety, expansionValveLines } from "./safety";
 export const materialGroups = ["source", "brine", "expansion", "hotWater", "storage", "distribution"] as const;
 export type MaterialGroup = (typeof materialGroups)[number];
 
+/**
+ * Chapter of a line in the LV structure «Heizung» (BKP 241 / 242, see lv-heating-structure.ts): 0 Apparate,
+ * 1 Leitungen (pipes and fittings), 2 Armaturen (Absperrungen, Entleerungen, Thermometer, …), 3 Regel- und
+ * Sicherheitsorgane (Sicherheitsventile, Ausdehnungsgefässe, Regelventile, Antriebe, Fühler, Pumpen), 4 Warmwasserspeicher.
+ */
+export type MaterialChapter = 0 | 1 | 2 | 3 | 4;
+
 export type MaterialLine = {
   key: string;
   group: MaterialGroup;
+  chapter: MaterialChapter;
   manufacturer: "Nussbaum" | "Meier Tobler" | null;
   article: string | null;
   label: string;
@@ -152,51 +160,52 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     if (current) current.quantity += amount;
     else map.set(line.key, { ...line, unit: "Stk", quantity: amount });
   };
-  const article = (group: MaterialGroup, manufacturer: "Nussbaum" | "Meier Tobler", a: A.Article | null | undefined, amount = 1, fallback?: string) => {
-    if (a) add({ key: `${group}|${a.number}`, group, manufacturer, article: a.number, label: a.text }, amount);
-    else if (fallback) neutral(group, fallback, amount);
+  type Ch = MaterialChapter;
+  const article = (group: MaterialGroup, chapter: Ch, manufacturer: "Nussbaum" | "Meier Tobler", a: A.Article | null | undefined, amount = 1, fallback?: string) => {
+    if (a) add({ key: `${group}|${a.number}`, group, chapter, manufacturer, article: a.number, label: a.text }, amount);
+    else if (fallback) neutral(group, chapter, fallback, amount);
   };
-  const neutral = (group: MaterialGroup, label: string, amount = 1) => add({ key: `${group}|${label}`, group, manufacturer: null, article: null, label }, amount);
+  const neutral = (group: MaterialGroup, chapter: Ch, label: string, amount = 1) => add({ key: `${group}|${label}`, group, chapter, manufacturer: null, article: null, label }, amount);
 
   // Fittings on Optipress-Therm.
   const ball = (group: MaterialGroup, size: PipeSize | null, amount: number) =>
-    size && size.d <= 54 ? article(group, "Nussbaum", A.ballValves.find((v) => v.d === size.d), amount) : neutral(group, `Absperrarmatur ${size ? `DN ${size.dn}` : "(DN offen)"}`, amount);
+    size && size.d <= 54 ? article(group, 2, "Nussbaum", A.ballValves.find((v) => v.d === size.d), amount) : neutral(group, 2, `Absperrarmatur ${size ? `DN ${size.dn}` : "(DN offen)"}`, amount);
   const tee = (group: MaterialGroup, size: PipeSize | null, thread: number, amount: number) => {
     const t = size ? (A.teesThreaded.find((x) => x.d === size.d && x.thread === thread) ?? A.teesThreaded.find((x) => x.d === size.d)) : undefined;
-    article(group, "Nussbaum", t, amount, `T-Stück mit Innengewinde ${threadName(thread)}" ${size ? `DN ${size.dn}` : "(DN offen)"}`);
+    article(group, 1, "Nussbaum", t, amount, `T-Stück mit Innengewinde ${threadName(thread)}" ${size ? `DN ${size.dn}` : "(DN offen)"}`);
   };
   const drain = (group: MaterialGroup, size: PipeSize | null, amount: number) => {
     tee(group, size, 0.5, amount);
-    article(group, "Nussbaum", A.drainCocks.find((x) => x.thread === 0.5), amount);
+    article(group, 2, "Nussbaum", A.drainCocks.find((x) => x.thread === 0.5), amount);
   };
   const thermometer = (group: MaterialGroup, size: PipeSize | null, amount: number) => {
     tee(group, size, 0.5, amount);
-    article(group, "Meier Tobler", A.thermometers[0], amount);
+    article(group, 2, "Meier Tobler", A.thermometers[0], amount);
   };
   const pump = (group: MaterialGroup, medium: "heating" | "brine", c: Circuit | undefined) => {
     const p = pumpFor(medium, c?.size ?? null, c?.flow ?? null);
-    article(group, "Meier Tobler", p, 1, "Umwälzpumpe (nach Auslegung)");
+    article(group, 3, "Meier Tobler", p, 1, "Umwälzpumpe (nach Auslegung)");
   };
   const actuated = (group: MaterialGroup, list: { kvs: number; number: string; text: string }[], c: Circuit | undefined, actuator: "SAS61.03" | "GLB161.9E") => {
-    article(group, "Meier Tobler", valveFor(list, c?.flow ?? null), 1, "Regelventil (kvs nach Auslegung)");
-    article(group, "Meier Tobler", A.actuators.find((x) => x.type === actuator));
+    article(group, 3, "Meier Tobler", valveFor(list, c?.flow ?? null), 1, "Regelventil (kvs nach Auslegung)");
+    article(group, 3, "Meier Tobler", A.actuators.find((x) => x.type === actuator));
   };
   /** Sicherheitsventil DN (Tabelle 5) at pSV: Afriso, else IMI DG/Hswiss; Entleerhahn before it, T-Stück on the line. */
   const safetyValve = (group: MaterialGroup, power: number | null, pSV: number, size: PipeSize | null) => {
     const { dn, thread, article: valve } = safetyValveFor(power, pSV);
-    article(group, "Meier Tobler", valve, 1, `Sicherheitsventil DN ${dn}, ${fmt(pSV, 1)} bar`);
+    article(group, 3, "Meier Tobler", valve, 1, `Sicherheitsventil DN ${dn}, ${fmt(pSV, 1)} bar`);
     tee(group, size, thread, 1);
-    article(group, "Meier Tobler", A.drainValves.find((v) => v.thread === 0.5));
+    article(group, 2, "Meier Tobler", A.drainValves.find((v) => v.thread === 0.5));
   };
   /** Reflex N (next size ≥ VN) with Reflex SU Kappenventil, Wandhalterung up to 25 l, Manometer by pSV. */
   const vessel = (group: MaterialGroup, vn: number | null, pSV: number, label: string) => {
     const v = vesselFor(vn);
-    article(group, "Meier Tobler", v, 1, `${label} (Nenninhalt nach Berechnung)`);
+    article(group, 3, "Meier Tobler", v, 1, `${label} (Nenninhalt nach Berechnung)`);
     const volume = v?.volume ?? vn ?? 0;
-    article(group, "Meier Tobler", A.capValves.find((c) => c.thread === (volume <= 80 ? 0.75 : 1)));
-    if (v && A.vesselBrackets.some((b) => volume >= b.min && volume <= b.max)) article(group, "Meier Tobler", A.vesselBrackets.find((b) => volume >= b.min && volume <= b.max));
+    article(group, 2, "Meier Tobler", A.capValves.find((c) => c.thread === (volume <= 80 ? 0.75 : 1)));
+    if (v && A.vesselBrackets.some((b) => volume >= b.min && volume <= b.max)) article(group, 3, "Meier Tobler", A.vesselBrackets.find((b) => volume >= b.min && volume <= b.max));
     const range = [...A.manometers].sort((a, b) => a.range - b.range).find((m) => m.range >= pSV * 1.3);
-    article(group, "Meier Tobler", range);
+    article(group, 2, "Meier Tobler", range);
   };
 
   // --- Wärmequelle: generators with Absperrungen, Entleerungen, Sicherheitsventil, pump ---------------------------
@@ -204,7 +213,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     const c = circuitOf(`gen:${u.id}`);
     const size = c?.size ?? null;
     const name = generatorName(data.generators, u, (t) => typeNames[t]);
-    neutral("source", `${name === typeNames[u.type] ? name : `${typeNames[u.type]} «${name}»`}${u.power !== null ? `, ΦN ${fmt(u.power, 1)} kW` : ""}`);
+    neutral("source", 0, `${name === typeNames[u.type] ? name : `${typeNames[u.type]} «${name}»`}${u.power !== null ? `, ΦN ${fmt(u.power, 1)} kW` : ""}`);
     ball("source", size, 2);
     drain("source", size, 2);
     safetyValve("source", u.power, data.safety.pSV, size);
@@ -214,7 +223,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     }
     // Pumps built into the generator are supplied with it.
     if (!u.internalPumps.heating) pump("source", "heating", c);
-    if (u.type === "district") neutral("source", "Primärseite Fernwärme (Wärmezähler, Regelventil, Absperrungen) – Lieferung Fernwärmeversorger");
+    if (u.type === "district") neutral("source", 0, "Primärseite Fernwärme (Wärmezähler, Regelventil, Absperrungen) – Lieferung Fernwärmeversorger");
 
     // Sole- / Zwischenkreis.
     if (u.type === "hpBrine" || u.type === "hpWater") {
@@ -234,16 +243,16 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
           const d = e.feedDn <= 40 ? 40 : 50;
           const bar = (kind: "KH+F" | "IS+F") =>
             A.probeManifolds.filter((m) => m.outlets === e.probes && m.d === d && m.kind === kind).sort((a, b) => a.body - b.body)[0];
-          article("brine", "Meier Tobler", bar("KH+F"), 1, `Erdsondenverteiler ${e.probes} × ${d} mm mit Kugelhähnen und Entleerung`);
-          article("brine", "Meier Tobler", bar("IS+F"), 1, `Erdsondenverteiler ${e.probes} × ${d} mm mit Durchflussreglern und Entleerung`);
+          article("brine", 2, "Meier Tobler", bar("KH+F"), 1, `Erdsondenverteiler ${e.probes} × ${d} mm mit Kugelhähnen und Entleerung`);
+          article("brine", 2, "Meier Tobler", bar("IS+F"), 1, `Erdsondenverteiler ${e.probes} × ${d} mm mit Durchflussreglern und Entleerung`);
         }
         const length = ews?.length ? `, je ${fmt(Math.ceil(ews.length / 5) * 5)} m` : "";
-        neutral("brine", `Erdwärmesonde Duplex ${e.diameter} mm${length}`, e.probes);
+        neutral("brine", 0, `Erdwärmesonde Duplex ${e.diameter} mm${length}`, e.probes);
       } else {
         vessel("brine", safety.brine?.chosen ?? null, data.safety.brine.pSV, "Druckausdehnungsgefäss Zwischenkreis");
-        neutral("brine", "Platten-Wärmetauscher Zwischenkreis / Grundwasser");
-        neutral("brine", "Förderbrunnen mit Unterwasserpumpe");
-        neutral("brine", "Rückgabebrunnen");
+        neutral("brine", 0, "Platten-Wärmetauscher Zwischenkreis / Grundwasser");
+        neutral("brine", 0, "Förderbrunnen mit Unterwasserpumpe");
+        neutral("brine", 0, "Rückgabebrunnen");
         ball("brine", sSize, 2);
       }
     }
@@ -257,14 +266,14 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     const electric = data.hotWaterElectric > 0 ? `, Elektroeinsatz ${fmt(data.hotWaterElectric, 1)} kW` : "";
     const coils = { single: "mit innenliegendem Register", lower: "mit 2 Registern (unteres angeschlossen)", upper: "mit 2 Registern (oberes angeschlossen)", series: "mit 2 Registern in Serie" }[data.hotWaterCoils];
     const heater = data.hotWaterHeater === "external" ? "für aussenliegenden Wärmetauscher" : coils;
-    neutral("hotWater", `Wassererwärmer${data.hotWaterVolume ? ` ${fmt(data.hotWaterVolume)} l` : ""} ${heater}${electric}`);
+    neutral("hotWater", 4, `Wassererwärmer${data.hotWaterVolume ? ` ${fmt(data.hotWaterVolume)} l` : ""} ${heater}${electric}`);
     if (data.hotWaterHeater === "external") {
-      neutral("hotWater", "Platten-Wärmetauscher Warmwasser");
-      neutral("hotWater", "Speicherladepumpe Trinkwasser (Sekundärseite)");
+      neutral("hotWater", 0, "Platten-Wärmetauscher Warmwasser");
+      neutral("hotWater", 3, "Speicherladepumpe Trinkwasser (Sekundärseite)");
     }
     if (safety.hotWaterValve) {
       const thread = dnThread(safety.hotWaterValve.isv ?? 15) ?? 0.5;
-      article("hotWater", "Nussbaum", A.potableSafetyValves.find((v) => v.thread === thread), 1, "Sicherheitsventil Wassererwärmer 6 bar");
+      article("hotWater", 3, "Nussbaum", A.potableSafetyValves.find((v) => v.thread === thread), 1, "Sicherheitsventil Wassererwärmer 6 bar");
     }
     const c = data.hotWaterConnection === "group" ? circuitOf(`group:${data.hotWaterGroup}`) : circuitOf("hotWater");
     ball("hotWater", c?.size ?? null, 2);
@@ -279,7 +288,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
 
   // --- Energiespeicher -----------------------------------------------------------------------------------------------
   if (data.storage) {
-    neutral("storage", `Technischer Speicher${data.storageVolume ? ` ${fmt(data.storageVolume)} l` : ""}`);
+    neutral("storage", 0, `Technischer Speicher${data.storageVolume ? ` ${fmt(data.storageVolume)} l` : ""}`);
     // Absperrungen and thermometers in all lines to and from the Speicher (reduziert: 3, konventionell: 4),
     // Entleerungen in both RL connections; sized like the mains (the largest generator circuit).
     const mains = circuits.filter((c) => c.kind === "generator" && c.size).sort((a, b) => b.size!.d - a.size!.d)[0]?.size ?? null;
@@ -290,7 +299,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
   }
 
   // --- Verteiler und Heizgruppen -------------------------------------------------------------------------------------
-  if (data.groups.length) neutral("distribution", `Heizungsverteiler VL/RL für ${data.groups.length} Heizgruppe${data.groups.length > 1 ? "n" : ""}`);
+  if (data.groups.length) neutral("distribution", 0, `Heizungsverteiler VL/RL für ${data.groups.length} Heizgruppe${data.groups.length > 1 ? "n" : ""}`);
   if (data.distributor === "pressurized") pump("distribution", "heating", circuitOf("main"));
   for (const g of data.groups) {
     const c = circuitOf(`group:${g.id}`);
@@ -298,11 +307,11 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
     ball("distribution", size, 4);
     drain("distribution", size, 4);
     thermometer("distribution", size, 2);
-    neutral("distribution", "Vorlauffühler (Lieferung MSRL)");
-    if (g.safetyThermostat) neutral("distribution", "Sicherheitsthermostat (Anlegethermostat, Lieferung MSRL)");
+    neutral("distribution", 3, "Vorlauffühler (Lieferung MSRL)");
+    if (g.safetyThermostat) neutral("distribution", 3, "Sicherheitsthermostat (Anlegethermostat, Lieferung MSRL)");
     if (g.heatMeter) {
       const meter = c?.flow != null ? [...A.heatMeters].sort((a, b) => a.qp - b.qp || a.thread - b.thread).find((m) => m.qp >= c.flow! && (size === null || m.thread >= size.thread)) : undefined;
-      article("distribution", "Meier Tobler", meter, 1, `Wärmezähler${c?.flow != null ? ` qp ≥ ${fmt(c.flow, 1)} m³/h` : ""}`);
+      article("distribution", 2, "Meier Tobler", meter, 1, `Wärmezähler${c?.flow != null ? ` qp ≥ ${fmt(c.flow, 1)} m³/h` : ""}`);
     }
     switch (g.circuit) {
       case "mixing":
@@ -322,7 +331,7 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
       case "injection2": {
         actuated("distribution", A.throughValves, c, "SAS61.03");
         const dn = size?.dn ?? null;
-        article("distribution", "Meier Tobler", dn !== null ? (A.balancingValves.find((v) => v.dn === dn) ?? A.balancingValves.find((v) => v.dn >= dn)) : undefined, 1, "Strangregulierventil");
+        article("distribution", 3, "Meier Tobler", dn !== null ? (A.balancingValves.find((v) => v.dn === dn) ?? A.balancingValves.find((v) => v.dn >= dn)) : undefined, 1, "Strangregulierventil");
         pump("distribution", "heating", c);
         break;
       }
@@ -331,4 +340,28 @@ export function plantMaterial(data: PlantData, ews: EwsResult | null): MaterialL
 
   const order = (l: MaterialLine) => materialGroups.indexOf(l.group);
   return [...map.values()].sort((a, b) => order(a) - order(b));
+}
+
+/** BKP of a line: the whole Sole- / Zwischenkreis with the Erdwärmesonden and the Brunnen is 241, the rest 242. */
+export const materialBkp = (line: MaterialLine): "241" | "242" => (line.group === "brine" ? "241" : "242");
+
+export type MaterialSection = { key: string; bkp: "241" | "242"; chapter: MaterialChapter; lines: MaterialLine[] };
+
+/**
+ * The lines by LV chapter (241.0 … 242.4) in chapter order; the same article or neutral text from several parts of the
+ * Anlage is merged into one line per chapter.
+ */
+export function materialSections(lines: MaterialLine[]): MaterialSection[] {
+  const out = new Map<string, MaterialSection>();
+  for (const l of lines) {
+    const bkp = materialBkp(l);
+    const key = `${bkp}.${l.chapter}`;
+    const section = out.get(key) ?? { key, bkp, chapter: l.chapter, lines: [] };
+    out.set(key, section);
+    const id = l.article ?? l.label;
+    const same = section.lines.find((x) => (x.article ?? x.label) === id);
+    if (same) same.quantity += l.quantity;
+    else section.lines.push({ ...l, key: `${key}|${id}` });
+  }
+  return [...out.values()].sort((a, b) => a.key.localeCompare(b.key));
 }

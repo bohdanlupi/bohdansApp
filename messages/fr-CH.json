@@ -2439,7 +2439,7 @@
       "hotWaterElectricHint": "Usuel 9 kW, 0 = sans. Dimensionne la soupape du chauffe-eau.",
       "material": {
         "title": "Extrait de matériel",
-        "hint": "Tous les composants du schéma de principe. Producteurs, accumulateur, chauffe-eau, sondes géothermiques et puits neutres ; robinetterie sur Optipress-Therm de Nussbaum, autres composants du catalogue Meier Tobler.",
+        "hint": "Tous les composants du schéma de principe. Producteurs, accumulateur, chauffe-eau, sondes géothermiques et puits neutres ; robinetterie sur Optipress-Therm de Nussbaum, autres composants du catalogue Meier Tobler. Classés par chapitres du descriptif : circuit d’eau glycolée / intermédiaire avec sondes géothermiques et puits en 241, tout le reste en 242 ; lors de la reprise, les chapitres de la structure chauffage du descriptif choisi sont proposés.",
         "hydraulics": "Débits et diamètres nominaux",
         "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT) ; DN = plus petite dimension Optipress-Therm avec v ≤ {v1} m/s (jusqu’au DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (au-delà). Circuit d’eau glycolée / intermédiaire : puissance frigorifique des sondes, sinon 75 % de la puissance de chauffage. Eau chaude : débit des producteurs. Longueur = longueur simple de la conduite ; contenu = aller + retour avec le diamètre intérieur de la dimension choisie.",
         "columns": {
@@ -2467,14 +2467,6 @@
         },
         "list": "Liste de matériel",
         "listHint": "Pompes proposées seulement selon le DN et le débit (hauteur 6 m) – vérifier avec la courbe de la pompe. Vannes de réglage avec kvs pour Δp 10 kPa. Reflex N : vérifier le raccordement et la pression de service max. avec la fiche technique.",
-        "groups": {
-          "source": "Production de chaleur",
-          "brine": "Circuit d’eau glycolée / intermédiaire",
-          "expansion": "Maintien de pression chauffage",
-          "hotWater": "Eau chaude",
-          "storage": "Accumulateur",
-          "distribution": "Distributeur et groupes"
-        },
         "article": "Article",
         "text": "Désignation",
         "quantity": "Quantité",
@@ -2482,6 +2474,9 @@
         "chapter": "Chapitre",
         "newGroupOption": "Nouveau groupe",
         "targetLv": "Descriptif",
+        "base": "Lot / bâtiment",
+        "noStructure": "Ce descriptif n’a pas encore de structure chauffage (CFC 24). Crée-la dans le descriptif avec «Structure chauffage» pour que les chapitres soient proposés.",
+        "toLv": "Vers le descriptif",
         "groupTitle": "Titre du nouveau groupe",
         "lvGroup": "Production de chaleur {name}",
         "insertIntoLv": "Reprendre dans le descriptif",

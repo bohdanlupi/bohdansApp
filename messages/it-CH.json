@@ -2439,7 +2439,7 @@
       "hotWaterElectricHint": "Usuale 9 kW, 0 = senza. Dimensiona la valvola di sicurezza dello scaldacqua.",
       "material": {
         "title": "Estratto materiale",
-        "hint": "Tutti i componenti dello schema di principio. Generatori, accumulatore, scaldacqua, sonde geotermiche e pozzi neutri; rubinetteria su Optipress-Therm di Nussbaum, altri componenti dal catalogo Meier Tobler.",
+        "hint": "Tutti i componenti dello schema di principio. Generatori, accumulatore, scaldacqua, sonde geotermiche e pozzi neutri; rubinetteria su Optipress-Therm di Nussbaum, altri componenti dal catalogo Meier Tobler. Ordinati per capitoli dell’elenco: circuito salamoia / intermedio con sonde geotermiche e pozzi in 241, tutto il resto in 242; nella ripresa vengono proposti i capitoli della struttura riscaldamento dell’elenco scelto.",
         "hydraulics": "Portate e diametri nominali",
         "hydraulicsHint": "V̇ = Φ / (ρ · cp · ΔT); DN = la più piccola dimensione Optipress-Therm con v ≤ {v1} m/s (fino a DN 20), {v2} m/s (DN 25–32), {v3} m/s (DN 40–50), {v4} m/s (oltre). Circuito glicolato / intermedio: potenza frigorifera delle sonde, altrimenti 75 % della potenza termica. Acqua calda: portata dei generatori. Lunghezza = lunghezza semplice della condotta; contenuto = andata + ritorno con il diametro interno della dimensione scelta.",
         "columns": {
@@ -2467,14 +2467,6 @@
         },
         "list": "Lista materiale",
         "listHint": "Pompe proposte solo secondo DN e portata (prevalenza 6 m) – verificare con la curva della pompa. Valvole di regolazione con kvs a Δp 10 kPa. Reflex N: verificare attacco e pressione d’esercizio max. con la scheda tecnica.",
-        "groups": {
-          "source": "Produzione di calore",
-          "brine": "Circuito glicolato / intermedio",
-          "expansion": "Mantenimento della pressione riscaldamento",
-          "hotWater": "Acqua calda",
-          "storage": "Accumulatore",
-          "distribution": "Distributore e gruppi"
-        },
         "article": "Articolo",
         "text": "Designazione",
         "quantity": "Quantità",
@@ -2482,6 +2474,9 @@
         "chapter": "Capitolo",
         "newGroupOption": "Nuovo gruppo",
         "targetLv": "Capitolato",
+        "base": "Lotto / edificio",
+        "noStructure": "Questo elenco non ha ancora una struttura riscaldamento (CCC 24). Creala nell’elenco con «Struttura riscaldamento» perché i capitoli vengano proposti.",
+        "toLv": "All’elenco",
         "groupTitle": "Titolo del nuovo gruppo",
         "lvGroup": "Produzione di calore {name}",
         "insertIntoLv": "Riprendere nel capitolato",
