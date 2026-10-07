@@ -2009,6 +2009,7 @@
         "register": "Heizregister / Lufterhitzer",
         "apparatus": "Heizgruppe / Apparat mit Bezeichnung",
         "safetyValve": "Sicherheitsventil",
+        "siphon": "Thermischer Siphon",
         "drain": "Entleerhahn",
         "capValve": "Kappenventil (gegen Schliessen gesichert)"
       },

@@ -59,6 +59,7 @@ export const symbolKeys = [
   "heatMeter",
   "expansion",
   "safetyValve",
+  "siphon",
   "boilerSolid",
   "boilerGasOil",
   "hpAir",
@@ -92,6 +93,7 @@ export const symbolRefs: Record<SymbolKey, string> = {
   heatMeter: "1.210.3",
   expansion: "2.4.2",
   safetyValve: "1.26.10",
+  siphon: "~",
   boilerSolid: "2.1.1 / 1.211.1",
   boilerGasOil: "2.1.1 / 1.211.2–3",
   hpAir: "2.2.11",
@@ -174,6 +176,13 @@ export type GenerationSchema = {
 type Pt = [number, number];
 const round = (v: number) => Math.round(v * 10) / 10;
 const pathD = (list: Pt[]) => list.map(([x, y], i) => `${i ? "L" : "M"}${round(x)},${round(y)}`).join(" ");
+/** Thermischer Siphon: a horizontal run at y from x1 to x2 that drops into a «U» (SIPHON_W wide) starting at xu. */
+const SIPHON_W = 10;
+const SIPHON_H = 18;
+const siphonD = (x1: number, y: number, xu: number, x2: number) => {
+  const r = SIPHON_W / 2;
+  return `M${round(x1)},${round(y)} L${round(xu)},${round(y)} L${round(xu)},${round(y + SIPHON_H - r)} A${r},${r} 0 0 0 ${round(xu + SIPHON_W)},${round(y + SIPHON_H - r)} L${round(xu + SIPHON_W)},${round(y)} L${round(x2)},${round(y)}`;
+};
 const ptsAttr = (list: Pt[]) => list.map(([x, y]) => `${round(x)},${round(y)}`).join(" ");
 
 // ---------------------------------------------------------------------------
@@ -281,8 +290,8 @@ export function drawSymbol(key: SymbolKey, x: number, y: number, dir: Dir = "rig
       // 1.28.2 Messfühler Temperatur: the stem touches the pipe, the sensing element (circle) at its end.
       return [g.line(0, 0, 0, 10 * s, 0.8), g.circle(0, 12.6 * s, 2.6, "bg", 0.8)];
     case "safetyThermostat":
-      // Sicherheitsthermostat (Anlegethermostat): box «ST» on a short stem at side s.
-      return [g.line(0, 0, 0, 6 * s, 0.8), g.box(0, 13 * s, 9, 14, "bg", 0.8), g.text(0, 13 * s, "ST", 4.5)];
+      // Sicherheitsthermostat (Anlegethermostat): the Temperaturfühler with a square of its size instead of the circle.
+      return [g.line(0, 0, 0, 10 * s, 0.8), g.box(0, 12.6 * s, 5.2, 5.2, "bg", 0.8)];
     case "heatMeter":
       // 1.210.3 Wärmezähler mit elektronischem Zählwerk: Volumenstromzähler in the pipe, Rechenwerk beside it.
       return [
@@ -433,6 +442,13 @@ export function buildGenerationSchema(
     lines.push({ d: pathD(list), kind, width });
     pipes.add(kind);
     for (const [, y] of list) maxY = Math.max(maxY, y);
+  };
+  /** Horizontal VL run into a connection with a thermischer Siphon just before it. */
+  const siphonPipe = (x1: number, y: number, xu: number, x2: number) => {
+    lines.push({ d: siphonD(x1, y, xu, x2), kind: "vl", width: 1.6 });
+    pipes.add("vl");
+    used.add("siphon");
+    maxY = Math.max(maxY, y + SIPHON_H);
   };
   const dot = (x: number, y: number, kind: PipeKind) => add({ t: "circle", cx: x, cy: y, r: 2.2, fill: pipeColors[kind] });
   const sym = (key: SymbolKey, x: number, y: number, dir: Dir, o: SymbolOpts = {}) => {
@@ -831,10 +847,12 @@ export function buildGenerationSchema(
 
   /**
    * Absperrungen of the Wassererwärmer at the height of those of the generators with thermometers below them at the
-   * height of those of the Speicher (VL facing right, RL left), and Entleerungen in VL and RL on their horizontals just
-   * before the connections at xIn.
+   * height of those of the Speicher (VL facing right, RL left), a thermischer Siphon in the VL and Entleerungen in VL and
+   * RL on their horizontals just before the connections at xIn.
    */
   function waterHeaterFittings(xw: number, xIn: number, yIn: number, yOut: number) {
+    // Thermischer Siphon in the VL just before the Entleerung and the connection.
+    siphonPipe(xIn - 42, yIn, xIn - 40, xIn);
     sym("ball", xw, YBALL, "down");
     sym("ball", xw - 22, YBALL, "up");
     sym("thermometer", xw, YBALL + 26, "down", { side: sideOf("down", "right") });
@@ -863,7 +881,7 @@ export function buildGenerationSchema(
     const { xIn, yIn, yOut } = drawWaterHeater(xw);
     if (ww === "diverter") {
       // Umschaltventil (Dreiweg) in the supply main.
-      pipe("vl", [[xw, YMV], [xw, yIn], [xIn, yIn]]);
+      pipe("vl", [[xw, YMV], [xw, yIn], [xIn - 42, yIn]]);
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, YMR]]);
       dot(xw - 22, YMR, "rl");
       sym("valve3", xw, YMV, "right", { port: sideOf("right", "below") });
@@ -877,7 +895,7 @@ export function buildGenerationSchema(
       const { gx, top: gTop } = wwGen;
       const yV = YMR + 16;
       const yR = YMR + 26;
-      pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn], [xIn, yIn]]);
+      pipe("vl", [[gx + 44, gTop + 12], [gx + 62, gTop + 12], [gx + 62, yV], [xw, yV], [xw, yIn], [xIn - 42, yIn]]);
       pipe("rl", [[xIn, yOut], [xw - 22, yOut], [xw - 22, yR], [gx + 72, yR], [gx + 72, gTop + 28], [gx + 44, gTop + 28]]);
       waterHeaterFittings(xw, xIn, yIn, yOut);
       waterHeaterSafetyValve(xw, 262);
@@ -899,7 +917,8 @@ export function buildGenerationSchema(
   if (data.storage) {
     // Technischer Speicher on the ground, the size of the Wassererwärmer. Konventionell: the mains drop into it on the
     // generator side and rise out of it on the consumer side (VL at the top, RL at the bottom); reduziert: the VL main
-    // runs on to the Verteiler with a T-Stück into the top, the RL from the Verteiler runs through the Speicher.
+    // runs on to the Verteiler with a T-Stück down into the Speicher, the RL from the Verteiler runs through it. The VL
+    // into the Speicher enters its side near the top through a thermischer Siphon.
     const xs = stLeft + 68;
     // Legs to and from the Speicher: RL outside, VL inside, far enough apart for the thermometers beside them.
     const dR = 44;
@@ -922,16 +941,16 @@ export function buildGenerationSchema(
     // them (facing away from the Speicher), Entleerungen in the Rücklauf connections on both sides.
     const legs: [number, 1 | -1][] = [[xs - dR, -1], [xs + w + dR, 1]];
     if (data.storageConnection === "reduced") {
-      const xc = xs + w / 2;
       pipe("vl", [[stLeft, YMV], [stRight, YMV]]);
-      pipe("vl", [[xc, YMV], [xc, top]]);
-      dot(xc, YMV, "vl");
-      legs.push([xc, 1]);
+      pipe("vl", [[xs - dV, YMV], [xs - dV, yTop]]);
+      dot(xs - dV, YMV, "vl");
+      legs.push([xs - dV, -1]);
     } else {
-      pipe("vl", [[stLeft, YMV], [xs - dV, YMV], [xs - dV, yTop], [xs, yTop]]);
+      pipe("vl", [[stLeft, YMV], [xs - dV, YMV], [xs - dV, yTop]]);
       pipe("vl", [[xs + w, yTop], [xs + w + dV, yTop], [xs + w + dV, YMV], [stRight, YMV]]);
       legs.push([xs - dV, -1], [xs + w + dV, 1]);
     }
+    siphonPipe(xs - dV, yTop, xs - dV, xs);
     for (const [x, side] of legs) {
       sym("ball", x, YBALL, "down");
       sym("thermometer", x, YBALL + 26, "down", { side: sideOf("down", side < 0 ? "left" : "right") });
@@ -1080,7 +1099,7 @@ export function buildGenerationSchema(
     const { xIn, yIn, yOut } = drawWaterHeater(xwG);
     if (wwGroup) {
       // The lines of the WW-Ladegruppe come over the groups from the left.
-      pipe("vl", [[xwG, WW_VL], [xwG, yIn], [xIn, yIn]]);
+      pipe("vl", [[xwG, WW_VL], [xwG, yIn], [xIn - 42, yIn]]);
       pipe("rl", [[xIn, yOut], [xwG - 22, yOut], [xwG - 22, WW_RL]]);
       waterHeaterFittings(xwG, xIn, yIn, yOut);
       waterHeaterSafetyValve(xwG, YBALL + 68);
@@ -1140,6 +1159,8 @@ export function legendSymbol(key: SymbolKey): Prim[] {
       return emitterSymbol(key, 20, 15, 28);
     case "safetyValve":
       return [{ t: "line", x1: 6, y1: 27, x2: 34, y2: 27, stroke: "muted", sw: 1 }, ...safetyValve(22, 27)];
+    case "siphon":
+      return [path(siphonD(2, 8, 15, 38), 1.2)];
     default: {
       // Pipe symbols on a short pipe: parts beside the pipe hang below it, drives point up.
       const offPipe = key === "thermometer" || key === "sensor" || key === "safetyThermostat" || key === "heatMeter" || key === "expansion" || key === "drain";
