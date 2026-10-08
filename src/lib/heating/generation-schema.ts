@@ -380,7 +380,7 @@ const compressor = (x: number, y: number, r = 7): Prim[] => [
 const plateHx = (x: number, y: number, a = 36): Prim[] => [rect(x - a / 2, y - a / 2, a, a), ln(x - a / 2, y + a / 2, x + a / 2, y - a / 2, 0.9)];
 
 /** 2.3 Heizkörper / Fussbodenheizung of a group, centred on (x, y), width w. */
-function emitterSymbol(key: SymbolKey, x: number, y: number, w: number): Prim[] {
+export function emitterSymbol(key: SymbolKey, x: number, y: number, w: number): Prim[] {
   const l = x - w / 2;
   switch (key) {
     case "floor":

@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { assertRole } from "@/lib/auth";
 import type { FormState } from "@/lib/form-state";
+import { parseDistribution } from "@/lib/heating/distribution-schema";
 import { emptyFloorSystem, parseFloorSystem } from "@/lib/heating/floor-schema";
 import { emptyHeatLoad, parseHeatLoad } from "@/lib/heating/heat-load-schema";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
@@ -122,6 +123,52 @@ export async function saveHeatingSchemaPlan(plantId: string, projectId: string, 
     .eq("project_id", projectId);
   if (error) return { error: "saveFailed" };
 
+  revalidatePath(`/projekte/${projectId}/heizung`, "layout");
+  return {};
+}
+
+/** Saves the Strangschema (243 Wärmeverteilung) of an Anlage. */
+export async function saveHeatingDistribution(plantId: string, projectId: string, data: unknown): Promise<{ error?: string }> {
+  await assertRole("admin", "planer");
+  if (!ids.safeParse([plantId, projectId]).success) return { error: "invalidInput" };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("heating_plants")
+    .update({ distribution: parseDistribution(data) as unknown as Json })
+    .eq("id", plantId)
+    .eq("project_id", projectId);
+  if (error) return { error: "saveFailed" };
+  revalidatePath(`/projekte/${projectId}/heizung`, "layout");
+  return {};
+}
+
+/** Print dialog of the Strangschema: SIA phase of the title block and, with a comment, a new revision. */
+export async function saveHeatingDistributionPlan(plantId: string, projectId: string, input: { phase: string | null; comment: string | null }): Promise<{ error?: string }> {
+  const profile = await assertRole("admin", "planer");
+  const parsed = schemaPrintSchema.safeParse(input);
+  if (!ids.safeParse([plantId, projectId]).success || !parsed.success) return { error: "invalidInput" };
+  const supabase = await createClient();
+  const { data: plant } = await supabase.from("heating_plants").select("distribution_plan").eq("id", plantId).eq("project_id", projectId).maybeSingle();
+  if (!plant) return { error: "invalidInput" };
+  const plan = parseSchemaPlan(plant.distribution_plan);
+  const revisions =
+    parsed.data.comment !== null
+      ? [
+          ...plan.revisions,
+          {
+            index: nextRevisionIndex(plan.revisions),
+            initials: initialsOf(profile.full_name, profile.email),
+            date: new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Zurich" }),
+            comment: parsed.data.comment,
+          },
+        ]
+      : plan.revisions;
+  const { error } = await supabase
+    .from("heating_plants")
+    .update({ distribution_plan: { phase: parsed.data.phase, revisions } as unknown as Json })
+    .eq("id", plantId)
+    .eq("project_id", projectId);
+  if (error) return { error: "saveFailed" };
   revalidatePath(`/projekte/${projectId}/heizung`, "layout");
   return {};
 }

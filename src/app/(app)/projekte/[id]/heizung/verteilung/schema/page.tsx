@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { requireProfile } from "@/lib/auth";
+import { parseDistribution } from "@/lib/heating/distribution-schema";
+import { parseSchemaPlan } from "@/lib/kwl/schema-plan";
+import { createClient } from "@/lib/supabase/server";
 
 import { loadProject } from "../../../load-project";
-import { ChapterFrame, ChapterPlaceholder } from "../../chapter-frame";
+import { ChapterFrame } from "../../chapter-frame";
 import { loadHeatingPlants, selectPlant } from "../../load-plan";
+import { DistributionEditor } from "./distribution-editor";
+import { loadDistributionInputs } from "./load-inputs";
 
 export async function generateMetadata({ params }: PageProps<"/projekte/[id]/heizung/verteilung/schema">): Promise<Metadata> {
   const project = await loadProject((await params).id);
@@ -13,17 +18,40 @@ export async function generateMetadata({ params }: PageProps<"/projekte/[id]/hei
   return { title: [t("schemaDistribution"), project?.number].filter(Boolean).join(" · ") };
 }
 
-/** 243 schemaDistribution: per Anlage; worked out next (placeholder). */
+/**
+ * 243 Prinzipschema Wärmeverteilung (Strangschema) per Anlage: the pipes from its Heizgruppen to the Heizkörper (rooms
+ * of the Wärmebedarf) and the Fussbodenheizungs-Verteiler, with pressure drop and Rohrauskühlung.
+ */
 export default async function DistributionSchemaPage({ params, searchParams }: PageProps<"/projekte/[id]/heizung/verteilung/schema">) {
   const { id } = await params;
   const { anlage } = await searchParams;
   const profile = await requireProfile();
   const plants = await loadHeatingPlants(id);
+  const plant = selectPlant(plants, anlage);
   const t = await getTranslations("heatingPlan");
+  const editable = profile.role !== "viewer";
+
+  // Strangschema of the Anlage (own query, so the other chapters do not depend on these columns).
+  const supabase = await createClient();
+  const [{ data: row }, inputs] = plant
+    ? await Promise.all([supabase.from("heating_plants").select("distribution, distribution_plan").eq("id", plant.id).maybeSingle(), loadDistributionInputs(id, plant)])
+    : [{ data: null }, null];
 
   return (
-    <ChapterFrame chapter="243" title={t("chapters.schemaDistribution")} projectId={id} plants={plants} plant={selectPlant(plants, anlage)} editable={profile.role !== "viewer"}>
-      <ChapterPlaceholder text={t("placeholder.schemaDistribution")} />
+    <ChapterFrame chapter="243" title={t("chapters.schemaDistribution")} projectId={id} plants={plants} plant={plant} editable={editable}>
+      {plant && inputs && (
+        <DistributionEditor
+          key={plant.id}
+          projectId={id}
+          plant={{ id: plant.id, name: plant.name, groups: plant.data.groups }}
+          initialData={parseDistribution(row?.distribution)}
+          schemaPlan={parseSchemaPlan(row?.distribution_plan)}
+          rooms={inputs.rooms}
+          floors={inputs.floors}
+          outsideTemp={inputs.outsideTemp}
+          editable={editable}
+        />
+      )}
     </ChapterFrame>
   );
 }

@@ -1767,6 +1767,163 @@
     "create": "Créer les chapitres",
     "created": "{count} chapitres créés."
   },
+  "heatingDistribution": {
+    "moveHorizontal": "Déplacer le schéma latéralement",
+    "noGroups": "Cette installation n’a pas encore de groupes de chauffe. Crée-les dans 242 Production de chaleur sous «4 · Distributeur et groupes».",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "schema": "Schéma des colonnes",
+    "schemaHint": "Dessiné à partir de la distribution ; cliquer sur une ligne ou un symbole sélectionne l’élément.",
+    "insulationBand": "Isolation (épaisseur indiquée à la conduite)",
+    "schemaText": {
+      "insulation": "Isolation",
+      "none": "sans isolation",
+      "strang": "Colonne",
+      "head": "Δp"
+    },
+    "tree": {
+      "title": "Distribution",
+      "group": "Groupe de chauffe",
+      "element": "Élément",
+      "size": "Dimension",
+      "power": "Puissance",
+      "temp": "Aller",
+      "empty": "Pas encore de conduites pour ce groupe.",
+      "addRoot": "Conduite depuis le groupe",
+      "addFloors": "Reprendre {count} distributeurs CS liés",
+      "addFloorsHint": "Crée une conduite depuis le groupe avec les distributeurs de chauffage au sol attribués à ce groupe.",
+      "kinds": {
+        "pipe": "Conduite",
+        "radiator": "Radiateur",
+        "floor": "Distributeur CS",
+        "consumer": "Consommateur",
+        "riser": "Colonne",
+        "floorPipe": "Raccordement",
+        "distPipe": "Conduite de distribution"
+      },
+      "strangNo": "Colonne {n}",
+      "selectHint": "Cliquer sur un élément de la liste ou du schéma pour le modifier.",
+      "addPipe": "Conduite",
+      "addRadiator": "Radiateur",
+      "addFloor": "Distributeur CS",
+      "addConsumer": "Consommateur",
+      "insertAfter": "Insérer",
+      "insertAfterHint": "Insérer une conduite entre cet élément et ses départs",
+      "up": "Monter",
+      "down": "Descendre",
+      "removeElement": "Retirer l’élément",
+      "removeElementHint": "Retire seulement cet élément ; ses départs remontent.",
+      "removeBranch": "Supprimer la branche"
+    },
+    "node": {
+      "label": "Désignation",
+      "floor": "Étage",
+      "length": "Longueur [m]",
+      "role": "Type",
+      "roles": {
+        "auto": "Automatique",
+        "distribution": "Conduite de distribution",
+        "floor": "Raccordement"
+      },
+      "system": "Système de tubes",
+      "size": "Dimension",
+      "auto": "Automatique",
+      "bends90": "Coudes 90°",
+      "bends45": "Coudes 45°",
+      "ambient": "Environnement",
+      "ambients": {
+        "heated": "Chauffé",
+        "unheated": "Non chauffé",
+        "outside": "Extérieur / terrain"
+      },
+      "insulation": "Isolation [mm]",
+      "bendsHint": "Coudes par conduite (autant à l’aller qu’au retour) ; s’il y en a, ils remplacent le supplément pour pièces de forme de cette conduite. Isolation vide = SIA 384/1 tableau 2.",
+      "riser": "Colonne montante",
+      "shutoff": "Vannes d’arrêt",
+      "regValve": "Vanne de réglage de colonne",
+      "room": "Local (besoins de chaleur)",
+      "noRoom": "– choisir un local –",
+      "powerOverride": "Puissance [W] (au lieu du local)",
+      "valveDp": "Δp vanne [kPa] (au lieu du standard)",
+      "distributor": "Distributeur de chauffage au sol",
+      "noDistributor": "– choisir un distributeur –",
+      "noFloors": "Cette installation n’a pas encore de chauffage au sol.",
+      "power": "Puissance [W]",
+      "dp": "Perte de charge [kPa]"
+    },
+    "details": {
+      "power": "Puissance / débit massique",
+      "sizeAuto": "Dimension (selon la vitesse)",
+      "sizeManual": "Dimension (choisie)",
+      "dpBends": "Δp aller + retour avec coudes",
+      "dpAllowance": "Δp aller + retour avec supplément",
+      "cumulative": "Δp depuis le groupe",
+      "insulation": {
+        "table": "Isolation SIA 384/1",
+        "manual": "Isolation (choisie)",
+        "connection": "Raccordement (sans isolation)"
+      },
+      "loss": "Perte de chaleur aller + retour",
+      "temps": "Aller début → fin",
+      "terminalDp": "Δp élément",
+      "path": "Δp circuit",
+      "throttle": "Besoin d’étranglement",
+      "critical": "circuit critique",
+      "arrive": "Aller à l’élément"
+    },
+    "settings": {
+      "title": "Calcul",
+      "description": "Perte de charge selon Darcy-Weisbach / Colebrook à l’aller et au retour, refroidissement des conduites selon l’isolation et l’environnement.",
+      "tHeated": "Environnement chauffé [°C]",
+      "tUnheated": "Environnement non chauffé [°C]",
+      "tOutside": "Environnement extérieur [°C]",
+      "lambda": "λ isolation [W/(m·K)]",
+      "allowance": "Supplément pièces de forme [%]",
+      "valveDp": "Vanne de radiateur + raccord [kPa]",
+      "zeta90": "ζ coude 90°",
+      "zeta45": "ζ coude 45°",
+      "insulationHint": "Épaisseurs d’isolation selon SIA 384/1:2022 tableau 2 (colonne selon λ, ligne selon la température de dimensionnement de la conduite, aucune en dessous de 26 °C). Le tableau vaut pour les locaux non chauffés activement et est utilisé ici pour toutes les conduites de distribution ; les raccordements de radiateurs dans les locaux chauffés restent sans isolation (5.4.4.2). À l’extérieur, la législation cantonale sur l’énergie s’applique en plus."
+    },
+    "results": {
+      "title": "Résultats",
+      "empty": "Pas encore de distribution saisie.",
+      "power": "Puissance",
+      "powerHint": "Groupe dans 242 : {power} kW",
+      "massFlow": "Débit massique",
+      "head": "Hauteur de refoulement",
+      "headHint": "circuit critique aller + retour = {m} m",
+      "loss": "Pertes des conduites",
+      "terminal": "Élément",
+      "terminalPower": "Puissance",
+      "throttle": "Étranglement",
+      "critical": "critique",
+      "arrive": "Aller à l’élément"
+    },
+    "warnings": {
+      "fast": "{element} : {v} m/s au-dessus de la valeur indicative {limit} m/s.",
+      "cooling": "{element} : l’aller se refroidit de {drop} K jusqu’à l’élément.",
+      "temps": "{group} : températures aller et retour manquantes dans 242 – calcul avec 55/45 °C.",
+      "noRoom": "{element} : aucun local choisi et aucune puissance saisie.",
+      "noFloor": "{element} : aucun distributeur de chauffage au sol choisi.",
+      "noPower": "{element} : aucune puissance saisie."
+    },
+    "plankopf": {
+      "plan": "Schéma des colonnes"
+    },
+    "legend": {
+      "vl": "Aller eau de chauffage",
+      "rl": "Retour eau de chauffage",
+      "insulation": "Isolation (épaisseur indiquée à la conduite)",
+      "symbols": {
+        "ball": "Robinet à boisseau sphérique (arrêt)",
+        "regValve": "Vanne de réglage de colonne / raccord de retour",
+        "thermoValve": "Vanne de radiateur avec tête thermostatique",
+        "radiator": "Radiateur",
+        "floorDistributor": "Distributeur de chauffage au sol",
+        "apparatus": "Consommateur"
+      }
+    }
+  },
   "heatingPlan": {
     "title": "Planification du chauffage",
     "description": "Planification de l’installation de chauffage selon les phases de la SIA 108 – avec les exigences des normes SIA 384/1, SIA 384/2, SIA 384/6 et SIA 384/7, de l’aide à l’application EnDK EN-103 et de la directive SICC HE301-01.",
@@ -2829,6 +2986,9 @@
     "auto": "auto",
     "removeRoom": "Supprimer la pièce",
     "addDistributor": "Distributeur",
+    "group": "Groupe de chauffe",
+    "groupHint": "Groupe de chauffe de l’installation (242) qui alimente ce distributeur – pour le schéma des colonnes 243.",
+    "noGroup": "– groupe de chauffe –",
     "notes": "Remarques",
     "sourceHint": "Selon les instructions de planification HAKA.GERODUR (diagrammes B1–B9, tab. C, tab. D numérisés). Qh = charge de la pièce sans la perte de la surface de sol chauffée ; celle-ci est remplacée par l’émission vers le bas. Tab. D tel que dessiné (17/13 à 100 kg/h : 58 Pa/m).",
     "warnings": {

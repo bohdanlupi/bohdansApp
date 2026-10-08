@@ -1767,6 +1767,163 @@
     "create": "Creare i capitoli",
     "created": "{count} capitoli creati."
   },
+  "heatingDistribution": {
+    "moveHorizontal": "Spostare lo schema lateralmente",
+    "noGroups": "Questo impianto non ha ancora gruppi di riscaldamento. Creali in 242 Produzione di calore sotto «4 · Distributore e gruppi».",
+    "save": "Salvare",
+    "saved": "Salvato",
+    "schema": "Schema delle colonne",
+    "schemaHint": "Disegnato dalla distribuzione; cliccando una linea o un simbolo si seleziona l’elemento.",
+    "insulationBand": "Isolamento (spessore indicato alla condotta)",
+    "schemaText": {
+      "insulation": "Isolamento",
+      "none": "senza isolamento",
+      "strang": "Colonna",
+      "head": "Δp"
+    },
+    "tree": {
+      "title": "Distribuzione",
+      "group": "Gruppo di riscaldamento",
+      "element": "Elemento",
+      "size": "Dimensione",
+      "power": "Potenza",
+      "temp": "Mandata",
+      "empty": "Ancora nessuna condotta per questo gruppo.",
+      "addRoot": "Condotta dal gruppo",
+      "addFloors": "Riprendere {count} collettori RP collegati",
+      "addFloorsHint": "Crea una condotta dal gruppo con i collettori del riscaldamento a pavimento assegnati a questo gruppo.",
+      "kinds": {
+        "pipe": "Condotta",
+        "radiator": "Radiatore",
+        "floor": "Collettore RP",
+        "consumer": "Utenza",
+        "riser": "Colonna",
+        "floorPipe": "Allacciamento",
+        "distPipe": "Condotta di distribuzione"
+      },
+      "strangNo": "Colonna {n}",
+      "selectHint": "Cliccare un elemento nella lista o nello schema per modificarlo.",
+      "addPipe": "Condotta",
+      "addRadiator": "Radiatore",
+      "addFloor": "Collettore RP",
+      "addConsumer": "Utenza",
+      "insertAfter": "Inserire",
+      "insertAfterHint": "Inserire una condotta tra questo elemento e le sue diramazioni",
+      "up": "Su",
+      "down": "Giù",
+      "removeElement": "Rimuovere l’elemento",
+      "removeElementHint": "Rimuove solo questo elemento; le sue diramazioni risalgono.",
+      "removeBranch": "Eliminare il ramo"
+    },
+    "node": {
+      "label": "Designazione",
+      "floor": "Piano",
+      "length": "Lunghezza [m]",
+      "role": "Tipo",
+      "roles": {
+        "auto": "Automatico",
+        "distribution": "Condotta di distribuzione",
+        "floor": "Allacciamento"
+      },
+      "system": "Sistema di tubi",
+      "size": "Dimensione",
+      "auto": "Automatico",
+      "bends90": "Curve 90°",
+      "bends45": "Curve 45°",
+      "ambient": "Ambiente",
+      "ambients": {
+        "heated": "Riscaldato",
+        "unheated": "Non riscaldato",
+        "outside": "Esterno / terreno"
+      },
+      "insulation": "Isolamento [mm]",
+      "bendsHint": "Curve per condotta (tante in mandata quante in ritorno); se presenti sostituiscono il supplemento per pezzi speciali di questa condotta. Isolamento vuoto = SIA 384/1 tabella 2.",
+      "riser": "Colonna montante",
+      "shutoff": "Valvole d’arresto",
+      "regValve": "Valvola di regolazione della colonna",
+      "room": "Locale (fabbisogno di calore)",
+      "noRoom": "– scegliere un locale –",
+      "powerOverride": "Potenza [W] (invece del locale)",
+      "valveDp": "Δp valvola [kPa] (invece dello standard)",
+      "distributor": "Collettore del riscaldamento a pavimento",
+      "noDistributor": "– scegliere un collettore –",
+      "noFloors": "Questo impianto non ha ancora un riscaldamento a pavimento.",
+      "power": "Potenza [W]",
+      "dp": "Perdita di carico [kPa]"
+    },
+    "details": {
+      "power": "Potenza / portata massica",
+      "sizeAuto": "Dimensione (secondo la velocità)",
+      "sizeManual": "Dimensione (scelta)",
+      "dpBends": "Δp mandata + ritorno con curve",
+      "dpAllowance": "Δp mandata + ritorno con supplemento",
+      "cumulative": "Δp dal gruppo",
+      "insulation": {
+        "table": "Isolamento SIA 384/1",
+        "manual": "Isolamento (scelto)",
+        "connection": "Allacciamento (senza isolamento)"
+      },
+      "loss": "Perdita di calore mandata + ritorno",
+      "temps": "Mandata inizio → fine",
+      "terminalDp": "Δp elemento",
+      "path": "Δp circuito",
+      "throttle": "Fabbisogno di strozzamento",
+      "critical": "circuito critico",
+      "arrive": "Mandata all’elemento"
+    },
+    "settings": {
+      "title": "Calcolo",
+      "description": "Perdita di carico secondo Darcy-Weisbach / Colebrook in mandata e ritorno, raffreddamento delle condotte secondo l’isolamento e l’ambiente.",
+      "tHeated": "Ambiente riscaldato [°C]",
+      "tUnheated": "Ambiente non riscaldato [°C]",
+      "tOutside": "Ambiente esterno [°C]",
+      "lambda": "λ isolamento [W/(m·K)]",
+      "allowance": "Supplemento pezzi speciali [%]",
+      "valveDp": "Valvola del radiatore + raccordo [kPa]",
+      "zeta90": "ζ curva 90°",
+      "zeta45": "ζ curva 45°",
+      "insulationHint": "Spessori d’isolamento secondo SIA 384/1:2022 tabella 2 (colonna secondo λ, riga secondo la temperatura di dimensionamento della condotta, nessuno sotto 26 °C). La tabella vale per locali non riscaldati attivamente ed è usata qui per tutte le condotte di distribuzione; gli allacciamenti dei radiatori nei locali riscaldati restano senza isolamento (5.4.4.2). All’esterno vale inoltre la legislazione cantonale sull’energia."
+    },
+    "results": {
+      "title": "Risultati",
+      "empty": "Ancora nessuna distribuzione registrata.",
+      "power": "Potenza",
+      "powerHint": "Gruppo in 242: {power} kW",
+      "massFlow": "Portata massica",
+      "head": "Prevalenza della pompa",
+      "headHint": "circuito critico mandata + ritorno = {m} m",
+      "loss": "Perdite delle condotte",
+      "terminal": "Elemento",
+      "terminalPower": "Potenza",
+      "throttle": "Strozzamento",
+      "critical": "critico",
+      "arrive": "Mandata all’elemento"
+    },
+    "warnings": {
+      "fast": "{element}: {v} m/s sopra il valore indicativo {limit} m/s.",
+      "cooling": "{element}: la mandata si raffredda di {drop} K fino all’elemento.",
+      "temps": "{group}: temperature di mandata e ritorno mancanti in 242 – calcolato con 55/45 °C.",
+      "noRoom": "{element}: nessun locale scelto e nessuna potenza inserita.",
+      "noFloor": "{element}: nessun collettore del riscaldamento a pavimento scelto.",
+      "noPower": "{element}: nessuna potenza inserita."
+    },
+    "plankopf": {
+      "plan": "Schema delle colonne"
+    },
+    "legend": {
+      "vl": "Mandata acqua di riscaldamento",
+      "rl": "Ritorno acqua di riscaldamento",
+      "insulation": "Isolamento (spessore indicato alla condotta)",
+      "symbols": {
+        "ball": "Rubinetto a sfera (arresto)",
+        "regValve": "Valvola di regolazione della colonna / raccordo di ritorno",
+        "thermoValve": "Valvola del radiatore con testa termostatica",
+        "radiator": "Radiatore",
+        "floorDistributor": "Collettore del riscaldamento a pavimento",
+        "apparatus": "Utenza"
+      }
+    }
+  },
   "heatingPlan": {
     "title": "Progettazione del riscaldamento",
     "description": "Progettazione dell’impianto di riscaldamento secondo le fasi della SIA 108 – con le esigenze delle norme SIA 384/1, SIA 384/2, SIA 384/6 e SIA 384/7, dell’aiuto all’applicazione EnDK EN-103 e della direttiva SITC HE301-01.",
@@ -2829,6 +2986,9 @@
     "auto": "auto",
     "removeRoom": "Rimuovere il locale",
     "addDistributor": "Collettore",
+    "group": "Gruppo di riscaldamento",
+    "groupHint": "Gruppo di riscaldamento dell’impianto (242) che alimenta questo collettore – per lo schema delle colonne 243.",
+    "noGroup": "– gruppo di riscaldamento –",
     "notes": "Osservazioni",
     "sourceHint": "Secondo le istruzioni di progettazione HAKA.GERODUR (diagrammi B1–B9, tab. C, tab. D digitalizzati). Qh = carico del locale senza la perdita della superficie di pavimento riscaldata; questa è sostituita dall’emissione verso il basso. Tab. D come disegnata (17/13 a 100 kg/h: 58 Pa/m).",
     "warnings": {

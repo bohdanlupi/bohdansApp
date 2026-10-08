@@ -1767,6 +1767,163 @@
     "create": "Kapitel anlegen",
     "created": "{count} Kapitel angelegt."
   },
+  "heatingDistribution": {
+    "moveHorizontal": "Schema seitlich verschieben",
+    "noGroups": "Diese Anlage hat noch keine Heizgruppen. Lege sie in 242 Wärmeerzeugung unter «4 · Verteiler und Heizgruppen» an.",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "schema": "Strangschema",
+    "schemaHint": "Wird aus der Verteilung gezeichnet; Linie oder Symbol anklicken wählt das Element.",
+    "insulationBand": "Dämmung (Dicke an der Leitung angeschrieben)",
+    "schemaText": {
+      "insulation": "Dämmung",
+      "none": "ohne Dämmung",
+      "strang": "Strang",
+      "head": "Δp"
+    },
+    "tree": {
+      "title": "Verteilung",
+      "group": "Heizgruppe",
+      "element": "Element",
+      "size": "Dimension",
+      "power": "Leistung",
+      "temp": "VL",
+      "empty": "Noch keine Leitungen für diese Heizgruppe.",
+      "addRoot": "Leitung ab Gruppe",
+      "addFloors": "{count} verknüpfte FBH-Verteiler übernehmen",
+      "addFloorsHint": "Legt eine Leitung ab der Gruppe mit den Fussbodenheizungs-Verteilern an, die dieser Heizgruppe zugeordnet sind.",
+      "kinds": {
+        "pipe": "Leitung",
+        "radiator": "Heizkörper",
+        "floor": "FBH-Verteiler",
+        "consumer": "Verbraucher",
+        "riser": "Strang",
+        "floorPipe": "Anbindung",
+        "distPipe": "Verteilleitung"
+      },
+      "strangNo": "Strang {n}",
+      "selectHint": "Ein Element in der Liste oder im Schema anklicken, um es zu bearbeiten.",
+      "addPipe": "Leitung",
+      "addRadiator": "Heizkörper",
+      "addFloor": "FBH-Verteiler",
+      "addConsumer": "Verbraucher",
+      "insertAfter": "Einfügen",
+      "insertAfterHint": "Leitung zwischen diesem Element und seinen Abgängen einfügen",
+      "up": "Nach oben",
+      "down": "Nach unten",
+      "removeElement": "Element entfernen",
+      "removeElementHint": "Entfernt nur dieses Element; seine Abgänge rücken nach.",
+      "removeBranch": "Zweig löschen"
+    },
+    "node": {
+      "label": "Bezeichnung",
+      "floor": "Geschoss",
+      "length": "Länge [m]",
+      "role": "Art",
+      "roles": {
+        "auto": "Automatisch",
+        "distribution": "Verteilleitung",
+        "floor": "Anbindung"
+      },
+      "system": "Rohrsystem",
+      "size": "Dimension",
+      "auto": "Automatisch",
+      "bends90": "Bögen 90°",
+      "bends45": "Bögen 45°",
+      "ambient": "Umgebung",
+      "ambients": {
+        "heated": "Beheizt",
+        "unheated": "Unbeheizt",
+        "outside": "Aussen / Erdreich"
+      },
+      "insulation": "Dämmung [mm]",
+      "bendsHint": "Bögen je Leitung (VL und RL je gleich viele); sind welche eingetragen, ersetzen sie für diese Leitung den Formstück-Zuschlag. Dämmung leer = SIA 384/1 Tabelle 2.",
+      "riser": "Steigstrang",
+      "shutoff": "Absperrungen",
+      "regValve": "Strangregulierventil",
+      "room": "Raum (Wärmebedarf)",
+      "noRoom": "– Raum wählen –",
+      "powerOverride": "Leistung [W] (statt Raum)",
+      "valveDp": "Δp Ventil [kPa] (statt Standard)",
+      "distributor": "Fussbodenheizungs-Verteiler",
+      "noDistributor": "– Verteiler wählen –",
+      "noFloors": "Für diese Anlage gibt es noch keine Fussbodenheizung.",
+      "power": "Leistung [W]",
+      "dp": "Druckverlust [kPa]"
+    },
+    "details": {
+      "power": "Leistung / Massenstrom",
+      "sizeAuto": "Dimension (nach Geschwindigkeit)",
+      "sizeManual": "Dimension (gewählt)",
+      "dpBends": "Δp VL + RL mit Bögen",
+      "dpAllowance": "Δp VL + RL mit Zuschlag",
+      "cumulative": "Δp ab Gruppe",
+      "insulation": {
+        "table": "Dämmung SIA 384/1",
+        "manual": "Dämmung (gewählt)",
+        "connection": "Anschlussleitung (ohne Dämmung)"
+      },
+      "loss": "Wärmeverlust VL + RL",
+      "temps": "Vorlauf Anfang → Ende",
+      "terminalDp": "Δp Element",
+      "path": "Δp Kreis",
+      "throttle": "Drosselbedarf",
+      "critical": "kritischer Kreis",
+      "arrive": "Vorlauf am Element"
+    },
+    "settings": {
+      "title": "Berechnung",
+      "description": "Druckverlust nach Darcy-Weisbach / Colebrook in Vor- und Rücklauf, Rohrauskühlung aus der Dämmung und der Umgebung.",
+      "tHeated": "Umgebung beheizt [°C]",
+      "tUnheated": "Umgebung unbeheizt [°C]",
+      "tOutside": "Umgebung aussen [°C]",
+      "lambda": "λ Dämmung [W/(m·K)]",
+      "allowance": "Formstück-Zuschlag [%]",
+      "valveDp": "Heizkörperventil + Verschraubung [kPa]",
+      "zeta90": "ζ Bogen 90°",
+      "zeta45": "ζ Bogen 45°",
+      "insulationHint": "Dämmdicken nach SIA 384/1:2022 Tabelle 2 (Spalte nach λ, Zeile nach der Auslegungstemperatur der Leitung, unter 26 °C keine). Die Tabelle gilt für nicht aktiv beheizte Räume und wird hier für alle Verteilleitungen verwendet; Anschlussleitungen zu Heizkörpern in beheizten Räumen bleiben ungedämmt (5.4.4.2). Aussen gilt zusätzlich die kantonale Energiegesetzgebung."
+    },
+    "results": {
+      "title": "Ergebnisse",
+      "empty": "Noch keine Verteilung erfasst.",
+      "power": "Leistung",
+      "powerHint": "Gruppe in 242: {power} kW",
+      "massFlow": "Massenstrom",
+      "head": "Förderhöhe Pumpe",
+      "headHint": "kritischer Kreis VL + RL = {m} m",
+      "loss": "Wärmeverlust Leitungen",
+      "terminal": "Element",
+      "terminalPower": "Leistung",
+      "throttle": "Drosselbedarf",
+      "critical": "kritisch",
+      "arrive": "VL am Element"
+    },
+    "warnings": {
+      "fast": "{element}: {v} m/s über dem Richtwert {limit} m/s.",
+      "cooling": "{element}: Vorlauf kühlt bis zum Element um {drop} K ab.",
+      "temps": "{group}: Vor- und Rücklauftemperatur in 242 fehlen – mit 55/45 °C gerechnet.",
+      "noRoom": "{element}: kein Raum gewählt und keine Leistung eingegeben.",
+      "noFloor": "{element}: kein Fussbodenheizungs-Verteiler gewählt.",
+      "noPower": "{element}: keine Leistung eingegeben."
+    },
+    "plankopf": {
+      "plan": "Strangschema"
+    },
+    "legend": {
+      "vl": "Vorlauf Heizwasser",
+      "rl": "Rücklauf Heizwasser",
+      "insulation": "Dämmung (Dicke an der Leitung angeschrieben)",
+      "symbols": {
+        "ball": "Kugelhahn (Absperrung)",
+        "regValve": "Strangregulierventil / Rücklaufverschraubung",
+        "thermoValve": "Heizkörperventil mit Thermostatkopf",
+        "radiator": "Heizkörper",
+        "floorDistributor": "Fussbodenheizungs-Verteiler",
+        "apparatus": "Verbraucher"
+      }
+    }
+  },
   "heatingPlan": {
     "title": "Heizungsplanung",
     "description": "Planung der Heizungsanlage nach den Phasen der SIA 108 – mit den Anforderungen der SIA 384/1, SIA 384/2, SIA 384/6 und SIA 384/7, der EnDK-Vollzugshilfe EN-103 und der SWKI HE301-01.",
@@ -2829,6 +2986,9 @@
     "auto": "auto",
     "removeRoom": "Raum entfernen",
     "addDistributor": "Verteiler",
+    "group": "Heizgruppe",
+    "groupHint": "Heizgruppe der Anlage (242), die diesen Verteiler speist – für das Strangschema 243.",
+    "noGroup": "– Heizgruppe –",
     "notes": "Bemerkungen",
     "sourceHint": "Nach der HAKA.GERODUR Projektierungsanleitung (Leistungsdiagramme B1–B9, Tab. C, Tab. D digitalisiert). Qh = Raumheizlast ohne den Verlust der beheizten Bodenfläche; dieser wird durch die Wärmeabgabe nach unten ersetzt. Tab. D wie gezeichnet (17/13 bei 100 kg/h: 58 Pa/m).",
     "warnings": {

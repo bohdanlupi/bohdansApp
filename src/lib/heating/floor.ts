@@ -94,7 +94,8 @@ export type FloorRoom = {
   bath: boolean;
 };
 
-export type FloorDistributor = { id: string; name: string; rooms: FloorRoom[] };
+/** A distributor with its rooms; `groupId`: the Heizgruppe of the Anlage (242) that feeds it (Strangschema 243). */
+export type FloorDistributor = { id: string; name: string; groupId: string | null; rooms: FloorRoom[] };
 
 export type FloorSystemData = {
   /** Wärmeerzeugungsanlage (heating_plants) that feeds the system; null = not assigned yet (counts to the first). */

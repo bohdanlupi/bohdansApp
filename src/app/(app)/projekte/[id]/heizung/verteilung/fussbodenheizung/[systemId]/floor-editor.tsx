@@ -52,8 +52,8 @@ export function FloorEditor({
   projectId: string;
   initialName: string;
   initialData: FloorSystemData;
-  /** Wärmeerzeugungsanlagen the system can be assigned to (242). */
-  plants: { id: string; name: string }[];
+  /** Wärmeerzeugungsanlagen the system can be assigned to (242), with their Heizgruppen for the distributors. */
+  plants: { id: string; name: string; groups: { id: string; name: string }[] }[];
   /** Heat load calculations with their heated rooms (Qh without floor loss). */
   calcs: CalcRooms[];
   editable: boolean;
@@ -72,6 +72,8 @@ export function FloorEditor({
   }, [calcs]);
   const result = useMemo(() => evaluateFloor(data, lookup), [data, lookup]);
   const set = <K extends keyof FloorSystemData>(key: K, value: FloorSystemData[K]) => setData((d) => ({ ...d, [key]: value }));
+  // Heizgruppen of the assigned Anlage (null = the first one), for the distributors.
+  const plantGroups = (plants.find((p) => p.id === data.plantId) ?? plants[0])?.groups ?? [];
   const setDistributor = (distId: string, patch: Partial<FloorDistributor>) => set("distributors", data.distributors.map((d) => (d.id === distId ? { ...d, ...patch } : d)));
   const used = new Set(data.distributors.flatMap((d) => d.rooms.map((r) => `${r.calcId}:${r.roomId}`)));
 
@@ -208,6 +210,23 @@ export function FloorEditor({
                   aria-label={t("distributor")}
                   onChange={(e) => setDistributor(dist.id, { name: e.target.value })}
                 />
+                {plantGroups.length > 0 && (
+                  <NativeSelect
+                    value={plantGroups.some((g) => g.id === dist.groupId) ? dist.groupId! : ""}
+                    disabled={!editable}
+                    className="h-8 w-48 text-xs"
+                    aria-label={t("group")}
+                    title={t("groupHint")}
+                    onChange={(e) => setDistributor(dist.id, { groupId: e.target.value || null })}
+                  >
+                    <option value="">{t("noGroup")}</option>
+                    {plantGroups.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                )}
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {t("distributorSummary", { rings: fmt(dr.rings), total: fmt(dr.total), massFlow: fmt(dr.massFlow, 0), pressure: fmt(dr.maxPressure / 1000, 1) })}
                 </span>
@@ -363,7 +382,7 @@ export function FloorEditor({
         );
       })}
       {editable && (
-        <Button variant="outline" onClick={() => set("distributors", [...data.distributors, { id: newId(), name: `V${data.distributors.length + 1}`, rooms: [] }])}>
+        <Button variant="outline" onClick={() => set("distributors", [...data.distributors, { id: newId(), name: `V${data.distributors.length + 1}`, groupId: null, rooms: [] }])}>
           <ListPlus />
           {t("addDistributor")}
         </Button>

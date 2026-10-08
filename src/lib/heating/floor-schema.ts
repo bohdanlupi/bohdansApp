@@ -41,7 +41,7 @@ const roomSchema = z.object({
   bath: z.boolean().catch(false),
 });
 
-const distributorSchema = z.object({ id, name: text(80), rooms: lenientArray(roomSchema, 100) });
+const distributorSchema = z.object({ id, name: text(80), groupId: z.string().max(64).nullable().catch(null), rooms: lenientArray(roomSchema, 100) });
 
 export const floorSystemSchema = z.object({
   plantId: z.string().max(40).nullable().catch(null),
@@ -65,4 +65,4 @@ export const floorSystemSchema = z.object({
 
 export const parseFloorSystem = (value: unknown): FloorSystemData => floorSystemSchema.catch(() => floorSystemSchema.parse({})).parse(value ?? {});
 
-export const emptyFloorSystem = (): FloorSystemData => ({ ...parseFloorSystem({}), distributors: [{ id: crypto.randomUUID(), name: "V1", rooms: [] }] });
+export const emptyFloorSystem = (): FloorSystemData => ({ ...parseFloorSystem({}), distributors: [{ id: crypto.randomUUID(), name: "V1", groupId: null, rooms: [] }] });
