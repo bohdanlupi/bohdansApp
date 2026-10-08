@@ -1,13 +1,14 @@
 // Materialauszug of 243 Wärmeverteilung (Strangschema), by chapter of the LV structure «Heizung» (243.x):
 //   .1 Leitungen   pipes (VL + RL), Bögen 90° / 45° and T-Stücke at the branches – Optipress-Therm (Nussbaum, in
 //                  material-data.ts) or Optiflex-Flowpress (Nussbaum, from the Sanitär catalogue data)
-//   .2 Armaturen   Kugelhähne at the Strang feet and where Absperrungen are set, Rücklaufverschraubungen (neutral)
+//   .2 Armaturen   Kugelhähne at the Strang feet and where Absperrungen are set (also before FBH-Verteiler),
+//                  Rücklaufverschraubungen (neutral), Wärmezähler (GWF) and their Anschlusssets (neutral) at FBH-Verteilern
 //   .3 Regel- und Sicherheitsorgane  Strangregulierventile (IMI STAD), Heizkörperventile with Thermostatkopf (neutral,
 //                  the type depends on the Heizkörper)
 //   .4 Abgabesystem Heizkörper and Verbraucher (neutral, with their power)
 //   .6 Dämmung     Meier Tobler pipe shells by size and SIA 384/1 thickness (PIR for λ ≤ 0.03, else Mineralwolle),
 //                  +20 % for fittings and valves
-// The Fussbodenheizungs-Verteiler are not listed here (they belong to the Fussbodenheizung).
+// The Fussbodenheizungs-Verteiler themselves are not listed here (they belong to the Fussbodenheizung).
 
 import { nussbaumArticles } from "@/lib/sanitary/catalog-data";
 import { insulationShells } from "@/lib/sanitary/insulation-data";
@@ -64,7 +65,7 @@ export function distributionMaterial(data: DistributionData, result: Distributio
     else neutral(6, `Rohrdämmung ${mm} mm für ${heatPipeText(p)} (${material === "pir" ? "PIR" : "Mineralwolle"})`, amount, "m");
   };
 
-  const visit = (n: HeatNode, parentRiser: boolean) => {
+  const visit = (n: HeatNode, parentRiser: boolean, parent: HeatPipe | null) => {
     const s = result.sections.get(n.id);
     const term = result.terminals.get(n.id);
     if (term) {
@@ -73,6 +74,19 @@ export function distributionMaterial(data: DistributionData, result: Distributio
         neutral(3, "Heizkörperventil mit voreinstellbarem Ventileinsatz und Thermostatkopf", 1);
         neutral(2, "Rücklaufverschraubung absperrbar", 1);
       } else if (n.type === "consumer") neutral(4, `Verbraucher «${term.name || "–"}», Φ ${fmt(term.power)} W`, 1);
+      else if (n.type === "floor") {
+        // Before the FBH-Verteiler: Absperrungen (size of the Anbindung), Wärmezähler by its flow, Anschlussset.
+        if (n.shutoff) {
+          if (parent) ball(parent, 2);
+          else neutral(2, "Absperrarmatur FBH-Verteiler", 2);
+        }
+        const flow = term.massFlow / 1000; // m³/h
+        if (n.heatMeter) {
+          const meter = [...A.heatMeters].sort((a, b) => a.qp - b.qp || a.thread - b.thread).find((m) => m.qp >= flow);
+          article(2, "Meier Tobler", meter, 1, `Wärmezähler qp ≥ ${fmt(flow, 1)} m³/h`);
+        }
+        if (n.meterSet) neutral(2, "Anschlussset für Wärmezähler am FBH-Verteiler (Kugelhähne, Passstück, Tauchhülse)", 1);
+      }
       return;
     }
     if (n.type !== "pipe" || !s) return;
@@ -93,9 +107,9 @@ export function distributionMaterial(data: DistributionData, result: Distributio
     }
     insulation(p, s.insVl, length);
     insulation(p, s.insRl, length);
-    n.children.forEach((c) => visit(c, n.riser));
+    n.children.forEach((c) => visit(c, n.riser, p));
   };
-  for (const roots of Object.values(data.networks)) roots.forEach((n) => visit(n, false));
+  for (const roots of Object.values(data.networks)) roots.forEach((n) => visit(n, false, null));
   return [...map.values()];
 }
 

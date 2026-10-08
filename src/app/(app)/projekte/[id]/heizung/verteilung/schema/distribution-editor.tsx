@@ -84,7 +84,7 @@ export function DistributionEditor({
   };
   const material = useMemo(() => distributionSections(distributionMaterial(data, result)), [data, result]);
   const schema = useMemo(
-    () => layoutDistribution(data, result, { vl: "VL", rl: "RL", insulation: t("schemaText.insulation"), none: t("schemaText.none"), strang: t("schemaText.strang"), circuit: circuitName, head: t("schemaText.head") }),
+    () => layoutDistribution(data, result, { vl: "VL", rl: "RL", insulation: t("schemaText.insulation"), none: t("schemaText.none"), strang: t("schemaText.strang"), circuit: circuitName, head: t("schemaText.head"), rings: (n) => t("schemaText.rings", { n }) }),
     [data, result], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
@@ -451,7 +451,7 @@ function NodeEditor({
       <NumberField value={node[key]} decimals={decimals} label={label} placeholder={placeholder} disabled={!editable} onChange={(v) => patch({ [key]: v })} className="h-8 rounded-lg" />
     </div>
   );
-  const check = (key: "riser" | "shutoff" | "regValve", label: string) => (
+  const check = (key: "riser" | "shutoff" | "regValve" | "meterSet" | "heatMeter", label: string) => (
     <label className="flex items-center gap-2 text-sm">
       <input type="checkbox" checked={node[key]} disabled={!editable} onChange={(e) => patch({ [key]: e.target.checked })} className="size-4 accent-brand" />
       {label}
@@ -656,6 +656,11 @@ function NodeEditor({
           <div className="grid grid-cols-2 gap-2">
             {text("label", t("node.label"), 120)}
             {text("floor", t("node.floor"), 20, "EG, 1.OG …")}
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {check("shutoff", t("node.shutoff"))}
+            {check("meterSet", t("node.meterSet"))}
+            {check("heatMeter", t("node.heatMeter"))}
           </div>
           {term && <TerminalDetails term={term} />}
         </>

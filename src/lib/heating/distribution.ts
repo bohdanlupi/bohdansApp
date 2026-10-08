@@ -45,9 +45,12 @@ export type HeatNode = {
   ambient: Ambient;
   /** Insulation thickness [mm] chosen by hand (null = SIA 384/1 Tabelle 2; 0 = none). */
   insulation: number | null;
-  /** Absperrungen at the start; Strangregulierventil at the foot of a Strang. */
+  /** Absperrungen at the start (FBH-Verteiler: before it); Strangregulierventil at the foot of a Strang. */
   shutoff: boolean;
   regValve: boolean;
+  /** FBH-Verteiler: Anschlussset für Wärmezähler and the Wärmezähler itself. */
+  meterSet: boolean;
+  heatMeter: boolean;
   // Heizkörper: room of the Wärmebedarf
   calcId: string | null;
   roomId: string | null;
@@ -115,6 +118,8 @@ export const newHeatNode = (type: HeatNodeType, patch: Partial<HeatNode> = {}): 
   insulation: null,
   shutoff: false,
   regValve: false,
+  meterSet: false,
+  heatMeter: false,
   calcId: null,
   roomId: null,
   systemId: null,
@@ -244,7 +249,7 @@ export function lossPerMetre(od: number, s: number, lambda: number, theta: numbe
 /** A room of the Wärmebedarf as Heizkörper load. */
 export type RoomLoad = { name: string; load: number; roomTemp: number };
 /** A Fussbodenheizungs-Verteiler from its calculation. */
-export type FloorLoad = { name: string; total: number; massFlow: number; maxPressure: number };
+export type FloorLoad = { name: string; total: number; massFlow: number; maxPressure: number; rings: number };
 /** A Heizgruppe of the Anlage (242). */
 export type GroupInfo = { id: string; name: string; supplyTemp: number | null; returnTemp: number | null; power: number | null };
 
@@ -285,6 +290,8 @@ export type TerminalResult = {
   id: string;
   name: string;
   kind: "radiator" | "floor" | "consumer";
+  /** Heizkreise of an FBH-Verteiler (0 for the others). */
+  rings: number;
   power: number;
   massFlow: number;
   /** Δp of the terminal itself and of the whole circuit [kPa]; Drosselbedarf against the critical circuit. */
@@ -350,7 +357,7 @@ export function evaluateDistribution(
     const flowOf = (w: number) => (w * 3.6) / (CP_WATER * dt); // kg/h
 
     // Terminals: power, mass flow and own Δp.
-    type Term = { power: number; massFlow: number; dp: number; name: string; kind: TerminalResult["kind"] };
+    type Term = { power: number; massFlow: number; dp: number; name: string; kind: TerminalResult["kind"]; rings?: number };
     const term = (n: HeatNode): Term | null => {
       if (n.type === "radiator") {
         const room = n.calcId && n.roomId ? rooms(n.calcId, n.roomId) : null;
@@ -364,7 +371,7 @@ export function evaluateDistribution(
           warnings.push({ kind: "noFloor", id: n.id });
           return { power: 0, massFlow: 0, dp: 0, name: n.label, kind: "floor" };
         }
-        return { power: f.total, massFlow: f.massFlow, dp: f.maxPressure / 1000, name: n.label || f.name, kind: "floor" };
+        return { power: f.total, massFlow: f.massFlow, dp: f.maxPressure / 1000, name: n.label || f.name, kind: "floor", rings: f.rings };
       }
       if (n.type === "consumer") {
         if (n.power === null) warnings.push({ kind: "noPower", id: n.id });
@@ -401,7 +408,7 @@ export function evaluateDistribution(
     const visit = (n: HeatNode, parentRiser: boolean, riserAbove: boolean, before: number, tIn: number) => {
       const t = terms.get(n.id);
       if (t) {
-        const tr: TerminalResult = { id: n.id, name: t.name, kind: t.kind, power: t.power, massFlow: t.massFlow, dp: t.dp, path: before + t.dp, throttle: 0, tArrive: tIn };
+        const tr: TerminalResult = { id: n.id, name: t.name, kind: t.kind, rings: t.rings ?? 0, power: t.power, massFlow: t.massFlow, dp: t.dp, path: before + t.dp, throttle: 0, tArrive: tIn };
         terminals.set(n.id, tr);
         groupTerminals.push(tr);
         // A terminal passes the flow on to nothing (children of terminals are not allowed in the editor).

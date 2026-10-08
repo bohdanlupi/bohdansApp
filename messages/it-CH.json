@@ -1779,7 +1779,8 @@
       "insulation": "Isolamento",
       "none": "senza isolamento",
       "strang": "Colonna",
-      "head": "Δp"
+      "head": "Δp",
+      "rings": "{n, plural, one {# circuito} other {# circuiti}}"
     },
     "tree": {
       "title": "Distribuzione",
@@ -1849,7 +1850,9 @@
       "noDistributor": "– scegliere un collettore –",
       "noFloors": "Questo impianto non ha ancora un riscaldamento a pavimento.",
       "power": "Potenza [W]",
-      "dp": "Perdita di carico [kPa]"
+      "dp": "Perdita di carico [kPa]",
+      "meterSet": "Set di raccordo per contatore di calore",
+      "heatMeter": "Contatore di calore"
     },
     "details": {
       "power": "Potenza / portata massica",
@@ -1916,11 +1919,15 @@
       "insulation": "Isolamento (spessore indicato alla condotta)",
       "symbols": {
         "ball": "Rubinetto a sfera (arresto)",
-        "regValve": "Valvola di regolazione della colonna / raccordo di ritorno",
+        "regValve": "Valvola di regolazione (colonna, circuito) / raccordo di ritorno",
         "thermoValve": "Valvola del radiatore con testa termostatica",
         "radiator": "Radiatore",
         "floorDistributor": "Collettore del riscaldamento a pavimento",
-        "apparatus": "Utenza"
+        "apparatus": "Utenza",
+        "valve2": "Valvola con servomotore (circuito)",
+        "drain": "Scarico",
+        "heatMeter": "Contatore di calore con sonda di mandata",
+        "meterSet": "Set di raccordo per contatore di calore (tronchetto, pozzetto)"
       }
     },
     "material": {

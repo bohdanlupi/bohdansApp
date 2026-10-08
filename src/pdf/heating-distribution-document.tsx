@@ -1,6 +1,6 @@
 import { Document, G, Image, Line, Page, Path, Rect, Svg } from "@react-pdf/renderer";
 
-import { type DistributionSchema, type DistributionSymbol, floorDistributor, lineColors, thermoValve } from "@/lib/heating/distribution-layout";
+import { type DistributionSchema, type DistributionSymbol, floorDistributor, lineColors, meterSet, thermoValve } from "@/lib/heating/distribution-layout";
 import { drawSymbol } from "@/lib/heating/generation-schema";
 import type { SchemaRevision } from "@/lib/kwl/schema-plan";
 import type { Prim } from "@/lib/kwl/schema-symbols";
@@ -34,7 +34,9 @@ function legendPrims(key: DistributionSymbol): Prim[] {
     case "thermoValve":
       return [pipe, ...thermoValve(15, 0)];
     case "floorDistributor":
-      return floorDistributor(0, -7);
+      return floorDistributor(0, -10);
+    case "meterSet":
+      return [pipe, { t: "line", x1: 0, y1: -8, x2: 30, y2: -8, stroke: "#555555", sw: 1.2 }, ...meterSet(15, 0, -8)];
     case "radiator":
       return [{ t: "rect", x: 4, y: -6, w: 22, h: 12, fill: "bg", stroke: "ink", sw: 1.2 }];
     case "apparatus":

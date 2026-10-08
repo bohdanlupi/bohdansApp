@@ -39,6 +39,7 @@ export async function loadDistributionInputs(projectId: string, plant: Pick<Load
         total: result.distributors[i].total,
         massFlow: result.distributors[i].massFlow,
         maxPressure: result.distributors[i].maxPressure,
+        rings: result.distributors[i].rings,
       }));
     });
   return { rooms, floors, outsideTemp: evaluateSite(plan.site).thetaE0 };

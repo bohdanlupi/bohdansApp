@@ -1779,7 +1779,8 @@
       "insulation": "Isolation",
       "none": "sans isolation",
       "strang": "Colonne",
-      "head": "Δp"
+      "head": "Δp",
+      "rings": "{n, plural, one {# circuit} other {# circuits}}"
     },
     "tree": {
       "title": "Distribution",
@@ -1849,7 +1850,9 @@
       "noDistributor": "– choisir un distributeur –",
       "noFloors": "Cette installation n’a pas encore de chauffage au sol.",
       "power": "Puissance [W]",
-      "dp": "Perte de charge [kPa]"
+      "dp": "Perte de charge [kPa]",
+      "meterSet": "Kit de raccordement pour compteur de chaleur",
+      "heatMeter": "Compteur de chaleur"
     },
     "details": {
       "power": "Puissance / débit massique",
@@ -1916,11 +1919,15 @@
       "insulation": "Isolation (épaisseur indiquée à la conduite)",
       "symbols": {
         "ball": "Robinet à boisseau sphérique (arrêt)",
-        "regValve": "Vanne de réglage de colonne / raccord de retour",
+        "regValve": "Vanne de réglage (colonne, circuit) / raccord de retour",
         "thermoValve": "Vanne de radiateur avec tête thermostatique",
         "radiator": "Radiateur",
         "floorDistributor": "Distributeur de chauffage au sol",
-        "apparatus": "Consommateur"
+        "apparatus": "Consommateur",
+        "valve2": "Vanne avec servomoteur (circuit)",
+        "drain": "Vidange",
+        "heatMeter": "Compteur de chaleur avec sonde aller",
+        "meterSet": "Kit de raccordement pour compteur de chaleur (manchette, doigt de gant)"
       }
     },
     "material": {
