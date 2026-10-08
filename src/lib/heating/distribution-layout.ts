@@ -41,7 +41,6 @@ export type DistributionText = {
   vl: string;
   rl: string;
   insulation: string;
-  none: string;
   strang: string;
   /** Schaltung names of the groups, by circuit key. */
   circuit: (group: GroupResult) => string;
@@ -251,7 +250,7 @@ export function layoutDistribution(data: DistributionData, result: DistributionR
   const lineText = (n: HeatNode): string[] => {
     const r = sec(n);
     if (!r) return [];
-    const mm = (v: number) => (v ? `${v} mm` : labels.none);
+    const mm = (v: number) => `${v} mm`;
     const out = r.insVl === r.insRl ? [`${labels.vl}/${labels.rl}: ${heatPipeText(r.pipe)} · ${mm(r.insVl)}`] : [`${labels.vl}: ${heatPipeText(r.pipe)} · ${mm(r.insVl)}`, `${labels.rl}: ${heatPipeText(r.pipe)} · ${mm(r.insRl)}`];
     out.push(`${fmt0(r.massFlow)} kg/h · ${fmt1(r.dp)} kPa`);
     return out;

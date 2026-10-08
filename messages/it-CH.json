@@ -1777,7 +1777,6 @@
     "insulationBand": "Isolamento (spessore indicato alla condotta)",
     "schemaText": {
       "insulation": "Isolamento",
-      "none": "senza isolamento",
       "strang": "Colonna",
       "head": "Δp",
       "rings": "{n, plural, one {# circuito} other {# circuiti}}"

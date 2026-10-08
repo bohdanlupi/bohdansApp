@@ -1777,7 +1777,6 @@
     "insulationBand": "Isolation (épaisseur indiquée à la conduite)",
     "schemaText": {
       "insulation": "Isolation",
-      "none": "sans isolation",
       "strang": "Colonne",
       "head": "Δp",
       "rings": "{n, plural, one {# circuit} other {# circuits}}"

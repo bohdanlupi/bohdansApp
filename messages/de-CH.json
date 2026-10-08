@@ -1777,7 +1777,6 @@
     "insulationBand": "Dämmung (Dicke an der Leitung angeschrieben)",
     "schemaText": {
       "insulation": "Dämmung",
-      "none": "ohne Dämmung",
       "strang": "Strang",
       "head": "Δp",
       "rings": "{n, plural, one {# Heizkreis} other {# Heizkreise}}"

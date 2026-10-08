@@ -53,7 +53,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
     vl: "VL",
     rl: "RL",
     insulation: d("schemaText.insulation"),
-    none: d("schemaText.none"),
     strang: d("schemaText.strang"),
     circuit: (gr) => (circuitOf.has(gr.group.id) ? g(`circuits.${circuitOf.get(gr.group.id)}`) : ""),
     head: d("schemaText.head"),
