@@ -1922,6 +1922,12 @@
         "floorDistributor": "Distributeur de chauffage au sol",
         "apparatus": "Consommateur"
       }
+    },
+    "material": {
+      "title": "Extrait de matériel",
+      "hint": "Tous les composants de la distribution selon le chapitre 243 Distribution de chaleur : tubes (aller et retour), coudes et tés, vannes d’arrêt, vannes de réglage de colonne, radiateurs avec vanne et raccord, isolation.",
+      "lvGroup": "Distribution de chaleur {name}",
+      "listHint": "Tubes et raccords Optipress-Therm ou Optiflex-Flowpress de Nussbaum, vannes de réglage IMI STAD, coquilles isolantes de Meier Tobler (+20 % pour raccords et robinetterie). Radiateurs, vannes de radiateur et raccords de retour neutres – type selon le radiateur. Les distributeurs de chauffage au sol font partie du chauffage au sol."
     }
   },
   "heatingPlan": {

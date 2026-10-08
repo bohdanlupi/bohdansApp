@@ -27,13 +27,16 @@ import {
 } from "@/lib/heating/distribution";
 import { type CalcOption, type FloorOption, groupInfos, inputLookups } from "@/lib/heating/distribution-inputs";
 import { layoutDistribution } from "@/lib/heating/distribution-layout";
+import { distributionMaterial, distributionSections } from "@/lib/heating/distribution-material";
 import type { HeatingGroup } from "@/lib/heating/plant-schema";
 import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { insulationStyle } from "@/lib/sanitary/pipes";
 import { cn } from "@/lib/utils";
 
 import { SchemaPrintButton } from "../../../lueftung/anlagen/[systemId]/schema-print-dialog";
-import { saveHeatingDistribution, saveHeatingDistributionPlan } from "../../actions";
+import type { LvWithChapters } from "../../../lueftung/anlagen/[systemId]/quantities-panel";
+import { insertDistributionMaterial, saveHeatingDistribution, saveHeatingDistributionPlan } from "../../actions";
+import { ChapterMaterial } from "../../chapter-material";
 import { DistributionSchemaView } from "./schema-view";
 
 
@@ -47,6 +50,7 @@ export function DistributionEditor({
   rooms,
   floors,
   outsideTemp,
+  lvs,
   editable,
 }: {
   projectId: string;
@@ -57,6 +61,8 @@ export function DistributionEditor({
   floors: FloorOption[];
   /** Norm-Aussentemperatur of the site [°C]. */
   outsideTemp: number | null;
+  /** LVs of the project with their chapters, for inserting the Materialauszug. */
+  lvs: LvWithChapters[];
   editable: boolean;
 }) {
   const t = useTranslations("heatingDistribution");
@@ -76,6 +82,7 @@ export function DistributionEditor({
     const pg = plant.groups.find((x) => x.id === g.group.id);
     return pg ? tg(`circuits.${pg.circuit}`) : "";
   };
+  const material = useMemo(() => distributionSections(distributionMaterial(data, result)), [data, result]);
   const schema = useMemo(
     () => layoutDistribution(data, result, { vl: "VL", rl: "RL", insulation: t("schemaText.insulation"), none: t("schemaText.none"), strang: t("schemaText.strang"), circuit: circuitName, head: t("schemaText.head") }),
     [data, result], // eslint-disable-line react-hooks/exhaustive-deps
@@ -173,6 +180,22 @@ export function DistributionEditor({
           <NodeEditor network={network} selected={selected} result={result} rooms={rooms} floors={floors} editable={editable} onSelect={select} onChange={setNetwork} />
         </aside>
       </div>
+
+      {hasNetwork && (
+        <Section title={t("material.title")} description={t("material.hint")} collapseKey="heating-distribution:material">
+          <ChapterMaterial
+            sections={material}
+            lvs={lvs}
+            plantName={plant.name}
+            projectId={projectId}
+            defaultTitle={t("material.lvGroup", { name: plant.name })}
+            hint={t("material.listHint")}
+            dirty={dirty}
+            editable={editable}
+            insert={(lvId, title, targets) => insertDistributionMaterial(plant.id, projectId, lvId, title, targets)}
+          />
+        </Section>
+      )}
     </div>
   );
 }

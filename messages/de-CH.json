@@ -1922,6 +1922,12 @@
         "floorDistributor": "Fussbodenheizungs-Verteiler",
         "apparatus": "Verbraucher"
       }
+    },
+    "material": {
+      "title": "Materialauszug",
+      "hint": "Alle Komponenten der Verteilung nach LV-Kapitel 243 Wärmeverteilung: Rohre (Vor- und Rücklauf), Bögen und T-Stücke, Absperrungen, Strangregulierventile, Heizkörper mit Ventil und Verschraubung, Dämmung.",
+      "lvGroup": "Wärmeverteilung {name}",
+      "listHint": "Rohre und Formstücke Optipress-Therm bzw. Optiflex-Flowpress von Nussbaum, Strangregulierventile IMI STAD, Dämmschalen von Meier Tobler (+20 % für Formstücke und Armaturen). Heizkörper, Heizkörperventile und Rücklaufverschraubungen neutral – Typ je nach Heizkörper. Die Fussbodenheizungs-Verteiler gehören zur Fussbodenheizung."
     }
   },
   "heatingPlan": {

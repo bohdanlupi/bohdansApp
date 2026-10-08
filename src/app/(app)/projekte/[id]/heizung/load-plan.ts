@@ -9,6 +9,7 @@ import { effectiveHeatingParams } from "@/lib/heating/params";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
 import { parsePlant } from "@/lib/heating/plant-schema";
 import { parseSchemaPlan } from "@/lib/kwl/schema-plan";
+import { type I18nText, pickText } from "@/lib/i18n-text";
 import { createClient } from "@/lib/supabase/server";
 
 /** Heizungsplanung of a project (defaults when none is saved yet). Deduplicated per request. */
@@ -50,4 +51,21 @@ export const loadHeatingSystems = cache(async (projectId: string) => {
   const supabase = await createClient();
   const { data } = await supabase.from("heating_systems").select("id, name, data").eq("project_id", projectId).order("sort").order("created_at");
   return (data ?? []).map((s) => ({ id: s.id, name: s.name, data: parseFloorSystem(s.data) }));
+});
+
+/** LVs of the project with their chapters (groups), for inserting a Materialauszug. */
+export const loadLvChapters = cache(async (projectId: string) => {
+  const supabase = await createClient();
+  const { data: lvRows } = await supabase.from("lvs").select("id, number, title, language").eq("project_id", projectId).order("number");
+  const { data: groupRows } = lvRows?.length
+    ? await supabase.from("lv_nodes").select("id, lv_id, parent_id, number, short_text, sort").in("lv_id", lvRows.map((l) => l.id)).eq("kind", "group").order("sort")
+    : { data: [] };
+  return (lvRows ?? []).map((lv) => ({
+    id: lv.id,
+    number: lv.number,
+    title: lv.title,
+    groups: (groupRows ?? [])
+      .filter((g) => g.lv_id === lv.id)
+      .map((g) => ({ id: g.id, parentId: g.parent_id, number: g.number, text: pickText(g.short_text as I18nText, lv.language).value })),
+  }));
 });

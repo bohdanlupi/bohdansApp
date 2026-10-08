@@ -61,6 +61,180 @@ export const thermPipes: (Article & { d: number })[] = [
   }
 ];
 
+export const thermBends90: (Article & { d: number })[] = [
+  {
+    "number": "55000.22",
+    "text": "Optipress-Therm-Bogen 90°, 15",
+    "d": 15
+  },
+  {
+    "number": "55000.23",
+    "text": "Optipress-Therm-Bogen 90°, 18",
+    "d": 18
+  },
+  {
+    "number": "55000.24",
+    "text": "Optipress-Therm-Bogen 90°, 22",
+    "d": 22
+  },
+  {
+    "number": "55000.25",
+    "text": "Optipress-Therm-Bogen 90°, 28",
+    "d": 28
+  },
+  {
+    "number": "55000.26",
+    "text": "Optipress-Therm-Bogen 90°, 35",
+    "d": 35
+  },
+  {
+    "number": "55000.27",
+    "text": "Optipress-Therm-Bogen 90°, 42",
+    "d": 42
+  },
+  {
+    "number": "55000.28",
+    "text": "Optipress-Therm-Bogen 90°, 54",
+    "d": 54
+  },
+  {
+    "number": "55000.70",
+    "text": "Optipress-Therm-Bogen 90°, 64",
+    "d": 64
+  },
+  {
+    "number": "55000.71",
+    "text": "Optipress-Therm-Bogen 90°, 76.1",
+    "d": 76.1
+  },
+  {
+    "number": "55000.72",
+    "text": "Optipress-Therm-Bogen 90°, 88.9",
+    "d": 88.9
+  },
+  {
+    "number": "55000.73",
+    "text": "Optipress-Therm-Bogen 90°, 108",
+    "d": 108
+  }
+];
+
+export const thermBends45: (Article & { d: number })[] = [
+  {
+    "number": "55003.22",
+    "text": "Optipress-Therm-Bogen 45°, 15",
+    "d": 15
+  },
+  {
+    "number": "55003.23",
+    "text": "Optipress-Therm-Bogen 45°, 18",
+    "d": 18
+  },
+  {
+    "number": "55003.24",
+    "text": "Optipress-Therm-Bogen 45°, 22",
+    "d": 22
+  },
+  {
+    "number": "55003.25",
+    "text": "Optipress-Therm-Bogen 45°, 28",
+    "d": 28
+  },
+  {
+    "number": "55003.26",
+    "text": "Optipress-Therm-Bogen 45°, 35",
+    "d": 35
+  },
+  {
+    "number": "55003.27",
+    "text": "Optipress-Therm-Bogen 45°, 42",
+    "d": 42
+  },
+  {
+    "number": "55003.28",
+    "text": "Optipress-Therm-Bogen 45°, 54",
+    "d": 54
+  },
+  {
+    "number": "55003.70",
+    "text": "Optipress-Therm-Bogen 45°, 64",
+    "d": 64
+  },
+  {
+    "number": "55003.71",
+    "text": "Optipress-Therm-Bogen 45°, 76.1",
+    "d": 76.1
+  },
+  {
+    "number": "55003.72",
+    "text": "Optipress-Therm-Bogen 45°, 88.9",
+    "d": 88.9
+  },
+  {
+    "number": "55003.73",
+    "text": "Optipress-Therm-Bogen 45°, 108",
+    "d": 108
+  }
+];
+
+export const thermTees: (Article & { d: number })[] = [
+  {
+    "number": "55010.22",
+    "text": "Optipress-Therm-T-Stück, 15",
+    "d": 15
+  },
+  {
+    "number": "55010.23",
+    "text": "Optipress-Therm-T-Stück, 18",
+    "d": 18
+  },
+  {
+    "number": "55010.24",
+    "text": "Optipress-Therm-T-Stück, 22",
+    "d": 22
+  },
+  {
+    "number": "55010.25",
+    "text": "Optipress-Therm-T-Stück, 28",
+    "d": 28
+  },
+  {
+    "number": "55010.26",
+    "text": "Optipress-Therm-T-Stück, 35",
+    "d": 35
+  },
+  {
+    "number": "55010.27",
+    "text": "Optipress-Therm-T-Stück, 42",
+    "d": 42
+  },
+  {
+    "number": "55010.28",
+    "text": "Optipress-Therm-T-Stück, 54",
+    "d": 54
+  },
+  {
+    "number": "55010.60",
+    "text": "Optipress-Therm-T-Stück, 64",
+    "d": 64
+  },
+  {
+    "number": "55010.61",
+    "text": "Optipress-Therm-T-Stück, 76.1",
+    "d": 76.1
+  },
+  {
+    "number": "55010.62",
+    "text": "Optipress-Therm-T-Stück, 88.9",
+    "d": 88.9
+  },
+  {
+    "number": "55010.63",
+    "text": "Optipress-Therm-T-Stück, 108",
+    "d": 108
+  }
+];
+
 export const ballValves: (Article & { d: number })[] = [
   {
     "number": "82100.22",

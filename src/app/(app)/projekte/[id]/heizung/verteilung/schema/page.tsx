@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import { loadProject } from "../../../load-project";
 import { ChapterFrame } from "../../chapter-frame";
-import { loadHeatingPlants, selectPlant } from "../../load-plan";
+import { loadHeatingPlants, loadLvChapters, selectPlant } from "../../load-plan";
 import { DistributionEditor } from "./distribution-editor";
 import { loadDistributionInputs } from "./load-inputs";
 
@@ -33,9 +33,9 @@ export default async function DistributionSchemaPage({ params, searchParams }: P
 
   // Strangschema of the Anlage (own query, so the other chapters do not depend on these columns).
   const supabase = await createClient();
-  const [{ data: row }, inputs] = plant
-    ? await Promise.all([supabase.from("heating_plants").select("distribution, distribution_plan").eq("id", plant.id).maybeSingle(), loadDistributionInputs(id, plant)])
-    : [{ data: null }, null];
+  const [{ data: row }, inputs, lvs] = plant
+    ? await Promise.all([supabase.from("heating_plants").select("distribution, distribution_plan").eq("id", plant.id).maybeSingle(), loadDistributionInputs(id, plant), loadLvChapters(id)])
+    : [{ data: null }, null, []];
 
   return (
     <ChapterFrame chapter="243" title={t("chapters.schemaDistribution")} projectId={id} plants={plants} plant={plant} editable={editable}>
@@ -49,6 +49,7 @@ export default async function DistributionSchemaPage({ params, searchParams }: P
           rooms={inputs.rooms}
           floors={inputs.floors}
           outsideTemp={inputs.outsideTemp}
+          lvs={lvs}
           editable={editable}
         />
       )}

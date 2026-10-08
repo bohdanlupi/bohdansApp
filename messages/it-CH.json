@@ -1922,6 +1922,12 @@
         "floorDistributor": "Collettore del riscaldamento a pavimento",
         "apparatus": "Utenza"
       }
+    },
+    "material": {
+      "title": "Estratto materiale",
+      "hint": "Tutti i componenti della distribuzione secondo il capitolo 243 Distribuzione del calore: tubi (mandata e ritorno), curve e raccordi a T, valvole d’arresto, valvole di regolazione delle colonne, radiatori con valvola e raccordo, isolamento.",
+      "lvGroup": "Distribuzione del calore {name}",
+      "listHint": "Tubi e raccordi Optipress-Therm o Optiflex-Flowpress di Nussbaum, valvole di regolazione IMI STAD, coppelle isolanti di Meier Tobler (+20 % per raccordi e rubinetteria). Radiatori, valvole dei radiatori e raccordi di ritorno neutri – tipo secondo il radiatore. I collettori del riscaldamento a pavimento fanno parte del riscaldamento a pavimento."
     }
   },
   "heatingPlan": {
