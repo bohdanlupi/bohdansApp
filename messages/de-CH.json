@@ -1779,7 +1779,8 @@
       "insulation": "Dämmung",
       "strang": "Strang",
       "head": "Δp",
-      "rings": "{n, plural, one {# Heizkreis} other {# Heizkreise}}"
+      "rings": "{n, plural, one {# Heizkreis} other {# Heizkreise}}",
+      "ringFittings": "Je Heizkreis Durchflussmesser (Taco-Setter) und Ventil für Stellantrieb"
     },
     "tree": {
       "title": "Verteilung",
@@ -1918,12 +1919,11 @@
       "insulation": "Dämmung (Dicke an der Leitung angeschrieben)",
       "symbols": {
         "ball": "Kugelhahn (Absperrung)",
-        "regValve": "Regulierventil (Strang, Heizkreis) / Rücklaufverschraubung",
+        "regValve": "Strangregulierventil / Rücklaufverschraubung",
         "thermoValve": "Heizkörperventil mit Thermostatkopf",
         "radiator": "Heizkörper",
         "floorDistributor": "Fussbodenheizungs-Verteiler",
         "apparatus": "Verbraucher",
-        "valve2": "Ventil mit Stellantrieb (Heizkreis)",
         "drain": "Entleerung",
         "heatMeter": "Wärmezähler mit Fühler im Vorlauf",
         "meterSet": "Anschlussset für Wärmezähler (Passstück, Tauchhülse)"

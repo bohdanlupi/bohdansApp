@@ -1779,7 +1779,8 @@
       "insulation": "Isolamento",
       "strang": "Colonna",
       "head": "Δp",
-      "rings": "{n, plural, one {# circuito} other {# circuiti}}"
+      "rings": "{n, plural, one {# circuito} other {# circuiti}}",
+      "ringFittings": "Per circuito flussimetro (Taco-Setter) e valvola per servomotore"
     },
     "tree": {
       "title": "Distribuzione",
@@ -1918,12 +1919,11 @@
       "insulation": "Isolamento (spessore indicato alla condotta)",
       "symbols": {
         "ball": "Rubinetto a sfera (arresto)",
-        "regValve": "Valvola di regolazione (colonna, circuito) / raccordo di ritorno",
+        "regValve": "Valvola di regolazione della colonna / raccordo di ritorno",
         "thermoValve": "Valvola del radiatore con testa termostatica",
         "radiator": "Radiatore",
         "floorDistributor": "Collettore del riscaldamento a pavimento",
         "apparatus": "Utenza",
-        "valve2": "Valvola con servomotore (circuito)",
         "drain": "Scarico",
         "heatMeter": "Contatore di calore con sonda di mandata",
         "meterSet": "Set di raccordo per contatore di calore (tronchetto, pozzetto)"

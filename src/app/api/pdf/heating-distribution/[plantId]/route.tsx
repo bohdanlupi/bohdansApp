@@ -57,6 +57,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
     circuit: (gr) => (circuitOf.has(gr.group.id) ? g(`circuits.${circuitOf.get(gr.group.id)}`) : ""),
     head: d("schemaText.head"),
     rings: (n) => t("heatingDistribution.schemaText.rings", { n }),
+    ringFittings: d("schemaText.ringFittings"),
   });
   const plan = parseSchemaPlan(plant.distribution_plan);
   const phase = plan.phase ? findPhase(plan.phase) : null;

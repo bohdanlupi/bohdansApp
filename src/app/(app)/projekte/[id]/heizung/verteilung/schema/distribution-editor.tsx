@@ -84,7 +84,7 @@ export function DistributionEditor({
   };
   const material = useMemo(() => distributionSections(distributionMaterial(data, result)), [data, result]);
   const schema = useMemo(
-    () => layoutDistribution(data, result, { vl: "VL", rl: "RL", insulation: t("schemaText.insulation"), strang: t("schemaText.strang"), circuit: circuitName, head: t("schemaText.head"), rings: (n) => t("schemaText.rings", { n }) }),
+    () => layoutDistribution(data, result, { vl: "VL", rl: "RL", insulation: t("schemaText.insulation"), strang: t("schemaText.strang"), circuit: circuitName, head: t("schemaText.head"), rings: (n) => t("schemaText.rings", { n }), ringFittings: t("schemaText.ringFittings") }),
     [data, result], // eslint-disable-line react-hooks/exhaustive-deps
   );
 

@@ -31,10 +31,9 @@ const LANE = 48;
 const GROUP_W = 150; // group box and the start of its lines
 const TERM_W = 30; // terminal symbol
 // FBH-Verteiler drawn like the Sondenverteiler of 242: Verteiler (VL) and Sammler (RL) bars, the Heizkreise below.
-const RING_PITCH = 32;
+const RING_PITCH = 20;
 const RING_DUP = 10; // VL and RL leg of a Heizkreis
-const RING_MAX = 4; // drawn Heizkreise (the text gives the number)
-const FLOOR_EXTRA = 200; // width of the Verteiler and its fittings beyond a Heizkörper
+const RING_MAX = 12; // drawn Heizkreise (the text gives the number)
 const FLOOR_ROWS = 2; // rows of an FBH-Verteiler (its Heizkreise hang below it)
 
 export type DistributionText = {
@@ -47,6 +46,8 @@ export type DistributionText = {
   head: string;
   /** «n Heizkreise» of an FBH-Verteiler. */
   rings: (n: number) => string;
+  /** Fittings of each Heizkreis (Durchflussmesser, Ventil for the Stellantrieb), as text instead of symbols. */
+  ringFittings: string;
 };
 
 export type DistributionSymbol = SymbolKey | "thermoValve" | "floorDistributor" | "meterSet";
@@ -153,7 +154,12 @@ export function layoutDistribution(data: DistributionData, result: DistributionR
     return "";
   };
   const leaves = (n: HeatNode): number => (n.children.length ? n.children.reduce((s, c) => s + leaves(c), 0) : n.type === "floor" ? FLOOR_ROWS : 1);
-  const hasFloor = (n: HeatNode): boolean => n.type === "floor" || n.children.some(hasFloor);
+  /** Width of an FBH-Verteiler with its fittings (see floorTerminal) beyond a Heizkörper (with its longer text), the widest in the subtree. */
+  const floorExtra = (n: HeatNode): number =>
+    n.type === "floor"
+      ? (n.shutoff ? 26 : 0) + (n.heatMeter || n.meterSet ? 32 : 0) + 6 + 12 + (ringCount(n) - 1) * RING_PITCH + RING_DUP + 12 + 40 + 100 - TERM_W
+      : Math.max(0, ...n.children.map(floorExtra));
+  const ringCount = (n: HeatNode) => Math.max(1, Math.min(result.terminals.get(n.id)?.rings ?? 0, RING_MAX));
   const depth = (n: HeatNode): number => (n.children.length ? 1 + Math.max(...n.children.map(depth)) : 0);
 
   // --- Pass A: x positions, lanes, columns; one part per Heizgruppe ----------------------------------------------
@@ -178,7 +184,7 @@ export function layoutDistribution(data: DistributionData, result: DistributionR
         cur = next;
       }
     } else hang(n, -1, "");
-    const width = Math.max(130, ...hangs.map((h) => 40 + (h.depth + 1) * DX2 + LABEL_W + (hasFloor(h.node) ? FLOOR_EXTRA : 0)));
+    const width = Math.max(130, ...hangs.map((h) => 40 + (h.depth + 1) * DX2 + LABEL_W + floorExtra(h.node)));
     columns.push({ x: cursor, lane: from.lane, from, chain, hangs, width });
     cursor += width;
   };
@@ -261,11 +267,11 @@ export function layoutDistribution(data: DistributionData, result: DistributionR
 
   /**
    * FBH-Verteiler from x on the row, like the Sondenverteiler of 242: Absperrungen and the Wärmezähler (or its
-   * Anschlussset) in the Anbindung, then the Verteiler (VL) and Sammler (RL) bars with the Heizkreise below them –
-   * Regulierventil in the VL, Ventil with Stellantrieb in the RL – and the Entleerungen at the end of the bars.
+   * Anschlussset) in the Anbindung, then the Verteiler (VL) and Sammler (RL) bars with the Heizkreise below them (up to
+   * RING_MAX; their fittings are named in the text) and the Entleerungen at the end of the bars.
    * Returns the left end of the bars and the start of its text.
    */
-  const floorTerminal = (n: HeatNode, x: number, yRow: number, rings: number) => {
+  const floorTerminal = (n: HeatNode, x: number, yRow: number) => {
     const yV = yRow + OFF.vl;
     const yR = yRow + OFF.rl;
     let xe = x;
@@ -287,17 +293,14 @@ export function layoutDistribution(data: DistributionData, result: DistributionR
       xe += 32;
     }
     const xd = xe + 6;
-    const count = Math.max(1, Math.min(rings, RING_MAX));
+    const count = ringCount(n);
     const xs = Array.from({ length: count }, (_, i) => xd + 12 + i * RING_PITCH);
     const x2 = xs[count - 1] + RING_DUP + 12;
-    const yC = yR + 52;
+    const yC = yR + 14;
     for (const px of xs) {
       draw(n.id, "vl", [[px, yV], [px, yC]]);
       draw(n.id, "rl", [[px + RING_DUP, yC], [px + RING_DUP, yR]]);
       group(n.id, ringCoil(px, yC));
-      symbol(n.id, "regValve", px, yR + 18, true, "left");
-      used.add("valve2");
-      group(n.id, drawHeatSymbol("valve2", px + RING_DUP, yR + 36, "up", { side: sideOf("up", "right") }));
     }
     used.add("floorDistributor");
     group(n.id, [bar(xd, x2, yV), bar(xd, x2, yR)]);
@@ -315,12 +318,13 @@ export function layoutDistribution(data: DistributionData, result: DistributionR
       group(n.id, [...thermoValve(x - 10, yRow + OFF.vl), { t: "rect", x, y: yRow - 5, w: TERM_W, h: SPAN + 10, fill: "bg", stroke: "ink", sw: 1.2 }]);
       symbol(n.id, "regValve", x - 10, yRow + OFF.rl);
     } else if (n.type === "floor") {
-      const f = floorTerminal(n, x, yRow, t?.rings ?? 0);
+      const f = floorTerminal(n, x, yRow);
       label(n.id, f.text, yRow + 3, t?.name || n.label || "–", 8);
       if (t) {
         label(n.id, f.text, yRow + 13, `${fmt0(t.power)} W · ${fmt0(t.massFlow)} kg/h · ${fmt1(t.tArrive)} °C`, 7, { muted: true });
         if (t.rings) label(n.id, f.text, yRow + 23, labels.rings(t.rings), 7, { muted: true });
       }
+      label(n.id, f.text, yRow + (t?.rings ? 33 : 23), labels.ringFittings, 7, { muted: true });
       return f.xd;
     } else {
       used.add("apparatus");
