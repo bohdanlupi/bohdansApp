@@ -38,6 +38,13 @@ const families = {
   "19051": "Wasserenthärter Aquapro-Vita Compact",
   "19053": "Wasserenthärter Aquapro-Vita",
   "67100": "Rohbauset, für Messkapsel Koax",
+  "67016": "Messkapsel Koax",
+  // Wohnungsverteiler: Unterputz boxes behind the Waschtisch, Verteilerkasten, single parts.
+  "70120": "Unterputz-Waschtischbox",
+  "70112": "Unterputz-Armaturenbox, Doppelausführung",
+  "11050": "Reduzierpatrone, zu Unterputz-Druckreduziergarnitur",
+  "11000": "Druckreduzierventil ohne Verschraubung, 2 bar bis 6 bar",
+  "86044": "Verteilerkasten, mit Rahmen mit Türe",
   "81018": "Optipress-Aquaplus-Temperaturmessstelle, für gedämmte Leitungen",
   // Fittings of the material list (Rohre): bends, T-pieces, reducers, couplings, transitions, manifolds.
   "80000": "Optipress-Aquaplus-Bogen 90°",

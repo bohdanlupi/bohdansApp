@@ -405,9 +405,8 @@ Verteil- / Steigleitungen (switchable). Warning above 65 °C (SIA 385/1 4.1.1).
 Prinzipschema: Strangschema (schema.ts; symbols after SVGW W3 Anhang 4 / SN EN 806-1, SIA 410 only where W3 has none:
 Enthärtung 1.27.1, Wassererwärmer 5.1.19, adjustable arrow of the Regulierventil von Hand; PWC green, PWH red, PWH-C
 orange, like the Schemavorlage). Drawn after Berechnungsvorlagen/Sanitär/Schemavorlage_Sanitär.pdf (2026-10-09): Verteilbatterie as a
-collector with an Abgang per line (Absperrventil mit Entleerung, Verschraubung) and an Entleerung at its end; the
-Wohnungsverteiler (Absperrventile + Wohnungswasserzähler) in a box, «Aufputz» or «Unterputz (Vorwand)» per Leitung
-(SanNode.mount, taken over by its Apparategruppen); each Apparategruppe as a Verteiler with one outlet per Apparat and
+collector with an Abgang per line (Absperrventil mit Entleerung, Verschraubung) and an Entleerung at its end; each
+Apparategruppe as a Verteiler with one outlet per Apparat and
 every Apparat (counts expanded, max 16) drawn on its own PWC / PWH line (Waschtisch, WC UP-Spülkasten, Dusche,
 Badewanne, Geschirrspüler, Waschautomat, Urinoir, Balkon- / Gartenventil; light blue bodies).
 Ausstossleitungen (2026-10-09): an Apparategruppe holds its Apparate as a list (SanNode.outlets; older data with counts per
@@ -416,7 +415,15 @@ type is converted on load), order = order along the Verteiler (◀ / ▶ in the 
 the lengths go into the material list. Drawn like the Schemavorlage: down out of the Verteiler, along below it, up to
 the Apparat, with size / length / Ausstosszeit under it. Ausstosszeit = PWH water content from the last warmgehaltene
 point (end of the circulated sections, else the Wassererwärmer incl. its line in the Zentrale) ÷ tap flow (user
-decision; SIA 385/2 with pipe heat-up not available), warning above SIA 385/1 4.3: 10 s with Warmhaltung, 15 s without. Web view at a fixed
+decision; SIA 385/2 with pipe heat-up not available), warning above SIA 385/1 4.3: 10 s with Warmhaltung, 15 s without.
+Verteiler per Apparategruppe (2026-10-09, SanNode.distributor, distributor.ts; replaces Wohnungswasserzähler / Unterputz on
+the Leitung, older data moved down on load): «PEX-Verteiler im Kasten» (Verteilerkasten 86044, 400–900 by the outlets),
+«Aufputz», «hinter WT»; per line PWC / PWH Absperrung, Druckreduzierung, Wasserzähler or Passstück (meter to follow).
+Hinter WT, both lines together: only Absperrung + Wasserzähler / Passstück → Unterputz-Waschtischbox 70120 (Messkapsel
+Koax 67016 per meter, Blinddeckel for the Passstück, the Waschtisch fed from the box without a Pex line or Verteiler
+outlet); only Absperrung + Druckreduzierung → Unterputz-Armaturenbox 70112 + Reduzierpatrone 11050 per line; else single
+articles. Single articles: Schrägsitzventil, Druckreduzierventil 11000 (2–6 bar), Rohbauset 67100 (+ Messkapsel 67016
+for a meter). W3 Tabellen 4.1 / 4.2 «mit Wasserzähler» when a Verteiler of the group has a meter or Passstück. Web view at a fixed
 scale (1.3 px per unit), full height, horizontal slider below to move it + plan PDF /api/pdf/sanitary-schema/<id> (Plankopf / revisions as the Lüftung schema; sheet height 297 / 420 /
 594 mm, width a multiple of 210 mm, wide enough for schema and legend).
 Insulation drawn as yellow bands with black dotted edges; each Leitung is labelled «KW / WW / ZK: diameter · insulation»

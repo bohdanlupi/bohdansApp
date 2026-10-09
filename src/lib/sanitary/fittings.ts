@@ -11,6 +11,7 @@
 import { type NussbaumFamily, nussbaumArticles } from "./catalog-data";
 import { consumerLu, type Medium, type SanitaryData, type SanNode, type SystemResult } from "./network";
 import { type PipeSize, sizeText } from "./pipes";
+import { distributorPlan } from "./distributor";
 import { appliances } from "./w3";
 
 export type FittingLine = { key: string; article: string | null; label: string; count: number };
@@ -170,7 +171,9 @@ export function systemFittings(data: SanitaryData, result: SystemResult): Fittin
       for (const m of ["pwc", "pwh"] as const) {
         const feed = sizeOf(n, m);
         if (!feed) continue;
-        const outlets = c.outlets.filter((o) => (m === "pwc" ? appliances[o.type].cold : appliances[o.type].warm) > 0).length;
+        // The Waschtisch at the Unterputz-Waschtischbox needs no outlet of the Verteiler.
+        const fromBox = distributorPlan(c.distributor, c.outlets).fromBox;
+        const outlets = c.outlets.filter((o) => o.id !== fromBox && (m === "pwc" ? appliances[o.type].cold : appliances[o.type].warm) > 0).length;
         manifold(feed, outlets);
       }
     }

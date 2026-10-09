@@ -39,7 +39,7 @@ export type SanitaryLegend = {
  */
 function legendTransform(key: SymbolKey) {
   if (isApplianceSymbol(key)) return "translate(15, 10) scale(0.42)";
-  const shifted: Partial<Record<SymbolKey, [number, number]>> = { redfil: [-3, 0.6], safety: [5, 0.6], heater: [0, 0.6], manifoldConcealed: [2, 0.6] };
+  const shifted: Partial<Record<SymbolKey, [number, number]>> = { redfil: [-3, 0.6], safety: [5, 0.6], heater: [0, 0.6], cabinet: [2, 0.6] };
   const [dy, k] = shifted[key] ?? [0, 0.8];
   return `translate(15, ${dy}) scale(${k})`;
 }

@@ -3053,7 +3053,9 @@
       "materials": {
         "pir": "PIR",
         "mineralwool": "laine minérale"
-      }
+      },
+      "box": "Boîtier ENC",
+      "cabinet": "Coffret de distribution"
     },
     "tree": {
       "title": "Distribution",
@@ -3091,7 +3093,6 @@
       },
       "riser": "Colonne montante",
       "shutoff": "Vannes d'arrêt",
-      "meter": "Compteur d'appartement",
       "system": "Système de tubes",
       "circulation": "Circulation",
       "circulations": {
@@ -3106,12 +3107,7 @@
         "manual": "vanne de réglage manuelle (Nussbaum 24026)"
       },
       "bends90": "Coudes 90° [pce]",
-      "bends45": "Coudes 45° [pce]",
-      "mount": "Distributeur",
-      "mounts": {
-        "surface": "apparent",
-        "concealed": "encastré (prémur)"
-      }
+      "bends45": "Coudes 45° [pce]"
     },
     "appliances": {
       "wc": "WC à réservoir (1 / –)",
@@ -3273,8 +3269,7 @@
         "regValveThermal": "Vanne de circulation thermostatique",
         "union": "Raccord à vis",
         "drain": "Vidange",
-        "manifold": "Distributeur, une sortie par appareil",
-        "manifoldConcealed": "Distributeur dans coffret encastré (prémur)",
+        "manifold": "Distributeur PEX, une sortie par appareil",
         "wc": "WC avec réservoir encastré",
         "basin": "Lavabo avec mélangeur sur gorge",
         "shower": "Douche avec mélangeur mural et douchette",
@@ -3282,7 +3277,10 @@
         "dishwasher": "Lave-vaisselle",
         "washer": "Lave-linge",
         "urinal": "Urinoir avec robinet à fermeture automatique",
-        "outlet": "Robinet de balcon / jardin avec dispositif de protection et raccord de tuyau"
+        "outlet": "Robinet de balcon / jardin avec dispositif de protection et raccord de tuyau",
+        "spacer": "Pièce d’adaptation (compteur à venir)",
+        "cabinet": "Distributeur PEX dans coffret de distribution",
+        "basinBox": "Boîtier encastré pour lavabo / robinetterie avec arrêts"
       },
       "insulationBand": "Isolation (épaisseur indiquée à la conduite)"
     },
@@ -3303,7 +3301,31 @@
       "time": "Temps d’écoulement {time} s (max. {limit} s) · {volume} l depuis {from}",
       "fromKept": "la conduite maintenue en température",
       "fromHeater": "le chauffe-eau",
-      "noLength": "Temps d’écoulement : saisir la longueur PWH"
+      "noLength": "Temps d’écoulement : saisir la longueur PWH",
+      "fromBox": "Directement depuis le boîtier encastré pour lavabo – pas de conduite PEX propre."
+    },
+    "distributor": {
+      "title": "Distributeur",
+      "type": "Type",
+      "types": {
+        "cabinet": "Distributeur PEX en coffret",
+        "surface": "Distributeur PEX apparent",
+        "basin": "Distributeur PEX derrière lavabo"
+      },
+      "shutoff": "Arrêt",
+      "reducer": "Réduction de pression",
+      "meter": "Compteur d’eau",
+      "meters": {
+        "none": "sans compteur",
+        "spacer": "Pièce d’adaptation",
+        "meter": "Compteur d’eau"
+      },
+      "box70120": "Boîtier encastré pour lavabo 70120 – lavabo raccordé directement",
+      "box70112": "Boîtier de robinetterie encastré 70112 avec cartouche de réduction",
+      "basinSingle": "Pièces séparées – la combinaison ne tient dans aucun boîtier",
+      "cabinetResult": "Coffret de distribution {size} mm, pièces séparées",
+      "single": "Pièces séparées",
+      "hint": "Derrière le lavabo : seulement arrêt + compteur / pièce d’adaptation → boîtier pour lavabo 70120, seulement arrêt + réduction de pression → boîtier de robinetterie 70112, sinon pièces séparées."
     }
   }
 }

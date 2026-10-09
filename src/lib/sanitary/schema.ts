@@ -14,7 +14,8 @@
 import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
 import { floorOrder } from "@/lib/kwl/schema-layout";
 
-import type { Medium, Mount, SanitaryData, SanNode, SystemResult } from "./network";
+import { distributorPlan, type DistributorPlan } from "./distributor";
+import type { Medium, SanitaryData, SanNode, SystemResult } from "./network";
 import { consumerLu } from "./network";
 import { insulationStyle, type PipeSize, sizeText } from "./pipes";
 import type { ApplianceKey } from "./w3";
@@ -52,6 +53,9 @@ export type SchemaText = {
   meter: string;
   battery: string;
   softener: string;
+  /** «UP-Box 70120», «Verteilerkasten 600». */
+  box: string;
+  cabinet: string;
   lu: string;
 };
 
@@ -75,7 +79,9 @@ export type SymbolKey =
   | "union"
   | "drain"
   | "manifold"
-  | "manifoldConcealed"
+  | "spacer"
+  | "cabinet"
+  | "basinBox"
   | ApplianceSymbol;
 
 /** Apparate (drawn upright, standing on their connections); Balkon- and Gartenventil share one symbol. */
@@ -277,9 +283,23 @@ export function drawSymbol(key: SymbolKey, x: number, y: number, vertical = fals
       ];
     }
     case "manifold":
-    case "manifoldConcealed":
       // Verteiler with one outlet per Apparat (legend: three outlets on one line).
-      return manifoldPrims(x - manifoldWidth(3) / 2, y, y, 3, 0, key === "manifoldConcealed");
+      return manifoldPrims(x - manifoldWidth(3) / 2, y, y, 3, 0, false);
+    case "cabinet":
+      // Verteiler in its Verteilerkasten (frame with the door strip).
+      return manifoldPrims(x - manifoldWidth(3) / 2, y, y, 3, 0, true);
+    case "spacer": {
+      // Passstück: the place of the Wasserzähler, the meter to follow (dashed W3 Wasserzähler).
+      const [cx, cy] = f(0, 0);
+      return [
+        { t: "path", d: `M${cx - 7},${cy - 7} H${cx + 7} V${cy + 7} H${cx - 7} Z`, fill: "bg", stroke: "ink", sw: 1, dash: "2 1.5" },
+        line(-7, -3, 7, -3, 0.6),
+        text(0, 2, "m³", 4.8, "muted"),
+      ];
+    }
+    case "basinBox":
+      // Unterputz box behind the Waschtisch with the Absperrungen inside.
+      return [rect(-13, -9, 26, 18, "none", "ink", 1.3), ...valve()];
     case "battery":
       // Verteilbatterie: the collector with its Abgänge.
       return [line(-6, 0, -6, -9), line(4, 0, 4, -9), rect(-12, -3, 24, 6)];
@@ -383,11 +403,16 @@ function applianceRow(n: SanNode) {
 /** Width of the group text right of the last Apparat (name 8, LU 7 units high). */
 const groupTextWidth = (n: SanNode) => Math.max(50, n.label.length * 4.4) + 10;
 
-/** Width of an Apparategruppe from its Verteiler to the end of its text. */
+/** Pitch of the parts of a Verteiler (Absperrung, Druckreduzierung, Wasserzähler) along the line. */
+const PART_W = 20;
+/** Room for the parts in front of the Verteiler; in the box also for the Waschtisch branching off. */
+const partsWidth = (plan: DistributorPlan) => (plan.box ? Math.max(22, plan.kinds.length * PART_W + 14) : plan.kinds.length ? plan.kinds.length * PART_W + 6 : 0);
+
+/** Width of an Apparategruppe from its Verteiler (with its parts) to the end of its text. */
 function consumerWidth(n: SanNode): number {
   const row = applianceRow(n);
   const apps = row.items.reduce((s, i) => s + APPLIANCE[i.key].w, 0);
-  return manifoldWidth(Math.max(row.cold, row.warm, 1)) + APP_GAP + apps + groupTextWidth(n);
+  return partsWidth(distributorPlan(n.distributor, n.outlets)) + manifoldWidth(Math.max(row.cold, row.warm, 1)) + APP_GAP + apps + groupTextWidth(n) + 6;
 }
 
 /** Right edge of a hanging element (relative to its column) at depth d whose lines start at `start`. */
@@ -609,28 +634,44 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
      * children branching down from the end of their pipe, consumers as outlet markers with their text.
      * `start(m)`: x where each line begins. Returns the rows used.
      */
-    const placeHang = (n: SanNode, d: number, start: (m: Medium) => number, yRow: number, mount: Mount): number => {
+    const placeHang = (n: SanNode, d: number, start: (m: Medium) => number, yRow: number): number => {
       const endX = c.x + 30 + (d + 1) * DX2;
       if (n.type === "consumer") {
-        // Apparategruppe: Verteiler (open or in its Unterputzkasten like the Stockwerkverteilung), then every
+        // Apparategruppe: the parts of its Verteiler per line (Absperrung, Druckreduzierung, Wasserzähler / Passstück),
+        // in the Unterputz box behind the Waschtisch or with the Pex-Verteiler in the Verteilerkasten; then every
         // Apparat on its own Pex line: down out of the Verteiler, along below it and up to the Apparat (like the
         // Schemavorlage; the lines run together but are separate, so no junction dots). Under each Apparat its Pex
-        // size, length and Ausstosszeit.
+        // size, length and Ausstosszeit. The Waschtisch at the Unterputz-Waschtischbox is fed from the box.
         const row = applianceRow(n);
-        const xM = Math.max(start("pwc") + 16, c.x + 44);
-        const wM = manifoldWidth(Math.max(row.cold, row.warm, 1));
+        const plan = distributorPlan(n.distributor, n.outlets);
+        const xP = Math.max(start("pwc") + 16, c.x + 44);
+        const xM = xP + partsWidth(plan);
+        // Outlets of the Verteiler (the Waschtisch at the box takes none).
+        const outCold = row.cold - (plan.fromBox ? 1 : 0);
+        const outWarm = row.warm - (plan.fromBox ? 1 : 0);
+        const wM = manifoldWidth(Math.max(outCold, outWarm, 1));
         const y = { pwc: yRow + OFF.pwc, pwh: yRow + OFF.pwh };
         const bus = { pwc: yRow + BUS.pwc, pwh: yRow + BUS.pwh };
         for (const m of ["pwc", "pwh"] as const) if (carries(n, m)) draw(n.id, m, [[start(m), y[m]], [xM, y[m]]]);
+        for (const m of plan.lines) {
+          const parts = n.distributor[m];
+          plan.kinds.forEach((k, i) => {
+            const key: SymbolKey | null = k === "meter" ? (parts.meter === "meter" ? "meter" : parts.meter === "spacer" ? "spacer" : null) : parts[k] ? (k === "shutoff" ? "shutoff" : "reducer") : null;
+            if (key) symbol(n.id, key, xP + PART_W / 2 + i * PART_W, y[m]);
+          });
+        }
         const yF = yRow - 8;
         const outletNo = { pwc: 0, pwh: 0 };
         let x = xM + wM + APP_GAP;
         for (const { outlet, key } of row.items) {
           const g = APPLIANCE[key];
           const cx = x + g.w / 2;
+          const fromBox = outlet.id === plan.fromBox;
           const pex = (m: "pwc" | "pwh", tx: number) => {
-            const ox = outletX(xM, m, outletNo[m]++);
+            // From an outlet of the Verteiler, or (the Waschtisch at its box) branching off inside the box.
+            const ox = fromBox ? xM - (m === "pwc" ? 9 : 5) : outletX(xM, m, outletNo[m]++);
             draw(n.id, m, [[ox, y[m]], [ox, bus[m]], [tx, bus[m]], [tx, yF - 1]]);
+            if (fromBox) dot(ox, y[m], m);
           };
           pex("pwc", cx + g.cold);
           if (g.warm !== null) pex("pwh", cx + g.warm);
@@ -641,15 +682,32 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
           const both = <T>(c: T, w: T | undefined, f: (v: T) => string) => (w === undefined || f(c) === f(w) ? f(c) : `${f(c)}/${f(w)}`);
           const len = (v: number | null) => (v === null ? "–" : fmt1(v));
           const lines: [string, Paint][] = [];
-          if (r?.pwc) lines.push([`Pex ${both(r.pwc.size.od, r.pwh?.size.od, String)}`, "muted"]);
-          lines.push([`${both(outlet.lengthPwc, r?.pwh ? outlet.lengthPwh : undefined, len)} m`, "muted"]);
+          if (fromBox) lines.push([`${labels.box} ${plan.box}`, "muted"]);
+          else {
+            if (r?.pwc) lines.push([`Pex ${both(r.pwc.size.od, r.pwh?.size.od, String)}`, "muted"]);
+            lines.push([`${both(outlet.lengthPwc, r?.pwh ? outlet.lengthPwh : undefined, len)} m`, "muted"]);
+          }
           if (r?.time != null) lines.push([`${fmt1(r.time)} s`, r.time > r.limit ? "#d00000" : "muted"]);
           lines.forEach(([s, fill], i) => group(n.id, [{ t: "text", x: cx, y: bus.pwc + 9 + i * 7, text: s, size: 5.5, anchor: "middle", fill }]));
           x += g.w;
         }
-        const concealed = mount === "concealed";
-        used.add(concealed ? "manifoldConcealed" : "manifold");
-        group(n.id, manifoldPrims(xM, y.pwc, y.pwh, row.cold, row.warm, concealed));
+        used.add("manifold");
+        // Unterputz box around the parts (its article above it); Verteilerkasten around the parts and the Verteiler.
+        if (plan.box) {
+          used.add("basinBox");
+          group(n.id, [
+            { t: "rect", x: xP - 3, y: yRow - 11, w: xM - xP, h: OFF.pwh + 22, fill: "none", stroke: "ink", sw: 1.3 },
+            { t: "text", x: xP - 3, y: yRow - 14, text: `${labels.box} ${plan.box}`, size: 5.5, fill: "muted" },
+          ]);
+        }
+        if (plan.cabinet) {
+          used.add("cabinet");
+          group(n.id, [
+            ...concealedBox(xP - 6, yRow - 17, xM + wM + 12 - xP, OFF.pwh + 29),
+            { t: "text", x: xP - 6, y: yRow - 20, text: `${labels.cabinet} ${plan.cabinetSize}`, size: 5.5, fill: "muted" },
+          ]);
+        }
+        group(n.id, manifoldPrims(xM, y.pwc, y.pwh, outCold, outWarm, false));
         const lu = consumerLu(n.outlets);
         label(n.id, x + 8, yRow + 3, n.label || "–", 8);
         label(n.id, x + 8, yRow + 13, `${lu.cold} / ${lu.warm} ${labels.lu}`, 7, { muted: true });
@@ -661,28 +719,16 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
         draw(n.id, m, paths[m]!);
       }
       bandsOf(n, paths);
-      // Wohnungsverteiler: Absperrventile and Wohnungswasserzähler side by side on PWC and PWH, in a common box
-      // (open, or the Unterputzkasten) like the Schemavorlage.
-      const x0 = start("pwhc") + 16;
-      const sx = x0 + 8;
-      const mx = n.shutoff ? x0 + 28 : x0 + 10;
-      const meters = (["pwc", "pwh"] as const).filter((m) => carries(n, m));
-      if (n.shutoff) meters.forEach((m) => symbol(n.id, "shutoff", sx, yRow + OFF[m]));
-      if (n.meter) {
-        meters.forEach((m) => symbol(n.id, "meter", mx, yRow + OFF[m]));
-        const bx = x0 - 2;
-        const bw = mx + 10 - bx;
-        group(n.id, n.mount === "concealed" ? concealedBox(bx - 2, yRow - 17, bw + 4, OFF.pwh + 29) : [{ t: "rect", x: bx, y: yRow - 10, w: bw, h: OFF.pwh + 20, fill: "none", stroke: "ink", sw: 1 }]);
-      }
+      // Absperrventile at the start of the Leitung.
+      if (n.shutoff) (["pwc", "pwh"] as const).filter((m) => carries(n, m)).forEach((m) => symbol(n.id, "shutoff", start("pwhc") + 24, yRow + OFF[m]));
       const title = [n.label, n.length ? `${fmt1(n.length)} m` : ""].filter(Boolean).join(" · ");
-      // Above the lines, clear of the Wohnungsverteiler box on them.
-      textBlock(n.id, endX - 4, yRow - (n.meter ? (n.mount === "concealed" ? 21 : 14) : 10), [...(title ? [title] : []), ...lineText(n)], "end");
+      textBlock(n.id, endX - 4, yRow - 10, [...(title ? [title] : []), ...lineText(n)], "end");
       if (circuitEnds.has(n.id)) circulationEnd(n, endX, yRow);
       let rows = 0;
       n.children.forEach((child, i) => {
         const cy = yRow + rows * RH;
         if (i === 0) {
-          rows += placeHang(child, d + 1, () => endX, cy, n.mount);
+          rows += placeHang(child, d + 1, () => endX, cy);
           return;
         }
         // Branch down from the end of this pipe, the lines turning in reverse order (like the Verteilleitung).
@@ -692,7 +738,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
           draw(child.id, m, [[endX, yRow + OFF[m]], [bx(m), yRow + OFF[m]]]);
           if (carries(n.children[0], m)) dot(bx(m), yRow + OFF[m], m);
         }
-        rows += placeHang(child, d + 1, bx, cy, n.mount);
+        rows += placeHang(child, d + 1, bx, cy);
         // The vertical part of the branch, drawn after the child knows its row.
         for (const m of mediaOf(child)) if (carries(n, m)) draw(child.id, m, [[bx(m), yRow + OFF[m]], [bx(m), cy + OFF[m]]]);
       });
@@ -747,7 +793,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
         const yRow = hangY(h);
         // T-junction on the Strang unless the Strang ends in this row.
         for (const m of mediaOf(h.node)) if (yRow > colTop) dot(c.x + OFF[m], yRow + OFF[m], m);
-        placeHang(h.node, 0, (m) => c.x + OFF[m], yRow, c.chain[h.anchor]?.mount ?? "surface");
+        placeHang(h.node, 0, (m) => c.x + OFF[m], yRow);
       }
     } else {
       // Column without Strang: the group rises from the Verteilleitung straight to its storey.
@@ -757,7 +803,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
           draw(h.node.id, m, [...riseFrom(m), [c.x + OFF[m], yRow + OFF[m]]]);
           if (c.from.continues) dot(c.x + OFF[m], yFrom + OFF[m], m);
         }
-        placeHang(h.node, 0, (m) => c.x + OFF[m], yRow, "surface");
+        placeHang(h.node, 0, (m) => c.x + OFF[m], yRow);
       }
     }
   }

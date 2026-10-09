@@ -3,9 +3,10 @@
 // Mineralwolle: ROHHE r.Heat A Alu kaschiert, PIR: swisspor Kisodur PIR Alu (glatt) – with 20 % for the fittings.
 
 import { type NussbaumFamily, nussbaumArticles } from "./catalog-data";
+import { distributorPlan } from "./distributor";
 import { systemFittings } from "./fittings";
 import { type InsulationShell, insulationShells } from "./insulation-data";
-import type { SanitaryData, SanNode, SystemResult } from "./network";
+import type { PipeResult, SanitaryData, SanNode, SystemResult } from "./network";
 import { articleFor, type InsulationMaterial, type PipeSize, pipeArticle } from "./pipes";
 
 export type QuantityLine = {
@@ -61,10 +62,36 @@ export function systemQuantities(data: SanitaryData, result: SystemResult): Quan
     else add({ key: `ins|${mm}|${size.key}|${shared}`, group: "insulation", manufacturer: null, article: null, label: `Dämmung ${mm} mm – ${size.label}${shared ? " (Rohr an Rohr)" : ""}`, unit: "m" }, amount);
   };
 
+  // Wohnungsverteiler of an Apparategruppe (distributor.ts): the Unterputz box behind the Waschtisch with its
+  // Messkapseln / Reduzierpatronen, or the single parts per line sized by the Leitung feeding it; the Verteilerkasten.
+  const distributor = (c: SanNode, feed: PipeResult) => {
+    const plan = distributorPlan(c.distributor, c.outlets);
+    if (plan.box) nussbaum("valves", plan.box, null, 1);
+    const cabinet = plan.cabinet ? nussbaumArticles["86044"].find((a) => a.number === plan.cabinet) : null;
+    if (cabinet) add({ key: `nb|${cabinet.number}`, group: "valves", manufacturer: "Nussbaum", article: cabinet.number, label: cabinet.text, unit: "Stk" }, 1);
+    for (const m of plan.lines) {
+      const parts = c.distributor[m];
+      const size = feed[m]?.size ?? null;
+      if (plan.box === "70120") {
+        if (parts.meter === "meter") nussbaum("valves", "67016", null, 1);
+        continue;
+      }
+      if (plan.box === "70112") {
+        if (parts.reducer) nussbaum("valves", "11050", null, 1);
+        continue;
+      }
+      if (parts.shutoff && size) nussbaum("valves", valveFor("shutoff", size), size, 1);
+      if (parts.reducer) nussbaum("valves", "11000", size, 1);
+      if (parts.meter !== "none") nussbaum("valves", "67100", size, 1);
+      if (parts.meter === "meter") nussbaum("valves", "67016", null, 1);
+    }
+  };
+
   const walk = (n: SanNode) => {
-    // Ausstossleitungen of the Apparate: Pex PWC / PWH with their lengths.
+    // Ausstossleitungen of the Apparate: Pex PWC / PWH with their lengths (none for the Waschtisch at its box).
     for (const o of n.outlets) {
       const r = result.outlets.get(o.id);
+      if (!r || r.fromBox) continue;
       if (r?.pwc) pipe(r.pwc.size, o.lengthPwc ?? 0);
       if (r?.pwh) pipe(r.pwh.size, o.lengthPwh ?? 0);
     }
@@ -91,10 +118,7 @@ export function systemQuantities(data: SanitaryData, result: SystemResult): Quan
         if (r.pwc) nussbaum("valves", valveFor("shutoff", r.pwc.size), r.pwc.size, 1);
         if (r.pwh) nussbaum("valves", valveFor("shutoff", r.pwh.size), r.pwh.size, 1);
       }
-      if (n.meter) {
-        if (r.pwc) nussbaum("valves", "67100", null, 1);
-        if (r.pwh) nussbaum("valves", "67100", null, 1);
-      }
+      for (const c of n.children) if (c.type === "consumer") distributor(c, r);
     }
     n.children.forEach(walk);
   };

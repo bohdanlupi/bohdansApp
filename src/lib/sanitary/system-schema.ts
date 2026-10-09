@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { type Distributor, distributorTypes, type LineParts, meterSlots } from "./distributor";
 import { type Central, defaultCentral, defaultSettings, MAX_OUTLETS, type Outlet, outletsFrom, type SanitaryData, type SanNode, type Settings } from "./network";
 import { findSize } from "./pipes";
 import { type ApplianceKey, applianceKeys } from "./w3";
@@ -31,6 +32,7 @@ const nodeFields = z.object({
   sizePwc: sizeKey,
   sizePwh: sizeKey,
   sizePwhc: sizeKey,
+  // Older data: Wohnungswasserzähler and mounting on the Leitung, moved to its Apparategruppen below.
   meter: z.boolean().catch(false),
   shutoff: z.boolean().catch(false),
   regValve: z.enum(["thermal", "manual"]).catch("thermal"),
@@ -69,10 +71,32 @@ function parseOutlets(raw: unknown, counts: Partial<Record<ApplianceKey, number>
   }).slice(0, MAX_OUTLETS);
 }
 
+const partsSchema: z.ZodType<LineParts> = z.object({
+  shutoff: z.boolean().catch(false),
+  reducer: z.boolean().catch(false),
+  meter: z.enum(meterSlots as [LineParts["meter"], ...LineParts["meter"][]]).catch("none"),
+});
+const distributorSchema: z.ZodType<Distributor> = z.object({
+  type: z.enum(distributorTypes as [Distributor["type"], ...Distributor["type"][]]),
+  pwc: partsSchema,
+  pwh: partsSchema,
+});
+
+/** Older data: Wohnungswasserzähler / Absperrventile / Unterputz of the Leitung above an Apparategruppe. */
+type Legacy = { meter: boolean; shutoff: boolean; concealed: boolean };
+
+/** Verteiler of a consumer: as saved, else from the Leitung above it (older data), else without parts. */
+function parseDistributor(raw: unknown, legacy: Legacy | null): Distributor {
+  const parsed = distributorSchema.safeParse(raw);
+  if (parsed.success) return parsed.data;
+  const parts = (): LineParts => ({ shutoff: legacy?.shutoff ?? false, reducer: false, meter: legacy?.meter ? "meter" : "none" });
+  return { type: legacy?.concealed ? "cabinet" : "surface", pwc: parts(), pwh: parts() };
+}
+
 const MAX_DEPTH = 40;
 const MAX_NODES = 2000;
 
-function parseNodes(raw: unknown, depth: number, budget: { left: number }): SanNode[] {
+function parseNodes(raw: unknown, depth: number, budget: { left: number }, legacy: Legacy | null = null): SanNode[] {
   if (!Array.isArray(raw) || depth > MAX_DEPTH) return [];
   const out: SanNode[] = [];
   for (const item of raw) {
@@ -81,11 +105,15 @@ function parseNodes(raw: unknown, depth: number, budget: { left: number }): SanN
     if (!parsed.success) continue;
     budget.left--;
     // Consumers are leaves.
-    const { appliances, ...fields } = parsed.data;
-    const raw = item as { children?: unknown; outlets?: unknown };
-    const children = fields.type === "pipe" ? parseNodes(raw.children, depth + 1, budget) : [];
+    const { appliances, meter, mount, ...fields } = parsed.data;
+    const raw = item as { children?: unknown; outlets?: unknown; distributor?: unknown };
+    // A Leitung with a Wohnungswasserzähler or Unterputz mounting (older data) hands it, with its Absperrventile, to
+    // the Apparategruppen below.
+    const own = fields.type === "pipe" && (meter || mount === "concealed") ? { meter, shutoff: fields.shutoff, concealed: mount === "concealed" } : null;
+    const children = fields.type === "pipe" ? parseNodes(raw.children, depth + 1, budget, own ?? legacy) : [];
     const outlets = fields.type === "consumer" ? parseOutlets(raw.outlets, appliances) : [];
-    out.push({ ...fields, outlets, children });
+    const distributor = parseDistributor(raw.distributor, fields.type === "consumer" ? legacy : null);
+    out.push({ ...fields, shutoff: own ? false : fields.shutoff, outlets, distributor, children });
   }
   return out;
 }

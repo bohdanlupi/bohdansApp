@@ -1,4 +1,8 @@
+import type { Distributor } from "./distributor";
 import { newNode, outletsFrom, type SanNode } from "./network";
+
+/** Wohnungsverteiler of the example: Aufputz with Absperrung and Wasserzähler on PWC and PWH. */
+const apartmentDistributor = (): Distributor => ({ type: "surface", pwc: { shutoff: true, reducer: false, meter: "meter" }, pwh: { shutoff: true, reducer: false, meter: "meter" } });
 
 /**
  * Starting network of a multi-family house: a Verteilleitung in the basement with two Stränge (Zirkulation
@@ -15,8 +19,7 @@ export function exampleNetwork(labels: { section: (n: number) => string; apartme
         floor,
         length: 8,
         system: "optiflex",
-        meter: true,
-        children: [newNode("consumer", { label: labels.apartment(floor, n), floor, outlets: outletsFrom({ wc: 1, basin: 1, shower: 1, dishwasher: 1, washer: 1 }) })],
+        children: [newNode("consumer", { label: labels.apartment(floor, n), floor, outlets: outletsFrom({ wc: 1, basin: 1, shower: 1, dishwasher: 1, washer: 1 }), distributor: apartmentDistributor() })],
       });
       chain = newNode("pipe", { floor, length: i === 0 ? 4 : 3, riser: true, circulation, children: chain ? [apartment, chain] : [apartment] });
     }

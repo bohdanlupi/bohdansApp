@@ -20,6 +20,7 @@ import {
   type SanNode,
   type SystemResult,
 } from "@/lib/sanitary/network";
+import { type DistributorType, distributorPlan, distributorTypes, type LineParts, type MeterSlot, meterSlots, type SupplyLine } from "@/lib/sanitary/distributor";
 import { findSize, type PipeSize, rarReturnSizes, supplySizes } from "@/lib/sanitary/pipes";
 import { mediumColors, sizeText } from "@/lib/sanitary/schema";
 import { type ApplianceKey, applianceKeys, appliances } from "@/lib/sanitary/w3";
@@ -269,7 +270,7 @@ function NodePanel({
       />
     </div>
   );
-  const check = (key: "riser" | "pwc" | "pwh" | "meter" | "shutoff", label: string) => (
+  const check = (key: "riser" | "pwc" | "pwh" | "shutoff", label: string) => (
     <label className="flex items-center gap-2 text-sm">
       <input type="checkbox" checked={node[key]} disabled={!editable} onChange={(e) => onPatch({ [key]: e.target.checked })} className="size-4 accent-brand" />
       {label}
@@ -332,19 +333,6 @@ function NodePanel({
             {check("shutoff", t("node.shutoff"))}
             {check("pwc", "PWC")}
             {check("pwh", "PWH")}
-            {check("meter", t("node.meter"))}
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="node-mount" className="text-xs">
-              {t("node.mount")}
-            </Label>
-            <NativeSelect id="node-mount" value={node.mount} disabled={!editable} onChange={(e) => onPatch({ mount: e.target.value as SanNode["mount"] })}>
-              {(["surface", "concealed"] as const).map((m) => (
-                <option key={m} value={m}>
-                  {t(`node.mounts.${m}`)}
-                </option>
-              ))}
-            </NativeSelect>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
@@ -517,6 +505,7 @@ function ConsumerFields({
   };
   return (
     <div className="space-y-2">
+      <DistributorFields node={node} editable={editable} onPatch={onPatch} />
       <p className="text-xs text-muted-foreground">{t("outlets.hint")}</p>
       {list.length === 0 && <p className="text-sm text-muted-foreground">{t("outlets.empty")}</p>}
       <ul className="space-y-2">
@@ -544,30 +533,34 @@ function ConsumerFields({
                   </>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {def.cold > 0 && (
-                  <OutletLine
-                    medium="pwc"
-                    length={o.lengthPwc}
-                    size={o.sizePwc}
-                    auto={r?.pwc?.size}
-                    editable={editable}
-                    onLength={(v) => patchOutlet(o.id, { lengthPwc: v })}
-                    onSize={(v) => patchOutlet(o.id, { sizePwc: v })}
-                  />
-                )}
-                {def.warm > 0 && (
-                  <OutletLine
-                    medium="pwh"
-                    length={o.lengthPwh}
-                    size={o.sizePwh}
-                    auto={r?.pwh?.size}
-                    editable={editable}
-                    onLength={(v) => patchOutlet(o.id, { lengthPwh: v })}
-                    onSize={(v) => patchOutlet(o.id, { sizePwh: v })}
-                  />
-                )}
-              </div>
+              {r?.fromBox ? (
+                <p className="text-xs text-muted-foreground">{t("outlets.fromBox")}</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {def.cold > 0 && (
+                    <OutletLine
+                      medium="pwc"
+                      length={o.lengthPwc}
+                      size={o.sizePwc}
+                      auto={r?.pwc?.size}
+                      editable={editable}
+                      onLength={(v) => patchOutlet(o.id, { lengthPwc: v })}
+                      onSize={(v) => patchOutlet(o.id, { sizePwc: v })}
+                    />
+                  )}
+                  {def.warm > 0 && (
+                    <OutletLine
+                      medium="pwh"
+                      length={o.lengthPwh}
+                      size={o.sizePwh}
+                      auto={r?.pwh?.size}
+                      editable={editable}
+                      onLength={(v) => patchOutlet(o.id, { lengthPwh: v })}
+                      onSize={(v) => patchOutlet(o.id, { sizePwh: v })}
+                    />
+                  )}
+                </div>
+              )}
               {def.warm > 0 && r && (
                 <p className={cn("text-xs tabular-nums", over ? "text-destructive" : "text-muted-foreground")}>
                   {r.time !== null && r.volume !== null
@@ -633,6 +626,59 @@ function OutletLine({
           </option>
         ))}
       </NativeSelect>
+    </div>
+  );
+}
+
+/** Verteiler of an Apparategruppe: its type and per line Absperrung, Druckreduzierung, Wasserzähler / Passstück. */
+function DistributorFields({ node, editable, onPatch }: { node: SanNode; editable: boolean; onPatch: (p: Partial<SanNode>) => void }) {
+  const t = useTranslations("sanitary.distributor");
+  const d = node.distributor;
+  const plan = distributorPlan(d, node.outlets);
+  const setLine = (m: SupplyLine, p: Partial<LineParts>) => onPatch({ distributor: { ...d, [m]: { ...d[m], ...p } } });
+  const result = plan.box
+    ? t(plan.box === "70120" ? "box70120" : "box70112")
+    : plan.cabinetSize
+      ? t("cabinetResult", { size: plan.cabinetSize })
+      : t(d.type === "basin" ? "basinSingle" : "single");
+  return (
+    <div className="space-y-2 rounded-lg border p-2">
+      <div className="space-y-1">
+        <Label htmlFor="dist-type" className="text-xs">
+          {t("title")}
+        </Label>
+        <NativeSelect id="dist-type" value={d.type} disabled={!editable} onChange={(e) => onPatch({ distributor: { ...d, type: e.target.value as DistributorType } })}>
+          {distributorTypes.map((k) => (
+            <option key={k} value={k}>
+              {t(`types.${k}`)}
+            </option>
+          ))}
+        </NativeSelect>
+      </div>
+      {plan.lines.map((m) => (
+        <div key={m} className="grid grid-cols-[2.5rem_1fr] items-center gap-x-2 gap-y-1">
+          <span className="text-xs font-medium" style={{ color: mediumColors[m] }}>
+            {m.toUpperCase()}
+          </span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {(["shutoff", "reducer"] as const).map((k) => (
+              <label key={k} className="flex items-center gap-1.5 text-sm">
+                <input type="checkbox" checked={d[m][k]} disabled={!editable} onChange={(e) => setLine(m, { [k]: e.target.checked })} className="size-4 accent-brand" />
+                {t(k)}
+              </label>
+            ))}
+            <NativeSelect value={d[m].meter} aria-label={`${m.toUpperCase()} ${t("meter")}`} disabled={!editable} onChange={(e) => setLine(m, { meter: e.target.value as MeterSlot })} className="w-auto">
+              {meterSlots.map((s) => (
+                <option key={s} value={s}>
+                  {t(`meters.${s}`)}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
+        </div>
+      ))}
+      <p className="text-xs">→ {result}</p>
+      {d.type === "basin" && <p className="text-xs text-muted-foreground">{t("hint")}</p>}
     </div>
   );
 }

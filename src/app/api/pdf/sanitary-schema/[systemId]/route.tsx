@@ -14,7 +14,7 @@ import { SanitarySchemaDocument } from "@/pdf/sanitary-schema-document";
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
-const symbolKeys: SymbolKey[] = ["shutoff", "shutoffDrain", "check", "regValve", "regValveThermal", "meter", "filter", "redfil", "reducer", "safety", "pump", "mixer", "softener", "consumer", "battery", "heater", "union", "drain", "manifold", "manifoldConcealed", ...applianceSymbols];
+const symbolKeys: SymbolKey[] = ["shutoff", "shutoffDrain", "check", "regValve", "regValveThermal", "meter", "filter", "redfil", "reducer", "safety", "pump", "mixer", "softener", "consumer", "battery", "heater", "union", "drain", "manifold", "spacer", "cabinet", "basinBox", ...applianceSymbols];
 
 // GET /api/pdf/sanitary-schema/<systemId> – Prinzipschema of a Sanitäranlage as a plan with title block and legend.
 export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/sanitary-schema/[systemId]">) {
@@ -57,6 +57,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
     meter: s("schemaText.meter"),
     battery: s("schemaText.battery"),
     softener: s("schemaText.softener"),
+    box: s("schemaText.box"),
+    cabinet: s("schemaText.cabinet"),
     lu: "LU",
   });
   const phase = plan.phase ? findPhase(plan.phase) : null;

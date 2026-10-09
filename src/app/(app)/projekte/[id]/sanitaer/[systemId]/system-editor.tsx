@@ -67,6 +67,8 @@ export function SanitaryEditor({
     meter: t("schemaText.meter"),
     battery: t("schemaText.battery"),
     softener: t("schemaText.softener"),
+    box: t("schemaText.box"),
+    cabinet: t("schemaText.cabinet"),
     lu: "LU",
   };
   const schema = useMemo(() => layoutSchema(data, result, schemaText), [data, result]); // eslint-disable-line react-hooks/exhaustive-deps

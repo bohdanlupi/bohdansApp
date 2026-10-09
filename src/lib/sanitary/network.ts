@@ -13,6 +13,7 @@
 //   pump head = longest circuit + Rückflussverhinderer + Regulierorgan (fully open).
 
 import { type BiralPump, biralPumps } from "./catalog-data";
+import { defaultDistributor, type Distributor, distributorPlan } from "./distributor";
 import {
   area,
   findSize,
@@ -33,8 +34,6 @@ import { type ApplianceKey, appliances, type Appliances, applianceKeys, peakFlow
 export type Circulation = "none" | "conventional" | "rar";
 export type PipeRole = "auto" | "distribution" | "floor";
 export type RegValve = "thermal" | "manual";
-/** Wohnungsverteiler (meter, shutoffs, manifolds of its Apparategruppen): open on the wall or in an Unterputz / Vorwand box. */
-export type Mount = "surface" | "concealed";
 export type Medium = "pwc" | "pwh" | "pwhc";
 
 /** One Apparat of an Apparategruppe and its Ausstossleitungen (Optiflex-Flowpress) from the Verteiler. */
@@ -68,19 +67,18 @@ export type SanNode = {
   sizePwc: string | null;
   sizePwh: string | null;
   sizePwhc: string | null;
-  /** Wohnungswasserzähler at the start (Stockwerkverteilung «mit Wasserzähler»). */
-  meter: boolean;
   /** Absperrventile at the start (Steigstränge always get them). */
   shutoff: boolean;
   /** Regulierventil of the Zirkulation at the foot of a Strang. */
   regValve: RegValve;
-  /** Pipes: how the Verteiler of this Stockwerkverteilung is mounted (its Apparategruppen take it over). */
-  mount: Mount;
   /** Bogen 90° / 45° of the Leitung (each of its lines PWC / PWH / PWH-C gets them in its size). */
   bends90: number;
   bends45: number;
   /** Apparategruppe: its Apparate in the order drawn along the Verteiler. */
   outlets: Outlet[];
+  /** Apparategruppe: its Pex-Verteiler (Kasten / Aufputz / hinter WT) with Absperrung, Passstück, Druckreduzierung and
+   * Wasserzähler per line (distributor.ts). */
+  distributor: Distributor;
   children: SanNode[];
 };
 
@@ -203,6 +201,8 @@ export type OutletResult = {
   limit: number;
   /** The line starts at a warmgehaltene (circulated) point. */
   kept: boolean;
+  /** Fed directly from the Unterputz-Waschtischbox (no Pex line of its own). */
+  fromBox: boolean;
 };
 
 export type Circuit = { endId: string; footId: string | null; path: number; throttle: number; flow: number };
@@ -273,13 +273,12 @@ export const newNode = (type: SanNode["type"], patch: Partial<SanNode> = {}): Sa
   sizePwc: null,
   sizePwh: null,
   sizePwhc: null,
-  meter: false,
   shutoff: false,
   regValve: "thermal",
-  mount: "surface",
   bends90: 0,
   bends45: 0,
   outlets: [],
+  distributor: defaultDistributor(),
   children: [],
   ...patch,
 });
@@ -400,11 +399,14 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
   const distLength = (central.centralLength ?? 0) + Math.max(0, ...data.network.map(distPath));
   // Floor groups: longest path from the group's first floor pipe.
   const floorPath = (n: SanNode): number => (n.type === "pipe" && roles.get(n.id) === "floor" ? pipeLength(n) + Math.max(0, ...n.children.map(floorPath)) : 0);
+  // «mit Wasserzähler» (Tabellen 4.1 / 4.2): a Wasserzähler or its Passstück at a Verteiler of the group.
+  const hasMeter = (n: SanNode): boolean =>
+    n.type === "consumer" ? (["pwc", "pwh"] as const).some((m) => n.distributor[m].meter !== "none") : n.children.some(hasMeter);
   const groupOf = new Map<string, { length: number; meter: boolean }>();
   const assignGroups = (n: SanNode, group: { length: number; meter: boolean } | null) => {
     let g = group;
     if (n.type === "pipe" && roles.get(n.id) === "floor") {
-      if (!g) g = { length: floorPath(n), meter: n.meter };
+      if (!g) g = { length: floorPath(n), meter: hasMeter(n) };
       groupOf.set(n.id, g);
     } else g = null;
     n.children.forEach((c) => assignGroups(c, g));
@@ -617,15 +619,16 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
       n.children.forEach((c) => walkOutlets(c, warm ? 0 : volume + (pwh ? litres(pwh.size, pipeLength(n)) : 0), kept || warm));
       return;
     }
+    const fromBox = distributorPlan(n.distributor, n.outlets).fromBox;
     for (const o of n.outlets) {
       const def = appliances[o.type];
       const pwc = def.cold ? sizeOutlet(o.sizePwc, def.q) : null;
       const pwh = def.warm ? sizeOutlet(o.sizePwh, def.q) : null;
       const limit = kept ? 10 : 15;
-      const v = pwh && o.lengthPwh !== null ? volume + litres(pwh.size, o.lengthPwh) : null;
+      const v = pwh && o.id === fromBox ? volume : pwh && o.lengthPwh !== null ? volume + litres(pwh.size, o.lengthPwh) : null;
       const time = v !== null ? v / def.q : null;
       if (time !== null && time > limit) warnings.push({ kind: "ausstoss", id: n.id, outlet: o.id, type: o.type, time, limit });
-      outlets.set(o.id, { pwc, pwh, flow: def.q, volume: v, time, limit, kept });
+      outlets.set(o.id, { pwc, pwh, flow: def.q, volume: v, time, limit, kept, fromBox: o.id === fromBox });
     }
   };
   const keptAtHeater = heatLoss > 0;

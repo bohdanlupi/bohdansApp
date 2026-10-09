@@ -4,7 +4,9 @@ export type CatalogArticle = { number: string; size: string | null; text: string
 
 /** Nussbaum articles by family (article number before the dot). */
 export const nussbaumFamilies = {
+  "11000": "Druckreduzierventil ohne Verschraubung, 2 bar bis 6 bar",
   "11002": "Druckreduzierventil mit OP-A-Verschraubung",
+  "11050": "Reduzierpatrone, zu Unterputz-Druckreduziergarnitur",
   "12102": "Redfil rückspülbar, mit Optipress-A-Anschlussverschraubung",
   "15101": "Rückflussverhinderer EA (Gewinde, für Optiflex-Flowpress mit Übergängen)",
   "18102": "Feinfilter rückspülbar, mit Optipress-A-Anschlussverschraubung",
@@ -12,7 +14,10 @@ export const nussbaumFamilies = {
   "19053": "Wasserenthärter Aquapro-Vita",
   "24026": "Regulierventil, mit Innengewinde",
   "36030": "Zirkulationsventil, mit Durchflussregulierung selbstständig",
+  "67016": "Messkapsel Koax",
   "67100": "Rohbauset, für Messkapsel Koax",
+  "70112": "Unterputz-Armaturenbox, Doppelausführung",
+  "70120": "Unterputz-Waschtischbox",
   "80000": "Optipress-Aquaplus-Bogen 90°",
   "80003": "Optipress-Aquaplus-Bogen 45°",
   "80010": "Optipress-Aquaplus-T-Stück",
@@ -36,6 +41,7 @@ export const nussbaumFamilies = {
   "84250": "Optiflex-Flowpress-Verteileranschluss",
   "84260": "Optiflex-Flowpress-Verteiler, 2-fach",
   "84261": "Optiflex-Flowpress-Verteiler, 3-/4-fach",
+  "86044": "Verteilerkasten, mit Rahmen mit Türe",
   "86510": "Optiflex-Flowpress-Schrägsitzventil",
   "87153": "Optiflex-Flowpress-Rohr formstabil"
 } as const;
@@ -43,6 +49,78 @@ export const nussbaumFamilies = {
 export type NussbaumFamily = keyof typeof nussbaumFamilies;
 
 export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
+  "11000": [
+    {
+      "number": "11000.34",
+      "size": "15 (½)",
+      "text": "Druckreduzierventil ohne Verschraubung, Einstellbereich 2 bar bis 6 bar, 15 (½)"
+    },
+    {
+      "number": "11000.35",
+      "size": "20 (¾)",
+      "text": "Druckreduzierventil ohne Verschraubung, Einstellbereich 2 bar bis 6 bar, 20 (¾)"
+    },
+    {
+      "number": "11000.36",
+      "size": "25 (1)",
+      "text": "Druckreduzierventil ohne Verschraubung, Einstellbereich 2 bar bis 6 bar, 25 (1)"
+    },
+    {
+      "number": "11000.37",
+      "size": "32 (1¼)",
+      "text": "Druckreduzierventil ohne Verschraubung, Einstellbereich 2 bar bis 6 bar, 32 (1¼)"
+    },
+    {
+      "number": "11000.38",
+      "size": "40 (1½)",
+      "text": "Druckreduzierventil ohne Verschraubung, Einstellbereich 2 bar bis 6 bar, 40 (1½)"
+    },
+    {
+      "number": "11000.39",
+      "size": "50 (2)",
+      "text": "Druckreduzierventil ohne Verschraubung, Einstellbereich 2 bar bis 6 bar, 50 (2)"
+    },
+    {
+      "number": "11000.40",
+      "size": "65 (2½)",
+      "text": "Druckreduzierventil ohne Verschraubung, Einstellbereich 2 bar bis 6 bar, 65 (2½)"
+    },
+    {
+      "number": "11000.90",
+      "size": "65 (2½)",
+      "text": "Druckreduzierventil , ohne Anschlussverschraubung, 65 (2½)"
+    },
+    {
+      "number": "11000.94",
+      "size": "15 (½)",
+      "text": "Druckreduzierventil , ohne Anschlussverschraubung, 15 (½)"
+    },
+    {
+      "number": "11000.95",
+      "size": "20 (¾)",
+      "text": "Druckreduzierventil , ohne Anschlussverschraubung, 20 (¾)"
+    },
+    {
+      "number": "11000.96",
+      "size": "25 (1)",
+      "text": "Druckreduzierventil , ohne Anschlussverschraubung, 25 (1)"
+    },
+    {
+      "number": "11000.97",
+      "size": "32 (1¼)",
+      "text": "Druckreduzierventil , ohne Anschlussverschraubung, 32 (1¼)"
+    },
+    {
+      "number": "11000.98",
+      "size": "40 (1½)",
+      "text": "Druckreduzierventil , ohne Anschlussverschraubung, 40 (1½)"
+    },
+    {
+      "number": "11000.99",
+      "size": "50 (2)",
+      "text": "Druckreduzierventil , ohne Anschlussverschraubung, 50 (2)"
+    }
+  ],
   "11002": [
     {
       "number": "11002.22",
@@ -78,6 +156,13 @@ export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
       "number": "11002.28",
       "size": "54",
       "text": "DRV m. OP-A-Verschraubung, Einstellbereich 2 bar bis 6 bar, 54"
+    }
+  ],
+  "11050": [
+    {
+      "number": "11050.21",
+      "size": "¾",
+      "text": "Reduzierpatrone, zu Unterputz-Druckreduziergarnitur, ¾"
     }
   ],
   "12102": [
@@ -229,11 +314,32 @@ export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
       "text": "Zirkulationsventil, mit Durchflussregulierung selbstständig, 20 (¾)"
     }
   ],
+  "67016": [
+    {
+      "number": "67016.21",
+      "size": null,
+      "text": "Messkapsel Koax"
+    }
+  ],
   "67100": [
     {
       "number": "67100.05",
       "size": "¾",
       "text": "Rohbauset, für Messkapsel Koax, ¾"
+    }
+  ],
+  "70112": [
+    {
+      "number": "70112.21",
+      "size": null,
+      "text": "Unterputz-Armaturenbox, Doppelausführung"
+    }
+  ],
+  "70120": [
+    {
+      "number": "70120.21",
+      "size": null,
+      "text": "Unterputz-Waschtischbox"
     }
   ],
   "80000": [
@@ -1745,6 +1851,33 @@ export const nussbaumArticles: Record<NussbaumFamily, CatalogArticle[]> = {
       "number": "84261.22",
       "size": "16 x ¾ x 4",
       "text": "Optiflex-Flowpress-Verteiler, 4-fach, mit Pressanschluss, 16 x ¾ x 4"
+    }
+  ],
+  "86044": [
+    {
+      "number": "86044.21",
+      "size": "400",
+      "text": "Verteilerkasten, mit Rahmen mit Türe reinweiss RAL 9010, 400"
+    },
+    {
+      "number": "86044.22",
+      "size": "600",
+      "text": "Verteilerkasten, mit Rahmen mit Türe reinweiss RAL 9010, 600"
+    },
+    {
+      "number": "86044.23",
+      "size": "750",
+      "text": "Verteilerkasten, mit Rahmen mit Türe reinweiss RAL 9010, 750"
+    },
+    {
+      "number": "86044.24",
+      "size": "900 *",
+      "text": "Verteilerkasten, mit Rahmen mit Türe reinweiss RAL 9010, 900 *"
+    },
+    {
+      "number": "86044.80",
+      "size": null,
+      "text": "Halteschiene, zu Verteilerkasten"
     }
   ],
   "86510": [
