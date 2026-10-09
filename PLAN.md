@@ -402,8 +402,14 @@ stricter): material PIR or Mineralwolle; konventionell Kaltwasser 30 mm (PIR) / 
 (PIR 30 … 80, Mineralwolle 60 … 100); Rohr an Rohr one insulation from the table «Rohr an Rohr» by the PWH size (fictive
 pipe one dimension larger), PWH-C none. Insulated: PWH of circulated sections and of the Verteilung, PWH-C, PWC
 Verteil- / Steigleitungen (switchable). Warning above 65 °C (SIA 385/1 4.1.1).
-Prinzipschema: Strangschema (schema.ts; symbols after SIA 410 1.26 / 1.27 / 1.29 / 2.6 / 5, Wasserzähler and
-Apparateanschluss after SN EN 806-1 as SIA 410 has none; PWC green, PWH red, PWH-C violet), web view at a fixed
+Prinzipschema: Strangschema (schema.ts; symbols after SVGW W3 Anhang 4 / SN EN 806-1, SIA 410 only where W3 has none:
+Enthärtung 1.27.1, Wassererwärmer 5.1.19, adjustable arrow of the Regulierventil von Hand; PWC green, PWH red, PWH-C
+violet). Drawn after Berechnungsvorlagen/Sanitär/Schemavorlage_Sanitär.pdf (2026-10-09): Verteilbatterie as a
+collector with an Abgang per line (Absperrventil mit Entleerung, Verschraubung) and an Entleerung at its end; the
+Wohnungsverteiler (Absperrventile + Wohnungswasserzähler) in a box, «Aufputz» or «Unterputz (Vorwand)» per Leitung
+(SanNode.mount, taken over by its Apparategruppen); each Apparategruppe as a Verteiler with one outlet per Apparat and
+every Apparat (counts expanded, max 16) drawn on its own PWC / PWH line (Waschtisch, WC UP-Spülkasten, Dusche,
+Badewanne, Geschirrspüler, Waschautomat, Urinoir, Balkon- / Gartenventil; light blue bodies). Web view at a fixed
 scale (1.3 px per unit), full height, horizontal slider below to move it + plan PDF /api/pdf/sanitary-schema/<id> (Plankopf / revisions as the Lüftung schema; sheet height 297 / 420 /
 594 mm, width a multiple of 210 mm, wide enough for schema and legend).
 Insulation drawn as yellow bands with black dotted edges; each Leitung is labelled «KW / WW / ZK: diameter · insulation»

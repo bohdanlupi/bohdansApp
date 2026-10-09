@@ -3107,7 +3107,12 @@
       },
       "appliancesHint": "Points de soutirage selon SSIGE W3 tableau 3 (valeurs de charge froid / chaud).",
       "bends90": "Coudes 90° [pce]",
-      "bends45": "Coudes 45° [pce]"
+      "bends45": "Coudes 45° [pce]",
+      "mount": "Distributeur",
+      "mounts": {
+        "surface": "apparent",
+        "concealed": "encastré (prémur)"
+      }
     },
     "appliances": {
       "wc": "WC à réservoir (1 / –)",
@@ -3253,10 +3258,22 @@
         "pump": "Pompe de circulation",
         "mixer": "Mitigeur thermostatique",
         "softener": "Adoucisseur",
-        "consumer": "Groupe d'appareils",
+        "consumer": "Raccordement d’appareil avec arrêt",
         "battery": "Batterie de distribution",
         "heater": "Chauffe-eau",
-        "regValveThermal": "Vanne de circulation thermostatique"
+        "regValveThermal": "Vanne de circulation thermostatique",
+        "union": "Raccord à vis",
+        "drain": "Vidange",
+        "manifold": "Distributeur, une sortie par appareil",
+        "manifoldConcealed": "Distributeur dans coffret encastré (prémur)",
+        "wc": "WC avec réservoir encastré",
+        "basin": "Lavabo avec mélangeur sur gorge",
+        "shower": "Douche avec mélangeur mural et douchette",
+        "bathtub": "Baignoire avec mélangeur mural et douchette",
+        "dishwasher": "Lave-vaisselle",
+        "washer": "Lave-linge",
+        "urinal": "Urinoir avec robinet à fermeture automatique",
+        "outlet": "Robinet de balcon / jardin avec dispositif de protection et raccord de tuyau"
       },
       "insulationBand": "Isolation (épaisseur indiquée à la conduite)"
     },

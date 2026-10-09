@@ -189,7 +189,7 @@ export function PdfPrims({ prims }: { prims: Prim[] }) {
           case "circle":
             return <Circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
           case "path":
-            return <Path key={i} d={p.d} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
+            return <Path key={i} d={p.d} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} strokeDasharray={p.dash} />;
           case "polygon":
             return <Polygon key={i} points={p.points} fill={pdfPaint(p.fill)} stroke={pdfPaint(p.stroke)} strokeWidth={p.sw} />;
           case "text":

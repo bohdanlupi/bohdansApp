@@ -319,6 +319,18 @@ function NodePanel({
             {check("pwh", "PWH")}
             {check("meter", t("node.meter"))}
           </div>
+          <div className="space-y-1">
+            <Label htmlFor="node-mount" className="text-xs">
+              {t("node.mount")}
+            </Label>
+            <NativeSelect id="node-mount" value={node.mount} disabled={!editable} onChange={(e) => onPatch({ mount: e.target.value as SanNode["mount"] })}>
+              {(["surface", "concealed"] as const).map((m) => (
+                <option key={m} value={m}>
+                  {t(`node.mounts.${m}`)}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <Label htmlFor="node-system" className="text-xs">

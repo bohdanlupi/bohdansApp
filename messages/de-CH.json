@@ -3107,7 +3107,12 @@
       },
       "appliancesHint": "Entnahmestellen nach SVGW W3 Tabelle 3 (Belastungswerte kalt / warm).",
       "bends90": "Bogen 90° [Stk]",
-      "bends45": "Bogen 45° [Stk]"
+      "bends45": "Bogen 45° [Stk]",
+      "mount": "Verteiler",
+      "mounts": {
+        "surface": "Aufputz",
+        "concealed": "Unterputz (Vorwand)"
+      }
     },
     "appliances": {
       "wc": "WC Spülkasten (1 / –)",
@@ -3253,10 +3258,22 @@
         "pump": "Zirkulationspumpe",
         "mixer": "Thermostatischer Mischer",
         "softener": "Enthärtung",
-        "consumer": "Apparategruppe",
+        "consumer": "Apparateanschluss mit Absperrung",
         "battery": "Verteilbatterie",
         "heater": "Wassererwärmer",
-        "regValveThermal": "Zirkulationsventil thermisch"
+        "regValveThermal": "Zirkulationsventil thermisch",
+        "union": "Verschraubung",
+        "drain": "Entleerung",
+        "manifold": "Verteiler, ein Abgang je Apparat",
+        "manifoldConcealed": "Verteiler im Unterputzkasten (Vorwand)",
+        "wc": "WC mit Unterputz-Spülkasten",
+        "basin": "Waschtisch mit Standmischbatterie",
+        "shower": "Dusche mit Wandmischbatterie und Brause",
+        "bathtub": "Badewanne mit Wandmischbatterie und Brause",
+        "dishwasher": "Geschirrspüler",
+        "washer": "Waschautomat",
+        "urinal": "Urinoir mit Selbstschlussarmatur",
+        "outlet": "Balkon- / Gartenventil mit Sicherungsarmatur und Schlauchverschraubung"
       },
       "insulationBand": "Dämmung (Stärke an der Leitung angeschrieben)"
     },

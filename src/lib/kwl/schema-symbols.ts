@@ -21,7 +21,7 @@ export type Prim =
   | { t: "rect"; x: number; y: number; w: number; h: number; fill: Paint; stroke?: Paint; sw?: number; rx?: number }
   | { t: "line"; x1: number; y1: number; x2: number; y2: number; stroke: Paint; sw: number; dash?: string }
   | { t: "circle"; cx: number; cy: number; r: number; fill: Paint; stroke?: Paint; sw?: number }
-  | { t: "path"; d: string; fill: Paint; stroke?: Paint; sw?: number }
+  | { t: "path"; d: string; fill: Paint; stroke?: Paint; sw?: number; dash?: string }
   | { t: "polygon"; points: string; fill: Paint; stroke?: Paint; sw?: number }
   | { t: "text"; x: number; y: number; text: string; size: number; anchor?: "start" | "middle" | "end"; fill: Paint; bold?: boolean };
 

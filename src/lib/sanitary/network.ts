@@ -30,6 +30,8 @@ import { appliances, type Appliances, applianceKeys, peakFlow, tableSize, veloci
 export type Circulation = "none" | "conventional" | "rar";
 export type PipeRole = "auto" | "distribution" | "floor";
 export type RegValve = "thermal" | "manual";
+/** Wohnungsverteiler (meter, shutoffs, manifolds of its Apparategruppen): open on the wall or in an Unterputz / Vorwand box. */
+export type Mount = "surface" | "concealed";
 export type Medium = "pwc" | "pwh" | "pwhc";
 
 export type SanNode = {
@@ -57,6 +59,8 @@ export type SanNode = {
   shutoff: boolean;
   /** Regulierventil of the Zirkulation at the foot of a Strang. */
   regValve: RegValve;
+  /** Pipes: how the Verteiler of this Stockwerkverteilung is mounted (its Apparategruppen take it over). */
+  mount: Mount;
   /** Bogen 90° / 45° of the Leitung (each of its lines PWC / PWH / PWH-C gets them in its size). */
   bends90: number;
   bends45: number;
@@ -238,6 +242,7 @@ export const newNode = (type: SanNode["type"], patch: Partial<SanNode> = {}): Sa
   meter: false,
   shutoff: false,
   regValve: "thermal",
+  mount: "surface",
   bends90: 0,
   bends45: 0,
   appliances: {},

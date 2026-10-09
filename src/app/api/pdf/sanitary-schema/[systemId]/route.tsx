@@ -6,7 +6,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { findPhase } from "@/lib/kwl/phases";
 import { parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import { evaluateSystem } from "@/lib/sanitary/network";
-import { layoutSchema, type SymbolKey } from "@/lib/sanitary/schema";
+import { applianceSymbols, layoutSchema, type SymbolKey } from "@/lib/sanitary/schema";
 import { parseSanitaryData } from "@/lib/sanitary/system-schema";
 import { createClient } from "@/lib/supabase/server";
 import { loadLogo } from "@/pdf/logo";
@@ -14,7 +14,7 @@ import { SanitarySchemaDocument } from "@/pdf/sanitary-schema-document";
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
-const symbolKeys: SymbolKey[] = ["shutoff", "shutoffDrain", "check", "regValve", "regValveThermal", "meter", "filter", "redfil", "reducer", "safety", "pump", "mixer", "softener", "consumer", "battery", "heater"];
+const symbolKeys: SymbolKey[] = ["shutoff", "shutoffDrain", "check", "regValve", "regValveThermal", "meter", "filter", "redfil", "reducer", "safety", "pump", "mixer", "softener", "consumer", "battery", "heater", "union", "drain", "manifold", "manifoldConcealed", ...applianceSymbols];
 
 // GET /api/pdf/sanitary-schema/<systemId> – Prinzipschema of a Sanitäranlage as a plan with title block and legend.
 export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/sanitary-schema/[systemId]">) {

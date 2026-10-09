@@ -3,7 +3,7 @@ import { Document, G, Image, Line, Page, Path, Rect, Svg } from "@react-pdf/rend
 import type { SchemaRevision } from "@/lib/kwl/schema-plan";
 import type { Medium } from "@/lib/sanitary/network";
 import { insulationStyle } from "@/lib/sanitary/pipes";
-import { drawSymbol, mediumColors, type SanitarySchema, type SymbolKey } from "@/lib/sanitary/schema";
+import { drawSymbol, isApplianceSymbol, mediumColors, type SanitarySchema, type SymbolKey } from "@/lib/sanitary/schema";
 import type { FirmSettings } from "@/lib/supabase/types";
 
 import { Legend, type LegendItem, MARGIN, PdfPrims, planSheet, type PlankopfLabels, TB_H, TB_W, TitleBlock } from "./kwl-schema-document";
@@ -33,6 +33,17 @@ export type SanitaryLegend = {
   sizes: string;
 };
 
+/**
+ * Symbol in its legend row (21 high): the Apparate (standing on their connections, up to 50 high) and the tall
+ * symbols smaller, shifted to stay inside their row.
+ */
+function legendTransform(key: SymbolKey) {
+  if (isApplianceSymbol(key)) return "translate(15, 10) scale(0.42)";
+  const shifted: Partial<Record<SymbolKey, [number, number]>> = { redfil: [-3, 0.6], safety: [5, 0.6], heater: [0, 0.6], manifoldConcealed: [2, 0.6] };
+  const [dy, k] = shifted[key] ?? [0, 0.8];
+  return `translate(15, ${dy}) scale(${k})`;
+}
+
 /** Legend entries: lines, insulation band, symbols, the note on the sizes. */
 function legendItems(schema: SanitarySchema, labels: SanitaryLegend): LegendItem[] {
   const media: Medium[] = ["pwc", "pwh", "pwhc"];
@@ -57,8 +68,8 @@ function legendItems(schema: SanitarySchema, labels: SanitaryLegend): LegendItem
       label: labels.symbols[key],
       symbol: (
         <G>
-          <Line x1={0} y1={0} x2={30} y2={0} stroke="#555555" strokeWidth={1.2} />
-          <G transform="translate(15, 0) scale(0.8)">
+          {!isApplianceSymbol(key) && <Line x1={0} y1={0} x2={30} y2={0} stroke="#555555" strokeWidth={1.2} />}
+          <G transform={legendTransform(key)}>
             <PdfPrims prims={drawSymbol(key, 0, 0)} />
           </G>
         </G>

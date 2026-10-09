@@ -5,17 +5,19 @@
 //   Verteilleitung ═══════╧════════════╧═══════════                     PWC / PWH / PWH-C as three parallel lines
 //   Zentrale: Hausanschluss → Wasserzähler → Filter → Verteilbatterie → Sicherheitsgruppe → Wassererwärmer → pump
 //
-// Symbols after SIA 410 (chapters 1, 2.6, 5); Wasserzähler and Apparateanschluss, which SIA 410 lacks, after SN EN
-// 806-1 (SVGW W3 Anhang 4). Colours: PWC green, PWH red, PWH-C violet. The Wassererwärmer is neutral, all other parts
-// are Nussbaum (pump Biral). Insulation as highlighter bands behind the lines; «Rohr an
-// Rohr» as one band around PWH and PWH-C.
+// Symbols after SVGW W3 Anhang 4 (SN EN 806-1), SIA 410 only where W3 has none; Apparate, Verteiler and
+// Verteilbatterie drawn like the LUPI Schemavorlage Sanitär (Berechnungsvorlagen/Sanitär): every Apparat of an
+// Apparategruppe stands on its own line from the Verteiler. Colours: PWC green, PWH red, PWH-C violet. The
+// Wassererwärmer is neutral, all other parts are Nussbaum (pump Biral). Insulation as highlighter bands behind the
+// lines; «Rohr an Rohr» as one band around PWH and PWH-C.
 
 import type { Paint, Prim } from "@/lib/kwl/schema-symbols";
 import { floorOrder } from "@/lib/kwl/schema-layout";
 
-import type { Medium, SanitaryData, SanNode, SystemResult } from "./network";
+import type { Medium, Mount, SanitaryData, SanNode, SystemResult } from "./network";
 import { consumerLu } from "./network";
 import { insulationStyle, type PipeSize, sizeText } from "./pipes";
+import { type ApplianceKey, applianceKeys } from "./w3";
 
 export const mediumColors: Record<Medium, `#${string}`> = { pwc: "#00a651", pwh: "#e3001b", pwhc: "#9b30d9" };
 /** Offset of each line from the first one (PWC) [units]. */
@@ -26,9 +28,9 @@ const MEDIA: Medium[] = ["pwc", "pwh", "pwhc"];
 
 const DX = 96; // Verteilleitung section
 const DX2 = 100; // Stockwerkverteilung section
-const RH = 84; // row of a Stockwerkverteilung (lines + the text block above them)
+const RH = 110; // row of a Stockwerkverteilung (lines, the Apparate or text block above them, the group text below)
+const HEAD = 66; // top of a storey down to its first row
 const TEXT_LINE = 9; // line pitch of the Leitung texts
-const LABEL_W = 180; // consumer text
 const LEFT = 64; // storey names
 const LANE = 56;
 
@@ -69,7 +71,42 @@ export type SymbolKey =
   | "softener"
   | "consumer"
   | "battery"
-  | "heater";
+  | "heater"
+  | "union"
+  | "drain"
+  | "manifold"
+  | "manifoldConcealed"
+  | ApplianceSymbol;
+
+/** Apparate (drawn upright, standing on their connections); Balkon- and Gartenventil share one symbol. */
+export type ApplianceSymbol = "wc" | "basin" | "shower" | "bathtub" | "dishwasher" | "washer" | "urinal" | "outlet";
+export const applianceSymbol: Record<ApplianceKey, ApplianceSymbol> = {
+  wc: "wc",
+  basin: "basin",
+  dishwasher: "dishwasher",
+  washer: "washer",
+  balcony: "outlet",
+  shower: "shower",
+  urinal: "urinal",
+  bathtub: "bathtub",
+  garden: "outlet",
+};
+export const applianceSymbols: ApplianceSymbol[] = ["wc", "basin", "shower", "bathtub", "dishwasher", "washer", "urinal", "outlet"];
+export const isApplianceSymbol = (key: SymbolKey): key is ApplianceSymbol => (applianceSymbols as SymbolKey[]).includes(key);
+/** Width of each Apparat in the row and the x offsets of its connections (warm null: cold water only). */
+const APPLIANCE: Record<ApplianceSymbol, { w: number; cold: number; warm: number | null }> = {
+  wc: { w: 26, cold: 0, warm: null },
+  basin: { w: 38, cold: 6, warm: -6 },
+  shower: { w: 42, cold: 6, warm: -6 },
+  bathtub: { w: 60, cold: 6, warm: -6 },
+  dishwasher: { w: 30, cold: 0, warm: null },
+  washer: { w: 30, cold: 0, warm: null },
+  urinal: { w: 26, cold: 0, warm: null },
+  outlet: { w: 34, cold: 0, warm: null },
+};
+/** Body of the Apparate: light blue with a blue edge, like the LUPI Schemavorlage. */
+const APP_FILL = "#c9f7ff";
+const APP_EDGE = "#1f45c8";
 
 export type SchemaBand = { d: string; fill: string; edge: string; width: number; mm: number; shared: boolean };
 export type SchemaLine = { d: string; medium: Medium; nodeId: string | null };
@@ -91,12 +128,15 @@ const pathD = (pts: Pt[]) => pts.map(([x, y], i) => `${i ? "L" : "M"}${round(x)}
 const round = (v: number) => Math.round(v * 10) / 10;
 
 // ---------------------------------------------------------------------------
-// Symbols, drawn along a line: horizontal (flow dir ±1) or vertical (upwards)
-//   SIA 410 1.26.5 Ventil (Absperrventil)            2.6.7 Entleerhahn            1.26.9 Rückflussverhinderer
-//   2.6.9 Drosselventil (Regulierventil)             1.29.3 thermischer Antrieb   1.26.8 Druckreduzierventil
-//   1.26.19 Filter                                    1.26.10 Sicherheitsventil mit Federbelastung, 1.26.16 Trichter
-//   1.27.3 Pumpe          1.27.1 Apparat (Enthärtung)  5.1.19 Wassererwärmer        5.2.10 thermostatischer Mischer
-//   SN EN 806-1: Wasserzähler, Apparate- und Armaturenanschluss mit Absperrung (not in SIA 410)
+// Symbols after SVGW W3 Anhang 4 (SN EN 806-1), drawn along a line: horizontal (flow dir ±1) or vertical (upwards)
+//   Geradsitz- / Schrägsitzventil (Absperrventil), Auslaufventil / Entleerungsventil, Rückflussverhinderer
+//   (kontrollierbar), Zirkulationsregelventil, Wasserzähler, Mechanischer Filter, Druckminderer, Druckminderer mit
+//   Filter, Sicherheitsventil federbelastet with Trichter, Flüssigkeitspumpe, Thermostatischer Mischer, Verschraubung,
+//   Apparate- und Armaturenanschluss mit Absperrung, Standmisch- / Wandmischbatterie, Brause, Selbstschlussarmatur,
+//   Auslaufventil mit Sicherungsarmatur und Schlauchverschraubung.
+// Not in W3, after SIA 410: Apparat ohne rotierende Teile (1.27.1, Enthärtung), Wassererwärmer (5.1.19), the arrow
+// of adjustability on the Regulierventil von Hand (W3 Absperrventil + SIA 410). The Apparate bodies (Waschtisch, WC,
+// Wanne …), the Verteiler and the Verteilbatterie follow the LUPI Schemavorlage Sanitär.
 // ---------------------------------------------------------------------------
 
 /** Maps local coordinates (u along the line, v across) to the sheet. */
@@ -105,74 +145,104 @@ function frame(x: number, y: number, vertical: boolean, dir = 1) {
 }
 const pts = (list: Pt[]) => list.map(([a, b]) => `${round(a)},${round(b)}`).join(" ");
 
+/**
+ * One symbol at (x, y). Apparate are drawn upright: (x, y) is the floor under them, their connections sit just
+ * above it (applianceSlot).
+ */
 export function drawSymbol(key: SymbolKey, x: number, y: number, vertical = false, dir = 1, color: Paint = "ink"): Prim[] {
+  if (isApplianceSymbol(key)) {
+    vertical = false;
+    dir = 1;
+  }
   const f = frame(x, y, vertical, dir);
   // Side for parts off the line: above a horizontal line, right of a vertical one (clear of the line next to it).
   const a = vertical ? 1 : -1;
-  const poly = (list: Pt[], fill: Paint = "bg", sw = 1): Prim => ({ t: "polygon", points: pts(list.map(([u, v]) => f(u, v))), fill, stroke: "ink", sw });
-  const line = (u1: number, v1: number, u2: number, v2: number, sw = 1): Prim => {
+  const poly = (list: Pt[], fill: Paint = "bg", sw = 1, stroke: Paint = "ink"): Prim => ({ t: "polygon", points: pts(list.map(([u, v]) => f(u, v))), fill, stroke, sw });
+  const line = (u1: number, v1: number, u2: number, v2: number, sw = 1, stroke: Paint = "ink"): Prim => {
     const [x1, y1] = f(u1, v1);
     const [x2, y2] = f(u2, v2);
-    return { t: "line", x1, y1, x2, y2, stroke: "ink", sw };
+    return { t: "line", x1, y1, x2, y2, stroke, sw };
   };
-  const rect = (u: number, v: number, w: number, h: number, fill: Paint = "bg"): Prim => {
+  const rect = (u: number, v: number, w: number, h: number, fill: Paint = "bg", stroke: Paint = "ink", sw = 1): Prim => {
     const [ax, ay] = f(u, v);
     const [bx, by] = f(u + w, v + h);
-    return { t: "rect", x: Math.min(ax, bx), y: Math.min(ay, by), w: Math.abs(bx - ax), h: Math.abs(by - ay), fill, stroke: "ink", sw: 1 };
+    return { t: "rect", x: Math.min(ax, bx), y: Math.min(ay, by), w: Math.abs(bx - ax), h: Math.abs(by - ay), fill, stroke, sw };
   };
-  const circle = (u: number, v: number, r: number, fill: Paint): Prim => {
+  const dot = (u: number, v: number, r: number): Prim => {
     const [cx, cy] = f(u, v);
-    return fill === "ink" ? { t: "circle", cx, cy, r, fill } : { t: "circle", cx, cy, r, fill, stroke: "ink", sw: 1 };
+    return { t: "circle", cx, cy, r, fill: "ink" };
   };
-  const text = (u: number, v: number, s: string, size = 6): Prim => {
+  const ring = (u: number, v: number, r: number, stroke: Paint = "ink"): Prim => {
+    const [cx, cy] = f(u, v);
+    return { t: "circle", cx, cy, r, fill: "bg", stroke, sw: 1 };
+  };
+  const text = (u: number, v: number, s: string, size = 6, fill: Paint = "ink"): Prim => {
     const [tx, ty] = f(u, v);
-    return { t: "text", x: tx, y: ty + size * 0.35, text: s, size, anchor: "middle", fill: "ink", bold: true };
+    return { t: "text", x: tx, y: ty + size * 0.35, text: s, size, anchor: "middle", fill, bold: true };
   };
   const dashed = (u1: number, v1: number, u2: number, v2: number): Prim => ({ ...line(u1, v1, u2, v2, 0.8), dash: "2 1.5" }) as Prim;
-  // 1.26.1 Absperrorgan: two triangles tip to tip around u0; `fillIn` / `fillOut`: the triangle before / after it.
-  const bowtie = (u0 = 0, fillIn: Paint = "bg", fillOut: Paint = "bg", w = 7, h = 5, sw = 1) => [
-    poly([[u0 - w, -h], [u0, 0], [u0 - w, h]], fillIn, sw),
-    poly([[u0 + w, -h], [u0, 0], [u0 + w, h]], fillOut, sw),
+  /** Filled arrow head with its tip at (u, v), pointing along +u (back = −1: along −u). */
+  const head = (u: number, v: number, size = 3.2, back = 1) => poly([[u, v], [u - size * back, v - size * 0.6], [u - size * back, v + size * 0.6]], "ink", 0.4);
+  /** Filled arrow head with its tip at (u, v), pointing along +v. */
+  const headDown = (u: number, v: number, size = 3.2) => poly([[u, v], [u - size * 0.6, v - size], [u + size * 0.6, v - size]], "ink", 0.4);
+  // Absperrarmatur: two triangles tip to tip around u0.
+  const bowtie = (u0 = 0, w = 7, h = 5) => [poly([[u0 - w, -h], [u0, 0], [u0 - w, h]]), poly([[u0 + w, -h], [u0, 0], [u0 + w, h]])];
+  // Geradsitz- / Schrägsitzventil: Absperrarmatur with the dot of the seat.
+  const valve = () => [...bowtie(), dot(0, 0, 1.7)];
+  // Druckminderer: the arrow «p» pointing down onto the valve at its upper right (off-line side).
+  const pressure = () => [line(6, 12 * a, 6, 7 * a, 0.8), poly([[6, 5 * a], [4.6, 7.5 * a], [7.4, 7.5 * a]], "ink", 0.4), text(10, 9.5 * a, "p", 4.5)];
+  // Apparate- und Armaturenanschluss mit Absperrung: circle, lower half filled in the colour of the water.
+  const tap = (u: number, fill: Paint): Prim[] => {
+    const [cx, cy] = f(u, -4);
+    return [
+      { t: "circle", cx, cy, r: 3, fill: "bg", stroke: "ink", sw: 0.9 },
+      { t: "path", d: `M${cx - 3},${cy} A3,3 0 0 0 ${cx + 3},${cy} Z`, fill },
+    ];
+  };
+  const taps = (k: ApplianceSymbol) => [...tap(APPLIANCE[k].cold, "#00a651"), ...(APPLIANCE[k].warm !== null ? tap(APPLIANCE[k].warm!, "#e3001b") : [])];
+  const body = (list: Pt[]) => poly(list, APP_FILL, 1.2, APP_EDGE);
+  // Wandmischbatterie: the bracket to the wall, the outlet arrow.
+  const wallMixer = (u: number, v: number) => [line(u - 3, v - 4, u, v - 4, 0.9), line(u, v - 4, u, v + 4, 0.9), line(u - 3, v + 4, u, v + 4, 0.9), line(u, v, u + 5, v, 0.9), head(u + 8, v)];
+  // Brause on its hose / rod from (u, v0) up to v1, the head pointing down.
+  const brause = (u: number, v0: number, v1: number) => [
+    line(u, v0, u, v1, 0.9),
+    line(u, v1, u + 7, v1, 0.9),
+    line(u + 7, v1, u + 7, v1 + 3, 0.9),
+    line(u + 7, v1 + 3, u + 4, v1 + 6, 0.9),
+    line(u + 7, v1 + 3, u + 10, v1 + 6, 0.9),
   ];
-  // 2.6.9 Drosselventil: the arrow into the valve.
-  const throttle = () => [...bowtie(), line(-13, 0, -4, 0, 0.9), poly([[-2.5, 0], [-6, -2], [-6, 2]], "ink", 0.4)];
   switch (key) {
     case "shutoff":
-      // 1.26.5 Ventil: Absperrorgan with the dot of the seat.
-      return [...bowtie(), circle(0, 0, 1.6, "ink")];
+      return valve();
     case "shutoffDrain":
-      // 1.26.5 Ventil with an Entleerhahn (2.6.7) on a short branch: small Absperrorgan and the hose end.
-      return [
-        ...bowtie(),
-        circle(0, 0, 1.6, "ink"),
-        line(0, 0, 0, 4 * a, 0.8),
-        poly([[-2.8, 4 * a], [0, 7.5 * a], [2.8, 4 * a]], "bg", 0.8),
-        poly([[-2.8, 11 * a], [0, 7.5 * a], [2.8, 11 * a]], "bg", 0.8),
-        line(-3, 12.5 * a, 3, 12.5 * a, 1),
-      ];
+      // Absperrventil with an Entleerungsventil (Auslaufventil) on a short branch, draining against the flow.
+      return [...valve(), line(0, 0, 0, 7 * a, 0.8), line(0, 7 * a, -4, 7 * a, 0.8), head(-8, 7 * a, 3.2, -1)];
+    case "drain":
+      // Entleerung: Absperrventil, then the Auslaufventil (arrow) at the end of the line.
+      return [...valve(), line(7, 0, 11, 0, 0.9), head(15, 0)];
     case "check":
-      // 1.26.9 Rückflussverhinderer: the downstream triangle filled.
-      return bowtie(0, "bg", "ink");
+      // Rückflussverhinderer kontrollierbar: filled triangle in the flow direction against a bar, test stub.
+      return [poly([[-4.5, -4.5], [3.5, 0], [-4.5, 4.5]], "ink", 0.5), line(3.5, -4.5, 3.5, 4.5, 1.1), line(-1, -2 * a, -1, -7 * a, 0.9)];
     case "regValve":
-      // 2.6.9 Drosselventil: Regulierventil set by hand.
-      return throttle();
+      // Regulierventil von Hand: Absperrventil (W3) with the arrow of adjustability (SIA 410) across it.
+      return [...valve(), line(-6, -7 * a, 4, 6 * a, 0.8), poly([[6, 8.5 * a], [2.4, 6.8 * a], [5, 4.6 * a]], "ink", 0.4)];
     case "regValveThermal":
-      // Drosselventil with thermischem Antrieb (1.29.3): thermostatic Zirkulationsventil.
-      return [...throttle(), line(0, 0, 0, 6 * a, 0.9), rect(-4.5, 6 * a, 9, 7 * a), line(-2.5, 9.5 * a, 2.5, 9.5 * a, 0.7)];
+      // Zirkulationsregelventil: Absperrarmatur with the filled triangle on it.
+      return [...bowtie(), poly([[-5, 9 * a], [5, 9 * a], [0, 0]], "ink", 0.6)];
     case "meter":
-      return [rect(-7, -6, 14, 12), line(-7, -2.5, 7, -2.5, 0.7), text(0, 2, "m³", 4.8)];
+      // Wasserzähler.
+      return [rect(-7, -7, 14, 14), line(-7, -3, 7, -3, 0.7), text(0, 2, "m³", 4.8)];
     case "filter":
-      // 1.26.19 Filter (Schmutzfänger).
+      // Mechanischer Filter.
       return [rect(-6, -8, 12, 16), dashed(0, -6.5, 0, 6.5)];
     case "reducer":
-      // 1.26.8 Druckreduzierventil: Absperrorgan in a filled box.
-      return [rect(-8, -6, 16, 12, "ink"), ...bowtie(0, "bg", "bg", 5, 4, 0.6)];
+      // Druckminderer.
+      return [...bowtie(), ...pressure()];
     case "redfil":
-      // Redfil: Druckreduzierventil (1.26.8) and Filter (1.26.19) in one fitting.
-      return [rect(-15, -6, 16, 12, "ink"), ...bowtie(-7, "bg", "bg", 5, 4, 0.6), rect(1, -8, 12, 16), dashed(7, -6.5, 7, 6.5)];
+      // Redfil: Druckminderer mit Filter, the filter below the valve.
+      return [rect(-7, 0, 14, -a * 18), dashed(0, -a * 6, 0, -a * 16), ...bowtie(), ...pressure()];
     case "safety":
-      // 1.26.10 Sicherheitsventil mit Federbelastung (angle valve, spring on top) on a branch; blow-off into a
-      // Trichter (1.26.16).
+      // Sicherheitsventil federbelastet (angle valve, spring on top) on a branch, blowing off into a Trichter.
       return [
         line(0, 0, 0, 6 * a),
         poly([[-4, 6 * a], [4, 6 * a], [0, 12 * a]]),
@@ -182,33 +252,144 @@ export function drawSymbol(key: SymbolKey, x: number, y: number, vertical = fals
         line(2.5, 16.5 * a, -2.5, 18.5 * a, 0.8),
         line(-2.5, 18.5 * a, 2.5, 20.5 * a, 0.8),
         line(6, 12 * a, 11, 12 * a, 0.8),
-        line(11, 12 * a, 11, 5 * a, 0.8),
-        line(8, 8 * a, 11, 5 * a, 0.8),
-        line(14, 8 * a, 11, 5 * a, 0.8),
+        line(11, 12 * a, 11, 4 * a, 0.8),
+        line(11, 7 * a, 8, 10 * a, 0.8),
+        line(11, 7 * a, 14, 10 * a, 0.8),
       ];
     case "pump":
-      // 1.27.3 Pumpe: circle with the filled triangle pointing in the flow direction.
-      return [circle(0, 0, 8, "bg"), poly([[0, -8], [8, 0], [0, 8]], "ink", 0.5)];
+      // Flüssigkeitspumpe: circle, the two lines meeting at its edge in the flow direction.
+      return [ring(0, 0, 8), line(0, -8, 8, 0), line(0, 8, 8, 0)];
     case "mixer":
-      // 5.2.10 Thermostatischer Mischer.
-      return [circle(0, 0, 5, "ink")];
+      // Thermostatischer Mischer.
+      return [dot(0, 0, 5)];
     case "softener":
-      // 1.27.1 Apparat ohne rotierende Teile, with its designation.
+      // SIA 410 1.27.1 Apparat ohne rotierende Teile, with its designation.
       return [rect(-9, -9, 18, 18), text(0, 0, "E", 8)];
+    case "union":
+      // Verschraubung.
+      return [line(-1.5, -3, -1.5, 3, 1), line(1, -4.5, 1, 4.5, 1), line(2.6, -4.5, 2.6, 4.5, 1)];
     case "consumer": {
-      // SN EN 806-1 Apparate- und Armaturenanschluss mit Absperrung: circle, lower half filled.
+      // Apparate- und Armaturenanschluss mit Absperrung.
       const [cx, cy] = f(0, 0);
       return [
         { t: "circle", cx, cy, r: 4.5, fill: "bg", stroke: "ink", sw: 1 },
         { t: "path", d: `M${cx - 4.5},${cy} A4.5,4.5 0 0 0 ${cx + 4.5},${cy} Z`, fill: color },
       ];
     }
+    case "manifold":
+    case "manifoldConcealed":
+      // Verteiler with one outlet per Apparat (legend: three outlets on one line).
+      return manifoldPrims(x - manifoldWidth(3) / 2, y, y, 3, 0, key === "manifoldConcealed");
     case "battery":
-      return [rect(-3, -8, 6, 16, "ink")];
+      // Verteilbatterie: the collector with its Abgänge.
+      return [line(-6, 0, -6, -9), line(4, 0, 4, -9), rect(-12, -3, 24, 6)];
     case "heater":
-      // 5.1.19 Wassererwärmer (Ansicht): rectangle.
-      return [rect(-9, -13, 18, 26), text(0, 0, "WE", 6)];
+      // SIA 410 5.1.19 Wassererwärmer (Ansicht), with its insulation jacket like the Schemavorlage.
+      return [rect(-10, -13, 20, 26, "#e6e6e6"), rect(-7, -10, 14, 23, "#ffd6c9"), text(0, 2, "WE", 5.5, "#111111")];
+    case "wc":
+      // WC with Unterputz-Spülkasten (dashed: concealed).
+      return [
+        { t: "path", d: `M${x - 9},${y - 16} V${y - 36} H${x + 9} V${y - 16} Z`, fill: APP_FILL, stroke: APP_EDGE, sw: 1.2, dash: "4 2.5" },
+        body([[-9, -16], [9, -16], [0, -8]]),
+        ...taps(key),
+      ];
+    case "basin":
+      // Waschtisch with Standmischbatterie.
+      return [
+        body([[-17, -28], [17, -28], [4, -15], [-4, -15]]),
+        rect(-1.8, -15, 3.6, 5, APP_FILL, APP_EDGE, 1),
+        line(0, -30, 0, -38, 0.9),
+        dot(0, -30, 1.3),
+        dot(0, -38, 1.3),
+        line(0, -34, 5, -34, 0.9),
+        head(8, -34),
+        ...taps(key),
+      ];
+    case "shower":
+      // Dusche: tray, Wandmischbatterie and Brause.
+      return [rect(-19, -14, 38, 5, APP_FILL, APP_EDGE, 1.2), ...wallMixer(-6, -24), ...brause(-6, -28, -48), ...taps(key)];
+    case "bathtub":
+      // Badewanne with Wandmischbatterie and Brause.
+      return [body([[-29, -28], [27, -28], [27, -10], [-19, -10]]), ...wallMixer(10, -34), ...brause(10, -38, -50), ...taps(key)];
+    case "dishwasher":
+      return [rect(-12, -35, 24, 25, APP_FILL, APP_EDGE, 1.2), text(0, -22.5, "GS", 6.5, APP_EDGE), ...taps(key)];
+    case "washer":
+      // Waschautomat: casing and drum.
+      return [rect(-12, -35, 24, 25, APP_FILL, APP_EDGE, 1.2), ring(0, -22.5, 7, APP_EDGE), line(-2.5, -25, 3.5, -19, 0.8, APP_EDGE), ...taps(key)];
+    case "urinal":
+      // Urinoir with Selbstschlussarmatur «SC».
+      return [body([[-8, -34], [8, -34], [8, -18], [0, -11], [-8, -18]]), line(-4, -38, 2, -38, 0.9), head(6, -38), text(1, -43.5, "SC", 4.2), ...taps(key)];
+    case "outlet": {
+      // Balkon- / Gartenventil: Wandauslaufventil, Sicherungsarmatur, Schlauchverschraubung and hose.
+      const hex: Pt[] = [0, 1, 2, 3, 4, 5].map((i) => [13.5 + 3.6 * Math.cos((Math.PI / 3) * i), -6 + 3.6 * Math.sin((Math.PI / 3) * i)]);
+      return [
+        line(0, -7, 0, -24, 0.9),
+        line(0, -24, 6, -24, 0.9),
+        head(9.5, -24),
+        line(13.5, -21, 13.5, -13, 0.8),
+        headDown(13.5, -9.6),
+        poly(hex),
+        dot(13.5, -6, 0.9),
+        { t: "path", d: `M${x + 13.5},${y - 2.4} q2,1.5 0,3 q-2,1.5 0,3`, fill: "none", stroke: "ink", sw: 0.8 },
+        ...taps(key),
+      ];
+    }
   }
+}
+
+/**
+ * Verteiler (Flowpress) of an Apparategruppe: a box over the PWC and PWH lines (y of each) with one outlet dot per
+ * Apparat; `concealed`: inside an Unterputz-Verteilerkasten (frame with the cover strip and its screws).
+ */
+function manifoldPrims(x: number, yC: number, yH: number, cold: number, warm: number, concealed: boolean): Prim[] {
+  const w = manifoldWidth(Math.max(cold, warm, 1));
+  const top = Math.min(yC, yH) - 6;
+  const h = Math.abs(yH - yC) + 12;
+  const out: Prim[] = concealed ? concealedBox(x - 4, top - 9, w + 8, h + 13) : [];
+  out.push({ t: "rect", x, y: top, w, h, fill: "bg", stroke: "ink", sw: 1 });
+  for (let i = 0; i < cold; i++) out.push({ t: "circle", cx: x + 5 + i * 6, cy: yC, r: 2, fill: "#00a651" });
+  for (let i = 0; i < warm; i++) out.push({ t: "circle", cx: x + 5 + i * 6, cy: yH, r: 2, fill: "#e3001b" });
+  return out;
+}
+const manifoldWidth = (slots: number) => 4 + slots * 6;
+
+/** Unterputz-Verteilerkasten (Vorwand): frame with the cover strip and its two screws. */
+function concealedBox(x: number, y: number, w: number, h: number): Prim[] {
+  return [
+    { t: "rect", x, y, w, h, fill: "none", stroke: "ink", sw: 1.3 },
+    { t: "line", x1: x, y1: y + 5, x2: x + w, y2: y + 5, stroke: "ink", sw: 0.8 },
+    { t: "circle", cx: x + 4, cy: y + 2.5, r: 0.9, fill: "ink" },
+    { t: "circle", cx: x + w - 4, cy: y + 2.5, r: 0.9, fill: "ink" },
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// Apparategruppe: Verteiler, then every Apparat on its own line
+// ---------------------------------------------------------------------------
+
+/** Apparate drawn per group; more are written as «+ n». */
+const MAX_APPLIANCES = 16;
+const APP_GAP = 12; // Verteiler to the first Apparat
+
+/** The Apparate of a group one by one, in the order of W3 Tabelle 3. */
+function applianceRow(n: SanNode) {
+  const all = applianceKeys.flatMap((k) => Array.from({ length: n.appliances[k] ?? 0 }, () => applianceSymbol[k]));
+  const items = all.slice(0, MAX_APPLIANCES);
+  return { items, more: all.length - items.length, cold: items.length, warm: items.filter((k) => APPLIANCE[k].warm !== null).length };
+}
+
+/** Width of an Apparategruppe from its Verteiler to the end of the last Apparat (at least its text below). */
+function consumerWidth(n: SanNode): number {
+  const row = applianceRow(n);
+  const apps = row.items.reduce((s, k) => s + APPLIANCE[k].w, 0) + (row.more ? 24 : 0);
+  return Math.max(110, manifoldWidth(Math.max(row.cold, row.warm, 1)) + APP_GAP + apps + 10);
+}
+
+/** Right edge of a hanging element (relative to its column) at depth d whose lines start at `start`. */
+function extent(n: SanNode, d: number, start: number): number {
+  if (n.type === "consumer") return Math.max(start + 16, 44) + consumerWidth(n);
+  const end = 30 + (d + 1) * DX2;
+  return n.children.reduce((r, c, i) => Math.max(r, extent(c, d + 1, i ? end + SPAN : end)), end + SPAN);
 }
 
 // ---------------------------------------------------------------------------
@@ -283,7 +464,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
         cur = next;
       }
     } else hang(n, -1, "");
-    const width = Math.max(130, ...hangs.map((h) => 40 + (h.depth + 1) * DX2 + LABEL_W));
+    const width = Math.max(130, ...hangs.map((h) => 40 + extent(h.node, 0, SPAN)));
     columns.push({ x: cursor, lane: from.lane, from, chain, hangs, width });
     cursor += width;
   };
@@ -324,8 +505,8 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
   const floorY = new Map<string, { y0: number; y1: number; row: number }>();
   let y = 36;
   for (const f of floorNames) {
-    const h = 56 + Math.max(1, rowsAt.get(f) ?? 1) * RH;
-    floorY.set(f, { y0: y, y1: y + h, row: y + 56 });
+    const h = HEAD + Math.max(1, rowsAt.get(f) ?? 1) * RH;
+    floorY.set(f, { y0: y, y1: y + h, row: y + HEAD });
     y += h;
   }
   const floorsBottom = y;
@@ -423,19 +604,40 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
      * children branching down from the end of their pipe, consumers as outlet markers with their text.
      * `start(m)`: x where each line begins. Returns the rows used.
      */
-    const placeHang = (n: SanNode, d: number, start: (m: Medium) => number, yRow: number): number => {
+    const placeHang = (n: SanNode, d: number, start: (m: Medium) => number, yRow: number, mount: Mount): number => {
       const endX = c.x + 30 + (d + 1) * DX2;
       if (n.type === "consumer") {
-        const x = Math.max(start("pwc") + 26, c.x + 44);
-        for (const m of ["pwc", "pwh"] as const) {
-          if (!carries(n, m)) continue;
-          draw(n.id, m, [[start(m), yRow + OFF[m]], [x, yRow + OFF[m]]]);
-          used.add("consumer");
-          group(n.id, drawSymbol("consumer", x + 4.5, yRow + OFF[m], false, 1, mediumColors[m]));
+        // Apparategruppe: Verteiler (open or in its Unterputzkasten like the Stockwerkverteilung), then every
+        // Apparat on its own PWC / PWH line, the lines turning up to the Apparat (no junction: separate lines).
+        const row = applianceRow(n);
+        const xM = Math.max(start("pwc") + 16, c.x + 44);
+        const wM = manifoldWidth(Math.max(row.cold, row.warm, 1));
+        const y = { pwc: yRow + OFF.pwc, pwh: yRow + OFF.pwh };
+        for (const m of ["pwc", "pwh"] as const) if (carries(n, m)) draw(n.id, m, [[start(m), y[m]], [xM, y[m]]]);
+        const yF = yRow - 8;
+        const last: Partial<Record<"pwc" | "pwh", number>> = {};
+        let x = xM + wM + APP_GAP;
+        for (const k of row.items) {
+          const g = APPLIANCE[k];
+          const cx = x + g.w / 2;
+          const riser = (m: "pwc" | "pwh", tx: number) => {
+            draw(n.id, m, [[tx, y[m]], [tx, yF - 1]]);
+            last[m] = tx;
+          };
+          riser("pwc", cx + g.cold);
+          if (g.warm !== null) riser("pwh", cx + g.warm);
+          used.add(k);
+          group(n.id, drawSymbol(k, cx, yF));
+          x += g.w;
         }
+        for (const m of ["pwc", "pwh"] as const) if (last[m] !== undefined) draw(n.id, m, [[xM + wM, y[m]], [last[m]!, y[m]]]);
+        const concealed = mount === "concealed";
+        used.add(concealed ? "manifoldConcealed" : "manifold");
+        group(n.id, manifoldPrims(xM, y.pwc, y.pwh, row.cold, row.warm, concealed));
+        if (row.more) label(n.id, x + 4, yRow - 18, `+ ${row.more}`, 8, { bold: true });
         const lu = consumerLu(n.appliances);
-        label(n.id, x + 14, yRow + 3, n.label || "–", 8);
-        label(n.id, x + 14, yRow + 13, `${lu.cold} / ${lu.warm} ${labels.lu}`, 7, { muted: true });
+        label(n.id, xM, y.pwh + 19, n.label || "–", 8);
+        label(n.id, xM, y.pwh + 28, `${lu.cold} / ${lu.warm} ${labels.lu}`, 7, { muted: true });
         return 1;
       }
       const paths: Partial<Record<Medium, Pt[]>> = {};
@@ -444,18 +646,28 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
         draw(n.id, m, paths[m]!);
       }
       bandsOf(n, paths);
-      const title = [n.label, n.length ? `${fmt1(n.length)} m` : ""].filter(Boolean).join(" · ");
-      // Above the lines, clear of the Wohnungswasserzähler on them.
-      textBlock(n.id, endX - 4, yRow - 10, [...(title ? [title] : []), ...lineText(n)], "end");
+      // Wohnungsverteiler: Absperrventile and Wohnungswasserzähler side by side on PWC and PWH, in a common box
+      // (open, or the Unterputzkasten) like the Schemavorlage.
       const x0 = start("pwhc") + 16;
-      if (n.meter) ["pwc", "pwh"].forEach((m, i) => carries(n, m as Medium) && symbol(n.id, "meter", x0 + 10 + i * 20, yRow + OFF[m as Medium]));
-      if (n.shutoff && !n.meter) ["pwc", "pwh"].forEach((m, i) => carries(n, m as Medium) && symbol(n.id, "shutoff", x0 + 10 + i * 18, yRow + OFF[m as Medium]));
+      const sx = x0 + 8;
+      const mx = n.shutoff ? x0 + 28 : x0 + 10;
+      const meters = (["pwc", "pwh"] as const).filter((m) => carries(n, m));
+      if (n.shutoff) meters.forEach((m) => symbol(n.id, "shutoff", sx, yRow + OFF[m]));
+      if (n.meter) {
+        meters.forEach((m) => symbol(n.id, "meter", mx, yRow + OFF[m]));
+        const bx = x0 - 2;
+        const bw = mx + 10 - bx;
+        group(n.id, n.mount === "concealed" ? concealedBox(bx - 2, yRow - 17, bw + 4, OFF.pwh + 29) : [{ t: "rect", x: bx, y: yRow - 10, w: bw, h: OFF.pwh + 20, fill: "none", stroke: "ink", sw: 1 }]);
+      }
+      const title = [n.label, n.length ? `${fmt1(n.length)} m` : ""].filter(Boolean).join(" · ");
+      // Above the lines, clear of the Wohnungsverteiler box on them.
+      textBlock(n.id, endX - 4, yRow - (n.meter ? (n.mount === "concealed" ? 21 : 14) : 10), [...(title ? [title] : []), ...lineText(n)], "end");
       if (circuitEnds.has(n.id)) circulationEnd(n, endX, yRow);
       let rows = 0;
       n.children.forEach((child, i) => {
         const cy = yRow + rows * RH;
         if (i === 0) {
-          rows += placeHang(child, d + 1, () => endX, cy);
+          rows += placeHang(child, d + 1, () => endX, cy, n.mount);
           return;
         }
         // Branch down from the end of this pipe, the lines turning in reverse order (like the Verteilleitung).
@@ -465,7 +677,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
           draw(child.id, m, [[endX, yRow + OFF[m]], [bx(m), yRow + OFF[m]]]);
           if (carries(n.children[0], m)) dot(bx(m), yRow + OFF[m], m);
         }
-        rows += placeHang(child, d + 1, bx, cy);
+        rows += placeHang(child, d + 1, bx, cy, n.mount);
         // The vertical part of the branch, drawn after the child knows its row.
         for (const m of mediaOf(child)) if (carries(n, m)) draw(child.id, m, [[bx(m), yRow + OFF[m]], [bx(m), cy + OFF[m]]]);
       });
@@ -520,7 +732,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
         const yRow = hangY(h);
         // T-junction on the Strang unless the Strang ends in this row.
         for (const m of mediaOf(h.node)) if (yRow > colTop) dot(c.x + OFF[m], yRow + OFF[m], m);
-        placeHang(h.node, 0, (m) => c.x + OFF[m], yRow);
+        placeHang(h.node, 0, (m) => c.x + OFF[m], yRow, c.chain[h.anchor]?.mount ?? "surface");
       }
     } else {
       // Column without Strang: the group rises from the Verteilleitung straight to its storey.
@@ -530,13 +742,13 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
           draw(h.node.id, m, [...riseFrom(m), [c.x + OFF[m], yRow + OFF[m]]]);
           if (c.from.continues) dot(c.x + OFF[m], yFrom + OFF[m], m);
         }
-        placeHang(h.node, 0, (m) => c.x + OFF[m], yRow);
+        placeHang(h.node, 0, (m) => c.x + OFF[m], yRow, "surface");
       }
     }
   }
 
   // --- Zentrale ----------------------------------------------------------------------------------------------------
-  drawCentral(data, result, labels, zentrale, lane0, { symbol, label, draw, dot, group, band, textBlock });
+  drawCentral(data, result, labels, zentrale, lane0, { symbol, label, draw, dot, group, band, textBlock, use: (k) => used.add(k) });
 
   return {
     width,
@@ -553,7 +765,11 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
 // Zentrale
 // ---------------------------------------------------------------------------
 
-type CentralGeometry = { trunkItems: SymbolKey[]; xVB: number; spX: number; feedItems: SymbolKey[]; x0: number; height: number };
+/**
+ * Zentrale: the trunk with its items, the Verteilbatterie from xVB to xEnd with its Abgänge at xA1 (PWC
+ * Verteilung) and xA2 (cold feed of the Wassererwärmer), the Wassererwärmer at spX, the Verteilung from x0.
+ */
+type CentralGeometry = { trunkItems: SymbolKey[]; xVB: number; xA1: number; xA2: number; xEnd: number; spX: number; feedItems: SymbolKey[]; hasHot: boolean; x0: number; height: number };
 
 function centralGeometry(data: SanitaryData, result: SystemResult): CentralGeometry {
   const c = data.central;
@@ -564,15 +780,18 @@ function centralGeometry(data: SanitaryData, result: SystemResult): CentralGeome
   if (c.reducer && c.filter !== "redfil") trunkItems.push("reducer");
   if (c.softener === "all") trunkItems.push("softener");
   const xVB = LEFT + 70 + trunkItems.length * 46;
-  const feedItems: SymbolKey[] = ["shutoff"];
+  // The Absperrventil of the cold feed sits on its Abgang of the Verteilbatterie.
+  const feedItems: SymbolKey[] = [];
   if (c.safetyGroup) feedItems.push("check", "safety");
   if (c.softener === "heater") feedItems.push("softener");
-  const spX = xVB + 36 + feedItems.length * 40;
   const hasHot = result.lu.warm > 0 || data.network.some((n) => n.pwh);
-  const x0 = hasHot ? spX + 250 : xVB + 60;
-  return { trunkItems, xVB, spX, feedItems, x0, height: 190 };
+  const xA1 = xVB + 20;
+  const xA2 = xVB + 56;
+  const xEnd = hasHot ? xVB + 78 : xVB + 42;
+  const spX = xA2 + 44 + feedItems.length * 40;
+  const x0 = hasHot ? spX + 250 : xEnd + 70;
+  return { trunkItems, xVB, xA1, xA2, xEnd, spX, feedItems, hasHot, x0, height: 190 };
 }
-
 function drawCentral(
   data: SanitaryData,
   result: SystemResult,
@@ -587,6 +806,7 @@ function drawCentral(
     group: (nodeId: string | null, prims: Prim[]) => void;
     band: (points: Pt[], mm: number | null, shared: boolean) => void;
     textBlock: (nodeId: string, x: number, yBottom: number, lines: string[], anchor: "start" | "middle" | "end", title?: boolean) => void;
+    use: (key: SymbolKey) => void;
   },
 ) {
   const { symbol, label, draw, dot, band } = api;
@@ -627,29 +847,39 @@ function drawCentral(
     if (k === "meter") label(null, x, Yt + 22, labels.meter, 6.5, { anchor: "middle", muted: true });
     if (k === "softener") label(null, x, Yt + 22, labels.softener, 6.5, { anchor: "middle", muted: true });
   });
-  // Verteilbatterie: bar from the PWC Verteilung down to the trunk.
-  api.group(null, [{ t: "rect", x: g.xVB - 3, y: Y - 8, w: 6, h: Yt - Y + 16, fill: "ink" }]);
-  label(null, g.xVB - 8, Y + 40, labels.battery, 6.5, { anchor: "end", muted: true });
+  // Verteilbatterie like the Schemavorlage: the collector, each Abgang rising with its Absperrventil mit Entleerung
+  // and a Verschraubung, the Entleerung at its end.
+  api.use("battery");
+  api.group(null, [{ t: "rect", x: g.xVB - 4, y: Yt - 4, w: g.xEnd - g.xVB + 8, h: 8, fill: "bg", stroke: "ink", sw: 1.2 }]);
+  symbol(null, "drain", g.xEnd, Yt + 11, true, -1);
+  label(null, (g.xVB + g.xEnd) / 2 - 4, Yt + 42, labels.battery, 6.5, { anchor: "middle", muted: true });
+  const abgang = (x: number) => {
+    symbol(null, "shutoffDrain", x, Yt - 18, true);
+    symbol(null, "union", x, Yt - 33, true);
+  };
   // PWC to the Verteilung.
-  line("pwc", [[g.xVB, Y], [g.x0, Y]], ci.supply);
-  symbol(null, "shutoff", g.xVB + 22, Y);
-  block(g.xVB + 40, Y - 43, c.centralLength, text([[labels.kw, result.central.supply?.size, ci.supply]]), "start");
-  const hasHot = g.x0 > g.xVB + 60;
-  if (!hasHot) return;
-  // Cold feed of the heater with the Sicherheitsgruppe.
-  line("pwc", [[g.xVB, Yt], [g.spX, Yt]], ci.feed);
+  line("pwc", [[g.xA1, Yt - 4], [g.xA1, Y], [g.x0, Y]], ci.supply);
+  abgang(g.xA1);
+  block(g.xA1 + 20, Y - 43, c.centralLength, text([[labels.kw, result.central.supply?.size, ci.supply]]), "start");
+  if (!g.hasHot) return;
+  // Cold feed of the heater with the Sicherheitsgruppe, entering the Wassererwärmer at its foot.
+  const Yf = Yt - 48;
+  line("pwc", [[g.xA2, Yt - 4], [g.xA2, Yf], [g.spX - 14, Yf], [g.spX - 14, Yt], [g.spX, Yt]], ci.feed);
+  abgang(g.xA2);
   g.feedItems.forEach((k, i) => {
-    const x = g.xVB + 30 + i * 40;
-    symbol(null, k, x, Yt);
-    if (k === "softener") label(null, x, Yt + 22, labels.softener, 6.5, { anchor: "middle", muted: true });
+    const x = g.xA2 + 32 + i * 40;
+    symbol(null, k, x, Yf);
+    if (k === "softener") label(null, x, Yf + 22, labels.softener, 6.5, { anchor: "middle", muted: true });
   });
-  block(g.spX - 6, Yt + 32, c.heaterLength, text([[labels.kw, result.central.feed?.size, ci.feed]]), "end");
-  // Wassererwärmer (neutral).
+  block(g.spX - 20, Yt + 12, c.heaterLength, text([[labels.kw, result.central.feed?.size, ci.feed]]), "end");
+  // Wassererwärmer (neutral), with its insulation jacket like the Schemavorlage.
   const top = Y + 48;
+  api.use("heater");
   api.group(null, [
-    { t: "rect", x: g.spX, y: top, w: 90, h: Yt + 20 - top, fill: "bg", stroke: "ink", sw: 1.4 },
-    { t: "text", x: g.spX + 45, y: top + 34, text: c.heaterLabel || labels.heater, size: 8.5, anchor: "middle", fill: "ink", bold: true },
-    { t: "text", x: g.spX + 45, y: top + 48, text: [c.heaterVolume ? `${c.heaterVolume} l` : "", `${fmt1(data.settings.tHot)} °C`].filter(Boolean).join(" · "), size: 7.5, anchor: "middle", fill: "muted" },
+    { t: "rect", x: g.spX, y: top, w: 90, h: Yt + 20 - top, fill: "#e6e6e6", stroke: "ink", sw: 1.4 },
+    { t: "rect", x: g.spX + 6, y: top + 6, w: 78, h: Yt + 8 - top, fill: "#ffd6c9", stroke: "#111111", sw: 0.8 },
+    { t: "text", x: g.spX + 45, y: top + 34, text: c.heaterLabel || labels.heater, size: 8.5, anchor: "middle", fill: "#111111", bold: true },
+    { t: "text", x: g.spX + 45, y: top + 48, text: [c.heaterVolume ? `${c.heaterVolume} l` : "", `${fmt1(data.settings.tHot)} °C`].filter(Boolean).join(" · "), size: 7.5, anchor: "middle", fill: "#444444" },
   ]);
   // PWH out of the heater to the Verteilung, PWH-C back through the pump group.
   const xH = g.spX + 30;

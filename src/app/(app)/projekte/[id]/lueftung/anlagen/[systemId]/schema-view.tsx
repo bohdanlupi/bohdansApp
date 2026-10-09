@@ -23,7 +23,7 @@ export function SvgPrims({ prims }: { prims: Prim[] }) {
           case "circle":
             return <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={paint(p.fill)} stroke={paint(p.stroke)} strokeWidth={p.sw} />;
           case "path":
-            return <path key={i} d={p.d} fill={paint(p.fill)} stroke={paint(p.stroke)} strokeWidth={p.sw} />;
+            return <path key={i} d={p.d} fill={paint(p.fill)} stroke={paint(p.stroke)} strokeWidth={p.sw} strokeDasharray={p.dash} />;
           case "polygon":
             return <polygon key={i} points={p.points} fill={paint(p.fill)} stroke={paint(p.stroke)} strokeWidth={p.sw} />;
           case "text":
