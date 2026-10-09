@@ -193,6 +193,7 @@ export function SanitaryEditor({
 function ResultsPanel({ data, result, editable, onPump }: { data: SanitaryData; result: SystemResult; editable: boolean; onPump: (pump: string | null) => void }) {
   const t = useTranslations("sanitary.results");
   const tw = useTranslations("sanitary.warnings");
+  const ta = useTranslations("sanitary.appliances");
   const labelOf = (nodeId: string) => {
     const n = findNode(data.network, nodeId);
     const r = result.pipes.get(nodeId);
@@ -210,6 +211,8 @@ function ResultsPanel({ data, result, editable, onPump }: { data: SanitaryData; 
         return tw("deltaT", { value: fmt(w.value, 1) });
       case "pumpHead":
         return tw("pumpHead", { head: fmt(w.head, 0) });
+      case "ausstoss":
+        return tw("ausstoss", { element: labelOf(w.id), appliance: ta(`${w.type}Short`), time: fmt(w.time, 1), limit: w.limit });
       default:
         return tw(w.kind);
     }

@@ -4,7 +4,9 @@
 //   Verteilung: a tree of pipe sections that each carry PWC and / or PWH, with the PWH-C «konventionell» (separate
 //              steel return) or «Rohr an Rohr» (Optiflex return along the steel PWH) – as the Nussbaum
 //              Zirkulationsberechnung (Berechnungsvorlagen/Sanitär); Steigstränge («riser») are drawn vertically.
-//   Leaves:     Apparategruppen with their outlets (SVGW W3 Tabelle 3).
+//   Leaves:     Apparategruppen with their Apparate (SVGW W3 Tabelle 3), each on its own Pex line (Ausstossleitung,
+//              PWC and PWH) from the Verteiler, with length and size; Ausstosszeit = water content from the last
+//              warmgehaltene point ÷ flow of the tap, checked against SIA 385/1 4.3 (10 s warmgehalten, else 15 s).
 // Sizing of PWC / PWH after SVGW W3 (w3.ts); PWH-C, flows and pump after the heat-loss method of the workbook:
 //   Q' = q'·L (konventionell 2·L at 0.12 kWh/(m·d), Rohr an Rohr L at 0.15), V_pump = ΣQ'·1000/24 / (ρ·c·ΔT),
 //   split at each branch in the ratio of the heat losses behind it; Δp = L·(1 + Zuschlag)·(R_PWH + R_PWH-C);
@@ -12,6 +14,7 @@
 
 import { type BiralPump, biralPumps } from "./catalog-data";
 import {
+  area,
   findSize,
   frictionPerMetre,
   type InsulationMaterial,
@@ -25,7 +28,7 @@ import {
   supplySizes,
   velocity,
 } from "./pipes";
-import { appliances, type Appliances, applianceKeys, peakFlow, tableSize, velocityLimits, type W3Table } from "./w3";
+import { type ApplianceKey, appliances, type Appliances, applianceKeys, peakFlow, tableSize, velocityLimits, type W3Table } from "./w3";
 
 export type Circulation = "none" | "conventional" | "rar";
 export type PipeRole = "auto" | "distribution" | "floor";
@@ -33,6 +36,18 @@ export type RegValve = "thermal" | "manual";
 /** Wohnungsverteiler (meter, shutoffs, manifolds of its Apparategruppen): open on the wall or in an Unterputz / Vorwand box. */
 export type Mount = "surface" | "concealed";
 export type Medium = "pwc" | "pwh" | "pwhc";
+
+/** One Apparat of an Apparategruppe and its Ausstossleitungen (Optiflex-Flowpress) from the Verteiler. */
+export type Outlet = {
+  id: string;
+  type: ApplianceKey;
+  /** Pex line lengths [m] (null = not entered yet). */
+  lengthPwc: number | null;
+  lengthPwh: number | null;
+  /** Pex size keys chosen by hand (null = by the flow of the tap). */
+  sizePwc: string | null;
+  sizePwh: string | null;
+};
 
 export type SanNode = {
   id: string;
@@ -64,7 +79,8 @@ export type SanNode = {
   /** Bogen 90° / 45° of the Leitung (each of its lines PWC / PWH / PWH-C gets them in its size). */
   bends90: number;
   bends45: number;
-  appliances: Appliances;
+  /** Apparategruppe: its Apparate in the order drawn along the Verteiler. */
+  outlets: Outlet[];
   children: SanNode[];
 };
 
@@ -174,6 +190,21 @@ export type PipeResult = {
   strang: number | null;
 };
 
+export type OutletSized = { size: PipeSize; source: "manual" | "velocity"; velocity: number };
+export type OutletResult = {
+  pwc: OutletSized | null;
+  pwh: OutletSized | null;
+  /** Flow of the tap [l/s] (W3 Tabelle 3). */
+  flow: number;
+  /** Warm water standing between the last warmgehaltene point and the tap [l]; null without PWH or PWH length. */
+  volume: number | null;
+  /** Ausstosszeit [s] = volume ÷ flow and its limit (SIA 385/1 4.3: 10 s with Warmhaltung, else 15 s). */
+  time: number | null;
+  limit: number;
+  /** The line starts at a warmgehaltene (circulated) point. */
+  kept: boolean;
+};
+
 export type Circuit = { endId: string; footId: string | null; path: number; throttle: number; flow: number };
 
 export type PumpSuggestion = {
@@ -205,6 +236,8 @@ export type SystemResult = {
   };
   pump: PumpSuggestion | null;
   circuits: Circuit[];
+  /** Per Apparat (Outlet.id): Pex sizes and Ausstosszeit. */
+  outlets: Map<string, OutletResult>;
   warnings: Warning[];
 };
 
@@ -216,7 +249,8 @@ export type Warning =
   | { kind: "tooHot" }
   | { kind: "noConsumers" }
   | { kind: "pumpHead"; head: number }
-  | { kind: "tableExceeded"; id: string; medium: Medium };
+  | { kind: "tableExceeded"; id: string; medium: Medium }
+  | { kind: "ausstoss"; id: string; outlet: string; type: ApplianceKey; time: number; limit: number };
 
 // ---------------------------------------------------------------------------
 // Tree helpers
@@ -245,10 +279,27 @@ export const newNode = (type: SanNode["type"], patch: Partial<SanNode> = {}): Sa
   mount: "surface",
   bends90: 0,
   bends45: 0,
-  appliances: {},
+  outlets: [],
   children: [],
   ...patch,
 });
+
+/** Maximum Apparate per Apparategruppe. */
+export const MAX_OUTLETS = 40;
+
+export const newOutlet = (type: ApplianceKey, patch: Partial<Outlet> = {}): Outlet => ({
+  id: newId(),
+  type,
+  lengthPwc: null,
+  lengthPwh: null,
+  sizePwc: null,
+  sizePwh: null,
+  ...patch,
+});
+
+/** Apparate from counts per type (older data, examples), in the order of W3 Tabelle 3. */
+export const outletsFrom = (counts: Appliances): Outlet[] =>
+  applianceKeys.flatMap((k) => Array.from({ length: Math.min(counts[k] ?? 0, MAX_OUTLETS) }, () => newOutlet(k))).slice(0, MAX_OUTLETS);
 
 export function mapTree(roots: SanNode[], fn: (node: SanNode) => SanNode | null): SanNode[] {
   return roots.flatMap((n) => {
@@ -275,18 +326,16 @@ export function pathTo(roots: SanNode[], id: string): string[] {
   return [];
 }
 
-/** LU of the outlets of a consumer. */
-export function consumerLu(a: Appliances) {
+/** LU of the Apparate of a consumer. */
+export function consumerLu(outlets: Outlet[]) {
   let cold = 0;
   let warm = 0;
   let largestCold = 0;
   let largestWarm = 0;
-  for (const key of applianceKeys) {
-    const n = a[key] ?? 0;
-    if (!n) continue;
-    const def = appliances[key];
-    cold += n * def.cold;
-    warm += n * def.warm;
+  for (const o of outlets) {
+    const def = appliances[o.type];
+    cold += def.cold;
+    warm += def.warm;
     if (def.cold) largestCold = Math.max(largestCold, def.q);
     if (def.warm) largestWarm = Math.max(largestWarm, def.q);
   }
@@ -309,7 +358,7 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
   type Load = { cold: number; warm: number; largestCold: number; largestWarm: number; consumers: number; riser: boolean };
   const loads = new Map<string, Load>();
   const load = (n: SanNode): Load => {
-    const own = n.type === "consumer" ? consumerLu(n.appliances) : { cold: 0, warm: 0, largestCold: 0, largestWarm: 0 };
+    const own = n.type === "consumer" ? consumerLu(n.outlets) : { cold: 0, warm: 0, largestCold: 0, largestWarm: 0 };
     const acc: Load = { ...own, consumers: n.type === "consumer" ? 1 : 0, riser: n.type === "pipe" && n.riser };
     for (const c of n.children) {
       const l = load(c);
@@ -549,6 +598,40 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
     };
   }
 
+  // Ausstossleitungen: Pex sizes by the flow of the tap (W3 2.1.3: 4 m/s), Ausstosszeit from the last warmgehaltene
+  // point: the end of the circulated sections, else the Wassererwärmer (with its line in the Zentrale).
+  const centralRes = centralLines();
+  const outlets = new Map<string, OutletResult>();
+  const sizeOutlet = (key: string | null, flow: number): OutletSized | null => {
+    const list = supplySizes("optiflex");
+    const manual = findSize(key);
+    const size = manual && list.includes(manual) ? manual : sizeForVelocity(list, flow, velocityLimits.outlet);
+    return size ? { size, source: manual && list.includes(manual) ? "manual" : "velocity", velocity: velocity(size, flow) } : null;
+  };
+  /** Water content of a line [l]. */
+  const litres = (size: PipeSize, length: number) => area(size) * length * 1000;
+  const walkOutlets = (n: SanNode, volume: number, kept: boolean) => {
+    if (n.type === "pipe") {
+      const pwh = pipes.get(n.id)?.pwh;
+      const warm = circulated.has(n.id);
+      n.children.forEach((c) => walkOutlets(c, warm ? 0 : volume + (pwh ? litres(pwh.size, pipeLength(n)) : 0), kept || warm));
+      return;
+    }
+    for (const o of n.outlets) {
+      const def = appliances[o.type];
+      const pwc = def.cold ? sizeOutlet(o.sizePwc, def.q) : null;
+      const pwh = def.warm ? sizeOutlet(o.sizePwh, def.q) : null;
+      const limit = kept ? 10 : 15;
+      const v = pwh && o.lengthPwh !== null ? volume + litres(pwh.size, o.lengthPwh) : null;
+      const time = v !== null ? v / def.q : null;
+      if (time !== null && time > limit) warnings.push({ kind: "ausstoss", id: n.id, outlet: o.id, type: o.type, time, limit });
+      outlets.set(o.id, { pwc, pwh, flow: def.q, volume: v, time, limit, kept });
+    }
+  };
+  const keptAtHeater = heatLoss > 0;
+  const heaterVolume = !keptAtHeater && centralRes.hot ? litres(centralRes.hot.size, central.heaterLength ?? 0) : 0;
+  data.network.forEach((n) => walkOutlets(n, heaterVolume, keptAtHeater));
+
   const houseLu = allLu;
   return {
     pipes,
@@ -556,9 +639,10 @@ export function evaluateSystem(data: SanitaryData): SystemResult {
     qd: { cold: peakFlow(total.cold * 0.1, total.largestCold), warm: peakFlow(total.warm * 0.1, total.largestWarm), total: peakFlow(allLu * 0.1, largestAll) },
     distLength,
     house: { dn: houseLu > 0 ? tableSize("5", Math.max(houseLu, 60), Math.max(central.houseLength ?? 10, 10)) : null, lu: houseLu },
-    central: centralLines(),
+    central: centralRes,
     pump,
     circuits,
+    outlets,
     warnings,
   };
 }

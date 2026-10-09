@@ -3105,7 +3105,6 @@
         "thermal": "thermostatique automatique (Nussbaum 36030)",
         "manual": "vanne de réglage manuelle (Nussbaum 24026)"
       },
-      "appliancesHint": "Points de soutirage selon SSIGE W3 tableau 3 (valeurs de charge froid / chaud).",
       "bends90": "Coudes 90° [pce]",
       "bends45": "Coudes 45° [pce]",
       "mount": "Distributeur",
@@ -3123,7 +3122,16 @@
       "shower": "Douche, évier, vidoir (2 / 2)",
       "urinal": "Urinoir automatique (3 / –)",
       "bathtub": "Baignoire (3 / 3)",
-      "garden": "Jardin / garage (5 / –)"
+      "garden": "Jardin / garage (5 / –)",
+      "wcShort": "WC",
+      "basinShort": "Lavabo",
+      "dishwasherShort": "Lave-vaisselle",
+      "washerShort": "Lave-linge",
+      "balconyShort": "Robinet de balcon",
+      "showerShort": "Douche",
+      "urinalShort": "Urinoir",
+      "bathtubShort": "Baignoire",
+      "gardenShort": "Robinet de jardin"
     },
     "results": {
       "title": "Calcul",
@@ -3166,7 +3174,8 @@
       "temperature": "OFSP : production d'eau chaude au moins 60 °C, distribution au moins 55 °C.",
       "noConsumers": "Pas encore de groupes d'appareils avec des points de soutirage.",
       "pumpHead": "La pompe choisie n'atteint pas la hauteur de {head} mbar.",
-      "tooHot": "SIA 385/1 4.1.1 : eau chaude dans la distribution au plus 65 °C."
+      "tooHot": "SIA 385/1 4.1.1 : eau chaude dans la distribution au plus 65 °C.",
+      "ausstoss": "{element} : temps d’écoulement {appliance} {time} s – plus de {limit} s (SIA 385/1 4.3). Raccourcir la conduite PEX ou la choisir plus petite."
     },
     "central": {
       "title": "Centrale",
@@ -3281,6 +3290,20 @@
       "plan": "Schéma de principe",
       "trade": "Sanitaire"
     },
-    "moveHorizontal": "Déplacer le schéma latéralement"
+    "moveHorizontal": "Déplacer le schéma latéralement",
+    "outlets": {
+      "hint": "Chaque appareil a sa propre conduite PEX (Optiflex-Flowpress) depuis le distributeur. Temps d’écoulement = contenu d’eau depuis le dernier point maintenu en température ÷ débit du point de soutirage (W3 tableau 3). Limite SIA 385/1 4.3 : 10 s avec maintien en température, 15 s sans.",
+      "empty": "Aucun appareil.",
+      "add": "+ Ajouter un appareil",
+      "left": "Vers la gauche",
+      "right": "Vers la droite",
+      "remove": "Supprimer l’appareil",
+      "length": "Longueur [m]",
+      "size": "Dimension",
+      "time": "Temps d’écoulement {time} s (max. {limit} s) · {volume} l depuis {from}",
+      "fromKept": "la conduite maintenue en température",
+      "fromHeater": "le chauffe-eau",
+      "noLength": "Temps d’écoulement : saisir la longueur PWH"
+    }
   }
 }

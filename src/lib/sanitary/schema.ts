@@ -17,7 +17,7 @@ import { floorOrder } from "@/lib/kwl/schema-layout";
 import type { Medium, Mount, SanitaryData, SanNode, SystemResult } from "./network";
 import { consumerLu } from "./network";
 import { insulationStyle, type PipeSize, sizeText } from "./pipes";
-import { type ApplianceKey, applianceKeys } from "./w3";
+import type { ApplianceKey } from "./w3";
 
 export const mediumColors: Record<Medium, `#${string}`> = { pwc: "#00a651", pwh: "#e3001b", pwhc: "#ff8000" };
 /** Offset of each line from the first one (PWC) [units]. */
@@ -28,7 +28,7 @@ const MEDIA: Medium[] = ["pwc", "pwh", "pwhc"];
 
 const DX = 96; // Verteilleitung section
 const DX2 = 100; // Stockwerkverteilung section
-const RH = 110; // row of a Stockwerkverteilung (lines, the Apparate or text block above them, the group text below)
+const RH = 124; // row of a Stockwerkverteilung (lines, the Apparate or text block above them, the Pex lines and their texts below)
 const HEAD = 66; // top of a storey down to its first row
 const TEXT_LINE = 9; // line pitch of the Leitung texts
 const LEFT = 64; // storey names
@@ -347,11 +347,11 @@ function manifoldPrims(x: number, yC: number, yH: number, cold: number, warm: nu
   const h = Math.abs(yH - yC) + 12;
   const out: Prim[] = concealed ? concealedBox(x - 4, top - 9, w + 8, h + 13) : [];
   out.push({ t: "rect", x, y: top, w, h, fill: "bg", stroke: "ink", sw: 1 });
-  for (let i = 0; i < cold; i++) out.push({ t: "circle", cx: x + 5 + i * 6, cy: yC, r: 2, fill: "#00a651" });
-  for (let i = 0; i < warm; i++) out.push({ t: "circle", cx: x + 5 + i * 6, cy: yH, r: 2, fill: "#e3001b" });
+  for (let i = 0; i < cold; i++) out.push({ t: "circle", cx: outletX(x, "pwc", i), cy: yC, r: 2, fill: "#00a651" });
+  for (let i = 0; i < warm; i++) out.push({ t: "circle", cx: outletX(x, "pwh", i), cy: yH, r: 2, fill: "#e3001b" });
   return out;
 }
-const manifoldWidth = (slots: number) => 4 + slots * 6;
+const manifoldWidth = (slots: number) => 6 + slots * OUTLET_PITCH;
 
 /** Unterputz-Verteilerkasten (Vorwand): frame with the cover strip and its two screws. */
 function concealedBox(x: number, y: number, w: number, h: number): Prim[] {
@@ -364,25 +364,30 @@ function concealedBox(x: number, y: number, w: number, h: number): Prim[] {
 }
 
 // ---------------------------------------------------------------------------
-// Apparategruppe: Verteiler, then every Apparat on its own line
+// Apparategruppe: Verteiler, then every Apparat on its own Pex line
 // ---------------------------------------------------------------------------
 
-/** Apparate drawn per group; more are written as «+ n». */
-const MAX_APPLIANCES = 16;
 const APP_GAP = 12; // Verteiler to the first Apparat
+/** Below the row: the Pex lines run along at these offsets (PWH above PWC, like the Schemavorlage). */
+const BUS = { pwh: 32, pwc: 40 } as const;
+/** Pitch of the outlets on the Verteiler; the PWH outlets sit between the PWC ones. */
+const OUTLET_PITCH = 6;
+const outletX = (x: number, m: "pwc" | "pwh", i: number) => x + (m === "pwc" ? 4 : 7) + i * OUTLET_PITCH;
 
-/** The Apparate of a group one by one, in the order of W3 Tabelle 3. */
+/** The Apparate of a group in their order along the Verteiler, and the outlets per line. */
 function applianceRow(n: SanNode) {
-  const all = applianceKeys.flatMap((k) => Array.from({ length: n.appliances[k] ?? 0 }, () => applianceSymbol[k]));
-  const items = all.slice(0, MAX_APPLIANCES);
-  return { items, more: all.length - items.length, cold: items.length, warm: items.filter((k) => APPLIANCE[k].warm !== null).length };
+  const items = n.outlets.map((o) => ({ outlet: o, key: applianceSymbol[o.type] }));
+  return { items, cold: items.length, warm: items.filter((i) => APPLIANCE[i.key].warm !== null).length };
 }
 
-/** Width of an Apparategruppe from its Verteiler to the end of the last Apparat (at least its text below). */
+/** Width of the group text right of the last Apparat (name 8, LU 7 units high). */
+const groupTextWidth = (n: SanNode) => Math.max(50, n.label.length * 4.4) + 10;
+
+/** Width of an Apparategruppe from its Verteiler to the end of its text. */
 function consumerWidth(n: SanNode): number {
   const row = applianceRow(n);
-  const apps = row.items.reduce((s, k) => s + APPLIANCE[k].w, 0) + (row.more ? 24 : 0);
-  return Math.max(110, manifoldWidth(Math.max(row.cold, row.warm, 1)) + APP_GAP + apps + 10);
+  const apps = row.items.reduce((s, i) => s + APPLIANCE[i.key].w, 0);
+  return manifoldWidth(Math.max(row.cold, row.warm, 1)) + APP_GAP + apps + groupTextWidth(n);
 }
 
 /** Right edge of a hanging element (relative to its column) at depth d whose lines start at `start`. */
@@ -422,7 +427,7 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
   const circulated = (n: SanNode) => !!res(n)?.circ;
   const carries = (n: SanNode, m: Medium) => {
     if (n.type === "consumer") {
-      const lu = consumerLu(n.appliances);
+      const lu = consumerLu(n.outlets);
       return m === "pwc" ? lu.cold > 0 : m === "pwh" ? lu.warm > 0 : false;
     }
     return m === "pwhc" ? circulated(n) : n[m];
@@ -608,36 +613,46 @@ export function layoutSchema(data: SanitaryData, result: SystemResult, labels: S
       const endX = c.x + 30 + (d + 1) * DX2;
       if (n.type === "consumer") {
         // Apparategruppe: Verteiler (open or in its Unterputzkasten like the Stockwerkverteilung), then every
-        // Apparat on its own PWC / PWH line, the lines turning up to the Apparat (no junction: separate lines).
+        // Apparat on its own Pex line: down out of the Verteiler, along below it and up to the Apparat (like the
+        // Schemavorlage; the lines run together but are separate, so no junction dots). Under each Apparat its Pex
+        // size, length and Ausstosszeit.
         const row = applianceRow(n);
         const xM = Math.max(start("pwc") + 16, c.x + 44);
         const wM = manifoldWidth(Math.max(row.cold, row.warm, 1));
         const y = { pwc: yRow + OFF.pwc, pwh: yRow + OFF.pwh };
+        const bus = { pwc: yRow + BUS.pwc, pwh: yRow + BUS.pwh };
         for (const m of ["pwc", "pwh"] as const) if (carries(n, m)) draw(n.id, m, [[start(m), y[m]], [xM, y[m]]]);
         const yF = yRow - 8;
-        const last: Partial<Record<"pwc" | "pwh", number>> = {};
+        const outletNo = { pwc: 0, pwh: 0 };
         let x = xM + wM + APP_GAP;
-        for (const k of row.items) {
-          const g = APPLIANCE[k];
+        for (const { outlet, key } of row.items) {
+          const g = APPLIANCE[key];
           const cx = x + g.w / 2;
-          const riser = (m: "pwc" | "pwh", tx: number) => {
-            draw(n.id, m, [[tx, y[m]], [tx, yF - 1]]);
-            last[m] = tx;
+          const pex = (m: "pwc" | "pwh", tx: number) => {
+            const ox = outletX(xM, m, outletNo[m]++);
+            draw(n.id, m, [[ox, y[m]], [ox, bus[m]], [tx, bus[m]], [tx, yF - 1]]);
           };
-          riser("pwc", cx + g.cold);
-          if (g.warm !== null) riser("pwh", cx + g.warm);
-          used.add(k);
-          group(n.id, drawSymbol(k, cx, yF));
+          pex("pwc", cx + g.cold);
+          if (g.warm !== null) pex("pwh", cx + g.warm);
+          used.add(key);
+          group(n.id, drawSymbol(key, cx, yF));
+          // «Pex 16» (or «Pex 16/20» PWC/PWH), «3,5 m» (or «3/4 m»), the Ausstosszeit red above its limit.
+          const r = result.outlets.get(outlet.id);
+          const both = <T>(c: T, w: T | undefined, f: (v: T) => string) => (w === undefined || f(c) === f(w) ? f(c) : `${f(c)}/${f(w)}`);
+          const len = (v: number | null) => (v === null ? "–" : fmt1(v));
+          const lines: [string, Paint][] = [];
+          if (r?.pwc) lines.push([`Pex ${both(r.pwc.size.od, r.pwh?.size.od, String)}`, "muted"]);
+          lines.push([`${both(outlet.lengthPwc, r?.pwh ? outlet.lengthPwh : undefined, len)} m`, "muted"]);
+          if (r?.time != null) lines.push([`${fmt1(r.time)} s`, r.time > r.limit ? "#d00000" : "muted"]);
+          lines.forEach(([s, fill], i) => group(n.id, [{ t: "text", x: cx, y: bus.pwc + 9 + i * 7, text: s, size: 5.5, anchor: "middle", fill }]));
           x += g.w;
         }
-        for (const m of ["pwc", "pwh"] as const) if (last[m] !== undefined) draw(n.id, m, [[xM + wM, y[m]], [last[m]!, y[m]]]);
         const concealed = mount === "concealed";
         used.add(concealed ? "manifoldConcealed" : "manifold");
         group(n.id, manifoldPrims(xM, y.pwc, y.pwh, row.cold, row.warm, concealed));
-        if (row.more) label(n.id, x + 4, yRow - 18, `+ ${row.more}`, 8, { bold: true });
-        const lu = consumerLu(n.appliances);
-        label(n.id, xM, y.pwh + 19, n.label || "–", 8);
-        label(n.id, xM, y.pwh + 28, `${lu.cold} / ${lu.warm} ${labels.lu}`, 7, { muted: true });
+        const lu = consumerLu(n.outlets);
+        label(n.id, x + 8, yRow + 3, n.label || "–", 8);
+        label(n.id, x + 8, yRow + 13, `${lu.cold} / ${lu.warm} ${labels.lu}`, 7, { muted: true });
         return 1;
       }
       const paths: Partial<Record<Medium, Pt[]>> = {};

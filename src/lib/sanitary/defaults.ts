@@ -1,4 +1,4 @@
-import { newNode, type SanNode } from "./network";
+import { newNode, outletsFrom, type SanNode } from "./network";
 
 /**
  * Starting network of a multi-family house: a Verteilleitung in the basement with two Stränge (Zirkulation
@@ -16,7 +16,7 @@ export function exampleNetwork(labels: { section: (n: number) => string; apartme
         length: 8,
         system: "optiflex",
         meter: true,
-        children: [newNode("consumer", { label: labels.apartment(floor, n), floor, appliances: { wc: 1, basin: 1, shower: 1, dishwasher: 1, washer: 1 } })],
+        children: [newNode("consumer", { label: labels.apartment(floor, n), floor, outlets: outletsFrom({ wc: 1, basin: 1, shower: 1, dishwasher: 1, washer: 1 }) })],
       });
       chain = newNode("pipe", { floor, length: i === 0 ? 4 : 3, riser: true, circulation, children: chain ? [apartment, chain] : [apartment] });
     }

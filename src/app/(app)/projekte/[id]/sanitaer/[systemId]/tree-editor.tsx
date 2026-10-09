@@ -1,16 +1,28 @@
 "use client";
 
-import { ArrowDown, ArrowUp, CornerDownRight, Plus, ShowerHead, Trash2, Ungroup } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, CornerDownRight, Plus, ShowerHead, Trash2, Ungroup, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { NativeSelect } from "@/components/form";
 import { fmt, NumberField } from "@/components/planning/fields";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { consumerLu, findNode, mapTree, newNode, type PipeResult, type SanNode, type SystemResult } from "@/lib/sanitary/network";
+import {
+  consumerLu,
+  findNode,
+  mapTree,
+  MAX_OUTLETS,
+  newNode,
+  newOutlet,
+  type Outlet,
+  type OutletResult,
+  type PipeResult,
+  type SanNode,
+  type SystemResult,
+} from "@/lib/sanitary/network";
 import { findSize, type PipeSize, rarReturnSizes, supplySizes } from "@/lib/sanitary/pipes";
 import { mediumColors, sizeText } from "@/lib/sanitary/schema";
-import { applianceKeys } from "@/lib/sanitary/w3";
+import { type ApplianceKey, applianceKeys, appliances } from "@/lib/sanitary/w3";
 import { cn } from "@/lib/utils";
 
 /** Siblings array (and index) of a node. */
@@ -139,6 +151,7 @@ export function TreeEditor({
             key={node.id}
             node={node}
             result={result.pipes.get(node.id)}
+            outlets={result.outlets}
             editable={editable}
             onPatch={(p) => patch(node.id, p)}
             actions={
@@ -191,7 +204,7 @@ export function TreeEditor({
 function Row({ node, depth, result, selected, onSelect }: { node: SanNode; depth: number; result: SystemResult; selected: string | null; onSelect: (id: string) => void }) {
   const t = useTranslations("sanitary");
   const r = result.pipes.get(node.id);
-  const lu = node.type === "consumer" ? consumerLu(node.appliances) : r?.lu;
+  const lu = node.type === "consumer" ? consumerLu(node.outlets) : r?.lu;
   const kind = node.type === "consumer" ? t("tree.consumer") : node.riser ? t("tree.riser") : r?.role === "floor" ? t("tree.floorPipe") : t("tree.distPipe");
   const strang = r?.strang ? ` ${r.strang}` : "";
   const title = [node.label, node.floor].filter(Boolean).join(" · ");
@@ -227,12 +240,14 @@ function Row({ node, depth, result, selected, onSelect }: { node: SanNode; depth
 function NodePanel({
   node,
   result,
+  outlets,
   editable,
   onPatch,
   actions,
 }: {
   node: SanNode;
   result: PipeResult | undefined;
+  outlets: Map<string, OutletResult>;
   editable: boolean;
   onPatch: (p: Partial<SanNode>) => void;
   actions: React.ReactNode;
@@ -274,7 +289,7 @@ function NodePanel({
       </div>
 
       {node.type === "consumer" ? (
-        <ConsumerFields node={node} editable={editable} onPatch={onPatch} />
+        <ConsumerFields node={node} outlets={outlets} editable={editable} onPatch={onPatch} />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-2">
@@ -476,31 +491,148 @@ function PipeDetails({ result }: { result: PipeResult }) {
   );
 }
 
-function ConsumerFields({ node, editable, onPatch }: { node: SanNode; editable: boolean; onPatch: (p: Partial<SanNode>) => void }) {
+function ConsumerFields({
+  node,
+  outlets,
+  editable,
+  onPatch,
+}: {
+  node: SanNode;
+  outlets: Map<string, OutletResult>;
+  editable: boolean;
+  onPatch: (p: Partial<SanNode>) => void;
+}) {
   const t = useTranslations("sanitary");
-  const lu = consumerLu(node.appliances);
+  const lu = consumerLu(node.outlets);
+  const list = node.outlets;
+  const set = (next: Outlet[]) => onPatch({ outlets: next });
+  const patchOutlet = (id: string, p: Partial<Outlet>) => set(list.map((o) => (o.id === id ? { ...o, ...p } : o)));
+  // ◀ / ▶: swap with the neighbour (the order along the Verteiler in the schema).
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= list.length) return;
+    const next = [...list];
+    [next[i], next[j]] = [next[j], next[i]];
+    set(next);
+  };
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted-foreground">{t("node.appliancesHint")}</p>
-      <div className="grid grid-cols-[1fr_4.5rem] items-center gap-x-2 gap-y-1">
-        {applianceKeys.map((k) => (
-          <div key={k} className="contents">
-            <span className="text-sm">{t(`appliances.${k}`)}</span>
-            <NumberField
-              value={node.appliances[k] ?? null}
-              decimals={0}
-              label={t(`appliances.${k}`)}
-              placeholder="0"
-              disabled={!editable}
-              onChange={(v) => onPatch({ appliances: { ...node.appliances, [k]: Math.min(999, Math.max(0, Math.round(v ?? 0))) || undefined } })}
-              className="h-8 rounded-lg"
-            />
-          </div>
+      <p className="text-xs text-muted-foreground">{t("outlets.hint")}</p>
+      {list.length === 0 && <p className="text-sm text-muted-foreground">{t("outlets.empty")}</p>}
+      <ul className="space-y-2">
+        {list.map((o, i) => {
+          const r = outlets.get(o.id);
+          const def = appliances[o.type];
+          const over = r?.time != null && r.time > r.limit;
+          return (
+            <li key={o.id} className="space-y-1.5 rounded-lg border p-2">
+              <div className="flex items-center gap-1">
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                  {i + 1}. {t(`appliances.${o.type}Short`)}
+                </span>
+                {editable && (
+                  <>
+                    <Button variant="ghost" size="icon-sm" aria-label={t("outlets.left")} disabled={i === 0} onClick={() => move(i, -1)}>
+                      <ChevronLeft />
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" aria-label={t("outlets.right")} disabled={i === list.length - 1} onClick={() => move(i, 1)}>
+                      <ChevronRight />
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" aria-label={t("outlets.remove")} onClick={() => set(list.filter((x) => x.id !== o.id))}>
+                      <X />
+                    </Button>
+                  </>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {def.cold > 0 && (
+                  <OutletLine
+                    medium="pwc"
+                    length={o.lengthPwc}
+                    size={o.sizePwc}
+                    auto={r?.pwc?.size}
+                    editable={editable}
+                    onLength={(v) => patchOutlet(o.id, { lengthPwc: v })}
+                    onSize={(v) => patchOutlet(o.id, { sizePwc: v })}
+                  />
+                )}
+                {def.warm > 0 && (
+                  <OutletLine
+                    medium="pwh"
+                    length={o.lengthPwh}
+                    size={o.sizePwh}
+                    auto={r?.pwh?.size}
+                    editable={editable}
+                    onLength={(v) => patchOutlet(o.id, { lengthPwh: v })}
+                    onSize={(v) => patchOutlet(o.id, { sizePwh: v })}
+                  />
+                )}
+              </div>
+              {def.warm > 0 && r && (
+                <p className={cn("text-xs tabular-nums", over ? "text-destructive" : "text-muted-foreground")}>
+                  {r.time !== null && r.volume !== null
+                    ? t("outlets.time", { time: fmt(r.time, 1), limit: r.limit, volume: fmt(r.volume, 2), from: t(r.kept ? "outlets.fromKept" : "outlets.fromHeater") })
+                    : t("outlets.noLength")}
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {editable && list.length < MAX_OUTLETS && (
+        <NativeSelect value="" aria-label={t("outlets.add")} onChange={(e) => e.target.value && set([...list, newOutlet(e.target.value as ApplianceKey)])}>
+          <option value="">{t("outlets.add")}</option>
+          {applianceKeys.map((k) => (
+            <option key={k} value={k}>
+              {t(`appliances.${k}`)}
+            </option>
+          ))}
+        </NativeSelect>
+      )}
+      <p className="border-t pt-2 text-sm tabular-nums">{t("results.luTotal", { cold: lu.cold, warm: lu.warm })}</p>
+    </div>
+  );
+}
+
+/** Length and Pex size of one Ausstossleitung (PWC or PWH) of an Apparat. */
+function OutletLine({
+  medium,
+  length,
+  size,
+  auto,
+  editable,
+  onLength,
+  onSize,
+}: {
+  medium: "pwc" | "pwh";
+  length: number | null;
+  size: string | null;
+  auto: PipeSize | undefined;
+  editable: boolean;
+  onLength: (v: number | null) => void;
+  onSize: (v: string | null) => void;
+}) {
+  const t = useTranslations("sanitary");
+  const options = supplySizes("optiflex");
+  const current = findSize(size);
+  const label = medium.toUpperCase();
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs" style={{ color: mediumColors[medium] }}>
+        {label}
+      </Label>
+      <NumberField value={length} decimals={2} label={`${label} ${t("outlets.length")}`} placeholder={t("outlets.length")} disabled={!editable} onChange={(v) => onLength(v === null ? null : Math.min(1000, Math.max(0, v)))} className="h-8 rounded-lg" />
+      <NativeSelect value={current && options.includes(current) ? current.key : ""} aria-label={`${label} ${t("outlets.size")}`} disabled={!editable} onChange={(e) => onSize(e.target.value || null)}>
+        <option value="">
+          {t("node.auto")}
+          {auto && !current ? ` (${sizeText(auto)})` : ""}
+        </option>
+        {options.map((s) => (
+          <option key={s.key} value={s.key}>
+            {sizeText(s)}
+          </option>
         ))}
-      </div>
-      <p className="border-t pt-2 text-sm tabular-nums">
-        {t("results.luTotal", { cold: lu.cold, warm: lu.warm })}
-      </p>
+      </NativeSelect>
     </div>
   );
 }

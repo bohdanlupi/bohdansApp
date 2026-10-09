@@ -3105,7 +3105,6 @@
         "thermal": "thermisch selbsttätig (Nussbaum 36030)",
         "manual": "Regulierventil von Hand (Nussbaum 24026)"
       },
-      "appliancesHint": "Entnahmestellen nach SVGW W3 Tabelle 3 (Belastungswerte kalt / warm).",
       "bends90": "Bogen 90° [Stk]",
       "bends45": "Bogen 45° [Stk]",
       "mount": "Verteiler",
@@ -3123,7 +3122,16 @@
       "shower": "Dusche, Spülbecken, Ausguss (2 / 2)",
       "urinal": "Urinoir automatisch (3 / –)",
       "bathtub": "Badewanne (3 / 3)",
-      "garden": "Garten / Garage (5 / –)"
+      "garden": "Garten / Garage (5 / –)",
+      "wcShort": "WC",
+      "basinShort": "Waschtisch",
+      "dishwasherShort": "Geschirrspüler",
+      "washerShort": "Waschautomat",
+      "balconyShort": "Balkonventil",
+      "showerShort": "Dusche",
+      "urinalShort": "Urinoir",
+      "bathtubShort": "Badewanne",
+      "gardenShort": "Gartenventil"
     },
     "results": {
       "title": "Berechnung",
@@ -3166,7 +3174,8 @@
       "temperature": "BAG: Wassererwärmung mindestens 60 °C, Verteilleitung mindestens 55 °C.",
       "noConsumers": "Noch keine Apparategruppen mit Entnahmestellen.",
       "pumpHead": "Die gewählte Pumpe erreicht die Förderhöhe von {head} mbar nicht.",
-      "tooHot": "SIA 385/1 4.1.1: Warmwasser in der Verteilung höchstens 65 °C."
+      "tooHot": "SIA 385/1 4.1.1: Warmwasser in der Verteilung höchstens 65 °C.",
+      "ausstoss": "{element}: Ausstosszeit {appliance} {time} s – mehr als {limit} s (SIA 385/1 4.3). Pex-Leitung kürzen oder kleiner wählen."
     },
     "central": {
       "title": "Zentrale",
@@ -3281,6 +3290,20 @@
       "plan": "Prinzipschema",
       "trade": "Sanitär"
     },
-    "moveHorizontal": "Schema seitlich verschieben"
+    "moveHorizontal": "Schema seitlich verschieben",
+    "outlets": {
+      "hint": "Jeder Apparat hat eine eigene Pex-Leitung (Optiflex-Flowpress) ab dem Verteiler. Ausstosszeit = Wasserinhalt ab der letzten warmgehaltenen Stelle ÷ Durchfluss der Entnahmestelle (W3 Tabelle 3). Grenze SIA 385/1 4.3: 10 s mit Warmhaltung, 15 s ohne.",
+      "empty": "Noch keine Apparate.",
+      "add": "+ Apparat hinzufügen",
+      "left": "Nach links",
+      "right": "Nach rechts",
+      "remove": "Apparat entfernen",
+      "length": "Länge [m]",
+      "size": "Dimension",
+      "time": "Ausstosszeit {time} s (max. {limit} s) · {volume} l ab {from}",
+      "fromKept": "warmgehaltener Leitung",
+      "fromHeater": "Wassererwärmer",
+      "noLength": "Ausstosszeit: Länge PWH eingeben"
+    }
   }
 }

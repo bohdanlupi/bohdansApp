@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { type Central, defaultCentral, defaultSettings, type SanitaryData, type SanNode, type Settings } from "./network";
+import { type Central, defaultCentral, defaultSettings, MAX_OUTLETS, type Outlet, outletsFrom, type SanitaryData, type SanNode, type Settings } from "./network";
 import { findSize } from "./pipes";
-import { applianceKeys } from "./w3";
+import { type ApplianceKey, applianceKeys } from "./w3";
 
 // Data of a Sanitäranlage (sanitary_systems.data). Parsed leniently: invalid nodes are dropped one by one, invalid
 // settings fall back to the defaults.
@@ -37,6 +37,7 @@ const nodeFields = z.object({
   mount: z.enum(["surface", "concealed"]).catch("surface"),
   bends90: z.number().int().min(0).max(999).catch(0),
   bends45: z.number().int().min(0).max(999).catch(0),
+  // Older data: counts per type, turned into single Apparate (outlets) below.
   appliances: z
     .record(z.string(), z.unknown())
     .catch({})
@@ -50,6 +51,24 @@ const nodeFields = z.object({
     ),
 });
 
+const outletSchema: z.ZodType<Outlet> = z.object({
+  id: z.string().min(1).max(40),
+  type: z.enum(applianceKeys as [ApplianceKey, ...ApplianceKey[]]),
+  lengthPwc: num(1000),
+  lengthPwh: num(1000),
+  sizePwc: sizeKey,
+  sizePwh: sizeKey,
+});
+
+/** Apparate of a consumer: the list, else (older data) one per counted appliance. */
+function parseOutlets(raw: unknown, counts: Partial<Record<ApplianceKey, number>>): Outlet[] {
+  if (!Array.isArray(raw)) return outletsFrom(counts);
+  return raw.flatMap((o) => {
+    const parsed = outletSchema.safeParse(o);
+    return parsed.success ? [parsed.data] : [];
+  }).slice(0, MAX_OUTLETS);
+}
+
 const MAX_DEPTH = 40;
 const MAX_NODES = 2000;
 
@@ -62,8 +81,11 @@ function parseNodes(raw: unknown, depth: number, budget: { left: number }): SanN
     if (!parsed.success) continue;
     budget.left--;
     // Consumers are leaves.
-    const children = parsed.data.type === "pipe" ? parseNodes((item as { children?: unknown }).children, depth + 1, budget) : [];
-    out.push({ ...parsed.data, children });
+    const { appliances, ...fields } = parsed.data;
+    const raw = item as { children?: unknown; outlets?: unknown };
+    const children = fields.type === "pipe" ? parseNodes(raw.children, depth + 1, budget) : [];
+    const outlets = fields.type === "consumer" ? parseOutlets(raw.outlets, appliances) : [];
+    out.push({ ...fields, outlets, children });
   }
   return out;
 }

@@ -11,7 +11,7 @@
 import { type NussbaumFamily, nussbaumArticles } from "./catalog-data";
 import { consumerLu, type Medium, type SanitaryData, type SanNode, type SystemResult } from "./network";
 import { type PipeSize, sizeText } from "./pipes";
-import { applianceKeys, appliances } from "./w3";
+import { appliances } from "./w3";
 
 export type FittingLine = { key: string; article: string | null; label: string; count: number };
 
@@ -106,7 +106,7 @@ export function systemFittings(data: SanitaryData, result: SystemResult): Fittin
 
   const carries = (n: SanNode, m: Medium) => {
     if (n.type === "consumer") {
-      const lu = consumerLu(n.appliances);
+      const lu = consumerLu(n.outlets);
       return m === "pwc" ? lu.cold > 0 : m === "pwh" ? lu.warm > 0 : false;
     }
     return !!sizeOf(n, m);
@@ -170,7 +170,7 @@ export function systemFittings(data: SanitaryData, result: SystemResult): Fittin
       for (const m of ["pwc", "pwh"] as const) {
         const feed = sizeOf(n, m);
         if (!feed) continue;
-        const outlets = applianceKeys.reduce((s, k) => s + ((m === "pwc" ? appliances[k].cold : appliances[k].warm) > 0 ? (c.appliances[k] ?? 0) : 0), 0);
+        const outlets = c.outlets.filter((o) => (m === "pwc" ? appliances[o.type].cold : appliances[o.type].warm) > 0).length;
         manifold(feed, outlets);
       }
     }

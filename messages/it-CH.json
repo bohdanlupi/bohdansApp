@@ -3105,7 +3105,6 @@
         "thermal": "termostatica automatica (Nussbaum 36030)",
         "manual": "valvola di regolazione manuale (Nussbaum 24026)"
       },
-      "appliancesHint": "Punti di prelievo secondo SSIGA W3 tabella 3 (valori di carico freddo / caldo).",
       "bends90": "Curve 90° [pz]",
       "bends45": "Curve 45° [pz]",
       "mount": "Distributore",
@@ -3123,7 +3122,16 @@
       "shower": "Doccia, lavello, vuotatoio (2 / 2)",
       "urinal": "Orinatoio automatico (3 / –)",
       "bathtub": "Vasca da bagno (3 / 3)",
-      "garden": "Giardino / garage (5 / –)"
+      "garden": "Giardino / garage (5 / –)",
+      "wcShort": "WC",
+      "basinShort": "Lavabo",
+      "dishwasherShort": "Lavastoviglie",
+      "washerShort": "Lavatrice",
+      "balconyShort": "Rubinetto balcone",
+      "showerShort": "Doccia",
+      "urinalShort": "Orinatoio",
+      "bathtubShort": "Vasca",
+      "gardenShort": "Rubinetto giardino"
     },
     "results": {
       "title": "Calcolo",
@@ -3166,7 +3174,8 @@
       "temperature": "UFSP: produzione di acqua calda almeno 60 °C, distribuzione almeno 55 °C.",
       "noConsumers": "Ancora nessun gruppo di apparecchi con punti di prelievo.",
       "pumpHead": "La pompa scelta non raggiunge la prevalenza di {head} mbar.",
-      "tooHot": "SIA 385/1 4.1.1: acqua calda nella distribuzione al massimo 65 °C."
+      "tooHot": "SIA 385/1 4.1.1: acqua calda nella distribuzione al massimo 65 °C.",
+      "ausstoss": "{element}: tempo di erogazione {appliance} {time} s – più di {limit} s (SIA 385/1 4.3). Accorciare la condotta PEX o sceglierla più piccola."
     },
     "central": {
       "title": "Centrale",
@@ -3281,6 +3290,20 @@
       "plan": "Schema di principio",
       "trade": "Sanitario"
     },
-    "moveHorizontal": "Spostare lo schema lateralmente"
+    "moveHorizontal": "Spostare lo schema lateralmente",
+    "outlets": {
+      "hint": "Ogni apparecchio ha la propria condotta PEX (Optiflex-Flowpress) dal distributore. Tempo di erogazione = contenuto d’acqua dall’ultimo punto mantenuto in temperatura ÷ portata del punto di prelievo (W3 tabella 3). Limite SIA 385/1 4.3: 10 s con mantenimento in temperatura, 15 s senza.",
+      "empty": "Nessun apparecchio.",
+      "add": "+ Aggiungi apparecchio",
+      "left": "A sinistra",
+      "right": "A destra",
+      "remove": "Rimuovi apparecchio",
+      "length": "Lunghezza [m]",
+      "size": "Dimensione",
+      "time": "Tempo di erogazione {time} s (max. {limit} s) · {volume} l da {from}",
+      "fromKept": "condotta mantenuta in temperatura",
+      "fromHeater": "scaldacqua",
+      "noLength": "Tempo di erogazione: inserire la lunghezza PWH"
+    }
   }
 }

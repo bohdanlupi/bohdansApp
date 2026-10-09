@@ -409,7 +409,14 @@ collector with an Abgang per line (Absperrventil mit Entleerung, Verschraubung) 
 Wohnungsverteiler (Absperrventile + Wohnungswasserzähler) in a box, «Aufputz» or «Unterputz (Vorwand)» per Leitung
 (SanNode.mount, taken over by its Apparategruppen); each Apparategruppe as a Verteiler with one outlet per Apparat and
 every Apparat (counts expanded, max 16) drawn on its own PWC / PWH line (Waschtisch, WC UP-Spülkasten, Dusche,
-Badewanne, Geschirrspüler, Waschautomat, Urinoir, Balkon- / Gartenventil; light blue bodies). Web view at a fixed
+Badewanne, Geschirrspüler, Waschautomat, Urinoir, Balkon- / Gartenventil; light blue bodies).
+Ausstossleitungen (2026-10-09): an Apparategruppe holds its Apparate as a list (SanNode.outlets; older data with counts per
+type is converted on load), order = order along the Verteiler (◀ / ▶ in the editor). Each Apparat has its own Pex line
+(Optiflex-Flowpress) for PWC and PWH with length and size (auto: smallest Pex ≤ 4 m/s at the tap flow of W3 Tabelle 3);
+the lengths go into the material list. Drawn like the Schemavorlage: down out of the Verteiler, along below it, up to
+the Apparat, with size / length / Ausstosszeit under it. Ausstosszeit = PWH water content from the last warmgehaltene
+point (end of the circulated sections, else the Wassererwärmer incl. its line in the Zentrale) ÷ tap flow (user
+decision; SIA 385/2 with pipe heat-up not available), warning above SIA 385/1 4.3: 10 s with Warmhaltung, 15 s without. Web view at a fixed
 scale (1.3 px per unit), full height, horizontal slider below to move it + plan PDF /api/pdf/sanitary-schema/<id> (Plankopf / revisions as the Lüftung schema; sheet height 297 / 420 /
 594 mm, width a multiple of 210 mm, wide enough for schema and legend).
 Insulation drawn as yellow bands with black dotted edges; each Leitung is labelled «KW / WW / ZK: diameter · insulation»

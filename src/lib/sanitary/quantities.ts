@@ -62,6 +62,12 @@ export function systemQuantities(data: SanitaryData, result: SystemResult): Quan
   };
 
   const walk = (n: SanNode) => {
+    // Ausstossleitungen of the Apparate: Pex PWC / PWH with their lengths.
+    for (const o of n.outlets) {
+      const r = result.outlets.get(o.id);
+      if (r?.pwc) pipe(r.pwc.size, o.lengthPwc ?? 0);
+      if (r?.pwh) pipe(r.pwh.size, o.lengthPwh ?? 0);
+    }
     const r = result.pipes.get(n.id);
     if (n.type === "pipe" && r) {
       const length = n.length ?? 0;
