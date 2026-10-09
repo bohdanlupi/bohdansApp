@@ -7,7 +7,7 @@
 //
 // Symbols after SVGW W3 Anhang 4 (SN EN 806-1), SIA 410 only where W3 has none; Apparate, Verteiler and
 // Verteilbatterie drawn like the LUPI Schemavorlage Sanitär (Berechnungsvorlagen/Sanitär): every Apparat of an
-// Apparategruppe stands on its own line from the Verteiler. Colours: PWC green, PWH red, PWH-C violet. The
+// Apparategruppe stands on its own line from the Verteiler. Colours: PWC green, PWH red, PWH-C orange. The
 // Wassererwärmer is neutral, all other parts are Nussbaum (pump Biral). Insulation as highlighter bands behind the
 // lines; «Rohr an Rohr» as one band around PWH and PWH-C.
 
@@ -19,7 +19,7 @@ import { consumerLu } from "./network";
 import { insulationStyle, type PipeSize, sizeText } from "./pipes";
 import { type ApplianceKey, applianceKeys } from "./w3";
 
-export const mediumColors: Record<Medium, `#${string}`> = { pwc: "#00a651", pwh: "#e3001b", pwhc: "#9b30d9" };
+export const mediumColors: Record<Medium, `#${string}`> = { pwc: "#00a651", pwh: "#e3001b", pwhc: "#ff8000" };
 /** Offset of each line from the first one (PWC) [units]. */
 const OFF: Record<Medium, number> = { pwc: 0, pwh: 14, pwhc: 28 };
 /** Distance of the outermost line (PWH-C) from the first one. */

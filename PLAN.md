@@ -404,7 +404,7 @@ pipe one dimension larger), PWH-C none. Insulated: PWH of circulated sections an
 Verteil- / Steigleitungen (switchable). Warning above 65 °C (SIA 385/1 4.1.1).
 Prinzipschema: Strangschema (schema.ts; symbols after SVGW W3 Anhang 4 / SN EN 806-1, SIA 410 only where W3 has none:
 Enthärtung 1.27.1, Wassererwärmer 5.1.19, adjustable arrow of the Regulierventil von Hand; PWC green, PWH red, PWH-C
-violet). Drawn after Berechnungsvorlagen/Sanitär/Schemavorlage_Sanitär.pdf (2026-10-09): Verteilbatterie as a
+orange, like the Schemavorlage). Drawn after Berechnungsvorlagen/Sanitär/Schemavorlage_Sanitär.pdf (2026-10-09): Verteilbatterie as a
 collector with an Abgang per line (Absperrventil mit Entleerung, Verschraubung) and an Entleerung at its end; the
 Wohnungsverteiler (Absperrventile + Wohnungswasserzähler) in a box, «Aufputz» or «Unterputz (Vorwand)» per Leitung
 (SanNode.mount, taken over by its Apparategruppen); each Apparategruppe as a Verteiler with one outlet per Apparat and
