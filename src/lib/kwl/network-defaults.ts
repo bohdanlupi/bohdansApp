@@ -55,6 +55,7 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
   const tube = pick("duct", /ComfoTube Flow 90/i, /ComfoTube.*90/i);
   const silencer = pick("silencer", /ComfoSilence 350 16\/16 L700/i, /ComfoSilence \d/i);
   const cld = pick("terminal", /CLD breit L430/i, /CLD/i);
+  const cldP = pickOnly("terminal", /CLD-P L260/i) ?? cld;
   const csbp400 = pick("terminal", /CSB-P 400/i, /CLD breit L430/i);
   const csbp600 = pick("terminal", /CSB-P 600/i, /CLD breit L430/i);
   const stcValve = pickOnly("valve", /ComfoValve Via STC/i);
@@ -79,7 +80,8 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
   /**
    * Room branch by room type (SIA 382/5): 1.1 Zimmer (supply) → ComfoCase CSB-P + ComfoGrid Bilamina (400 for one
    * tube, 600 for two); 2.5 short use (extract) → ComfoValve Via STC directly in a spiro pipe DN 125; all other
-   * rooms → ComfoCase CLD breit 2×90 + ComfoGrid Genua breit. Returns the branch and the distributor outlets it uses.
+   * rooms → ComfoCase CLD-P 1×90 + ComfoGrid Genua for one tube, CLD breit 2×90 + ComfoGrid Genua breit for more.
+   * Returns the branch and the distributor outlets it uses.
    */
   const branchFor = (r: RoomFlow, side: "supply" | "extract"): { node: NetNode; outlets: number } => {
     const room = { calcId: r.calcId, roomId: r.roomId };
@@ -90,8 +92,8 @@ export function defaultSystem(rooms: RoomFlow[], labels: DefaultLabels, base: Sy
     }
     const count = tubeCount(r[side]);
     const bilamina = kind === "bilamina";
-    const casing = bilamina ? (count > 1 ? csbp600 : csbp400) : cld;
-    const group = bilamina ? `ComfoGrid Bilamina ${count > 1 ? 600 : 400}` : "ComfoGrid Genua breit";
+    const casing = bilamina ? (count > 1 ? csbp600 : csbp400) : count > 1 ? cld : cldP;
+    const group = bilamina ? `ComfoGrid Bilamina ${count > 1 ? 600 : 400}` : casing === cld ? "ComfoGrid Genua breit" : "ComfoGrid Genua";
     const terminal = component("terminal", casing, r.name, { ...room, ...measuredCover(casing, group, side, count > 1 ? /2x DN90/ : /1x DN90/) });
     // ComfoTubes are laid without bends (flexible tube).
     return { node: duct(tube, labels.roomDuct, 10, 0, { count, children: [terminal] }), outlets: count };

@@ -268,7 +268,8 @@ export const tubeCount = (flow: number | null) => (!flow || flow < 38 ? 1 : flow
 /**
  * Auslass of a room by its type (SIA 382/5 1.1 … 2.6), used for the suggestions in the air flows and the standard
  * network: 1.1 Zimmer (supply) → ComfoCase CSB-P + ComfoGrid Bilamina; 2.5 short use (extract) → ComfoValve Via STC
- * in a spiro pipe; all other rooms → ComfoCase CLD breit + ComfoGrid Genua breit.
+ * in a spiro pipe; all other rooms → ComfoCase CLD-P + ComfoGrid Genua for one tube (up to 38 m³/h), CLD breit +
+ * ComfoGrid Genua breit for two or more.
  */
 export function terminalKind(type: string | null | undefined, side: "supply" | "extract"): "bilamina" | "genua" | "stc" {
   if (side === "supply" && type === "room") return "bilamina";
@@ -286,7 +287,7 @@ export function roomDistribution(flow: number | null, side: "supply" | "extract"
     case "stc":
       return { terminal: "ComfoValve STC", ducts: "Spiro DN 125" };
     default:
-      return { terminal: "CLD breit + Genua", ducts: `${tubes}× ComfoTube 90` };
+      return { terminal: tubes > 1 ? "CLD breit + Genua breit" : "CLD-P + Genua", ducts: `${tubes}× ComfoTube 90` };
   }
 }
 
