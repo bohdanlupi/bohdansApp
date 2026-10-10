@@ -32,6 +32,7 @@ const nodeFields = z.object({
   regValve: z.boolean().catch(false),
   meterSet: z.boolean().catch(false),
   heatMeter: z.boolean().catch(false),
+  radiatorId: ref,
   calcId: ref,
   roomId: ref,
   systemId: ref,

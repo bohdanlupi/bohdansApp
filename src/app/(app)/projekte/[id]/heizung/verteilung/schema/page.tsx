@@ -48,6 +48,7 @@ export default async function DistributionSchemaPage({ params, searchParams }: P
           schemaPlan={parseSchemaPlan(row?.distribution_plan)}
           rooms={inputs.rooms}
           floors={inputs.floors}
+          radiators={inputs.radiators}
           outsideTemp={inputs.outsideTemp}
           lvs={lvs}
           editable={editable}

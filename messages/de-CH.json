@@ -1814,7 +1814,9 @@
       "down": "Nach unten",
       "removeElement": "Element entfernen",
       "removeElementHint": "Entfernt nur dieses Element; seine Abgänge rücken nach.",
-      "removeBranch": "Zweig löschen"
+      "removeBranch": "Zweig löschen",
+      "addRadiators": "{count} Heizkörper übernehmen",
+      "addRadiatorsHint": "Legt für die Heizkörper dieser Heizgruppe aus «Heizkörper» einen Strang je Geschoss mit Stockwerkverteilung und Anschlussleitungen an – danach Längen und Führung anpassen."
     },
     "node": {
       "label": "Bezeichnung",
@@ -1852,7 +1854,10 @@
       "power": "Leistung [W]",
       "dp": "Druckverlust [kPa]",
       "meterSet": "Anschlussset für Wärmezähler",
-      "heatMeter": "Wärmezähler"
+      "heatMeter": "Wärmezähler",
+      "radiator": "Heizkörper (aus «Heizkörper»)",
+      "noRadiator": "– nicht verknüpft –",
+      "noRadiators": "In «Heizkörper» sind für diese Heizgruppe noch keine Heizkörper erfasst."
     },
     "details": {
       "power": "Leistung / Massenstrom",
@@ -1908,7 +1913,8 @@
       "temps": "{group}: Vor- und Rücklauftemperatur in 242 fehlen – mit 55/45 °C gerechnet.",
       "noRoom": "{element}: kein Raum gewählt und keine Leistung eingegeben.",
       "noFloor": "{element}: kein Fussbodenheizungs-Verteiler gewählt.",
-      "noPower": "{element}: keine Leistung eingegeben."
+      "noPower": "{element}: keine Leistung eingegeben.",
+      "noRadiator": "{element}: der verknüpfte Heizkörper existiert nicht mehr."
     },
     "plankopf": {
       "plan": "Strangschema"
@@ -1926,7 +1932,10 @@
         "apparatus": "Verbraucher",
         "drain": "Entleerung",
         "heatMeter": "Wärmezähler mit Fühler im Vorlauf",
-        "meterSet": "Anschlussset für Wärmezähler (Passstück, Tauchhülse)"
+        "meterSet": "Anschlussset für Wärmezähler (Passstück, Tauchhülse)",
+        "returnValve": "Rücklaufverschraubung (absperrbar, voreinstellbar)",
+        "vent": "Entlüftungsventil",
+        "valveBlock": "Anschlussarmatur Ventilheizkörper"
       }
     },
     "material": {
@@ -3014,6 +3023,110 @@
       "ringLength": "Kreislänge über dem Maximum"
     },
     "pdfTitle": "Fussbodenheizung"
+  },
+  "radiators": {
+    "description": "Heizkörper je Heizgruppe aus dem Wärmebedarf: Zehnder-Modell wählen, die Grösse wird für die Vor- und Rücklauftemperatur der Gruppe vorgeschlagen und kann überschrieben werden. Anschluss und Oventrop-Armaturen je Heizkörper; das Prinzipschema Wärmeverteilung übernimmt sie.",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "defaults": "Standardwerte der Anlage",
+    "defaultsHint": "Gelten für alle Heizkörper, bei denen das Feld leer («Standard») ist.",
+    "model": "Modell",
+    "series": "Baureihe",
+    "columns": "{n}-säulig",
+    "connection": "Anschluss",
+    "side": "Vorlauf-Seite",
+    "pipeFrom": "Leitung kommt",
+    "valveSeries": "Thermostatventil",
+    "dn": "Ventilgrösse",
+    "head": "Thermostatkopf",
+    "noHead": "Kein Kopf (Stellantrieb separat)",
+    "drain": "Entleerung",
+    "vent": "Entlüftungsventil",
+    "drainCock": "Entleerhahn",
+    "formsHint": "Ventilformen werden aus Anschluss und Leitungsführung vorgeschlagen: seitlicher Anschluss aus Boden oder Decke → Eck, aus der Wand → Winkeleck; Anschluss unten aus dem Boden → Durchgang, aus Wand/Decke → Eck. Je Heizkörper überschreibbar.",
+    "standard": "Standard ({value})",
+    "auto": "Auto ({value})",
+    "unassigned": "Ohne Heizgruppe",
+    "group": "Heizgruppe",
+    "groupTemps": "{supply}/{ret} °C",
+    "noTemps": "Temperaturen fehlen in 242 (55/45 °C angenommen)",
+    "groupSummary": "{count} Heizkörper · Qh {load} W · Φ {output} W · {massFlow} kg/h",
+    "addFromCalc": "Räume aus Wärmebedarf übernehmen …",
+    "calcOption": "{name} ({count} offen)",
+    "addRoom": "Raum",
+    "noRooms": "Noch keine Räume – aus dem Wärmebedarf übernehmen oder manuell anlegen.",
+    "floor": "Geschoss",
+    "addRadiator": "Heizkörper hinzufügen",
+    "removeRadiator": "Heizkörper entfernen",
+    "removeRoom": "Raum entfernen",
+    "elements": "Glieder",
+    "valveInsert": "Ventileinsatz",
+    "notes": "Notizen",
+    "sourceHint": "Normwärmeleistung Φ50 (EN 442, ΔT 50 K) und Exponent n aus den Zehnder-Technikunterlagen Charleston (2023) und Nova Jet (2025); Leistung Φ = Φ50 · (ΔT/50 K)^n mit ΔT = (θVL + θRL)/2 − θi. Die Werte gelten für gleichseitigen Anschluss – für andere Anschlussarten den Faktor f setzen. Artikel: Zehnder (IGH ZehnderHK), Armaturen Meier Tobler (Oventrop).",
+    "result": {
+      "count": "Heizkörper",
+      "load": "Wärmebedarf",
+      "output": "Installierte Leistung",
+      "massFlow": "Massenstrom"
+    },
+    "col": {
+      "room": "Raum / Heizkörper",
+      "label": "Bezeichnung",
+      "share": "Anteil %",
+      "model": "Modell",
+      "size": "Grösse",
+      "coverage": "Deckung",
+      "connection": "Anschluss",
+      "side": "VL-Seite",
+      "pipeFrom": "Leitung von",
+      "vlForm": "Thermostatventil",
+      "rlForm": "Rücklaufverschr.",
+      "drain": "Entleerung",
+      "factorHint": "Faktor f für die Anschlussart (leer = 1.00)",
+      "vent": "Entl."
+    },
+    "connections": {
+      "same": "gleichseitig",
+      "cross": "wechselseitig",
+      "bottom": "unten (Ventilheizkörper)",
+      "bottomBoth": "unten beidseitig"
+    },
+    "sides": {
+      "left": "links",
+      "right": "rechts"
+    },
+    "pipeSources": {
+      "floor": "aus dem Boden",
+      "wall": "aus der Wand",
+      "ceiling": "von der Decke"
+    },
+    "valveSeriesNames": {
+      "aq": "Oventrop AQ (automatischer Abgleich)",
+      "av9": "Oventrop AV 9 (mit Voreinstellung)",
+      "a": "Oventrop Serie A (ohne Voreinstellung)"
+    },
+    "forms": {
+      "eck": "Eck",
+      "durchgang": "Durchgang",
+      "axial": "Axial",
+      "winkeleckL": "Winkeleck links",
+      "winkeleckR": "Winkeleck rechts"
+    },
+    "drains": {
+      "return": "über Rücklaufverschraubung",
+      "separate": "separater Entleerhahn"
+    },
+    "warnings": {
+      "noModel": "Kein gültiges Modell gewählt.",
+      "noTemps": "Vor-/Rücklauftemperatur der Heizgruppe fehlen in 242 – mit 55/45 °C gerechnet.",
+      "noOverTemp": "Mittlere Wassertemperatur liegt nicht über der Raumtemperatur.",
+      "tooSmall": "Die gewählte Grösse deckt den Wärmebedarf nicht.",
+      "maxSize": "Auch die grösste lieferbare Grösse deckt den Wärmebedarf nicht – Modell oder Anzahl Heizkörper anpassen.",
+      "noValve": "Kein Oventrop-Thermostatventil in dieser Form/Grösse im Katalog.",
+      "noReturnValve": "Keine Oventrop-Rücklaufverschraubung in dieser Form/Grösse im Katalog.",
+      "noRoom": "Kein Raum aus dem Wärmebedarf verknüpft und kein Wärmebedarf eingegeben.",
+      "factor": "Zehnder gibt die Leistung für gleichseitigen Anschluss an; andere Anschlussarten mit dem Faktor f berücksichtigen."
+    }
   },
   "sanitary": {
     "title": "Sanitäranlagen",

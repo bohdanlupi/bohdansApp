@@ -13,6 +13,7 @@ import { floorOrder } from "@/lib/kwl/schema-layout";
 import type { Prim } from "@/lib/kwl/schema-symbols";
 
 import { type DistributionData, type DistributionResult, type GroupResult, type HeatNode, heatPipeText } from "./distribution";
+import type { RadiatorOption } from "./distribution-inputs";
 import { drawSymbol as drawHeatSymbol, pipeColors, sideOf, type SymbolKey } from "./generation-schema";
 
 export type Line2 = "vl" | "rl";
@@ -30,6 +31,10 @@ const LEFT = 64; // storey names
 const LANE = 48;
 const GROUP_W = 150; // group box and the start of its lines
 const TERM_W = 30; // terminal symbol
+// Heizkörper with its Anschluss (configured in 243 Heizkörper): valve zone, body, routing column on the right.
+const RAD_LEFT = 30;
+const RAD_BODY = 44;
+const RAD_W = RAD_LEFT + RAD_BODY + 26;
 // FBH-Verteiler drawn like the Sondenverteiler of 242: Verteiler (VL) and Sammler (RL) bars, the Heizkreise below.
 const RING_PITCH = 20;
 const RING_DUP = 10; // VL and RL leg of a Heizkreis
@@ -48,9 +53,11 @@ export type DistributionText = {
   rings: (n: number) => string;
   /** Fittings of each Heizkreis (Durchflussmesser, Ventil for the Stellantrieb), as text instead of symbols. */
   ringFittings: string;
+  /** Anschluss of a configured Heizkörper as text, e.g. «gleichseitig links · aus dem Boden». */
+  radiator?: (r: RadiatorOption) => string;
 };
 
-export type DistributionSymbol = SymbolKey | "thermoValve" | "floorDistributor" | "meterSet";
+export type DistributionSymbol = SymbolKey | "thermoValve" | "floorDistributor" | "meterSet" | "returnValve" | "vent" | "valveBlock";
 
 export type DistLine = { d: string; kind: Line2; nodeId: string | null };
 export type DistGroup = { nodeId: string | null; prims: Prim[] };
@@ -77,6 +84,40 @@ export function thermoValve(x: number, y: number): Prim[] {
     { t: "polygon", points: `${x + 6},${y - 4.5} ${x},${y} ${x + 6},${y + 4.5}`, fill: "bg", stroke: "ink", sw: 1 },
     { t: "line", x1: x, y1: y, x2: x, y2: y - 7, stroke: "ink", sw: 0.9 },
     { t: "path", d: `M${x - 4},${y - 7} A4,4 0 0 1 ${x + 4},${y - 7} Z`, fill: "bg", stroke: "ink", sw: 0.9 },
+  ];
+}
+
+/** Thermostatkopf on the built-in valve insert of a Ventilheizkörper at the top edge (x, y). */
+const thermoHead = (x: number, y: number): Prim[] => [
+  { t: "line", x1: x, y1: y, x2: x, y2: y - 6, stroke: "ink", sw: 0.9 },
+  { t: "path", d: `M${x - 4},${y - 6} A4,4 0 0 1 ${x + 4},${y - 6} Z`, fill: "bg", stroke: "ink", sw: 0.9 },
+];
+
+/** Rücklaufverschraubung (absperrbar, voreinstellbar): Absperrorgan with the Verschraubungskappe above. */
+export function returnValve(x: number, y: number): Prim[] {
+  return [
+    { t: "polygon", points: `${x - 6},${y - 4.5} ${x},${y} ${x - 6},${y + 4.5}`, fill: "bg", stroke: "ink", sw: 1 },
+    { t: "polygon", points: `${x + 6},${y - 4.5} ${x},${y} ${x + 6},${y + 4.5}`, fill: "bg", stroke: "ink", sw: 1 },
+    { t: "line", x1: x, y1: y, x2: x, y2: y - 5, stroke: "ink", sw: 0.9 },
+    { t: "rect", x: x - 2.5, y: y - 8, w: 5, h: 3, fill: "ink" },
+  ];
+}
+
+/** Entlüftungsventil at a corner of the Heizkörper: a short stub with «×» (dx: ±1 outwards). */
+export function ventMark(x: number, y: number, dx: 1 | -1 = 1): Prim[] {
+  const cx = x + 6 * dx;
+  return [
+    { t: "line", x1: x, y1: y, x2: cx, y2: y, stroke: "ink", sw: 0.8 },
+    { t: "line", x1: cx - 2.5, y1: y - 2.5, x2: cx + 2.5, y2: y + 2.5, stroke: "ink", sw: 0.9 },
+    { t: "line", x1: cx - 2.5, y1: y + 2.5, x2: cx + 2.5, y2: y - 2.5, stroke: "ink", sw: 0.9 },
+  ];
+}
+
+/** Anschlussarmatur of a Ventilheizkörper (Multiflex / Multiblock) around both ports at x, its top at y. */
+export function valveBlock(x: number, y: number): Prim[] {
+  return [
+    { t: "rect", x: x - 8, y, w: 16, h: 6, fill: "bg", stroke: "ink", sw: 1 },
+    { t: "line", x1: x, y1: y, x2: x, y2: y + 6, stroke: "ink", sw: 0.7 },
   ];
 }
 
@@ -127,7 +168,13 @@ type Column = { x: number; lane: number; from: From; chain: HeatNode[]; hangs: H
 type Seg = { node: HeatNode; lane: number; x0: number; x1: number; drop: boolean; from: From };
 type Start = { group: GroupResult; x: number };
 
-export function layoutDistribution(data: DistributionData, result: DistributionResult, labels: DistributionText): DistributionSchema {
+export function layoutDistribution(
+  data: DistributionData,
+  result: DistributionResult,
+  labels: DistributionText,
+  radiators: (id: string) => RadiatorOption | null = () => null,
+): DistributionSchema {
+  const radiatorOf = (n: HeatNode) => (n.type === "radiator" && n.radiatorId ? radiators(n.radiatorId) : null);
   const groups: DistGroup[] = [];
   const lines: DistLine[] = [];
   const bands: DistributionSchema["bands"] = [];
@@ -158,7 +205,9 @@ export function layoutDistribution(data: DistributionData, result: DistributionR
   const floorExtra = (n: HeatNode): number =>
     n.type === "floor"
       ? (n.shutoff ? 26 : 0) + (n.heatMeter || n.meterSet ? 32 : 0) + 6 + 12 + (ringCount(n) - 1) * RING_PITCH + RING_DUP + 12 + 40 + 100 - TERM_W
-      : Math.max(0, ...n.children.map(floorExtra));
+      : n.type === "radiator" && radiatorOf(n)
+        ? RAD_W - TERM_W + 40
+        : Math.max(0, ...n.children.map(floorExtra));
   const ringCount = (n: HeatNode) => Math.max(1, Math.min(result.terminals.get(n.id)?.rings ?? 0, RING_MAX));
   const depth = (n: HeatNode): number => (n.children.length ? 1 + Math.max(...n.children.map(depth)) : 0);
 
@@ -309,9 +358,128 @@ export function layoutDistribution(data: DistributionData, result: DistributionR
     return { xd, text: x2 + 22 };
   };
 
+  /**
+   * Configured Heizkörper from x on the row (VL at yRow, RL at yRow + 14 arrive from the left): body, the pipes routed to
+   * its connections by Anschluss and side, Thermostatventil (or Kopf on the Ventileinsatz with the Anschlussarmatur),
+   * Rücklaufverschraubung (with the Entleerung when the radiator is drained through it), Entlüftung at the free upper
+   * corner and a separate Entleerhahn at the free lower corner. VL and RL are routed so they never cross.
+   */
+  const radiatorTerminal = (n: HeatNode, rad: RadiatorOption, x: number, yRow: number) => {
+    const yV = yRow + OFF.vl;
+    const yR = yRow + OFF.rl;
+    const bx = x + RAD_LEFT;
+    const bw = RAD_BODY;
+    const yT = yV - 7;
+    const yB = yR + 7;
+    const xr = bx + bw + 20;
+    const xl = x + 8;
+    const left = rad.side === "left";
+    const prims: Prim[] = [];
+    const vl = (pts: Pt[]) => draw(n.id, "vl", pts);
+    const rl = (pts: Pt[]) => draw(n.id, "rl", pts);
+    const thermo = (vx: number, vy: number) => {
+      used.add("thermoValve");
+      prims.push(...thermoValve(vx, vy));
+    };
+    const ret = (vx: number, vy: number) => {
+      used.add("returnValve");
+      prims.push(...returnValve(vx, vy));
+      if (rad.drain === "return") {
+        used.add("drain");
+        prims.push(...drawHeatSymbol("drain", vx, vy, "right", { side: 1 }));
+      }
+    };
+    // Sides taken by the VL and RL connections (Entlüftung / Entleerung at the free corners).
+    const vlSide: "left" | "right" = left ? "left" : "right";
+    let rlSide: "left" | "right" = vlSide;
+    switch (rad.connection) {
+      case "same":
+        if (left) {
+          vl([[x, yV], [bx, yV]]);
+          rl([[x, yR], [bx, yR]]);
+          thermo(bx - 11, yV);
+          ret(bx - 11, yR);
+        } else {
+          vl([[x, yV], [xl, yV], [xl, yT - 8], [xr, yT - 8], [xr, yV], [bx + bw, yV]]);
+          rl([[x, yR], [xl, yR], [xl, yB + 8], [xr, yB + 8], [xr, yR], [bx + bw, yR]]);
+          thermo(bx + bw + 10, yV);
+          ret(bx + bw + 10, yR);
+        }
+        break;
+      case "cross":
+        if (left) {
+          vl([[x, yV], [bx, yV]]);
+          rl([[x, yR], [xl, yR], [xl, yB + 8], [xr, yB + 8], [xr, yR], [bx + bw, yR]]);
+          thermo(bx - 11, yV);
+          ret(bx + bw + 10, yR);
+          rlSide = "right";
+        } else {
+          vl([[x, yV], [xl, yV], [xl, yT - 8], [xr, yT - 8], [xr, yV], [bx + bw, yV]]);
+          rl([[x, yR], [bx, yR]]);
+          thermo(bx + bw + 10, yV);
+          ret(bx - 11, yR);
+          rlSide = "left";
+        }
+        break;
+      case "bottom": {
+        // Ventilheizkörper: both ports at the bottom of the connection side, VL inner, RL outer.
+        const xc = left ? bx + 12 : bx + bw - 12;
+        vl([[x, yV], [x + 16, yV], [x + 16, yB + 10], [xc - 3, yB + 10], [xc - 3, yB]]);
+        rl([[x, yR], [x + 6, yR], [x + 6, yB + 18], [xc + 3, yB + 18], [xc + 3, yB]]);
+        used.add("valveBlock");
+        prims.push(...valveBlock(xc, yB + 1));
+        if (rad.articles.head) {
+          used.add("thermoValve");
+          prims.push(...thermoHead(left ? bx + 4 : bx + bw - 4, yT));
+        }
+        break;
+      }
+      case "bottomBoth":
+        if (left) {
+          vl([[x, yV], [x + 16, yV], [x + 16, yB + 10], [bx + 6, yB + 10], [bx + 6, yB]]);
+          rl([[x, yR], [x + 6, yR], [x + 6, yB + 20], [bx + bw - 6, yB + 20], [bx + bw - 6, yB]]);
+          thermo(x + 23, yB + 10);
+          ret(bx + bw - 16, yB + 20);
+          rlSide = "right";
+        } else {
+          vl([[x, yV], [xl, yV], [xl, yT - 8], [xr, yT - 8], [xr, yB + 10], [bx + bw - 6, yB + 10], [bx + bw - 6, yB]]);
+          rl([[x, yR], [x + 16, yR], [x + 16, yB + 10], [bx + 6, yB + 10], [bx + 6, yB]]);
+          thermo(xr - 9, yB + 10);
+          ret(x + 23, yB + 10);
+          rlSide = "left";
+        }
+        break;
+    }
+    used.add("radiator");
+    prims.unshift({ t: "rect", x: bx, y: yT, w: bw, h: yB - yT, fill: "bg", stroke: "ink", sw: 1.2 });
+    // Entlüftung at the upper corner opposite the VL (Ventilheizkörper: opposite the valve insert).
+    if (rad.vent) {
+      used.add("vent");
+      prims.push(...(vlSide === "left" ? ventMark(bx + bw, yT + 3, 1) : ventMark(bx, yT + 3, -1)));
+    }
+    // Separate Entleerhahn at the lower corner opposite the RL, pointing sideways out of the body (clear of the pipes
+    // routed below it); «unten beidseitig» has no free lower corner – there on the RL side, above its port.
+    if (rad.drain === "separate" && rad.articles.drain !== null) {
+      used.add("drain");
+      const outward = rad.connection === "bottomBoth" ? rlSide : rlSide === "left" ? "right" : "left";
+      prims.push(...drawHeatSymbol("drain", outward === "right" ? bx + bw : bx, yB - 4, "up", { side: sideOf("up", outward) }));
+    }
+    group(n.id, prims);
+  };
+
   /** A terminal at x (left edge) on the row: symbol and its text (name, power, arriving Vorlauf temperature). */
   const terminal = (n: HeatNode, x: number, yRow: number) => {
     const t = result.terminals.get(n.id);
+    const rad = radiatorOf(n);
+    if (rad) {
+      radiatorTerminal(n, rad, x, yRow);
+      const tx = x + RAD_W + 8;
+      label(n.id, tx, yRow + 3, t?.name || n.label || rad.label || "–", 8);
+      if (t) label(n.id, tx, yRow + 13, `${fmt0(t.power)} W · ${fmt0(t.massFlow)} kg/h · ${fmt1(t.tArrive)} °C`, 7, { muted: true });
+      if (rad.model) label(n.id, tx, yRow + 23, rad.model, 7, { muted: true });
+      if (labels.radiator) label(n.id, tx, yRow + 33, labels.radiator(rad), 7, { muted: true });
+      return x;
+    }
     if (n.type === "radiator") {
       used.add("thermoValve");
       used.add("radiator");

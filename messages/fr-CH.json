@@ -1814,7 +1814,9 @@
       "down": "Descendre",
       "removeElement": "Retirer l’élément",
       "removeElementHint": "Retire seulement cet élément ; ses départs remontent.",
-      "removeBranch": "Supprimer la branche"
+      "removeBranch": "Supprimer la branche",
+      "addRadiators": "Reprendre {count} radiateurs",
+      "addRadiatorsHint": "Crée pour les radiateurs de ce groupe (« Radiateurs ») une colonne par étage avec distribution d'étage et conduites de raccordement – adapter ensuite longueurs et tracé."
     },
     "node": {
       "label": "Désignation",
@@ -1852,7 +1854,10 @@
       "power": "Puissance [W]",
       "dp": "Perte de charge [kPa]",
       "meterSet": "Kit de raccordement pour compteur de chaleur",
-      "heatMeter": "Compteur de chaleur"
+      "heatMeter": "Compteur de chaleur",
+      "radiator": "Radiateur (de « Radiateurs »)",
+      "noRadiator": "– non lié –",
+      "noRadiators": "Aucun radiateur saisi pour ce groupe dans « Radiateurs »."
     },
     "details": {
       "power": "Puissance / débit massique",
@@ -1908,7 +1913,8 @@
       "temps": "{group} : températures aller et retour manquantes dans 242 – calcul avec 55/45 °C.",
       "noRoom": "{element} : aucun local choisi et aucune puissance saisie.",
       "noFloor": "{element} : aucun distributeur de chauffage au sol choisi.",
-      "noPower": "{element} : aucune puissance saisie."
+      "noPower": "{element} : aucune puissance saisie.",
+      "noRadiator": "{element} : le radiateur lié n'existe plus."
     },
     "plankopf": {
       "plan": "Schéma des colonnes"
@@ -1926,7 +1932,10 @@
         "apparatus": "Consommateur",
         "drain": "Vidange",
         "heatMeter": "Compteur de chaleur avec sonde aller",
-        "meterSet": "Kit de raccordement pour compteur de chaleur (manchette, doigt de gant)"
+        "meterSet": "Kit de raccordement pour compteur de chaleur (manchette, doigt de gant)",
+        "returnValve": "Raccord retour (avec fermeture et préréglage)",
+        "vent": "Purgeur",
+        "valveBlock": "Robinetterie de raccordement radiateur à vanne intégrée"
       }
     },
     "material": {
@@ -3014,6 +3023,110 @@
       "ringLength": "Longueur de circuit supérieure au maximum"
     },
     "pdfTitle": "Chauffage au sol"
+  },
+  "radiators": {
+    "description": "Radiateurs par groupe de chauffage à partir des besoins de chaleur : choisir le modèle Zehnder, la taille est proposée pour les températures aller/retour du groupe et peut être modifiée. Raccordement et robinetterie Oventrop par radiateur ; le schéma de principe de distribution les reprend.",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "defaults": "Valeurs par défaut de l'installation",
+    "defaultsHint": "S'appliquent à tous les radiateurs dont le champ est vide (« Standard »).",
+    "model": "Modèle",
+    "series": "Gamme",
+    "columns": "{n} colonnes",
+    "connection": "Raccordement",
+    "side": "Côté aller",
+    "pipeFrom": "Conduite arrive",
+    "valveSeries": "Robinet thermostatique",
+    "dn": "Taille de vanne",
+    "head": "Tête thermostatique",
+    "noHead": "Sans tête (servomoteur séparé)",
+    "drain": "Vidange",
+    "vent": "Purgeur",
+    "drainCock": "Robinet de vidange",
+    "formsHint": "Les formes de vanne sont proposées selon le raccordement et la conduite : raccordement latéral depuis le sol ou le plafond → équerre, depuis le mur → équerre double ; raccordement par le bas depuis le sol → droit, depuis le mur/plafond → équerre. Modifiable par radiateur.",
+    "standard": "Standard ({value})",
+    "auto": "Auto ({value})",
+    "unassigned": "Sans groupe de chauffage",
+    "group": "Groupe de chauffage",
+    "groupTemps": "{supply}/{ret} °C",
+    "noTemps": "Températures manquantes dans 242 (55/45 °C admis)",
+    "groupSummary": "{count} radiateurs · Qh {load} W · Φ {output} W · {massFlow} kg/h",
+    "addFromCalc": "Reprendre les locaux des besoins de chaleur …",
+    "calcOption": "{name} ({count} ouverts)",
+    "addRoom": "Local",
+    "noRooms": "Aucun local – reprendre des besoins de chaleur ou créer manuellement.",
+    "floor": "Étage",
+    "addRadiator": "Ajouter un radiateur",
+    "removeRadiator": "Supprimer le radiateur",
+    "removeRoom": "Supprimer le local",
+    "elements": "éléments",
+    "valveInsert": "Insert de vanne",
+    "notes": "Notes",
+    "sourceHint": "Puissance normale Φ50 (EN 442, ΔT 50 K) et exposant n selon les documentations techniques Zehnder Charleston (2023) et Nova Jet (2025) ; puissance Φ = Φ50 · (ΔT/50 K)^n avec ΔT = (θaller + θretour)/2 − θi. Les valeurs valent pour un raccordement du même côté – pour les autres raccordements, saisir le facteur f. Articles : Zehnder (IGH ZehnderHK), robinetterie Meier Tobler (Oventrop).",
+    "result": {
+      "count": "Radiateurs",
+      "load": "Besoins de chaleur",
+      "output": "Puissance installée",
+      "massFlow": "Débit massique"
+    },
+    "col": {
+      "room": "Local / radiateur",
+      "label": "Désignation",
+      "share": "Part %",
+      "model": "Modèle",
+      "size": "Taille",
+      "coverage": "Couverture",
+      "connection": "Raccordement",
+      "side": "Côté aller",
+      "pipeFrom": "Conduite depuis",
+      "vlForm": "Robinet thermost.",
+      "rlForm": "Raccord retour",
+      "drain": "Vidange",
+      "factorHint": "Facteur f pour le type de raccordement (vide = 1.00)",
+      "vent": "Purge"
+    },
+    "connections": {
+      "same": "même côté",
+      "cross": "opposé",
+      "bottom": "par le bas (radiateur à vanne intégrée)",
+      "bottomBoth": "par le bas des deux côtés"
+    },
+    "sides": {
+      "left": "gauche",
+      "right": "droite"
+    },
+    "pipeSources": {
+      "floor": "du sol",
+      "wall": "du mur",
+      "ceiling": "du plafond"
+    },
+    "valveSeriesNames": {
+      "aq": "Oventrop AQ (équilibrage automatique)",
+      "av9": "Oventrop AV 9 (avec préréglage)",
+      "a": "Oventrop série A (sans préréglage)"
+    },
+    "forms": {
+      "eck": "Équerre",
+      "durchgang": "Droit",
+      "axial": "Axial",
+      "winkeleckL": "Équerre double gauche",
+      "winkeleckR": "Équerre double droite"
+    },
+    "drains": {
+      "return": "par le raccord retour",
+      "separate": "robinet de vidange séparé"
+    },
+    "warnings": {
+      "noModel": "Aucun modèle valable choisi.",
+      "noTemps": "Températures aller/retour du groupe manquantes dans 242 – calcul avec 55/45 °C.",
+      "noOverTemp": "La température moyenne de l'eau n'est pas supérieure à la température du local.",
+      "tooSmall": "La taille choisie ne couvre pas les besoins de chaleur.",
+      "maxSize": "Même la plus grande taille livrable ne couvre pas les besoins – adapter le modèle ou le nombre de radiateurs.",
+      "noValve": "Aucun robinet thermostatique Oventrop de cette forme/taille dans le catalogue.",
+      "noReturnValve": "Aucun raccord retour Oventrop de cette forme/taille dans le catalogue.",
+      "noRoom": "Aucun local des besoins de chaleur lié et aucun besoin saisi.",
+      "factor": "Zehnder indique la puissance pour un raccordement du même côté ; tenir compte des autres raccordements avec le facteur f."
+    }
   },
   "sanitary": {
     "title": "Installations sanitaires",

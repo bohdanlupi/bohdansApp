@@ -46,8 +46,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
 
   const plantData = parsePlant(plant.data);
   const data = parseDistribution(plant.distribution);
-  const lookups = inputLookups(inputs.rooms, inputs.floors);
-  const result = evaluateDistribution(data, groupInfos(plantData.groups, g("schema.group")), lookups.room, lookups.floor, inputs.outsideTemp);
+  const lookups = inputLookups(inputs.rooms, inputs.floors, inputs.radiators.list);
+  const result = evaluateDistribution(data, groupInfos(plantData.groups, g("schema.group")), lookups.room, lookups.floor, inputs.outsideTemp, lookups.radiator);
   const circuitOf = new Map(plantData.groups.map((x) => [x.id, x.circuit]));
   const schema = layoutDistribution(data, result, {
     vl: "VL",
@@ -58,7 +58,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
     head: d("schemaText.head"),
     rings: (n) => t("heatingDistribution.schemaText.rings", { n }),
     ringFittings: d("schemaText.ringFittings"),
-  });
+    radiator: (r) => [t(`radiators.connections.${r.connection}`), t(`radiators.sides.${r.side}`), t(`radiators.pipeSources.${r.pipeFrom}`)].join(" · "),
+  }, lookups.radiatorInfo);
   const plan = parseSchemaPlan(plant.distribution_plan);
   const phase = plan.phase ? findPhase(plan.phase) : null;
 

@@ -17,6 +17,7 @@ import { evaluateEws, ewsContextOf } from "@/lib/heating/ews";
 import { evaluateHeatLoad } from "@/lib/heating/heat-load";
 import { materialSections, plantMaterial } from "@/lib/heating/material";
 import { emptyPlant, parsePlant } from "@/lib/heating/plant-schema";
+import { parseRadiatorPlan } from "@/lib/heating/radiator-schema";
 import { initialsOf, nextRevisionIndex, parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -139,6 +140,21 @@ export async function saveHeatingDistribution(plantId: string, projectId: string
   const { error } = await supabase
     .from("heating_plants")
     .update({ distribution: parseDistribution(data) as unknown as Json })
+    .eq("id", plantId)
+    .eq("project_id", projectId);
+  if (error) return { error: "saveFailed" };
+  revalidatePath(`/projekte/${projectId}/heizung`, "layout");
+  return {};
+}
+
+/** Saves the Heizkörper (243) of an Anlage. */
+export async function saveHeatingRadiators(plantId: string, projectId: string, data: unknown): Promise<{ error?: string }> {
+  await assertRole("admin", "planer");
+  if (!ids.safeParse([plantId, projectId]).success) return { error: "invalidInput" };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("heating_plants")
+    .update({ radiators: parseRadiatorPlan(data) as unknown as Json })
     .eq("id", plantId)
     .eq("project_id", projectId);
   if (error) return { error: "saveFailed" };
@@ -480,8 +496,8 @@ export async function insertDistributionMaterial(
   if (!plant || !lv) return { error: "invalidInput" };
 
   const data = parseDistribution(plant.distribution);
-  const lookups = inputLookups(inputs.rooms, inputs.floors);
-  const result = evaluateDistribution(data, groupInfos(parsePlant(plant.data).groups, "Gruppe"), lookups.room, lookups.floor, inputs.outsideTemp);
-  const sections = distributionSections(distributionMaterial(data, result));
+  const lookups = inputLookups(inputs.rooms, inputs.floors, inputs.radiators.list);
+  const result = evaluateDistribution(data, groupInfos(parsePlant(plant.data).groups, "Gruppe"), lookups.room, lookups.floor, inputs.outsideTemp, lookups.radiator);
+  const sections = distributionSections(distributionMaterial(data, result, inputs.radiators));
   return insertMaterialRows(supabase, { projectId, lvId, language: lv.language as AppLanguage, groupTitle, targets: parsedTargets.data, sections });
 }

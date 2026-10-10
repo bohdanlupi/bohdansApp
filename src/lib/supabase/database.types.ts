@@ -549,6 +549,7 @@ export type Database = {
           id: string
           name: string
           project_id: string
+          radiators: Json
           schema_plan: Json
           sort: number
           updated_at: string
@@ -562,6 +563,7 @@ export type Database = {
           id?: string
           name: string
           project_id: string
+          radiators?: Json
           schema_plan?: Json
           sort?: number
           updated_at?: string
@@ -575,6 +577,7 @@ export type Database = {
           id?: string
           name?: string
           project_id?: string
+          radiators?: Json
           schema_plan?: Json
           sort?: number
           updated_at?: string

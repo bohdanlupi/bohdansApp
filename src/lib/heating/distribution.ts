@@ -1,6 +1,6 @@
 // 243 Wärmeverteilung of an Anlage (Strangschema): one tree of pipe sections per Heizgruppe of 242, from the group to
 // its Heizkörper (rooms of the Wärmebedarf), Fussbodenheizungs-Verteiler (from their calculation) and free consumers.
-//   Flows:      Heizkörper Φ / (cp · (θVL − θRL)) of the group; FBH-Verteiler the mass flow of its calculation;
+//   Flows:      Heizkörper Φ / (cp · (θVL − θRL)) of the group (the load of the configured Heizkörper, else of the room); FBH-Verteiler the mass flow of its calculation;
 //               each section carries the sum of the terminals behind it.
 //   Sizes:      Optipress-Therm (C-Stahl, Nussbaum) as standard, Optiflex-Flowpress (Mehrschichtverbund) selectable;
 //               by the velocity Richtwerte of 242 (hydraulics.ts) or chosen by hand.
@@ -51,7 +51,8 @@ export type HeatNode = {
   /** FBH-Verteiler: Anschlussset für Wärmezähler and the Wärmezähler itself. */
   meterSet: boolean;
   heatMeter: boolean;
-  // Heizkörper: room of the Wärmebedarf
+  // Heizkörper: configured Heizkörper of the Anlage (243 Heizkörper), else a room of the Wärmebedarf
+  radiatorId: string | null;
   calcId: string | null;
   roomId: string | null;
   // Fussbodenheizungs-Verteiler: system (heating_systems) and its distributor
@@ -120,6 +121,7 @@ export const newHeatNode = (type: HeatNodeType, patch: Partial<HeatNode> = {}): 
   regValve: false,
   meterSet: false,
   heatMeter: false,
+  radiatorId: null,
   calcId: null,
   roomId: null,
   systemId: null,
@@ -248,6 +250,8 @@ export function lossPerMetre(od: number, s: number, lambda: number, theta: numbe
 
 /** A room of the Wärmebedarf as Heizkörper load. */
 export type RoomLoad = { name: string; load: number; roomTemp: number };
+/** A configured Heizkörper (243 Heizkörper) with its share of the room load. */
+export type RadiatorLoad = { name: string; load: number };
 /** A Fussbodenheizungs-Verteiler from its calculation. */
 export type FloorLoad = { name: string; total: number; massFlow: number; maxPressure: number; rings: number };
 /** A Heizgruppe of the Anlage (242). */
@@ -319,6 +323,7 @@ export type GroupResult = {
 export type DistributionWarning =
   | { kind: "fast"; id: string; velocity: number; limit: number }
   | { kind: "noRoom"; id: string }
+  | { kind: "noRadiator"; id: string }
   | { kind: "noFloor"; id: string }
   | { kind: "noPower"; id: string }
   | { kind: "temps"; groupId: string }
@@ -339,6 +344,7 @@ export function evaluateDistribution(
   rooms: (calcId: string, roomId: string) => RoomLoad | null,
   floors: (systemId: string, distributorId: string) => FloorLoad | null,
   outsideTemp: number | null,
+  radiators: (id: string) => RadiatorLoad | null = () => null,
 ): DistributionResult {
   const s = data.settings;
   const sections = new Map<string, SectionResult>();
@@ -360,6 +366,12 @@ export function evaluateDistribution(
     type Term = { power: number; massFlow: number; dp: number; name: string; kind: TerminalResult["kind"]; rings?: number };
     const term = (n: HeatNode): Term | null => {
       if (n.type === "radiator") {
+        if (n.radiatorId) {
+          const rad = radiators(n.radiatorId);
+          if (!rad && n.power === null) warnings.push({ kind: "noRadiator", id: n.id });
+          const power = n.power ?? rad?.load ?? 0;
+          return { power, massFlow: flowOf(power), dp: n.dp ?? s.valveDp, name: n.label || rad?.name || "", kind: "radiator" };
+        }
         const room = n.calcId && n.roomId ? rooms(n.calcId, n.roomId) : null;
         if (!room && n.power === null) warnings.push({ kind: "noRoom", id: n.id });
         const power = n.power ?? room?.load ?? 0;

@@ -2,10 +2,12 @@
 //   .1 Leitungen   pipes (VL + RL), Bögen 90° / 45° and T-Stücke at the branches – Optipress-Therm (Nussbaum, in
 //                  material-data.ts) or Optiflex-Flowpress (Nussbaum, from the Sanitär catalogue data)
 //   .2 Armaturen   Kugelhähne at the Strang feet and where Absperrungen are set (also before FBH-Verteiler),
-//                  Rücklaufverschraubungen (neutral), Wärmezähler (GWF) and their Anschlusssets (neutral) at FBH-Verteilern
-//   .3 Regel- und Sicherheitsorgane  Strangregulierventile (IMI STAD), Heizkörperventile with Thermostatkopf (neutral,
-//                  the type depends on the Heizkörper)
-//   .4 Abgabesystem Heizkörper and Verbraucher (neutral, with their power)
+//                  Rücklaufverschraubungen, Anschlussarmaturen, Entlüftungsventile and Entleerhahnen of the Heizkörper,
+//                  Wärmezähler (GWF) and their Anschlusssets (neutral) at FBH-Verteilern
+//   .3 Regel- und Sicherheitsorgane  Strangregulierventile (IMI STAD), Thermostatventile and Thermostatköpfe
+//   .4 Abgabesystem Heizkörper and Verbraucher
+// Heizkörper configured in 243 Heizkörper bring their Zehnder article and the Oventrop armatures (Meier Tobler
+// articles); a Heizkörper only linked to a room stays neutral.
 //   .6 Dämmung     Meier Tobler pipe shells by size and SIA 384/1 thickness (PIR for λ ≤ 0.03, else Mineralwolle),
 //                  +20 % for fittings and valves
 // The Fussbodenheizungs-Verteiler themselves are not listed here (they belong to the Fussbodenheizung).
@@ -14,6 +16,7 @@ import { nussbaumArticles } from "@/lib/sanitary/catalog-data";
 import { insulationShells } from "@/lib/sanitary/insulation-data";
 
 import type { DistributionData, DistributionResult, HeatNode, HeatPipe } from "./distribution";
+import type { RadiatorInputs } from "./distribution-inputs";
 import { heatPipeText } from "./distribution";
 import * as A from "./material-data";
 
@@ -22,7 +25,7 @@ export type DistChapter = 1 | 2 | 3 | 4 | 6;
 export type DistMaterialLine = {
   key: string;
   chapter: DistChapter;
-  manufacturer: "Nussbaum" | "Meier Tobler" | null;
+  manufacturer: "Nussbaum" | "Meier Tobler" | "Zehnder" | null;
   article: string | null;
   label: string;
   unit: "Stk" | "m";
@@ -37,7 +40,9 @@ const fmt = (v: number, d = 0) => v.toLocaleString("de-CH", { minimumFractionDig
 /** Optiflex-Flowpress article of a family (Sanitär catalogue data) for a pipe diameter. */
 const flowpress = (family: "87153" | "84240" | "84241" | "84242", od: number) => nussbaumArticles[family].find((a) => a.size !== null && Number.parseFloat(a.size) === od && !a.size.includes("x")) ?? null;
 
-export function distributionMaterial(data: DistributionData, result: DistributionResult): DistMaterialLine[] {
+export function distributionMaterial(data: DistributionData, result: DistributionResult, radiators: RadiatorInputs = { list: [], drainTool: null }): DistMaterialLine[] {
+  const radiatorMap = new Map(radiators.list.map((r) => [r.id, r]));
+  let drainTool = false;
   const map = new Map<string, DistMaterialLine>();
   const add = (line: Omit<DistMaterialLine, "quantity">, amount: number) => {
     if (amount <= 0) return;
@@ -46,7 +51,7 @@ export function distributionMaterial(data: DistributionData, result: Distributio
     if (current) current.quantity = Math.round((current.quantity + amount) * 10) / 10;
     else map.set(line.key, { ...line, quantity: Math.round(amount * 10) / 10 });
   };
-  const article = (chapter: DistChapter, manufacturer: "Nussbaum" | "Meier Tobler", a: { number: string; text: string } | null | undefined, amount: number, fallback: string, unit: "Stk" | "m" = "Stk") =>
+  const article = (chapter: DistChapter, manufacturer: "Nussbaum" | "Meier Tobler" | "Zehnder", a: { number: string; text: string } | null | undefined, amount: number, fallback: string, unit: "Stk" | "m" = "Stk") =>
     a ? add({ key: `${chapter}|${a.number}`, chapter, manufacturer, article: a.number, label: a.text, unit }, amount) : neutral(chapter, fallback, amount, unit);
   const neutral = (chapter: DistChapter, label: string, amount: number, unit: "Stk" | "m" = "Stk") => add({ key: `${chapter}|${label}`, chapter, manufacturer: null, article: null, label, unit }, amount);
   const material = data.settings.lambda <= 0.03 + 1e-9 ? "pir" : "mineralwool";
@@ -69,7 +74,20 @@ export function distributionMaterial(data: DistributionData, result: Distributio
     const s = result.sections.get(n.id);
     const term = result.terminals.get(n.id);
     if (term) {
-      if (n.type === "radiator") {
+      const rad = n.type === "radiator" && n.radiatorId ? radiatorMap.get(n.radiatorId) : undefined;
+      if (rad) {
+        const a = rad.articles;
+        article(4, "Zehnder", a.radiator, 1, `Heizkörper «${term.name || "–"}», ${rad.model}, Φ ${fmt(rad.output)} W`);
+        if (a.valveBlock) article(2, "Meier Tobler", a.valveBlock, 1, "Anschlussarmatur Ventilheizkörper");
+        else {
+          article(3, "Meier Tobler", a.vlValve, 1, "Thermostatventil");
+          article(2, "Meier Tobler", a.rlValve, 1, "Rücklaufverschraubung absperrbar");
+        }
+        if (a.head) article(3, "Meier Tobler", a.head, 1, "Thermostatkopf");
+        if (a.vent) article(2, "Meier Tobler", a.vent, 1, "Entlüftungsventil");
+        if (a.drain) article(2, "Meier Tobler", a.drain, 1, "Entleerhahn");
+        if (rad.drain === "return" && a.rlValve) drainTool = true;
+      } else if (n.type === "radiator") {
         neutral(4, `Heizkörper «${term.name || "–"}», Φ ${fmt(term.power)} W`, 1);
         neutral(3, "Heizkörperventil mit voreinstellbarem Ventileinsatz und Thermostatkopf", 1);
         neutral(2, "Rücklaufverschraubung absperrbar", 1);
@@ -110,6 +128,8 @@ export function distributionMaterial(data: DistributionData, result: Distributio
     n.children.forEach((c) => visit(c, n.riser, p));
   };
   for (const roots of Object.values(data.networks)) roots.forEach((n) => visit(n, false, null));
+  // Oventrop Entleerungs- und Füllwerkzeug once, when Heizkörper are drained through their Rücklaufverschraubung.
+  if (drainTool && radiators.drainTool) article(2, "Meier Tobler", radiators.drainTool, 1, "Entleerungswerkzeug");
   return [...map.values()];
 }
 

@@ -1814,7 +1814,9 @@
       "down": "Giù",
       "removeElement": "Rimuovere l’elemento",
       "removeElementHint": "Rimuove solo questo elemento; le sue diramazioni risalgono.",
-      "removeBranch": "Eliminare il ramo"
+      "removeBranch": "Eliminare il ramo",
+      "addRadiators": "Riprendere {count} radiatori",
+      "addRadiatorsHint": "Crea per i radiatori di questo gruppo («Radiatori») una colonna per piano con distribuzione di piano e condotte di allacciamento – poi adattare lunghezze e percorso."
     },
     "node": {
       "label": "Designazione",
@@ -1852,7 +1854,10 @@
       "power": "Potenza [W]",
       "dp": "Perdita di carico [kPa]",
       "meterSet": "Set di raccordo per contatore di calore",
-      "heatMeter": "Contatore di calore"
+      "heatMeter": "Contatore di calore",
+      "radiator": "Radiatore (da «Radiatori»)",
+      "noRadiator": "– non collegato –",
+      "noRadiators": "In «Radiatori» non sono ancora registrati radiatori per questo gruppo."
     },
     "details": {
       "power": "Potenza / portata massica",
@@ -1908,7 +1913,8 @@
       "temps": "{group}: temperature di mandata e ritorno mancanti in 242 – calcolato con 55/45 °C.",
       "noRoom": "{element}: nessun locale scelto e nessuna potenza inserita.",
       "noFloor": "{element}: nessun collettore del riscaldamento a pavimento scelto.",
-      "noPower": "{element}: nessuna potenza inserita."
+      "noPower": "{element}: nessuna potenza inserita.",
+      "noRadiator": "{element}: il radiatore collegato non esiste più."
     },
     "plankopf": {
       "plan": "Schema delle colonne"
@@ -1926,7 +1932,10 @@
         "apparatus": "Utenza",
         "drain": "Scarico",
         "heatMeter": "Contatore di calore con sonda di mandata",
-        "meterSet": "Set di raccordo per contatore di calore (tronchetto, pozzetto)"
+        "meterSet": "Set di raccordo per contatore di calore (tronchetto, pozzetto)",
+        "returnValve": "Detentore (con chiusura e preregolazione)",
+        "vent": "Valvola di sfiato",
+        "valveBlock": "Raccordo per radiatore con valvola integrata"
       }
     },
     "material": {
@@ -3014,6 +3023,110 @@
       "ringLength": "Lunghezza del circuito oltre il massimo"
     },
     "pdfTitle": "Riscaldamento a pavimento"
+  },
+  "radiators": {
+    "description": "Radiatori per gruppo di riscaldamento dal fabbisogno termico: scegliere il modello Zehnder, la grandezza viene proposta per le temperature di mandata/ritorno del gruppo e può essere modificata. Allacciamento e rubinetteria Oventrop per radiatore; lo schema di principio della distribuzione li riprende.",
+    "save": "Salvare",
+    "saved": "Salvato",
+    "defaults": "Valori standard dell'impianto",
+    "defaultsHint": "Valgono per tutti i radiatori con il campo vuoto («Standard»).",
+    "model": "Modello",
+    "series": "Serie",
+    "columns": "{n} colonne",
+    "connection": "Allacciamento",
+    "side": "Lato mandata",
+    "pipeFrom": "Condotta arriva",
+    "valveSeries": "Valvola termostatica",
+    "dn": "Grandezza valvola",
+    "head": "Testa termostatica",
+    "noHead": "Senza testa (servomotore separato)",
+    "drain": "Svuotamento",
+    "vent": "Valvola di sfiato",
+    "drainCock": "Rubinetto di scarico",
+    "formsHint": "Le forme delle valvole sono proposte dall'allacciamento e dal percorso della condotta: allacciamento laterale dal pavimento o dal soffitto → a squadra, dalla parete → a squadra doppia; allacciamento dal basso dal pavimento → diritta, da parete/soffitto → a squadra. Modificabile per radiatore.",
+    "standard": "Standard ({value})",
+    "auto": "Auto ({value})",
+    "unassigned": "Senza gruppo di riscaldamento",
+    "group": "Gruppo di riscaldamento",
+    "groupTemps": "{supply}/{ret} °C",
+    "noTemps": "Temperature mancanti in 242 (assunti 55/45 °C)",
+    "groupSummary": "{count} radiatori · Qh {load} W · Φ {output} W · {massFlow} kg/h",
+    "addFromCalc": "Riprendere i locali dal fabbisogno termico …",
+    "calcOption": "{name} ({count} aperti)",
+    "addRoom": "Locale",
+    "noRooms": "Ancora nessun locale – riprendere dal fabbisogno termico o creare manualmente.",
+    "floor": "Piano",
+    "addRadiator": "Aggiungere radiatore",
+    "removeRadiator": "Rimuovere radiatore",
+    "removeRoom": "Rimuovere locale",
+    "elements": "elementi",
+    "valveInsert": "Inserto valvola",
+    "notes": "Note",
+    "sourceHint": "Potenza nominale Φ50 (EN 442, ΔT 50 K) ed esponente n dalla documentazione tecnica Zehnder Charleston (2023) e Nova Jet (2025); potenza Φ = Φ50 · (ΔT/50 K)^n con ΔT = (θmandata + θritorno)/2 − θi. I valori valgono per allacciamento sullo stesso lato – per gli altri allacciamenti inserire il fattore f. Articoli: Zehnder (IGH ZehnderHK), rubinetteria Meier Tobler (Oventrop).",
+    "result": {
+      "count": "Radiatori",
+      "load": "Fabbisogno termico",
+      "output": "Potenza installata",
+      "massFlow": "Portata massica"
+    },
+    "col": {
+      "room": "Locale / radiatore",
+      "label": "Designazione",
+      "share": "Quota %",
+      "model": "Modello",
+      "size": "Grandezza",
+      "coverage": "Copertura",
+      "connection": "Allacciamento",
+      "side": "Lato mandata",
+      "pipeFrom": "Condotta da",
+      "vlForm": "Valvola termost.",
+      "rlForm": "Detentore",
+      "drain": "Svuotamento",
+      "factorHint": "Fattore f per il tipo di allacciamento (vuoto = 1.00)",
+      "vent": "Sfiato"
+    },
+    "connections": {
+      "same": "stesso lato",
+      "cross": "lati opposti",
+      "bottom": "dal basso (radiatore con valvola integrata)",
+      "bottomBoth": "dal basso su due lati"
+    },
+    "sides": {
+      "left": "sinistra",
+      "right": "destra"
+    },
+    "pipeSources": {
+      "floor": "dal pavimento",
+      "wall": "dalla parete",
+      "ceiling": "dal soffitto"
+    },
+    "valveSeriesNames": {
+      "aq": "Oventrop AQ (bilanciamento automatico)",
+      "av9": "Oventrop AV 9 (con preregolazione)",
+      "a": "Oventrop serie A (senza preregolazione)"
+    },
+    "forms": {
+      "eck": "A squadra",
+      "durchgang": "Diritta",
+      "axial": "Assiale",
+      "winkeleckL": "A squadra doppia sinistra",
+      "winkeleckR": "A squadra doppia destra"
+    },
+    "drains": {
+      "return": "tramite il detentore",
+      "separate": "rubinetto di scarico separato"
+    },
+    "warnings": {
+      "noModel": "Nessun modello valido scelto.",
+      "noTemps": "Temperature di mandata/ritorno del gruppo mancanti in 242 – calcolato con 55/45 °C.",
+      "noOverTemp": "La temperatura media dell'acqua non supera la temperatura del locale.",
+      "tooSmall": "La grandezza scelta non copre il fabbisogno termico.",
+      "maxSize": "Anche la grandezza massima disponibile non copre il fabbisogno – adattare il modello o il numero di radiatori.",
+      "noValve": "Nessuna valvola termostatica Oventrop di questa forma/grandezza nel catalogo.",
+      "noReturnValve": "Nessun detentore Oventrop di questa forma/grandezza nel catalogo.",
+      "noRoom": "Nessun locale del fabbisogno termico collegato e nessun fabbisogno inserito.",
+      "factor": "Zehnder indica la potenza per allacciamento sullo stesso lato; considerare gli altri allacciamenti con il fattore f."
+    }
   },
   "sanitary": {
     "title": "Impianti sanitari",

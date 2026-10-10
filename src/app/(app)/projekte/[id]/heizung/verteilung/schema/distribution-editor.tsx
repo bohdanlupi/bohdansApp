@@ -25,7 +25,7 @@ import {
   pipesOf,
   type SectionResult,
 } from "@/lib/heating/distribution";
-import { type CalcOption, type FloorOption, groupInfos, inputLookups } from "@/lib/heating/distribution-inputs";
+import { type CalcOption, type FloorOption, groupInfos, inputLookups, type RadiatorInputs, type RadiatorOption, radiatorNetwork } from "@/lib/heating/distribution-inputs";
 import { layoutDistribution } from "@/lib/heating/distribution-layout";
 import { distributionMaterial, distributionSections } from "@/lib/heating/distribution-material";
 import type { HeatingGroup } from "@/lib/heating/plant-schema";
@@ -49,6 +49,7 @@ export function DistributionEditor({
   schemaPlan,
   rooms,
   floors,
+  radiators,
   outsideTemp,
   lvs,
   editable,
@@ -59,6 +60,8 @@ export function DistributionEditor({
   schemaPlan: SchemaPlan;
   rooms: CalcOption[];
   floors: FloorOption[];
+  /** Heizkörper configured for the Anlage (243 Heizkörper). */
+  radiators: RadiatorInputs;
   /** Norm-Aussentemperatur of the site [°C]. */
   outsideTemp: number | null;
   /** LVs of the project with their chapters, for inserting the Materialauszug. */
@@ -68,6 +71,7 @@ export function DistributionEditor({
   const t = useTranslations("heatingDistribution");
   const tg = useTranslations("heatingPlan.generation");
   const tForms = useTranslations("forms");
+  const tr = useTranslations("radiators");
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState(initialData);
   const [selected, setSelected] = useState<string | null>(null);
@@ -76,15 +80,31 @@ export function DistributionEditor({
 
   const groups: GroupInfo[] = useMemo(() => groupInfos(plant.groups, tg("schema.group")), [plant.groups, tg]);
   const [groupId, setGroupId] = useState<string | null>(groups[0]?.id ?? null);
-  const lookups = useMemo(() => inputLookups(rooms, floors), [rooms, floors]);
-  const result = useMemo(() => evaluateDistribution(data, groups, lookups.room, lookups.floor, outsideTemp), [data, groups, lookups, outsideTemp]);
+  const lookups = useMemo(() => inputLookups(rooms, floors, radiators.list), [rooms, floors, radiators]);
+  const result = useMemo(() => evaluateDistribution(data, groups, lookups.room, lookups.floor, outsideTemp, lookups.radiator), [data, groups, lookups, outsideTemp]);
   const circuitName = (g: { group: GroupInfo }) => {
     const pg = plant.groups.find((x) => x.id === g.group.id);
     return pg ? tg(`circuits.${pg.circuit}`) : "";
   };
-  const material = useMemo(() => distributionSections(distributionMaterial(data, result)), [data, result]);
+  const material = useMemo(() => distributionSections(distributionMaterial(data, result, radiators)), [data, result, radiators]);
   const schema = useMemo(
-    () => layoutDistribution(data, result, { vl: "VL", rl: "RL", insulation: t("schemaText.insulation"), strang: t("schemaText.strang"), circuit: circuitName, head: t("schemaText.head"), rings: (n) => t("schemaText.rings", { n }), ringFittings: t("schemaText.ringFittings") }),
+    () =>
+      layoutDistribution(
+        data,
+        result,
+        {
+          vl: "VL",
+          rl: "RL",
+          insulation: t("schemaText.insulation"),
+          strang: t("schemaText.strang"),
+          circuit: circuitName,
+          head: t("schemaText.head"),
+          rings: (n) => t("schemaText.rings", { n }),
+          ringFittings: t("schemaText.ringFittings"),
+          radiator: (r) => [tr(`connections.${r.connection}`), tr(`sides.${r.side}`), tr(`pipeSources.${r.pipeFrom}`)].join(" · "),
+        },
+        lookups.radiatorInfo,
+      ),
     [data, result], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
@@ -174,10 +194,12 @@ export function DistributionEditor({
             onSelect={select}
             onChange={setNetwork}
             floors={floors.filter((f) => f.groupId === groupId)}
+            radiators={radiators.list.filter((r) => r.groupId === groupId)}
+            placedRadiators={placedRadiators(data)}
           />
         </div>
         <aside className="space-y-3 xl:sticky xl:top-4 xl:self-start">
-          <NodeEditor network={network} selected={selected} result={result} rooms={rooms} floors={floors} editable={editable} onSelect={select} onChange={setNetwork} />
+          <NodeEditor network={network} selected={selected} result={result} rooms={rooms} floors={floors} radiators={radiators.list.filter((r) => r.groupId === groupId)} editable={editable} onSelect={select} onChange={setNetwork} />
         </aside>
       </div>
 
@@ -216,6 +238,14 @@ function siblingsOf(roots: HeatNode[], id: string): { parent: HeatNode | null; i
   return null;
 }
 
+/** Ids of the configured Heizkörper already in any network of the Anlage. */
+function placedRadiators(data: DistributionData): Set<string> {
+  const ids = new Set<string>();
+  const walk = (list: HeatNode[]) => list.forEach((n) => (n.radiatorId && ids.add(n.radiatorId), walk(n.children)));
+  Object.values(data.networks).forEach(walk);
+  return ids;
+}
+
 /** New pipe below a parent: same system and surroundings; Strang after a Strang. */
 const childPipe = (parent: HeatNode | null): HeatNode =>
   newHeatNode("pipe", parent ? { system: parent.system, ambient: parent.ambient, riser: parent.riser, floor: parent.riser ? "" : parent.floor } : {});
@@ -231,6 +261,8 @@ function TreeList({
   onSelect,
   onChange,
   floors,
+  radiators,
+  placedRadiators,
 }: {
   groups: GroupInfo[];
   groupId: string | null;
@@ -243,12 +275,16 @@ function TreeList({
   onChange: (fn: (roots: HeatNode[]) => HeatNode[]) => void;
   /** FBH-Verteiler linked to this group. */
   floors: FloorOption[];
+  /** Heizkörper configured for this group, and those already placed in the Anlage. */
+  radiators: RadiatorOption[];
+  placedRadiators: Set<string>;
 }) {
   const t = useTranslations("heatingDistribution");
   const usedFloors = new Set<string>();
   const collect = (list: HeatNode[]) => list.forEach((n) => (n.type === "floor" && n.distributorId && usedFloors.add(n.distributorId), collect(n.children)));
   collect(network);
   const missing = floors.filter((f) => !usedFloors.has(f.id));
+  const missingRadiators = radiators.filter((r) => !placedRadiators.has(r.id));
 
   return (
     <section className="rounded-xl border">
@@ -317,6 +353,22 @@ function TreeList({
               {t("tree.addFloors", { count: missing.length })}
             </Button>
           )}
+          {missingRadiators.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              title={t("tree.addRadiatorsHint")}
+              onClick={() => {
+                // Starting structure (Strang per storey) for the configured Heizkörper not yet in the Anlage.
+                const roots = radiatorNetwork(missingRadiators);
+                onChange((list) => [...list, ...roots]);
+                if (roots[0]) onSelect(roots[0].id);
+              }}
+            >
+              <Flame />
+              {t("tree.addRadiators", { count: missingRadiators.length })}
+            </Button>
+          )}
         </div>
       )}
     </section>
@@ -370,6 +422,7 @@ function NodeEditor({
   result,
   rooms,
   floors,
+  radiators,
   editable,
   onSelect,
   onChange,
@@ -379,6 +432,8 @@ function NodeEditor({
   result: DistributionResult;
   rooms: CalcOption[];
   floors: FloorOption[];
+  /** Configured Heizkörper of the group. */
+  radiators: RadiatorOption[];
   editable: boolean;
   onSelect: (id: string | null) => void;
   onChange: (fn: (roots: HeatNode[]) => HeatNode[]) => void;
@@ -594,6 +649,29 @@ function NodeEditor({
       {node.type === "radiator" && (
         <>
           <div className="space-y-1">
+            <Label htmlFor="hn-radiator" className="text-xs">
+              {t("node.radiator")}
+            </Label>
+            <NativeSelect
+              id="hn-radiator"
+              value={node.radiatorId ?? ""}
+              disabled={!editable}
+              onChange={(e) => {
+                const rad = radiators.find((r) => r.id === e.target.value);
+                patch(rad ? { radiatorId: rad.id, floor: rad.floor || node.floor, calcId: null, roomId: null } : { radiatorId: null });
+              }}
+            >
+              <option value="">{t("node.noRadiator")}</option>
+              {radiators.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {[r.floor, r.label].filter(Boolean).join(" · ")} – {r.model} ({fmt(r.load)} W)
+                </option>
+              ))}
+            </NativeSelect>
+            {radiators.length === 0 && <p className="text-xs text-muted-foreground">{t("node.noRadiators")}</p>}
+          </div>
+          {!node.radiatorId && (
+          <div className="space-y-1">
             <Label htmlFor="hn-room" className="text-xs">
               {t("node.room")}
             </Label>
@@ -619,6 +697,7 @@ function NodeEditor({
               ))}
             </NativeSelect>
           </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             {text("label", t("node.label"), 120)}
             {text("floor", t("node.floor"), 20, "EG, 1.OG …")}
