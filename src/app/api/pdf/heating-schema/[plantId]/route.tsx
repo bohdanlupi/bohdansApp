@@ -1,4 +1,3 @@
-import { renderToBuffer } from "@react-pdf/renderer";
 import { createTranslator } from "next-intl";
 
 import { languageToLocale } from "@/i18n/config";
@@ -14,6 +13,7 @@ import { parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import { createClient } from "@/lib/supabase/server";
 import { HeatingSchemaDocument } from "@/pdf/heating-schema-document";
 import { loadLogo } from "@/pdf/logo";
+import { planResponse } from "@/pdf/plan-response";
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
@@ -21,7 +21,7 @@ const pipeKinds: PipeKind[] = ["vl", "rl", "brine", "brineR", "gw", "gwR", "pwc"
 
 // GET /api/pdf/heating-schema/<plantId> – Prinzipschema Wärmeerzeugung of an Anlage as a plan with title block and
 // legend.
-export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/heating-schema/[plantId]">) {
+export async function GET(request: Request, { params }: RouteContext<"/api/pdf/heating-schema/[plantId]">) {
   const profile = await getCurrentProfile();
   if (!profile) return new Response("Unauthorized", { status: 401 });
 
@@ -53,7 +53,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const plan = parseSchemaPlan(plant.schema_plan);
   const phase = plan.phase ? findPhase(plan.phase) : null;
 
-  const pdf = await renderToBuffer(
+  return planResponse(
+    request,
     <HeatingSchemaDocument
       schema={schema}
       legend={{
@@ -77,13 +78,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
       firm={firm}
       logo={await loadLogo()}
     />,
+    `Prinzipschema-Waermeerzeugung-${project.number}-${plant.name}`,
   );
-  const filename = `Prinzipschema-Waermeerzeugung-${project.number}-${plant.name}.pdf`.replace(/[^\w.-]/g, "_");
-  return new Response(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${filename}"`,
-      "Cache-Control": "private, no-store",
-    },
-  });
 }

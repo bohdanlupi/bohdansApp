@@ -2,7 +2,7 @@
 
 import { FileText, ListPlus, Save, Trash2, Wand2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { ConfirmButton } from "@/components/confirm-button";
@@ -61,7 +61,6 @@ export function SystemEditor({
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState({ name: initialName, data: initialData });
   const [selected, setSelected] = useState<string | null>(null);
-  const schemaRef = useRef<HTMLDivElement>(null);
   const [pending, startTransition] = useTransition();
   const dirty = name !== saved.name || data !== saved.data;
 
@@ -187,7 +186,7 @@ export function SystemEditor({
             <FileText />
             {t("pdf")}
           </a>
-          <SchemaDxfButton target={schemaRef} name={`${name} ${t("schema")}`} />
+          <SchemaDxfButton url={`/api/pdf/kwl-schema/${id}`} dirty={dirty} />
           <SchemaPrintButton systemId={id} projectId={projectId} plan={schemaPlan} editable={editable} dirty={dirty} />
           {editable && (
             <>
@@ -279,7 +278,7 @@ export function SystemEditor({
                 <h2 className="font-semibold">{t("schema")}</h2>
                 <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>
               </div>
-              <div className="overflow-x-auto" ref={schemaRef}>
+              <div className="overflow-x-auto">
                 <SchemaView
                   layout={layout}
                   selected={selected}

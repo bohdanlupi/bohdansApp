@@ -1,4 +1,3 @@
-import { renderToBuffer } from "@react-pdf/renderer";
 import { createTranslator } from "next-intl";
 
 import { loadDistributionInputs } from "@/app/(app)/projekte/[id]/heizung/verteilung/schema/load-inputs";
@@ -14,12 +13,13 @@ import { parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import { createClient } from "@/lib/supabase/server";
 import { HeatingDistributionDocument } from "@/pdf/heating-distribution-document";
 import { loadLogo } from "@/pdf/logo";
+import { planResponse } from "@/pdf/plan-response";
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 // GET /api/pdf/heating-distribution/<plantId> – Prinzipschema Wärmeverteilung (Strangschema) of an Anlage as a plan
 // with title block and legend.
-export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/heating-distribution/[plantId]">) {
+export async function GET(request: Request, { params }: RouteContext<"/api/pdf/heating-distribution/[plantId]">) {
   const profile = await getCurrentProfile();
   if (!profile) return new Response("Unauthorized", { status: 401 });
 
@@ -63,7 +63,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const plan = parseSchemaPlan(plant.distribution_plan);
   const phase = plan.phase ? findPhase(plan.phase) : null;
 
-  const pdf = await renderToBuffer(
+  return planResponse(
+    request,
     <HeatingDistributionDocument
       schema={schema}
       legend={{ title: k("legend"), vl: d("legend.vl"), rl: d("legend.rl"), insulation: d("legend.insulation"), symbol: (key) => d(`legend.symbols.${key}`) }}
@@ -83,13 +84,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
       firm={firm}
       logo={await loadLogo()}
     />,
+    `Prinzipschema-Waermeverteilung-${project.number}-${plant.name}`,
   );
-  const filename = `Prinzipschema-Waermeverteilung-${project.number}-${plant.name}.pdf`.replace(/[^\w.-]/g, "_");
-  return new Response(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${filename}"`,
-      "Cache-Control": "private, no-store",
-    },
-  });
 }

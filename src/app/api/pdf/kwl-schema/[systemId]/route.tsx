@@ -1,4 +1,3 @@
-import { renderToBuffer } from "@react-pdf/renderer";
 import { createTranslator } from "next-intl";
 
 import { languageToLocale } from "@/i18n/config";
@@ -18,9 +17,10 @@ import { createClient } from "@/lib/supabase/server";
 import type { KwlTranslate } from "@/pdf/kwl-document";
 import { KwlSchemaDocument } from "@/pdf/kwl-schema-document";
 import { loadLogo } from "@/pdf/logo";
+import { planResponse } from "@/pdf/plan-response";
 
 // GET /api/pdf/kwl-schema/<systemId> – Prinzipschema of a Lüftungsanlage as a plan with title block and legend.
-export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/kwl-schema/[systemId]">) {
+export async function GET(request: Request, { params }: RouteContext<"/api/pdf/kwl-schema/[systemId]">) {
   const profile = await getCurrentProfile();
   if (!profile) return new Response("Unauthorized", { status: 401 });
 
@@ -54,7 +54,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const phase = plan.phase ? findPhase(plan.phase) : null;
   const airs = ["outdoor", "supply", "extract", "exhaust"] as const;
 
-  const pdf = await renderToBuffer(
+  return planResponse(
+    request,
     <KwlSchemaDocument
       layout={layout}
       labels={{
@@ -97,13 +98,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
       firm={firm}
       logo={await loadLogo()}
     />,
+    `Prinzipschema-${project.number}-${system.name}`,
   );
-  const filename = `Prinzipschema-${project.number}-${system.name}.pdf`.replace(/[^\w.-]/g, "_");
-  return new Response(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${filename}"`,
-      "Cache-Control": "private, no-store",
-    },
-  });
 }

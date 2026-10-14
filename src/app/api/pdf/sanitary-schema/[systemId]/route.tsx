@@ -1,4 +1,3 @@
-import { renderToBuffer } from "@react-pdf/renderer";
 import { createTranslator } from "next-intl";
 
 import { languageToLocale } from "@/i18n/config";
@@ -10,6 +9,7 @@ import { applianceSymbols, layoutSchema, type SymbolKey } from "@/lib/sanitary/s
 import { parseSanitaryData } from "@/lib/sanitary/system-schema";
 import { createClient } from "@/lib/supabase/server";
 import { loadLogo } from "@/pdf/logo";
+import { planResponse } from "@/pdf/plan-response";
 import { SanitarySchemaDocument } from "@/pdf/sanitary-schema-document";
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
@@ -17,7 +17,7 @@ type Translate = (key: string, values?: Record<string, string | number>) => stri
 const symbolKeys: SymbolKey[] = ["shutoff", "shutoffDrain", "check", "regValve", "regValveThermal", "meter", "filter", "redfil", "reducer", "safety", "pump", "mixer", "softener", "consumer", "battery", "heater", "union", "drain", "manifold", "spacer", "cabinet", "basinBox", ...applianceSymbols];
 
 // GET /api/pdf/sanitary-schema/<systemId> – Prinzipschema of a Sanitäranlage as a plan with title block and legend.
-export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/sanitary-schema/[systemId]">) {
+export async function GET(request: Request, { params }: RouteContext<"/api/pdf/sanitary-schema/[systemId]">) {
   const profile = await getCurrentProfile();
   if (!profile) return new Response("Unauthorized", { status: 401 });
 
@@ -63,7 +63,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   });
   const phase = plan.phase ? findPhase(plan.phase) : null;
 
-  const pdf = await renderToBuffer(
+  return planResponse(
+    request,
     <SanitarySchemaDocument
       schema={schema}
       legend={{
@@ -89,13 +90,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
       firm={firm}
       logo={await loadLogo()}
     />,
+    `Prinzipschema-Sanitaer-${project.number}-${system.name}`,
   );
-  const filename = `Prinzipschema-Sanitaer-${project.number}-${system.name}.pdf`.replace(/[^\w.-]/g, "_");
-  return new Response(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${filename}"`,
-      "Cache-Control": "private, no-store",
-    },
-  });
 }

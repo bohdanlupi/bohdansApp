@@ -2,7 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Fragment, useCallback, useMemo, useRef } from "react";
+import { Fragment, useCallback, useMemo } from "react";
 
 import { NativeSelect } from "@/components/form";
 import { NumberField, Notice, Section } from "@/components/planning/fields";
@@ -73,7 +73,6 @@ export function GenerationEditor({
 }) {
   const t = useTranslations("heatingPlan");
   const tg = useTranslations("heatingPlan.generation");
-  const schemaRef = useRef<HTMLDivElement>(null);
   const building = usePlan(projectId, initialPlan, editable, saveHeatingPlan);
   const savePlant = useCallback((pid: string, data: unknown) => saveHeatingPlant(plant.id, pid, plant.name, data), [plant.id, plant.name]);
   const anlage = usePlan(projectId, plant.data, editable, savePlant);
@@ -349,7 +348,7 @@ export function GenerationEditor({
         description={tg("schemaHint")}
         actions={
           <div className="flex flex-wrap gap-2">
-            <SchemaDxfButton target={schemaRef} name={`${plant.name} ${tg("schemaTitle")}`} />
+            <SchemaDxfButton url={`/api/pdf/heating-schema/${plant.id}`} dirty={anlage.status !== "saved"} />
             <SchemaPrintButton
               systemId={plant.id}
               projectId={projectId}
@@ -362,9 +361,7 @@ export function GenerationEditor({
           </div>
         }
       >
-        <div ref={schemaRef}>
-          <GenerationSchemaView schema={schema} label={tg("schemaTitle")} />
-        </div>
+        <GenerationSchemaView schema={schema} label={tg("schemaTitle")} />
       </Section>
 
       <SafetySection data={d} result={safety} editable={editable} setSafety={(patch) => setPlant({ safety: { ...d.safety, ...patch } })} />
