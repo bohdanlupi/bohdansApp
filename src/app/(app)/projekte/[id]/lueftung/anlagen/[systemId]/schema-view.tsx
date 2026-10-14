@@ -129,7 +129,7 @@ export function SchemaView({
           <g key={node.id} className="cursor-pointer" onClick={() => onSelect(node.id)}>
             <circle cx={x} cy={y} r={Math.max(top, 9) + 3} fill="transparent" />
             <SvgPrims prims={prims} />
-            {selected === node.id && <circle cx={x} cy={y} r={Math.max(top, 9) + 4} fill="none" strokeDasharray="3 2" className="stroke-brand" strokeWidth={1.5} />}
+            {selected === node.id && <circle data-dxf="skip" cx={x} cy={y} r={Math.max(top, 9) + 4} fill="none" strokeDasharray="3 2" className="stroke-brand" strokeWidth={1.5} />}
             {label && (
               <text x={x} y={y - top - 15} textAnchor="middle" className="fill-foreground text-[9px] font-medium">
                 {label}

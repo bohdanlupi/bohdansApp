@@ -1615,6 +1615,7 @@
     "noStructure": "Ce descriptif n’a pas encore de structure ventilation (CFC 244). La créer dans le descriptif avec « Structure ventilation » ; les positions seront alors attribuées automatiquement aux chapitres.",
     "toLv": "Vers le descriptif",
     "schemaPdf": "Schéma de principe PDF",
+    "schemaDxf": "Schéma de principe DXF",
     "schemaDialog": {
       "title": "Imprimer le schéma de principe",
       "text": "Le schéma de principe est imprimé comme plan avec cartouche (A3, plus grand si nécessaire).",

@@ -2,7 +2,7 @@
 
 import { Save, Trash2, Wand2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { ConfirmButton } from "@/components/confirm-button";
@@ -20,6 +20,7 @@ import { systemQuantities } from "@/lib/sanitary/quantities";
 import { layoutSchema } from "@/lib/sanitary/schema";
 
 import type { LvWithChapters } from "../../lueftung/anlagen/[systemId]/quantities-panel";
+import { SchemaDxfButton } from "../../lueftung/anlagen/[systemId]/schema-dxf-button";
 import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
 import { deleteSanitarySystem, saveSanitarySchemaPlan, saveSanitarySystem } from "../actions";
 import { SanitaryQuantitiesPanel } from "./quantities-panel";
@@ -49,6 +50,7 @@ export function SanitaryEditor({
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState({ name: initialName, data: initialData });
   const [selected, setSelected] = useState<string | null>(null);
+  const schemaRef = useRef<HTMLElement>(null);
   const [pending, startTransition] = useTransition();
   const dirty = name !== saved.name || data !== saved.data;
 
@@ -103,6 +105,7 @@ export function SanitaryEditor({
           <Input id="sanitary-system-name" value={name} maxLength={200} disabled={!editable} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="flex flex-wrap gap-2">
+          <SchemaDxfButton target={schemaRef} name={`${name} ${t("schema")}`} />
           <SchemaPrintButton
             systemId={id}
             projectId={projectId}
@@ -171,7 +174,7 @@ export function SanitaryEditor({
         onChange={(fn) => setData((d) => ({ ...d, network: fn(d.network) }))}
         top={
           data.network.length > 0 && (
-            <section className="min-w-0 space-y-2 rounded-xl border p-3">
+            <section className="min-w-0 space-y-2 rounded-xl border p-3" ref={schemaRef}>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="font-semibold">{t("schema")}</h2>
                 <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>

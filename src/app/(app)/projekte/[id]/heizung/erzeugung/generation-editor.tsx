@@ -2,7 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Fragment, useCallback, useMemo } from "react";
+import { Fragment, useCallback, useMemo, useRef } from "react";
 
 import { NativeSelect } from "@/components/form";
 import { NumberField, Notice, Section } from "@/components/planning/fields";
@@ -37,6 +37,7 @@ import { formatNumber } from "@/lib/number-input";
 import { cn } from "@/lib/utils";
 
 import type { LvWithChapters } from "../../lueftung/anlagen/[systemId]/quantities-panel";
+import { SchemaDxfButton } from "../../lueftung/anlagen/[systemId]/schema-dxf-button";
 import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
 import { saveHeatingPlan, saveHeatingPlant, saveHeatingSchemaPlan } from "../actions";
 import { GenerationSchemaView } from "./generation-schema-view";
@@ -72,6 +73,7 @@ export function GenerationEditor({
 }) {
   const t = useTranslations("heatingPlan");
   const tg = useTranslations("heatingPlan.generation");
+  const schemaRef = useRef<HTMLDivElement>(null);
   const building = usePlan(projectId, initialPlan, editable, saveHeatingPlan);
   const savePlant = useCallback((pid: string, data: unknown) => saveHeatingPlant(plant.id, pid, plant.name, data), [plant.id, plant.name]);
   const anlage = usePlan(projectId, plant.data, editable, savePlant);
@@ -346,18 +348,23 @@ export function GenerationEditor({
         collapseKey="heating-generation:schema"
         description={tg("schemaHint")}
         actions={
-          <SchemaPrintButton
-            systemId={plant.id}
-            projectId={projectId}
-            plan={plant.schemaPlan}
-            editable={editable}
-            dirty={anlage.status !== "saved"}
-            url={`/api/pdf/heating-schema/${plant.id}`}
-            save={saveHeatingSchemaPlan}
-          />
+          <div className="flex flex-wrap gap-2">
+            <SchemaDxfButton target={schemaRef} name={`${plant.name} ${tg("schemaTitle")}`} />
+            <SchemaPrintButton
+              systemId={plant.id}
+              projectId={projectId}
+              plan={plant.schemaPlan}
+              editable={editable}
+              dirty={anlage.status !== "saved"}
+              url={`/api/pdf/heating-schema/${plant.id}`}
+              save={saveHeatingSchemaPlan}
+            />
+          </div>
         }
       >
-        <GenerationSchemaView schema={schema} label={tg("schemaTitle")} />
+        <div ref={schemaRef}>
+          <GenerationSchemaView schema={schema} label={tg("schemaTitle")} />
+        </div>
       </Section>
 
       <SafetySection data={d} result={safety} editable={editable} setSafety={(patch) => setPlant({ safety: { ...d.safety, ...patch } })} />

@@ -2,7 +2,7 @@
 
 import { ArrowDown, ArrowUp, CornerDownRight, Flame, Grid3x3, Plus, Save, Square, Trash2, Ungroup } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { type FormMessageKey, NativeSelect } from "@/components/form";
@@ -33,6 +33,7 @@ import type { SchemaPlan } from "@/lib/kwl/schema-plan";
 import { insulationStyle } from "@/lib/sanitary/pipes";
 import { cn } from "@/lib/utils";
 
+import { SchemaDxfButton } from "../../../lueftung/anlagen/[systemId]/schema-dxf-button";
 import { SchemaPrintButton } from "../../../lueftung/anlagen/[systemId]/schema-print-dialog";
 import type { LvWithChapters } from "../../../lueftung/anlagen/[systemId]/quantities-panel";
 import { insertDistributionMaterial, saveHeatingDistribution, saveHeatingDistributionPlan } from "../../actions";
@@ -75,6 +76,7 @@ export function DistributionEditor({
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState(initialData);
   const [selected, setSelected] = useState<string | null>(null);
+  const schemaRef = useRef<HTMLElement>(null);
   const [pending, startTransition] = useTransition();
   const dirty = data !== saved;
 
@@ -141,6 +143,7 @@ export function DistributionEditor({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-end gap-2">
+        <SchemaDxfButton target={schemaRef} name={`${plant.name} ${t("schema")}`} />
         <SchemaPrintButton
           systemId={plant.id}
           projectId={projectId}
@@ -166,7 +169,7 @@ export function DistributionEditor({
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_26rem]">
         <div className="min-w-0 space-y-4">
           {hasNetwork && (
-            <section className="min-w-0 space-y-2 rounded-xl border p-3">
+            <section className="min-w-0 space-y-2 rounded-xl border p-3" ref={schemaRef}>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="font-semibold">{t("schema")}</h2>
                 <p className="text-xs text-muted-foreground">{t("schemaHint")}</p>

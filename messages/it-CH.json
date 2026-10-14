@@ -1615,6 +1615,7 @@
     "noStructure": "Questo elenco non ha ancora una struttura ventilazione (CCC 244). Crearla nell’elenco con «Struttura ventilazione»; le posizioni verranno poi assegnate automaticamente ai capitoli.",
     "toLv": "All’elenco",
     "schemaPdf": "Schema di principio PDF",
+    "schemaDxf": "Schema di principio DXF",
     "schemaDialog": {
       "title": "Stampare lo schema di principio",
       "text": "Lo schema di principio viene stampato come piano con cartiglio (A3, più grande se necessario).",

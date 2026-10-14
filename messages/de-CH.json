@@ -1615,6 +1615,7 @@
     "noStructure": "Dieses LV hat noch keine Kapitelstruktur Lüftung (BKP 244). Im LV mit «Struktur Lüftung» anlegen, dann werden die Positionen automatisch den Kapiteln zugeordnet.",
     "toLv": "Zum LV",
     "schemaPdf": "Prinzipschema PDF",
+    "schemaDxf": "Prinzipschema DXF",
     "schemaDialog": {
       "title": "Prinzipschema drucken",
       "text": "Das Prinzipschema wird als Plan mit Plankopf gedruckt (A3, grösser wenn nötig).",
