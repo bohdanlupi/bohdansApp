@@ -72,9 +72,10 @@ function serviceLines(data: FeeOfferData, phase: FeePhase, state: ServiceState, 
   return [...builtIn, ...custom];
 }
 
-function Heading({ n, children }: { n: number; children: string }) {
+/** Chapter heading; `newPage` starts the chapter on a new page (Honorar, Leistungsumfang, nicht enthaltene Leistungen, Zusatzleistungen). */
+function Heading({ n, children, newPage }: { n: number; children: string; newPage?: boolean }) {
   return (
-    <Text style={{ ...styles.bold, fontSize: 11, marginTop: 14, marginBottom: 5 }} minPresenceAhead={40}>
+    <Text break={newPage} style={{ ...styles.bold, fontSize: 11, marginTop: newPage ? 0 : 14, marginBottom: 5 }} minPresenceAhead={40}>
       {n}. {children}
     </Text>
   );
@@ -275,7 +276,7 @@ export function FeeOfferDocument({
           <Text key={i}>{line}</Text>
         ))}
 
-        <Heading n={3}>{tx.sections.fee}</Heading>
+        <Heading n={3} newPage>{tx.sections.fee}</Heading>
         <Text style={{ marginBottom: 6 }}>{sia ? tx.feeSia : tx.feeHours}</Text>
         {sia && hasBasis && <Text style={{ marginBottom: 6 }}>{tx.feeBasis}</Text>}
         {groups.map((group, gi) => (
@@ -326,7 +327,7 @@ export function FeeOfferDocument({
           </View>
         ))}
 
-        <Heading n={4}>{tx.sections.scope}</Heading>
+        <Heading n={4} newPage>{tx.sections.scope}</Heading>
         <Text style={{ marginBottom: 4 }}>{tx.scopeIntro}</Text>
         {phasesInOffer.map((phase) => {
           const lines = serviceLines(data, phase, "in", language, tx.only);
@@ -351,7 +352,7 @@ export function FeeOfferDocument({
           </>
         )}
 
-        <Heading n={6}>{tx.sections.excluded}</Heading>
+        <Heading n={6} newPage>{tx.sections.excluded}</Heading>
         <Text style={{ marginBottom: 4 }}>{tx.excludedIntro}</Text>
         {phasesInOffer.map((phase) => {
           const lines = serviceLines(data, phase, "out", language, tx.only);
@@ -367,7 +368,7 @@ export function FeeOfferDocument({
         })}
         <Text style={{ marginTop: 2 }}>{tx.excludedOutro}</Text>
 
-        <Heading n={7}>{tx.sections.extra}</Heading>
+        <Heading n={7} newPage>{tx.sections.extra}</Heading>
         <Text style={{ marginBottom: 3 }}>{tx.extraIntro}</Text>
         {data.rates.map((r) => (
           <View key={r.id} style={{ flexDirection: "row" }}>
