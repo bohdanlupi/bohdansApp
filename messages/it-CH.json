@@ -3497,7 +3497,8 @@
       "date": "Data",
       "net": "Onorario IVA escl.",
       "status": "Stato",
-      "project": "N. progetto"
+      "project": "N. progetto",
+      "validUntil": "Valida fino al"
     },
     "status": {
       "draft": "Bozza",
@@ -3754,7 +3755,8 @@
       "date": "Data",
       "due": "Pagabile entro",
       "total": "Importo IVA incl.",
-      "status": "Stato"
+      "status": "Stato",
+      "project": "Progetto"
     },
     "summary": {
       "earned": "Prestazioni fornite",
@@ -3770,7 +3772,8 @@
     "lockedPaid": "Pagata – la fattura è bloccata. Per modificarla, reimpostare lo stato su «Inviata».",
     "lockedLater": "Bloccata, perché una fattura successiva di questa offerta è pagata (deduce questa fattura).",
     "positions": "Posizioni",
-    "allPositionsDone": "Tutte le posizioni 100 %"
+    "allPositionsDone": "Tutte le posizioni 100 %",
+    "openTitle": "Fatture aperte"
   },
   "feeSettings": {
     "description": "Valori predefiniti per le nuove offerte d’onorario. Le offerte esistenti mantengono i loro valori.",
@@ -3801,6 +3804,18 @@
       "title": "Spese accessorie",
       "pct": "Spese accessorie [%]",
       "text": "Spese secondo dispendio (una riga per voce)"
+    }
+  },
+  "deadline": {
+    "validUntil": {
+      "passed": "scaduta da {days, plural, one {# giorno} other {# giorni}}",
+      "today": "scade oggi",
+      "soon": "scade tra {days, plural, one {# giorno} other {# giorni}}"
+    },
+    "due": {
+      "passed": "in ritardo di {days, plural, one {# giorno} other {# giorni}}",
+      "today": "scade oggi",
+      "soon": "scade tra {days, plural, one {# giorno} other {# giorni}}"
     }
   }
 }

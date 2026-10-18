@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
+import { DeadlineDate } from "@/components/deadline-date";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { feeTotals } from "@/lib/fees/calc";
 import { parseFeeOfferData } from "@/lib/fees/offer-schema";
@@ -16,6 +17,7 @@ export type OfferRow = {
   title: string;
   city: string | null;
   offer_date: string;
+  valid_until: string | null;
   status: string;
   data: Json;
   company: { name: string } | null;
@@ -37,6 +39,7 @@ export function OfferTable({ offers, vatRate, showProject }: { offers: OfferRow[
             {showProject && <TableHead>{t("project")}</TableHead>}
             <TableHead>{t("client")}</TableHead>
             <TableHead>{t("date")}</TableHead>
+            <TableHead>{t("validUntil")}</TableHead>
             <TableHead className="text-right">{t("net")}</TableHead>
             <TableHead className="pr-4">{t("status")}</TableHead>
           </TableRow>
@@ -54,6 +57,9 @@ export function OfferTable({ offers, vatRate, showProject }: { offers: OfferRow[
               {showProject && <TableCell className="tabular-nums">{o.project?.number}</TableCell>}
               <TableCell className="max-w-64 truncate">{o.company?.name}</TableCell>
               <TableCell className="tabular-nums">{new Date(o.offer_date).toLocaleDateString("de-CH")}</TableCell>
+              <TableCell>
+                <DeadlineDate date={o.valid_until} kind="validUntil" active={o.status === "draft" || o.status === "sent"} />
+              </TableCell>
               <TableCell className="text-right tabular-nums">{formatMoney(feeTotals(parseFeeOfferData(o.data), vatRate).net)}</TableCell>
               <TableCell className="pr-4">{isFeeOfferStatus(o.status) && <FeeStatusBadge status={o.status} />}</TableCell>
             </TableRow>

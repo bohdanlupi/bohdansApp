@@ -7,13 +7,12 @@ import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { requireProfile } from "@/lib/auth";
-import { invoiceTotals, parseFeeInvoiceData } from "@/lib/fees/invoice";
-import { parseFeeOfferData } from "@/lib/fees/offer-schema";
 import { createClient } from "@/lib/supabase/server";
 
 import { OfferTable } from "../../../honorarofferten/offer-table";
 import { CreateInvoiceButton } from "../../../honorarrechnungen/create-invoice-button";
-import { type InvoiceRow, InvoiceTable } from "../../../honorarrechnungen/invoice-table";
+import { invoiceRows } from "../../../honorarrechnungen/invoice-rows";
+import { InvoiceTable } from "../../../honorarrechnungen/invoice-table";
 import { loadProject } from "../load-project";
 
 export async function generateMetadata({ params }: PageProps<"/projekte/[id]/honorar">): Promise<Metadata> {
@@ -35,7 +34,7 @@ export default async function ProjectFeePage({ params }: PageProps<"/projekte/[i
   const [{ data: offers }, { data: firm }] = await Promise.all([
     supabase
       .from("fee_offers")
-      .select("id, number, title, city, offer_date, status, data, company:companies(name)")
+      .select("id, number, title, city, offer_date, valid_until, status, data, company:companies(name)")
       .eq("project_id", id)
       .order("offer_date", { ascending: false })
       .order("number", { ascending: false }),
@@ -47,17 +46,7 @@ export default async function ProjectFeePage({ params }: PageProps<"/projekte/[i
     ? await supabase.from("fee_invoices").select("id, number, offer_id, invoice_date, due_date, status, data, created_at").in("offer_id", offerIds).order("created_at")
     : { data: [] };
 
-  // Amount of each invoice: Leistungsstand minus that of the previous invoice of the same offer.
-  const invoices: InvoiceRow[] = [];
-  for (const offer of offers ?? []) {
-    const offerData = parseFeeOfferData(offer.data);
-    let previous = null;
-    for (const inv of (invoiceData ?? []).filter((i) => i.offer_id === offer.id)) {
-      const data = parseFeeInvoiceData(inv.data);
-      invoices.push({ ...inv, offerNumber: offer.number, total: invoiceTotals(offerData, vatRate, data, previous).total });
-      previous = data;
-    }
-  }
+  const invoices = invoiceRows(offers ?? [], invoiceData ?? [], vatRate);
   invoices.sort((a, b) => b.number.localeCompare(a.number, "de", { numeric: true }));
   const accepted = (offers ?? []).filter((o) => o.status === "accepted");
 

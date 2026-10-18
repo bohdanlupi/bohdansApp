@@ -3497,7 +3497,8 @@
       "date": "Date",
       "net": "Honoraires hors TVA",
       "status": "Statut",
-      "project": "N° projet"
+      "project": "N° projet",
+      "validUntil": "Valable jusqu’au"
     },
     "status": {
       "draft": "Brouillon",
@@ -3754,7 +3755,8 @@
       "date": "Date",
       "due": "Payable jusqu’au",
       "total": "Montant TVA incl.",
-      "status": "Statut"
+      "status": "Statut",
+      "project": "Projet"
     },
     "summary": {
       "earned": "Prestations fournies",
@@ -3770,7 +3772,8 @@
     "lockedPaid": "Payée – la facture est verrouillée. Pour la modifier, remettre le statut sur « Envoyée ».",
     "lockedLater": "Verrouillée, car une facture ultérieure de cette offre est payée (elle déduit cette facture).",
     "positions": "Positions",
-    "allPositionsDone": "Toutes les positions 100 %"
+    "allPositionsDone": "Toutes les positions 100 %",
+    "openTitle": "Factures ouvertes"
   },
   "feeSettings": {
     "description": "Valeurs par défaut des nouvelles offres d’honoraires. Les offres existantes conservent leurs valeurs.",
@@ -3801,6 +3804,18 @@
       "title": "Frais accessoires",
       "pct": "Frais accessoires [%]",
       "text": "Frais selon dépenses (une ligne par poste)"
+    }
+  },
+  "deadline": {
+    "validUntil": {
+      "passed": "expirée depuis {days, plural, one {# jour} other {# jours}}",
+      "today": "expire aujourd’hui",
+      "soon": "expire dans {days, plural, one {# jour} other {# jours}}"
+    },
+    "due": {
+      "passed": "en retard de {days, plural, one {# jour} other {# jours}}",
+      "today": "échue aujourd’hui",
+      "soon": "échue dans {days, plural, one {# jour} other {# jours}}"
     }
   }
 }

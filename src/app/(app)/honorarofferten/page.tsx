@@ -12,6 +12,8 @@ import { feeOfferStatuses } from "@/lib/fees/options";
 import { createClient } from "@/lib/supabase/server";
 import { param, searchWords } from "@/lib/validation";
 
+import { invoiceRows } from "../honorarrechnungen/invoice-rows";
+import { InvoiceTable } from "../honorarrechnungen/invoice-table";
 import { isFeeOfferStatus, OfferTable } from "./offer-table";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,12 +32,25 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
   const supabase = await createClient();
   let query = supabase
     .from("fee_offers")
-    .select("id, number, title, city, offer_date, status, data, company:companies(name), project:projects(id, number)")
+    .select("id, number, title, city, offer_date, valid_until, status, data, company:companies(name), project:projects(id, number)")
     .order("number", { ascending: false })
     .limit(300);
   for (const word of searchWords(q)) query = query.or(`number.ilike.%${word}%,title.ilike.%${word}%,city.ilike.%${word}%`);
   if (status) query = query.eq("status", status);
   const [{ data: offers }, { data: firm }] = await Promise.all([query, supabase.from("firm_settings").select("vat_rate").eq("id", true).single()]);
+
+  // Open invoices (Entwurf / Versendet) first, earliest due date on top. Their amounts need all invoices of the offers.
+  const { data: open } = await supabase.from("fee_invoices").select("offer_id").in("status", ["draft", "sent"]);
+  const openOfferIds = [...new Set((open ?? []).map((i) => i.offer_id))];
+  const [{ data: openOffers }, { data: offerInvoices }] = openOfferIds.length
+    ? await Promise.all([
+        supabase.from("fee_offers").select("id, number, title, data, project:projects(number)").in("id", openOfferIds),
+        supabase.from("fee_invoices").select("id, number, offer_id, invoice_date, due_date, status, data, created_at").in("offer_id", openOfferIds).order("created_at"),
+      ])
+    : [{ data: [] }, { data: [] }];
+  const openInvoices = invoiceRows(openOffers ?? [], offerInvoices ?? [], firm?.vat_rate ?? 0)
+    .filter((i) => i.status === "draft" || i.status === "sent")
+    .sort((a, b) => (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999") || a.number.localeCompare(b.number, "de", { numeric: true }));
 
   const filtered = Boolean(q || status);
   const isEmpty = !offers?.length;
@@ -47,6 +62,14 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
         description={t("feeOffers.description")}
       />
 
+      {openInvoices.length > 0 && (
+        <section className="mb-8 space-y-3">
+          <h2 className="text-lg font-semibold">{t("feeInvoices.openTitle")}</h2>
+          <InvoiceTable invoices={openInvoices} showProject />
+        </section>
+      )}
+
+      {openInvoices.length > 0 && <h2 className="mb-3 text-lg font-semibold">{t("feeOffers.title")}</h2>}
       {isEmpty && !filtered ? (
         <EmptyState icon={FileSignature} title={t("feeOffers.emptyTitle")} text={t("feeOffers.emptyText")} />
       ) : (

@@ -3497,7 +3497,8 @@
       "date": "Datum",
       "net": "Honorar exkl. MwSt.",
       "status": "Status",
-      "project": "Projekt-Nr."
+      "project": "Projekt-Nr.",
+      "validUntil": "Gültig bis"
     },
     "status": {
       "draft": "Entwurf",
@@ -3754,7 +3755,8 @@
       "date": "Datum",
       "due": "Zahlbar bis",
       "total": "Betrag inkl. MwSt.",
-      "status": "Status"
+      "status": "Status",
+      "project": "Projekt"
     },
     "summary": {
       "earned": "Leistungen erbracht",
@@ -3770,7 +3772,8 @@
     "lockedPaid": "Bezahlt – die Rechnung ist gesperrt. Um sie zu ändern, Status zurück auf «Versendet» setzen.",
     "lockedLater": "Gesperrt, weil eine spätere Rechnung dieser Offerte bezahlt ist (sie zieht diese Rechnung ab).",
     "positions": "Positionen",
-    "allPositionsDone": "Alle Positionen 100 %"
+    "allPositionsDone": "Alle Positionen 100 %",
+    "openTitle": "Offene Rechnungen"
   },
   "feeSettings": {
     "description": "Vorgaben für neue Honorarofferten. Bestehende Offerten behalten ihre Werte.",
@@ -3801,6 +3804,18 @@
       "title": "Nebenkosten",
       "pct": "Nebenkosten [%]",
       "text": "Nebenkosten nach Aufwand (eine Zeile pro Position)"
+    }
+  },
+  "deadline": {
+    "validUntil": {
+      "passed": "abgelaufen seit {days, plural, one {# Tag} other {# Tagen}}",
+      "today": "läuft heute ab",
+      "soon": "läuft in {days, plural, one {# Tag} other {# Tagen}} ab"
+    },
+    "due": {
+      "passed": "überfällig seit {days, plural, one {# Tag} other {# Tagen}}",
+      "today": "heute fällig",
+      "soon": "fällig in {days, plural, one {# Tag} other {# Tagen}}"
     }
   }
 }

@@ -1,13 +1,24 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
+import { DeadlineDate } from "@/components/deadline-date";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type FeeInvoiceStatus, feeInvoiceStatuses } from "@/lib/fees/invoice";
 import { formatMoney } from "@/lib/number-input";
 import { cn } from "@/lib/utils";
 
-export type InvoiceRow = { id: string; number: string; offerNumber: string; invoice_date: string; due_date: string | null; status: string; total: number };
+export type InvoiceRow = {
+  id: string;
+  number: string;
+  offerNumber: string;
+  invoice_date: string;
+  due_date: string | null;
+  status: string;
+  total: number;
+  /** Project and title (overview of all invoices). */
+  project?: { number: string; title: string } | null;
+};
 
 const styles: Record<FeeInvoiceStatus, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -24,8 +35,8 @@ export function InvoiceStatusBadge({ status }: { status: FeeInvoiceStatus }) {
 
 const date = (value: string | null) => (value ? new Date(value).toLocaleDateString("de-CH") : "");
 
-/** Invoices of a project with offer, dates, amount incl. MwSt. and status. */
-export function InvoiceTable({ invoices }: { invoices: InvoiceRow[] }) {
+/** Invoices with offer, dates (due date marked while open), amount incl. MwSt. and status; project in the overview. */
+export function InvoiceTable({ invoices, showProject }: { invoices: InvoiceRow[]; showProject?: boolean }) {
   const t = useTranslations("feeInvoices.columns");
   return (
     <div className="rounded-xl border">
@@ -33,6 +44,7 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceRow[] }) {
         <TableHeader>
           <TableRow>
             <TableHead className="pl-4">{t("number")}</TableHead>
+            {showProject && <TableHead>{t("project")}</TableHead>}
             <TableHead>{t("offer")}</TableHead>
             <TableHead>{t("date")}</TableHead>
             <TableHead>{t("due")}</TableHead>
@@ -48,9 +60,12 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceRow[] }) {
                   {i.number}
                 </Link>
               </TableCell>
+              {showProject && <TableCell className="max-w-72 truncate">{i.project?.title}</TableCell>}
               <TableCell className="tabular-nums">{i.offerNumber}</TableCell>
               <TableCell className="tabular-nums">{date(i.invoice_date)}</TableCell>
-              <TableCell className="tabular-nums">{date(i.due_date)}</TableCell>
+              <TableCell>
+                <DeadlineDate date={i.due_date} kind="due" active={i.status === "draft" || i.status === "sent"} />
+              </TableCell>
               <TableCell className="text-right tabular-nums">{formatMoney(i.total)}</TableCell>
               <TableCell className="pr-4">{isStatus(i.status) && <InvoiceStatusBadge status={i.status} />}</TableCell>
             </TableRow>
