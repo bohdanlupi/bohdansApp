@@ -3711,7 +3711,18 @@
     "addressHint": "Adresse du mandant pour la lettre ; reprise du carnet d’adresses lors du changement de mandant.",
     "clientAddress": "Adresse du mandant",
     "addressBook": "Carnet d’adresses",
-    "addressTake": "Reprendre"
+    "addressTake": "Reprendre",
+    "overview": {
+      "projectNumber": "N° projet",
+      "project": "Projet",
+      "client": "Mandant",
+      "date": "Date",
+      "due": "Payable jusqu’au",
+      "validUntil": "Valable jusqu’au",
+      "net": "Montant hors TVA",
+      "total": "Montant TVA incl.",
+      "status": "Statut"
+    }
   },
   "feeInvoices": {
     "title": "Factures d’honoraires",

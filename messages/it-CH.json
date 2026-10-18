@@ -3711,7 +3711,18 @@
     "addressHint": "Indirizzo del committente per la lettera; viene ripreso dalla rubrica quando si cambia committente.",
     "clientAddress": "Indirizzo del committente",
     "addressBook": "Rubrica",
-    "addressTake": "Riprendi"
+    "addressTake": "Riprendi",
+    "overview": {
+      "projectNumber": "N. progetto",
+      "project": "Progetto",
+      "client": "Committente",
+      "date": "Data",
+      "due": "Pagabile entro",
+      "validUntil": "Valida fino al",
+      "net": "Importo IVA esclusa",
+      "total": "Importo IVA inclusa",
+      "status": "Stato"
+    }
   },
   "feeInvoices": {
     "title": "Fatture d’onorario",

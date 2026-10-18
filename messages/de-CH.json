@@ -3711,7 +3711,18 @@
     "addressHint": "Adresse des Auftraggebers für den Brief; wird beim Wechsel des Auftraggebers aus dem Adressbuch übernommen.",
     "clientAddress": "Adresse Auftraggeber",
     "addressBook": "Adressbuch",
-    "addressTake": "Übernehmen"
+    "addressTake": "Übernehmen",
+    "overview": {
+      "projectNumber": "Projekt-Nr.",
+      "project": "Projekt",
+      "client": "Auftraggeber",
+      "date": "Datum",
+      "due": "Zahlbar bis",
+      "validUntil": "Gültig bis",
+      "net": "Betrag exkl. MwSt.",
+      "total": "Betrag inkl. MwSt.",
+      "status": "Status"
+    }
   },
   "feeInvoices": {
     "title": "Honorarrechnungen",

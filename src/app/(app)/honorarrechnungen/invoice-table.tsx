@@ -16,6 +16,8 @@ export type InvoiceRow = {
   due_date: string | null;
   status: string;
   total: number;
+  net: number;
+  client: string | null;
   /** Project and title (overview of all invoices). */
   project?: { number: string; title: string } | null;
 };
@@ -35,8 +37,8 @@ export function InvoiceStatusBadge({ status }: { status: FeeInvoiceStatus }) {
 
 const date = (value: string | null) => (value ? new Date(value).toLocaleDateString("de-CH") : "");
 
-/** Invoices with offer, dates (due date marked while open), amount incl. MwSt. and status; project in the overview. */
-export function InvoiceTable({ invoices, showProject }: { invoices: InvoiceRow[]; showProject?: boolean }) {
+/** Invoices of a project with offer, dates (due date marked while open), amount incl. MwSt. and status. */
+export function InvoiceTable({ invoices }: { invoices: InvoiceRow[] }) {
   const t = useTranslations("feeInvoices.columns");
   return (
     <div className="rounded-xl border">
@@ -44,7 +46,6 @@ export function InvoiceTable({ invoices, showProject }: { invoices: InvoiceRow[]
         <TableHeader>
           <TableRow>
             <TableHead className="pl-4">{t("number")}</TableHead>
-            {showProject && <TableHead>{t("project")}</TableHead>}
             <TableHead>{t("offer")}</TableHead>
             <TableHead>{t("date")}</TableHead>
             <TableHead>{t("due")}</TableHead>
@@ -60,7 +61,6 @@ export function InvoiceTable({ invoices, showProject }: { invoices: InvoiceRow[]
                   {i.number}
                 </Link>
               </TableCell>
-              {showProject && <TableCell className="max-w-72 truncate">{i.project?.title}</TableCell>}
               <TableCell className="tabular-nums">{i.offerNumber}</TableCell>
               <TableCell className="tabular-nums">{date(i.invoice_date)}</TableCell>
               <TableCell>

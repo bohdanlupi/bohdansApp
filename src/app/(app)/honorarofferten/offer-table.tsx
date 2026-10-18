@@ -21,13 +21,12 @@ export type OfferRow = {
   status: string;
   data: Json;
   company: { name: string } | null;
-  project?: { id: string; number: string } | null;
 };
 
 export const isFeeOfferStatus = (value: string | undefined): value is FeeOfferStatus => feeOfferStatuses.includes(value as FeeOfferStatus);
 
-/** Offers with client, date, fee and status; the project column only in the overview of all offers. */
-export function OfferTable({ offers, vatRate, showProject }: { offers: OfferRow[]; vatRate: number; showProject?: boolean }) {
+/** Offers of a project with client, dates (valid until marked while open), fee and status. */
+export function OfferTable({ offers, vatRate }: { offers: OfferRow[]; vatRate: number }) {
   const t = useTranslations("feeOffers.columns");
   return (
     <div className="rounded-xl border">
@@ -36,7 +35,6 @@ export function OfferTable({ offers, vatRate, showProject }: { offers: OfferRow[
           <TableRow>
             <TableHead className="pl-4">{t("number")}</TableHead>
             <TableHead>{t("title")}</TableHead>
-            {showProject && <TableHead>{t("project")}</TableHead>}
             <TableHead>{t("client")}</TableHead>
             <TableHead>{t("date")}</TableHead>
             <TableHead>{t("validUntil")}</TableHead>
@@ -53,7 +51,6 @@ export function OfferTable({ offers, vatRate, showProject }: { offers: OfferRow[
                   {o.title}
                 </Link>
               </TableCell>
-              {showProject && <TableCell className="tabular-nums">{o.project?.number}</TableCell>}
               <TableCell className="max-w-64 truncate">{o.company?.name}</TableCell>
               <TableCell className="tabular-nums">{new Date(o.offer_date).toLocaleDateString("de-CH")}</TableCell>
               <TableCell>

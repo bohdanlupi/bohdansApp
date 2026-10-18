@@ -4,7 +4,7 @@ import type { Json } from "@/lib/supabase/database.types";
 
 import type { InvoiceRow } from "./invoice-table";
 
-type Offer = { id: string; number: string; title: string; data: Json; project?: { number: string } | null };
+type Offer = { id: string; number: string; title: string; data: Json; project?: { number: string } | null; company?: { name: string } | null };
 type Invoice = { id: string; number: string; offer_id: string; invoice_date: string; due_date: string | null; status: string; data: Json; created_at: string };
 
 /**
@@ -18,6 +18,7 @@ export function invoiceRows(offers: Offer[], invoices: Invoice[], vatRate: numbe
     let previous = null;
     for (const inv of invoices.filter((i) => i.offer_id === offer.id)) {
       const data = parseFeeInvoiceData(inv.data);
+      const totals = invoiceTotals(offerData, vatRate, data, previous);
       rows.push({
         id: inv.id,
         number: inv.number,
@@ -25,8 +26,10 @@ export function invoiceRows(offers: Offer[], invoices: Invoice[], vatRate: numbe
         invoice_date: inv.invoice_date,
         due_date: inv.due_date,
         status: inv.status,
-        total: invoiceTotals(offerData, vatRate, data, previous).total,
-        project: { number: offer.project?.number ?? "", title: offer.project ? `${offer.project.number} · ${offer.title}` : offer.title },
+        total: totals.total,
+        net: totals.net,
+        client: offer.company?.name ?? null,
+        project: { number: offer.project?.number ?? "", title: offer.title },
       });
       previous = data;
     }
