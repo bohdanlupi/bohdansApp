@@ -25,8 +25,12 @@ export type OverviewRow = {
   status: React.ReactNode;
 };
 
-/** All columns equally wide (fixed layout), so they are spaced evenly and the tables of the overview line up. */
-const COLUMNS = 8;
+/**
+ * Relative column widths (fixed layout, so the tables of the overview line up): Projekt and Auftraggeber twice as
+ * wide, all other columns equal.
+ */
+const WEIGHTS = [1, 2, 2, 1, 1, 1, 1, 1];
+const WEIGHT_SUM = WEIGHTS.reduce((a, b) => a + b, 0);
 
 export function OverviewTable({ rows, kind }: { rows: OverviewRow[]; kind: "invoice" | "offer" }) {
   const t = useTranslations("feeOffers.overview");
@@ -34,8 +38,8 @@ export function OverviewTable({ rows, kind }: { rows: OverviewRow[]; kind: "invo
     <div className="rounded-xl border">
       <Table className="min-w-[72rem] table-fixed">
         <colgroup>
-          {Array.from({ length: COLUMNS }, (_, i) => (
-            <col key={i} style={{ width: `${100 / COLUMNS}%` }} />
+          {WEIGHTS.map((w, i) => (
+            <col key={i} style={{ width: `${(100 * w) / WEIGHT_SUM}%` }} />
           ))}
         </colgroup>
         <TableHeader>
