@@ -87,6 +87,13 @@ export function FeeOfferEditor({
   const setHeader = (change: Partial<FeeOfferHeaderState>) => update((s) => ({ ...s, header: { ...s.header, ...change } }));
   const setData = (change: (d: FeeOfferData) => FeeOfferData) => update((s) => ({ ...s, data: change(s.data) }));
 
+  // Address of the Auftraggeber in the address book, offered when the offer's address differs from it.
+  const company = companies.find((c) => c.id === header.company_id);
+  const addressText = (a: { street: string | null; zip: string | null; city: string | null }) =>
+    [a.street, [a.zip, a.city].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  const bookAddress = company ? { street: company.street, zip: company.zip, city: company.city, text: addressText(company) } : null;
+  const offerAddress = addressText(header);
+
   const selectCompany = async (companyId: string | null) => {
     const company = companies.find((c) => c.id === companyId);
     setHeader({ company_id: companyId, contact_id: null, ...(company ? { street: company.street, zip: company.zip, city: company.city } : {}) });
@@ -210,9 +217,25 @@ export function FeeOfferEditor({
               ))}
             </NativeSelect>
           </div>
-          {text("street", "sm:col-span-3")}
-          {text("zip", "sm:col-span-1")}
-          {text("city", "sm:col-span-2")}
+          <div className="rounded-lg border bg-muted/30 p-3 sm:col-span-6">
+            <p className="text-sm font-medium">{t("clientAddress")}</p>
+            <p className="mb-2 text-xs text-muted-foreground">{t("addressHint")}</p>
+            <div className="grid gap-4 sm:grid-cols-6">
+              {text("street", "sm:col-span-3")}
+              {text("zip", "sm:col-span-1")}
+              {text("city", "sm:col-span-2")}
+            </div>
+            {editable && bookAddress && bookAddress.text !== offerAddress && (
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span>
+                  {t("addressBook")}: {bookAddress.text || "–"}
+                </span>
+                <Button variant="outline" size="sm" onClick={() => setHeader({ street: bookAddress.street, zip: bookAddress.zip, city: bookAddress.city })}>
+                  {t("addressTake")}
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="sm:col-span-2">{date("offer_date")}</div>
           <div className="sm:col-span-2">{date("valid_until")}</div>
           <div className="space-y-1.5 sm:col-span-2">

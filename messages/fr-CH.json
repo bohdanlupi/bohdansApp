@@ -3708,7 +3708,10 @@
         "day": "jour"
       }
     },
-    "addressHint": "Adresse du mandant pour la lettre ; reprise du carnet d’adresses lors du changement de mandant."
+    "addressHint": "Adresse du mandant pour la lettre ; reprise du carnet d’adresses lors du changement de mandant.",
+    "clientAddress": "Adresse du mandant",
+    "addressBook": "Carnet d’adresses",
+    "addressTake": "Reprendre"
   },
   "feeInvoices": {
     "title": "Factures d’honoraires",

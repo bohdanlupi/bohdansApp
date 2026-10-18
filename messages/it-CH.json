@@ -3708,7 +3708,10 @@
         "day": "giorno"
       }
     },
-    "addressHint": "Indirizzo del committente per la lettera; viene ripreso dalla rubrica quando si cambia committente."
+    "addressHint": "Indirizzo del committente per la lettera; viene ripreso dalla rubrica quando si cambia committente.",
+    "clientAddress": "Indirizzo del committente",
+    "addressBook": "Rubrica",
+    "addressTake": "Riprendi"
   },
   "feeInvoices": {
     "title": "Fatture d’onorario",

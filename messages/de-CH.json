@@ -3708,7 +3708,10 @@
         "day": "Tag"
       }
     },
-    "addressHint": "Adresse des Auftraggebers für den Brief; wird beim Wechsel des Auftraggebers aus dem Adressbuch übernommen."
+    "addressHint": "Adresse des Auftraggebers für den Brief; wird beim Wechsel des Auftraggebers aus dem Adressbuch übernommen.",
+    "clientAddress": "Adresse Auftraggeber",
+    "addressBook": "Adressbuch",
+    "addressTake": "Übernehmen"
   },
   "feeInvoices": {
     "title": "Honorarrechnungen",
