@@ -38,7 +38,7 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/projekt
   const supabase = await createClient();
   let query = supabase
     .from("project_list")
-    .select("id, number, name, zip, city, status, client_names", { count: "exact" })
+    .select("id, number, name, street, zip, city, status", { count: "exact" })
     .order("number", { ascending: false })
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   for (const word of searchWords(q)) query = query.ilike("search_text", `%${word}%`);
@@ -113,8 +113,8 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/projekt
                   <TableRow>
                     <TableHead className="pl-4">{t("projects.columns.number")}</TableHead>
                     <TableHead>{t("projects.columns.name")}</TableHead>
+                    <TableHead>{t("projects.columns.street")}</TableHead>
                     <TableHead>{t("projects.columns.city")}</TableHead>
-                    <TableHead>{t("projects.columns.client")}</TableHead>
                     <TableHead>{t("projects.columns.feeOffer")}</TableHead>
                     <TableHead className="pr-4">{t("projects.columns.status")}</TableHead>
                   </TableRow>
@@ -128,8 +128,8 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/projekt
                           {p.name}
                         </Link>
                       </TableCell>
+                      <TableCell className="max-w-64 truncate">{p.street}</TableCell>
                       <TableCell>{[p.zip, p.city].filter(Boolean).join(" ")}</TableCell>
-                      <TableCell className="max-w-64 truncate">{p.client_names}</TableCell>
                       <TableCell>
                         {(() => {
                           const status = p.id ? offerStatus.get(p.id) : undefined;

@@ -105,7 +105,8 @@
       "city": "Luogo",
       "client": "Committente",
       "status": "Stato",
-      "feeOffer": "Offerta d’onorario"
+      "feeOffer": "Offerta d’onorario",
+      "street": "Indirizzo"
     },
     "form": {
       "newTitle": "Nuovo progetto",

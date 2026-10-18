@@ -105,7 +105,8 @@
       "city": "Lieu",
       "client": "Maître d'ouvrage",
       "status": "Statut",
-      "feeOffer": "Offre d’honoraires"
+      "feeOffer": "Offre d’honoraires",
+      "street": "Adresse"
     },
     "form": {
       "newTitle": "Nouveau projet",

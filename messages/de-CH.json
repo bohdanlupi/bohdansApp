@@ -105,7 +105,8 @@
       "city": "Ort",
       "client": "Bauherr",
       "status": "Status",
-      "feeOffer": "Honorarofferte"
+      "feeOffer": "Honorarofferte",
+      "street": "Adresse"
     },
     "form": {
       "newTitle": "Neues Projekt",
