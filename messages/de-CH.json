@@ -3788,7 +3788,8 @@
     "lockedLater": "Gesperrt, weil eine spätere Rechnung dieser Offerte bezahlt ist (sie zieht diese Rechnung ab).",
     "positions": "Positionen",
     "allPositionsDone": "Alle Positionen 100 %",
-    "openTitle": "Offene Rechnungen"
+    "openTitle": "Offene Rechnungen",
+    "paidTitle": "Bezahlte Rechnungen"
   },
   "feeSettings": {
     "description": "Vorgaben für neue Honorarofferten. Bestehende Offerten behalten ihre Werte.",

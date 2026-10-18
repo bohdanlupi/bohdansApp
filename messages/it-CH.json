@@ -3788,7 +3788,8 @@
     "lockedLater": "Bloccata, perché una fattura successiva di questa offerta è pagata (deduce questa fattura).",
     "positions": "Posizioni",
     "allPositionsDone": "Tutte le posizioni 100 %",
-    "openTitle": "Fatture aperte"
+    "openTitle": "Fatture aperte",
+    "paidTitle": "Fatture pagate"
   },
   "feeSettings": {
     "description": "Valori predefiniti per le nuove offerte d’onorario. Le offerte esistenti mantengono i loro valori.",

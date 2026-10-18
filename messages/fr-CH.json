@@ -3788,7 +3788,8 @@
     "lockedLater": "Verrouillée, car une facture ultérieure de cette offre est payée (elle déduit cette facture).",
     "positions": "Positions",
     "allPositionsDone": "Toutes les positions 100 %",
-    "openTitle": "Factures ouvertes"
+    "openTitle": "Factures ouvertes",
+    "paidTitle": "Factures payées"
   },
   "feeSettings": {
     "description": "Valeurs par défaut des nouvelles offres d’honoraires. Les offres existantes conservent leurs valeurs.",
