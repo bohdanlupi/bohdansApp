@@ -159,6 +159,34 @@
     "noResults": "Keine Adressen gefunden.",
     "newCompany": "Neue Adresse",
     "import": "CSV-Import",
+    "export": {
+      "button": "CSV-Export",
+      "company": {
+        "name": "Firma",
+        "name2": "Zusatz",
+        "street": "Strasse",
+        "po_box": "Postfach",
+        "zip": "PLZ",
+        "city": "Ort",
+        "country": "Land",
+        "phone": "Telefon",
+        "email": "E-Mail",
+        "website": "Website",
+        "uid_number": "UID",
+        "categories": "Kategorien",
+        "trades": "Gewerke",
+        "notes": "Bemerkungen"
+      },
+      "contact": {
+        "salutation": "Anrede",
+        "first_name": "Vorname",
+        "last_name": "Nachname",
+        "function": "Funktion",
+        "phone": "Telefon Kontakt",
+        "mobile": "Natel",
+        "email": "E-Mail Kontakt"
+      }
+    },
     "searchPlaceholder": "Name, Ort, Kontaktperson …",
     "allCategories": "Alle Kategorien",
     "allTrades": "Alle Gewerke",

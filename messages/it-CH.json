@@ -159,6 +159,34 @@
     "noResults": "Nessun indirizzo trovato.",
     "newCompany": "Nuovo indirizzo",
     "import": "Importazione CSV",
+    "export": {
+      "button": "Esportazione CSV",
+      "company": {
+        "name": "Ditta",
+        "name2": "Complemento",
+        "street": "Indirizzo",
+        "po_box": "Casella postale",
+        "zip": "CAP",
+        "city": "Luogo",
+        "country": "Paese",
+        "phone": "Telefono",
+        "email": "E-mail",
+        "website": "Sito web",
+        "uid_number": "IDI",
+        "categories": "Categorie",
+        "trades": "Mestieri",
+        "notes": "Osservazioni"
+      },
+      "contact": {
+        "salutation": "Appellativo",
+        "first_name": "Nome",
+        "last_name": "Cognome",
+        "function": "Funzione",
+        "phone": "Telefono contatto",
+        "mobile": "Cellulare",
+        "email": "E-mail contatto"
+      }
+    },
     "searchPlaceholder": "Nome, luogo, persona di contatto …",
     "allCategories": "Tutte le categorie",
     "allTrades": "Tutti i settori",

@@ -1,4 +1,4 @@
-import { Building2, Plus, Upload } from "lucide-react";
+import { Building2, Download, Plus, Upload } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -48,6 +48,9 @@ export default async function AddressesPage({ searchParams }: PageProps<"/adress
 
   const filtered = Boolean(q || category || trade || showArchived);
   const isEmpty = !companies?.length;
+  const exportParams = new URLSearchParams(
+    Object.entries({ q, kategorie: category, gewerk: trade, archiv: showArchived ? "1" : undefined }).filter((e): e is [string, string] => Boolean(e[1])),
+  ).toString();
 
   return (
     <>
@@ -55,7 +58,15 @@ export default async function AddressesPage({ searchParams }: PageProps<"/adress
         title={t("addresses.title")}
         description={t("addresses.description")}
         actions={
-          canWrite && (
+          <>
+            {!isEmpty && (
+              // Download of the filtered list (all pages), see /api/csv/adressen.
+              <a href={`/api/csv/adressen${exportParams ? `?${exportParams}` : ""}`} download className={buttonVariants({ variant: "outline" })}>
+                <Download />
+                {t("addresses.export.button")}
+              </a>
+            )}
+            {canWrite && (
             <>
               <Link href="/adressen/import" className={buttonVariants({ variant: "outline" })}>
                 <Upload />
@@ -66,7 +77,8 @@ export default async function AddressesPage({ searchParams }: PageProps<"/adress
                 {t("addresses.newCompany")}
               </Link>
             </>
-          )
+            )}
+          </>
         }
       />
 

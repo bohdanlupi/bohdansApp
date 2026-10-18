@@ -159,6 +159,34 @@
     "noResults": "Aucune adresse trouvée.",
     "newCompany": "Nouvelle adresse",
     "import": "Import CSV",
+    "export": {
+      "button": "Export CSV",
+      "company": {
+        "name": "Entreprise",
+        "name2": "Complément",
+        "street": "Rue",
+        "po_box": "Case postale",
+        "zip": "NPA",
+        "city": "Lieu",
+        "country": "Pays",
+        "phone": "Téléphone",
+        "email": "E-mail",
+        "website": "Site web",
+        "uid_number": "IDE",
+        "categories": "Catégories",
+        "trades": "Corps de métier",
+        "notes": "Remarques"
+      },
+      "contact": {
+        "salutation": "Civilité",
+        "first_name": "Prénom",
+        "last_name": "Nom de famille",
+        "function": "Fonction",
+        "phone": "Téléphone contact",
+        "mobile": "Portable",
+        "email": "E-mail contact"
+      }
+    },
     "searchPlaceholder": "Nom, lieu, personne de contact …",
     "allCategories": "Toutes les catégories",
     "allTrades": "Tous les corps de métier",
