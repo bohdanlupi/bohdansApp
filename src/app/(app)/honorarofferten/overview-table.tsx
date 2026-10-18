@@ -14,6 +14,8 @@ export type OverviewRow = {
   /** Offer or invoice number, shown below the title. */
   number: string;
   client: string | null;
+  /** Kontaktperson of the Auftraggeber with mobile (else phone) and e-mail. */
+  contact: { name: string; phone: string | null; email: string | null } | null;
   date: string;
   deadline: string | null;
   /** Deadline still matters (open offer / unpaid invoice): marked when passed or near. */
@@ -24,7 +26,7 @@ export type OverviewRow = {
 };
 
 /** Fixed column widths, so the tables of the overview (open invoices, offers, paid invoices) line up. */
-const columns = ["w-28", "", "w-56", "w-28", "w-52", "w-36", "w-36", "w-28"];
+const columns = ["w-28", "", "w-72", "w-28", "w-52", "w-36", "w-36", "w-28"];
 
 export function OverviewTable({ rows, kind }: { rows: OverviewRow[]; kind: "invoice" | "offer" }) {
   const t = useTranslations("feeOffers.overview");
@@ -58,7 +60,28 @@ export function OverviewTable({ rows, kind }: { rows: OverviewRow[]; kind: "invo
                 </Link>
                 <span className="block text-xs text-muted-foreground tabular-nums">{r.number}</span>
               </TableCell>
-              <TableCell className="truncate">{r.client}</TableCell>
+              <TableCell className="truncate">
+                {r.client}
+                {r.contact && (
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {r.contact.name}
+                    {/* Links above the row link (z-10), so phone and e-mail can be clicked */}
+                    {r.contact.phone && (
+                      <>
+                        {" · "}
+                        <a href={`tel:${r.contact.phone.replace(/\s+/g, "")}`} className="relative z-10 tabular-nums hover:text-foreground hover:underline">
+                          {r.contact.phone}
+                        </a>
+                      </>
+                    )}
+                    {r.contact.email && (
+                      <a href={`mailto:${r.contact.email}`} className="relative z-10 block truncate hover:text-foreground hover:underline">
+                        {r.contact.email}
+                      </a>
+                    )}
+                  </span>
+                )}
+              </TableCell>
               <TableCell className="tabular-nums">{new Date(r.date).toLocaleDateString("de-CH")}</TableCell>
               <TableCell className="whitespace-normal">
                 <DeadlineDate date={r.deadline} kind={kind === "invoice" ? "due" : "validUntil"} active={r.deadlineActive} />

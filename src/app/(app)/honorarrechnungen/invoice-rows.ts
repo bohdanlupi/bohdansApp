@@ -4,7 +4,9 @@ import type { Json } from "@/lib/supabase/database.types";
 
 import type { InvoiceRow } from "./invoice-table";
 
-type Offer = { id: string; number: string; title: string; data: Json; project?: { number: string } | null; company?: { name: string } | null };
+type Offer = { id: string; number: string; title: string; data: Json; project?: { number: string } | null; company?: { name: string } | null;
+  contact?: { first_name: string | null; last_name: string; mobile: string | null; phone: string | null; email: string | null } | null;
+};
 type Invoice = { id: string; number: string; offer_id: string; invoice_date: string; due_date: string | null; status: string; data: Json; created_at: string };
 
 /**
@@ -29,6 +31,7 @@ export function invoiceRows(offers: Offer[], invoices: Invoice[], vatRate: numbe
         total: totals.total,
         net: totals.net,
         client: offer.company?.name ?? null,
+        contact: offer.contact ?? null,
         project: { number: offer.project?.number ?? "", title: offer.title },
       });
       previous = data;

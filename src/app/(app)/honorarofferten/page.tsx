@@ -36,7 +36,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
   const supabase = await createClient();
   let query = supabase
     .from("fee_offers")
-    .select("id, number, title, city, offer_date, valid_until, status, data, company:companies(name), project:projects(id, number, status)")
+    .select("id, number, title, city, offer_date, valid_until, status, data, company:companies(name), contact:contacts(first_name, last_name, mobile, phone, email), project:projects(id, number, status)")
     .order("number", { ascending: false })
     .limit(300);
   for (const word of searchWords(q)) query = query.or(`number.ilike.%${word}%,title.ilike.%${word}%,city.ilike.%${word}%`);
@@ -51,7 +51,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
   const invoicedOfferIds = [...new Set((invoiced ?? []).map((i) => i.offer_id))];
   const [{ data: invoicedOffers }, { data: offerInvoices }] = invoicedOfferIds.length
     ? await Promise.all([
-        supabase.from("fee_offers").select("id, number, title, data, project:projects(number), company:companies(name)").in("id", invoicedOfferIds),
+        supabase.from("fee_offers").select("id, number, title, data, project:projects(number), company:companies(name), contact:contacts(first_name, last_name, mobile, phone, email)").in("id", invoicedOfferIds),
         supabase.from("fee_invoices").select("id, number, offer_id, invoice_date, due_date, status, data, created_at").in("offer_id", invoicedOfferIds).order("created_at"),
       ])
     : [{ data: [] }, { data: [] }];
@@ -61,6 +61,9 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
     .sort((a, b) => (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999") || a.number.localeCompare(b.number, "de", { numeric: true }));
 
   const vatRate = firm?.vat_rate ?? 0;
+  type Contact = { first_name: string | null; last_name: string; mobile: string | null; phone: string | null; email: string | null } | null | undefined;
+  const contactView = (c: Contact): OverviewRow["contact"] =>
+    c ? { name: [c.first_name, c.last_name].filter(Boolean).join(" "), phone: c.mobile || c.phone, email: c.email } : null;
   const invoiceRow = (i: (typeof allInvoices)[number]): OverviewRow => ({
     id: i.id,
     href: `/honorarrechnungen/${i.id}`,
@@ -68,6 +71,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
     title: i.project?.title ?? "",
     number: `${i.number} · ${i.offerNumber}`,
     client: i.client,
+    contact: contactView(i.contact),
     date: i.invoice_date,
     deadline: i.due_date,
     deadlineActive: true,
@@ -85,6 +89,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
       title: o.title,
       number: o.number,
       client: o.company?.name ?? null,
+      contact: contactView(o.contact),
       date: o.offer_date,
       deadline: o.valid_until,
       deadlineActive: o.status === "draft" || o.status === "sent",

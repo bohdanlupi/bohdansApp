@@ -18,6 +18,7 @@ export type InvoiceRow = {
   total: number;
   net: number;
   client: string | null;
+  contact?: { first_name: string | null; last_name: string; mobile: string | null; phone: string | null; email: string | null } | null;
   /** Project and title (overview of all invoices). */
   project?: { number: string; title: string } | null;
 };
