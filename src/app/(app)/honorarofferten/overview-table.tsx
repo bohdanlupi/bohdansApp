@@ -25,17 +25,17 @@ export type OverviewRow = {
   status: React.ReactNode;
 };
 
-/** Fixed column widths, so the tables of the overview (open invoices, offers, paid invoices) line up. */
-const columns = ["w-28", "", "w-72", "w-28", "w-52", "w-36", "w-36", "w-28"];
+/** All columns equally wide (fixed layout), so they are spaced evenly and the tables of the overview line up. */
+const COLUMNS = 8;
 
 export function OverviewTable({ rows, kind }: { rows: OverviewRow[]; kind: "invoice" | "offer" }) {
   const t = useTranslations("feeOffers.overview");
   return (
     <div className="rounded-xl border">
-      <Table className="min-w-[64rem] table-fixed">
+      <Table className="min-w-[72rem] table-fixed">
         <colgroup>
-          {columns.map((c, i) => (
-            <col key={i} className={c} />
+          {Array.from({ length: COLUMNS }, (_, i) => (
+            <col key={i} style={{ width: `${100 / COLUMNS}%` }} />
           ))}
         </colgroup>
         <TableHeader>
