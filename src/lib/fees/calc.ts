@@ -18,6 +18,7 @@ import {
 // Honorar + Zusatzpositionen − Rabatt + Nebenkosten = Total exkl. MwSt. + MwSt. = Total inkl. MwSt. (5 Rp.).
 // Free offers (kind "positions") take Σ Menge × Ansatz of their positions as Honorar instead.
 // Skonto is a payment condition: shown with its amount, the total stays the full amount.
+// All amounts are rounded to 5 Rappen (the cost basis Ba of Gebäudeautomation / Fachkoordination to 1 Rappen).
 
 export type PhaseFee = { phase: FeePhase; q: number; hours: number | null; amount: number | null };
 
@@ -101,7 +102,7 @@ export function positionPrice(data: FeeOfferData, p: OfferPosition): number | nu
   return p.price;
 }
 
-export const positionAmount = (data: FeeOfferData, p: OfferPosition) => round2((p.qty ?? 0) * (positionPrice(data, p) ?? 0));
+export const positionAmount = (data: FeeOfferData, p: OfferPosition) => roundTo5Rappen((p.qty ?? 0) * (positionPrice(data, p) ?? 0));
 
 export const rateOf = (data: FeeOfferData, id: string) => data.rates.find((r) => r.id === id)?.rate ?? null;
 
@@ -123,13 +124,13 @@ export function tradeFee(data: FeeOfferData, trade: FeeTrade): TradeFee {
         const entries = Object.entries(t.phases[phase].hours);
         const hours = entries.reduce((sum, [, v]) => sum + v, 0);
         const amount = entries.reduce((sum, [id, v]) => sum + v * (rateOf(data, id) ?? 0), 0);
-        return { phase, q, hours, amount: round2(amount) };
+        return { phase, q, hours, amount: roundTo5Rappen(amount) };
       }
       // Fachkoordination: Tm with k instead of U (Art. 9.6.1). Whole hours per phase as displayed, so the fee is
       // hours × s × h exactly.
       const raw = b && bp ? predictedHours({ b, bp, z1, z2, n, r: t.r, i: t.i, s: t.s, u: fk ? 1 : t.u, k: fk ? t.k : 1 }, q) : null;
       const hours = raw === null ? null : Math.round(raw);
-      return { phase, q, hours, amount: hours === null || h === null ? null : round2(hours * t.s * h) };
+      return { phase, q, hours, amount: hours === null || h === null ? null : roundTo5Rappen(hours * t.s * h) };
     });
 
   return {
@@ -141,7 +142,7 @@ export function tradeFee(data: FeeOfferData, trade: FeeTrade): TradeFee {
     phases,
     q: phases.reduce((sum, ph) => sum + ph.q, 0),
     hours: phases.reduce((sum, ph) => sum + (ph.hours ?? 0), 0),
-    amount: round2(phases.reduce((sum, ph) => sum + (ph.amount ?? 0), 0)),
+    amount: roundTo5Rappen(phases.reduce((sum, ph) => sum + (ph.amount ?? 0), 0)),
     incomplete: phases.some((ph) => ph.amount === null),
   };
 }
@@ -150,16 +151,16 @@ export function feeTotals(data: FeeOfferData, vatRate: number): FeeTotals {
   const trades = activeTrades(data).map((t) => tradeFee(data, t));
   const phases = feePhases.flatMap((phase) => {
     const fees = trades.flatMap((t) => t.phases.filter((p) => p.phase === phase));
-    return fees.length ? [{ phase, amount: round2(fees.reduce((sum, p) => sum + (p.amount ?? 0), 0)) }] : [];
+    return fees.length ? [{ phase, amount: roundTo5Rappen(fees.reduce((sum, p) => sum + (p.amount ?? 0), 0)) }] : [];
   });
   const positions = data.kind === "positions";
-  const fees = positions ? round2(data.positions.reduce((sum, p) => sum + positionAmount(data, p), 0)) : round2(trades.reduce((sum, t) => sum + t.amount, 0));
-  const extras = positions ? 0 : round2(data.extras.reduce((sum, e) => sum + (e.amount ?? 0), 0));
-  const subtotal = round2(fees + extras);
-  const discount = round2((subtotal * data.discountPct) / 100);
-  const expenses = round2(((subtotal - discount) * data.expensesPct) / 100);
-  const net = round2(subtotal - discount + expenses);
-  const vat = round2((net * vatRate) / 100);
+  const fees = positions ? roundTo5Rappen(data.positions.reduce((sum, p) => sum + positionAmount(data, p), 0)) : roundTo5Rappen(trades.reduce((sum, t) => sum + t.amount, 0));
+  const extras = positions ? 0 : roundTo5Rappen(data.extras.reduce((sum, e) => sum + roundTo5Rappen(e.amount ?? 0), 0));
+  const subtotal = roundTo5Rappen(fees + extras);
+  const discount = roundTo5Rappen((subtotal * data.discountPct) / 100);
+  const expenses = roundTo5Rappen(((subtotal - discount) * data.expensesPct) / 100);
+  const net = roundTo5Rappen(subtotal - discount + expenses);
+  const vat = roundTo5Rappen((net * vatRate) / 100);
   const total = roundTo5Rappen(net + vat);
-  return { trades, phases, fees, extras, subtotal, discount, expenses, net, vat, total, skonto: round2((total * data.skontoPct) / 100) };
+  return { trades, phases, fees, extras, subtotal, discount, expenses, net, vat, total, skonto: roundTo5Rappen((total * data.skontoPct) / 100) };
 }

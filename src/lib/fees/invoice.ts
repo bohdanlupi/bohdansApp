@@ -5,7 +5,7 @@ import { type FeePhase, feePhases, type FeeTrade, feeTrades } from "./sia108";
 // Honorarrechnung (fee_invoices.data): the cumulative Leistungsstand in % per trade and phase and per Zusatzposition
 // of the accepted offer. An invoice bills everything earned so far minus what the previous invoice of the same
 // offer had earned (SIA Teilrechnung with Akonto-Abzug); Rabatt and Nebenkosten apply pro rata as in the offer.
-// Free offers have a Leistungsstand per position instead. Skonto is a payment condition (default from the offer).
+// Free offers have a Leistungsstand per position instead. All amounts are rounded to 5 Rappen. Skonto is a payment condition (default from the offer).
 
 export const feeInvoiceStatuses = ["draft", "sent", "paid"] as const;
 export type FeeInvoiceStatus = (typeof feeInvoiceStatuses)[number];
@@ -63,7 +63,6 @@ export const emptyInvoiceData = (): FeeInvoiceData => ({ progress: {}, extras: {
 /** Skonto of an invoice: its own values, else those of the offer. */
 export const invoiceSkonto = (offer: FeeOfferData, data: FeeInvoiceData) => ({ pct: data.skontoPct ?? offer.skontoPct, days: data.skontoDays ?? offer.skontoDays });
 
-const round2 = (value: number) => Math.round(value * 100) / 100;
 const roundTo5Rappen = (value: number) => Math.round(value * 20) / 20;
 
 export type InvoiceLine = {
@@ -99,16 +98,16 @@ export type InvoiceTotals = {
 };
 
 const line = (fee: number, pct: number, prevPct: number): InvoiceLine => {
-  const earned = round2((fee * pct) / 100);
-  const prevEarned = round2((fee * prevPct) / 100);
-  return { fee, pct, prevPct, earned, prevEarned, amount: round2(earned - prevEarned) };
+  const earned = roundTo5Rappen((fee * pct) / 100);
+  const prevEarned = roundTo5Rappen((fee * prevPct) / 100);
+  return { fee, pct, prevPct, earned, prevEarned, amount: roundTo5Rappen(earned - prevEarned) };
 };
 
 function cumulative(offer: FeeOfferData, fees: number, extras: number): Cumulative {
-  const subtotal = round2(fees + extras);
-  const discount = round2((subtotal * offer.discountPct) / 100);
-  const expenses = round2(((subtotal - discount) * offer.expensesPct) / 100);
-  return { fees, extras, subtotal, discount, expenses, net: round2(subtotal - discount + expenses) };
+  const subtotal = roundTo5Rappen(fees + extras);
+  const discount = roundTo5Rappen((subtotal * offer.discountPct) / 100);
+  const expenses = roundTo5Rappen(((subtotal - discount) * offer.expensesPct) / 100);
+  return { fees, extras, subtotal, discount, expenses, net: roundTo5Rappen(subtotal - discount + expenses) };
 }
 
 /** Lines and totals of an invoice; `previous` is the data of the previous invoice of the offer (null = first). */
@@ -123,7 +122,7 @@ export function invoiceTotals(offer: FeeOfferData, vatRate: number, data: FeeInv
   }));
   const extras = offer.extras
     .filter((e) => e.amount)
-    .map((e) => ({ id: e.id, text: e.text, ...line(e.amount ?? 0, data.extras[e.id] ?? 0, previous?.extras[e.id] ?? 0) }));
+    .map((e) => ({ id: e.id, text: e.text, ...line(roundTo5Rappen(e.amount ?? 0), data.extras[e.id] ?? 0, previous?.extras[e.id] ?? 0) }));
 
   const positions =
     offer.kind === "positions"
@@ -133,16 +132,16 @@ export function invoiceTotals(offer: FeeOfferData, vatRate: number, data: FeeInv
       : [];
 
   const sum = (key: "earned" | "prevEarned") => ({
-    fees: round2(trades.reduce((s, t) => s + t.phases.reduce((a, p) => a + p[key], 0), 0) + positions.reduce((a, p) => a + p[key], 0)),
-    extras: round2(extras.reduce((s, e) => s + e[key], 0)),
+    fees: roundTo5Rappen(trades.reduce((s, t) => s + t.phases.reduce((a, p) => a + p[key], 0), 0) + positions.reduce((a, p) => a + p[key], 0)),
+    extras: roundTo5Rappen(extras.reduce((s, e) => s + e[key], 0)),
   });
   const cur = sum("earned");
   const prev = sum("prevEarned");
   const current = cumulative(offer, cur.fees, cur.extras);
   const before = cumulative(offer, prev.fees, prev.extras);
-  const net = round2(current.net - before.net);
-  const vat = round2((net * vatRate) / 100);
+  const net = roundTo5Rappen(current.net - before.net);
+  const vat = roundTo5Rappen((net * vatRate) / 100);
   const total = roundTo5Rappen(net + vat);
-  const skonto = total > 0 ? round2((total * invoiceSkonto(offer, data).pct) / 100) : 0;
+  const skonto = total > 0 ? roundTo5Rappen((total * invoiceSkonto(offer, data).pct) / 100) : 0;
   return { trades, extras, positions, current, previous: before, net, vat, total, skonto };
 }

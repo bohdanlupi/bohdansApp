@@ -28,6 +28,8 @@ import { type FeeDefaults, FeeSection } from "./fee-section";
 import { PositionsSection } from "./positions-section";
 import { ServicesSection } from "./services-section";
 
+const to5Rappen = (v: number | null) => (v === null ? null : Math.round(v * 20) / 20);
+
 export type FeeOfferHeaderState = {
   number: string;
   title: string;
@@ -266,7 +268,7 @@ export function FeeOfferEditor({
                 decimals={2}
                 disabled={!editable}
                 className="w-32"
-                onChange={(amount) => setData((d) => ({ ...d, extras: d.extras.map((x) => (x.id === e.id ? { ...x, amount } : x)) }))}
+                onChange={(amount) => setData((d) => ({ ...d, extras: d.extras.map((x) => (x.id === e.id ? { ...x, amount: to5Rappen(amount) } : x)) }))}
               />
               {editable && (
                 <Button variant="ghost" size="icon-sm" aria-label={t("extras.remove")} onClick={() => setData((d) => ({ ...d, extras: d.extras.filter((x) => x.id !== e.id) }))}>

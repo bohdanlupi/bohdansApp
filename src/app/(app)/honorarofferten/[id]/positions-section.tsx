@@ -13,6 +13,8 @@ import { formatMoney } from "@/lib/number-input";
 
 import { RatesEditor, type RateSuggestion } from "./fee-section";
 
+const to5Rappen = (v: number | null) => (v === null ? null : Math.round(v * 20) / 20);
+
 /** Free offer: positions with Menge × Ansatz (hours from a rate category of the offer or an own Ansatz). */
 export function PositionsSection({
   data,
@@ -93,7 +95,7 @@ export function PositionsSection({
                       </NativeSelect>
                     )}
                     {(p.unit !== "h" || !p.rateId) && (
-                      <NumberField label={t("price")} value={p.price} decimals={2} disabled={!editable} className="w-28" onChange={(price) => setPosition(p.id, { price })} />
+                      <NumberField label={t("price")} value={p.price} decimals={2} disabled={!editable} className="w-28" onChange={(price) => setPosition(p.id, { price: to5Rappen(price) })} />
                     )}
                     {p.unit === "h" && p.rateId && positionPrice(data, p) === null && <span className="self-center text-xs text-destructive">{t("rateMissing")}</span>}
                   </div>

@@ -110,6 +110,11 @@ const inRange = (value: unknown, [min, max]: readonly [number, number], fallback
   typeof value === "number" && Number.isFinite(value) && value >= min && value <= max ? value : fallback;
 const text = (value: unknown, max: number) => (typeof value === "string" ? value.slice(0, max) : "");
 const money = z.number().finite().min(0).max(1e10).nullable().catch(null);
+/** Prices are rounded to 5 Rappen. */
+const price = (value: unknown) => {
+  const v = money.parse(value ?? null);
+  return v === null ? null : Math.round(v * 20) / 20;
+};
 
 function parsePhase(raw: unknown): TradePhase {
   const v = record(raw);
@@ -181,7 +186,7 @@ function parseExtras(raw: unknown): ExtraItem[] {
   return (Array.isArray(raw) ? raw : []).flatMap((e): ExtraItem[] => {
     const o = record(e);
     if (typeof o.id !== "string") return [];
-    return [{ id: o.id.slice(0, 40), text: text(o.text, 300), amount: money.parse(o.amount ?? null) }];
+    return [{ id: o.id.slice(0, 40), text: text(o.text, 300), amount: price(o.amount) }];
   }).slice(0, MAX_EXTRAS);
 }
 
@@ -196,7 +201,7 @@ function parsePositions(raw: unknown): OfferPosition[] {
       qty,
       unit: positionUnits.includes(o.unit as PositionUnit) ? (o.unit as PositionUnit) : "h",
       rateId: typeof o.rateId === "string" && o.rateId ? o.rateId.slice(0, 40) : null,
-      price: money.parse(o.price ?? null),
+      price: price(o.price),
     }];
   }).slice(0, MAX_POSITIONS);
 }
