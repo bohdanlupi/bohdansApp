@@ -23,7 +23,7 @@ import type { AppLanguage } from "@/lib/supabase/types";
 import { getCompanyContacts } from "../../projekte/actions";
 import { createProjectFromOffer, deleteFeeOffer, saveFeeOffer } from "../actions";
 import { CommitInput } from "@/components/planning/commit-input";
-import { FeeSection } from "./fee-section";
+import { FeeSection, type RateSuggestion } from "./fee-section";
 import { ServicesSection } from "./services-section";
 
 export type FeeOfferHeaderState = {
@@ -52,6 +52,7 @@ export function FeeOfferEditor({
   companies,
   initialContacts,
   vatRate,
+  rateSuggestion,
   editable,
 }: {
   id: string;
@@ -61,6 +62,7 @@ export function FeeOfferEditor({
   companies: CompanyOption[];
   initialContacts: ContactOption[];
   vatRate: number;
+  rateSuggestion: RateSuggestion;
   editable: boolean;
 }) {
   const t = useTranslations("feeOffers");
@@ -220,7 +222,7 @@ export function FeeOfferEditor({
         </div>
       </Section>
 
-      <FeeSection data={data} onChange={setData} editable={editable} language={language} totals={totals} />
+      <FeeSection data={data} onChange={setData} editable={editable} language={language} totals={totals} suggestion={rateSuggestion} />
       <ServicesSection data={data} onChange={setData} editable={editable} language={language} />
 
       <Section title={t("sections.conditions")} collapseKey="fee-offer:conditions">
@@ -266,11 +268,6 @@ export function FeeOfferEditor({
         <div className="space-y-1.5">
           <Label htmlFor="offer-expenses">{t("fields.expensesText")}</Label>
           <CommitInput id="offer-expenses" multiline rows={3} value={data.expensesText} disabled={!editable} onCommit={(expensesText) => setData((d) => ({ ...d, expensesText }))} />
-        </div>
-        <div className="space-y-1">
-          <p className="text-sm font-medium">{t("rates.title")}</p>
-          <p className="text-sm text-muted-foreground">{data.rates.map((r) => `${r.label}: CHF ${fmt(r.rate, 2)}/h`).join(" · ") || "–"}</p>
-          <p className="text-xs text-muted-foreground">{t("rates.hint")}</p>
         </div>
       </Section>
 

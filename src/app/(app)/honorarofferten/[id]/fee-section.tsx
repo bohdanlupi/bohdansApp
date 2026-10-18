@@ -1,14 +1,18 @@
 "use client";
 
+import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { NativeSelect } from "@/components/form";
+import { CommitInput } from "@/components/planning/commit-input";
 import { fmt, Notice, NumberField, Section } from "@/components/planning/fields";
 import { Fact, NumberParam, OptionField } from "@/components/planning/plan-ui";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { activeTrades, type FeeTotals, rateOf, type TradeFee } from "@/lib/fees/calc";
 import { type FeeMethod, type FeeOfferData, phaseShare, type TradeData } from "@/lib/fees/offer-schema";
 import { phaseLabel, tradeNames } from "@/lib/fees/options";
+import { type FeeRate, MAX_RATES } from "@/lib/fees/settings-schema";
 import { buildingTypes, factorLimits, feePhases, type FeeTrade, feeTrades, siaColumns, tradeColumn } from "@/lib/fees/sia108";
 import { formatMoney } from "@/lib/number-input";
 import type { AppLanguage } from "@/lib/supabase/types";
@@ -24,7 +28,7 @@ export type DataProps = {
 const clamp = (value: number | null, [min, max]: readonly [number, number], fallback: number) => (value === null ? fallback : Math.min(max, Math.max(min, value)));
 
 /** Fee method, trades with their SIA 108 factors and the phases per trade. */
-export function FeeSection({ data, onChange, editable, language, totals }: DataProps & { totals: FeeTotals }) {
+export function FeeSection({ data, onChange, editable, language, totals, suggestion }: DataProps & { totals: FeeTotals; suggestion: RateSuggestion }) {
   const t = useTranslations("feeOffers.fee");
   const trades = activeTrades(data);
   const columns = siaColumns.filter((c) => trades.some((tr) => tradeColumn[tr] === c));
@@ -78,6 +82,8 @@ export function FeeSection({ data, onChange, editable, language, totals }: DataP
         </div>
       </div>
 
+      <RatesEditor data={data} onChange={onChange} editable={editable} suggestion={suggestion} />
+
       {data.method === "sia" && columns.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium">{t("zTitle")}</p>
@@ -100,6 +106,82 @@ export function FeeSection({ data, onChange, editable, language, totals }: DataP
         <TradeCard key={fee.trade} fee={fee} data={data} editable={editable} language={language} onTrade={(change) => setTrade(fee.trade, change)} />
       ))}
     </Section>
+  );
+}
+
+/** Rate categories of the firm settings, offered as suggestion for this offer. */
+export type RateSuggestion = { rates: FeeRate[]; siaRateId: string };
+
+/** Hours entered for a removed rate category are dropped with it. */
+const withoutRateHours = (trades: FeeOfferData["trades"], keep: (id: string) => boolean) =>
+  Object.fromEntries(
+    feeTrades.map((tr) => [
+      tr,
+      {
+        ...trades[tr],
+        phases: Object.fromEntries(
+          feePhases.map((p) => [p, { ...trades[tr].phases[p], hours: Object.fromEntries(Object.entries(trades[tr].phases[p].hours).filter(([id]) => keep(id))) }]),
+        ),
+      },
+    ]),
+  ) as FeeOfferData["trades"];
+
+/** Rates of this offer: copied from the settings at creation, then edited per offer only. */
+function RatesEditor({ data, onChange, editable, suggestion }: Omit<DataProps, "language"> & { suggestion: RateSuggestion }) {
+  const t = useTranslations("feeOffers.rates");
+  const setRate = (id: string, change: Partial<FeeRate>) => onChange((d) => ({ ...d, rates: d.rates.map((x) => (x.id === id ? { ...x, ...change } : x)) }));
+  const differs = JSON.stringify(data.rates) !== JSON.stringify(suggestion.rates) || data.siaRateId !== suggestion.siaRateId;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-sm font-medium">{t("title")}</p>
+          <p className="text-xs text-muted-foreground">{t("hint")}</p>
+        </div>
+        {editable && differs && suggestion.rates.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const ids = new Set(suggestion.rates.map((r) => r.id));
+              onChange((d) => ({ ...d, rates: suggestion.rates, siaRateId: suggestion.siaRateId, trades: withoutRateHours(d.trades, (id) => ids.has(id)) }));
+            }}
+          >
+            <RotateCcw />
+            {t("reset")}
+          </Button>
+        )}
+      </div>
+      {data.rates.map((r) => (
+        <div key={r.id} className="flex items-center gap-2">
+          <CommitInput aria-label={t("label")} value={r.label} required disabled={!editable} className="h-7 max-w-xs" onCommit={(label) => setRate(r.id, { label })} />
+          <NumberField label={t("rate")} value={r.rate} decimals={2} disabled={!editable} className="w-28" onChange={(rate) => setRate(r.id, { rate: rate ?? 0 })} />
+          <span className="text-sm text-muted-foreground">CHF/h</span>
+          {editable && data.rates.length > 1 && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("remove")}
+              onClick={() =>
+                onChange((d) => {
+                  const rates = d.rates.filter((x) => x.id !== r.id);
+                  return { ...d, rates, siaRateId: d.siaRateId === r.id ? rates[0].id : d.siaRateId, trades: withoutRateHours(d.trades, (id) => id !== r.id) };
+                })
+              }
+            >
+              <Trash2 />
+            </Button>
+          )}
+        </div>
+      ))}
+      {editable && data.rates.length < MAX_RATES && (
+        <Button variant="ghost" size="sm" onClick={() => onChange((d) => ({ ...d, rates: [...d.rates, { id: crypto.randomUUID().slice(0, 8), label: t("newLabel"), rate: 0 }] }))}>
+          <Plus />
+          {t("add")}
+        </Button>
+      )}
+    </div>
   );
 }
 

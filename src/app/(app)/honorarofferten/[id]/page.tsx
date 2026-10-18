@@ -7,6 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { requireProfile } from "@/lib/auth";
 import { parseFeeOfferData } from "@/lib/fees/offer-schema";
 import { type FeeOfferStatus, feeOfferStatuses } from "@/lib/fees/options";
+import { parseFeeSettings } from "@/lib/fees/settings-schema";
 import { createClient } from "@/lib/supabase/server";
 
 import { FeeOfferEditor } from "./offer-editor";
@@ -37,8 +38,9 @@ export default async function FeeOfferPage({ params }: PageProps<"/honoraroffert
     offer.company_id
       ? supabase.from("contacts").select("id, first_name, last_name, function").eq("company_id", offer.company_id).order("last_name")
       : Promise.resolve({ data: [] }),
-    supabase.from("firm_settings").select("vat_rate").eq("id", true).single(),
+    supabase.from("firm_settings").select("vat_rate, fee_settings").eq("id", true).single(),
   ]);
+  const settings = parseFeeSettings(firm?.fee_settings);
 
   return (
     <div className="space-y-4">
@@ -67,6 +69,7 @@ export default async function FeeOfferPage({ params }: PageProps<"/honoraroffert
         companies={companies ?? []}
         initialContacts={contacts ?? []}
         vatRate={firm?.vat_rate ?? 0}
+        rateSuggestion={{ rates: settings.rates, siaRateId: settings.siaRateId }}
         editable={profile.role !== "viewer"}
       />
     </div>

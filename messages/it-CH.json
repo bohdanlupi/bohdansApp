@@ -3519,7 +3519,13 @@
     },
     "rates": {
       "title": "Tariffe orarie di questa offerta",
-      "hint": "Riprese dalle impostazioni alla creazione; valgono anche per le prestazioni supplementari secondo dispendio."
+      "hint": "Proposta dalle impostazioni alla creazione; da adattare qui solo per questa offerta. Valgono anche per le prestazioni supplementari secondo dispendio.",
+      "label": "Designazione",
+      "rate": "Tariffa CHF/h",
+      "remove": "Rimuovi categoria",
+      "newLabel": "Nuova categoria",
+      "add": "Aggiungi categoria",
+      "reset": "Riprendi la proposta dalle impostazioni"
     },
     "summary": {
       "net": "Totale IVA escl.",
@@ -3575,7 +3581,7 @@
       "phase": "Fase parziale",
       "hours": "Ore",
       "costMissing": "Inserite i costi dell’opera B per calcolare l’onorario.",
-      "noRates": "Nessuna tariffa oraria – inserite le categorie nelle impostazioni.",
+      "noRates": "Nessuna tariffa oraria – inserite le categorie in «Tariffe orarie di questa offerta».",
       "rateMissing": "Manca la tariffa oraria scelta.",
       "qHint": "Vuoto = quota di prestazioni secondo SIA 108 art. 7.7 (somma di tutte le fasi {sum} %)."
     },

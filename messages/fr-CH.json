@@ -3519,7 +3519,13 @@
     },
     "rates": {
       "title": "Tarifs horaires de cette offre",
-      "hint": "Repris des paramètres lors de la création ; ils s’appliquent aussi aux prestations supplémentaires selon dépenses."
+      "hint": "Proposition des paramètres lors de la création ; à adapter ici pour cette offre uniquement. Ils s’appliquent aussi aux prestations supplémentaires selon dépenses.",
+      "label": "Désignation",
+      "rate": "Tarif CHF/h",
+      "remove": "Supprimer la catégorie",
+      "newLabel": "Nouvelle catégorie",
+      "add": "Ajouter une catégorie",
+      "reset": "Reprendre la proposition des paramètres"
     },
     "summary": {
       "net": "Total hors TVA",
@@ -3575,7 +3581,7 @@
       "phase": "Phase partielle",
       "hours": "Heures",
       "costMissing": "Saisissez les coûts de l’ouvrage B pour calculer les honoraires.",
-      "noRates": "Aucun tarif horaire – saisissez des catégories dans les paramètres.",
+      "noRates": "Aucun tarif horaire – saisissez des catégories sous « Tarifs horaires de cette offre ».",
       "rateMissing": "Le tarif horaire choisi manque.",
       "qHint": "Vide = part de prestations selon SIA 108 art. 7.7 (somme de toutes les phases {sum} %)."
     },

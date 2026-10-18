@@ -3519,7 +3519,13 @@
     },
     "rates": {
       "title": "Stundenansätze dieser Offerte",
-      "hint": "Übernommen aus den Einstellungen beim Anlegen; sie gelten auch für Zusatzleistungen nach Aufwand."
+      "hint": "Vorschlag aus den Einstellungen beim Anlegen; hier nur für diese Offerte anpassen. Sie gelten auch für Zusatzleistungen nach Aufwand.",
+      "label": "Bezeichnung",
+      "rate": "Ansatz CHF/h",
+      "remove": "Kategorie entfernen",
+      "newLabel": "Neue Kategorie",
+      "add": "Kategorie hinzufügen",
+      "reset": "Vorschlag aus Einstellungen übernehmen"
     },
     "summary": {
       "net": "Total exkl. MwSt.",
@@ -3575,7 +3581,7 @@
       "phase": "Teilphase",
       "hours": "Stunden",
       "costMissing": "Erfassen Sie die Baukosten B, um das Honorar zu berechnen.",
-      "noRates": "Keine Stundenansätze – erfassen Sie Kategorien in den Einstellungen.",
+      "noRates": "Keine Stundenansätze – erfassen Sie Kategorien unter «Stundenansätze dieser Offerte».",
       "rateMissing": "Der gewählte Stundenansatz fehlt.",
       "qHint": "Leer = Leistungsanteil nach SIA 108 Art. 7.7 (Summe aller Teilphasen {sum} %)."
     },
