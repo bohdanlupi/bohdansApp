@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("new") };
 }
 
-/** New offer of a project (/honorarofferten/neu?projekt=<id>): prefilled with name, address, language and Bauherr. */
+/** New offer of a project (/honorarofferten/neu?projekt=<id>): prefilled with name, language and Bauherr with its address. */
 export default async function NewFeeOfferPage({ searchParams }: PageProps<"/honorarofferten/neu">) {
   const profile = await requireProfile();
   const project = await loadProject(param((await searchParams).projekt) ?? "");
@@ -25,13 +25,15 @@ export default async function NewFeeOfferPage({ searchParams }: PageProps<"/hono
 
   const supabase = await createClient();
   const [{ data: companies }, { data: offers }, { data: client }] = await Promise.all([
-    supabase.from("companies").select("id, name, city").eq("archived", false).order("name"),
+    supabase.from("companies").select("id, name, street, zip, city").eq("archived", false).order("name"),
     supabase.from("fee_offers").select("number").eq("project_id", project.id),
     supabase.from("project_participants").select("company_id, contact_id").eq("project_id", project.id).eq("role", "client").limit(1).maybeSingle(),
   ]);
   const { data: contacts } = client?.company_id
     ? await supabase.from("contacts").select("id, first_name, last_name, function").eq("company_id", client.company_id).order("last_name")
     : { data: [] };
+
+  const clientCompany = (companies ?? []).find((c) => c.id === client?.company_id);
 
   // Offer numbers follow the project: 2026-010-HO1, -HO2 … (offers without suffix count as well).
   const used = (offers ?? []).map((o) => Number(o.number.match(/-HO(\d+)$/)?.[1] ?? 0));
@@ -47,9 +49,10 @@ export default async function NewFeeOfferPage({ searchParams }: PageProps<"/hono
         defaults={{
           project_id: project.id,
           title: project.name,
-          street: project.street,
-          zip: project.zip,
-          city: project.city,
+          // Address of the Auftraggeber (follows the chosen company in the form)
+          street: clientCompany?.street ?? null,
+          zip: clientCompany?.zip ?? null,
+          city: clientCompany?.city ?? null,
           language: project.language,
           company_id: client?.company_id ?? null,
           contact_id: client?.contact_id ?? null,

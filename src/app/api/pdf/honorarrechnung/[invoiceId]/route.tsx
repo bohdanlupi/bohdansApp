@@ -24,7 +24,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
     supabase
       .from("fee_invoices")
       .select(
-        "*, offer:fee_offers(id, number, title, zip, city, language, data, company:companies(name, street, zip, city, country), contact:contacts(salutation, first_name, last_name))",
+        "*, offer:fee_offers(id, number, title, street, zip, city, language, data, company:companies(name, street, zip, city, country), contact:contacts(salutation, first_name, last_name), project:projects(zip, city))",
       )
       .eq("id", invoiceId)
       .maybeSingle(),
@@ -48,12 +48,15 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const totals = invoiceTotals(offerData, firm.vat_rate, data, previous ? parseFeeInvoiceData(previous.data) : null);
   const language = offer.language;
   const { company, contact } = offer;
+  // Recipient: the offer's address (Auftraggeber), else the company's.
+  const own = Boolean(offer.street || offer.zip || offer.city);
+  const to = { street: own ? offer.street : company?.street, zip: own ? offer.zip : company?.zip, city: own ? offer.city : company?.city };
   const title = contact?.salutation === "mr" ? feeOfferTexts(language).mr : contact?.salutation === "ms" ? feeOfferTexts(language).ms : null;
   const recipient = [
     company?.name,
     contact ? [title, contact.first_name, contact.last_name].filter(Boolean).join(" ") : null,
-    company?.street,
-    [company?.zip, company?.city].filter(Boolean).join(" "),
+    to.street,
+    [to.zip, to.city].filter(Boolean).join(" "),
   ].filter((line): line is string => Boolean(line));
 
   const iban = qrIban(firm.iban);
@@ -62,7 +65,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
       ? {
           iban,
           creditor: { name: firm.name, street: firm.street, zip: firm.zip, city: firm.city, country: firm.country },
-          debtor: company ? { name: company.name, street: company.street, zip: company.zip, city: company.city, country: company.country } : null,
+          debtor: company ? { name: company.name, street: to.street ?? null, zip: to.zip ?? null, city: to.city ?? null, country: company.country } : null,
           amount: totals.total,
           message: feeInvoiceTexts(language).qr.message(invoice.number),
         }
@@ -80,7 +83,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
         invoiceDate: invoice.invoice_date,
         dueDate: invoice.due_date,
         offerNumber: offer.number,
-        projectLine: [offer.title, [offer.zip, offer.city].filter(Boolean).join(" ")].filter(Boolean).join(", "),
+        projectLine: [offer.title, [offer.project?.zip, offer.project?.city].filter(Boolean).join(" ")].filter(Boolean).join(", "),
         language,
         offer: offerData,
         text: data.text,

@@ -65,7 +65,7 @@ export function FeeOfferEditor({
   initialHeader: FeeOfferHeaderState;
   initialData: FeeOfferData;
   project: { id: string; number: string; name: string } | null;
-  companies: CompanyOption[];
+  companies: (CompanyOption & { street: string | null; zip: string | null })[];
   initialContacts: ContactOption[];
   vatRate: number;
   defaults: FeeDefaults;
@@ -88,7 +88,8 @@ export function FeeOfferEditor({
   const setData = (change: (d: FeeOfferData) => FeeOfferData) => update((s) => ({ ...s, data: change(s.data) }));
 
   const selectCompany = async (companyId: string | null) => {
-    setHeader({ company_id: companyId, contact_id: null });
+    const company = companies.find((c) => c.id === companyId);
+    setHeader({ company_id: companyId, contact_id: null, ...(company ? { street: company.street, zip: company.zip, city: company.city } : {}) });
     setContacts(companyId ? await getCompanyContacts(companyId) : []);
   };
 

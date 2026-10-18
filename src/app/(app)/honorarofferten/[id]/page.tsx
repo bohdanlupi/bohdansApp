@@ -34,7 +34,7 @@ export default async function FeeOfferPage({ params }: PageProps<"/honoraroffert
 
   const supabase = await createClient();
   const [{ data: companies }, { data: contacts }, { data: firm }, { count: paidInvoices }] = await Promise.all([
-    supabase.from("companies").select("id, name, city").eq("archived", false).order("name"),
+    supabase.from("companies").select("id, name, street, zip, city").eq("archived", false).order("name"),
     offer.company_id
       ? supabase.from("contacts").select("id, first_name, last_name, function").eq("company_id", offer.company_id).order("last_name")
       : Promise.resolve({ data: [] }),

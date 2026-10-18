@@ -3541,7 +3541,7 @@
     "toProject": "Projet {number}",
     "createProject": "Créer le projet",
     "createProjectTitle": "Créer un projet à partir de l’offre ?",
-    "createProjectText": "Un nouveau projet est créé avec le nom, l’adresse et le mandant de l’offre ; l’offre est marquée comme acceptée.",
+    "createProjectText": "Un nouveau projet est créé avec le nom et le mandant de l’offre ; l’offre est marquée comme acceptée.",
     "delete": "Supprimer",
     "deleteTitle": "Supprimer l’offre ?",
     "deleteText": "L’offre d’honoraires {number} sera supprimée définitivement.",
@@ -3707,7 +3707,8 @@
         "pcs": "pce",
         "day": "jour"
       }
-    }
+    },
+    "addressHint": "Adresse du mandant pour la lettre ; reprise du carnet d’adresses lors du changement de mandant."
   },
   "feeInvoices": {
     "title": "Factures d’honoraires",

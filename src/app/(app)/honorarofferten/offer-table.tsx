@@ -52,7 +52,6 @@ export function OfferTable({ offers, vatRate, showProject }: { offers: OfferRow[
                 <Link href={`/honorarofferten/${o.id}`} className="font-medium after:absolute after:inset-0">
                   {o.title}
                 </Link>
-                {o.city && <span className="ml-2 text-muted-foreground">{o.city}</span>}
               </TableCell>
               {showProject && <TableCell className="tabular-nums">{o.project?.number}</TableCell>}
               <TableCell className="max-w-64 truncate">{o.company?.name}</TableCell>

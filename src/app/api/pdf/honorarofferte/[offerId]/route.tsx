@@ -7,7 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { FeeOfferDocument } from "@/pdf/fee-offer-document";
 import { loadLogo } from "@/pdf/logo";
 
-// GET /api/pdf/honorarofferte/<offerId> – fee offer (letter + Anhang) in the offer's language.
+// GET /api/pdf/honorarofferte/<offerId> – fee offer (letter + Anhang) in the offer's language. The offer's address is
+// the Auftraggeber's (recipient block); subject line and Projektadresse use the project's address.
 export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/honorarofferte/[offerId]">) {
   const profile = await getCurrentProfile();
   if (!profile) return new Response("Unauthorized", { status: 401 });
@@ -19,7 +20,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const [{ data: offer }, { data: firm }] = await Promise.all([
     supabase
       .from("fee_offers")
-      .select("*, company:companies(name, street, zip, city), contact:contacts(salutation, first_name, last_name)")
+      .select("*, company:companies(name, street, zip, city), contact:contacts(salutation, first_name, last_name), project:projects(street, zip, city)")
       .eq("id", offerId)
       .maybeSingle(),
     supabase.from("firm_settings").select("*").eq("id", true).single(),
@@ -32,15 +33,20 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
     <FeeOfferDocument
       firm={firm}
       logo={await loadLogo()}
-      recipient={offer.company}
+      recipient={
+        offer.company && {
+          name: offer.company.name,
+          ...(offer.street || offer.zip || offer.city ? { street: offer.street, zip: offer.zip, city: offer.city } : { street: offer.company.street, zip: offer.company.zip, city: offer.company.city }),
+        }
+      }
       contact={offer.contact}
       vatRate={firm.vat_rate}
       offer={{
         number: offer.number,
         title: offer.title,
-        street: offer.street,
-        zip: offer.zip,
-        city: offer.city,
+        street: offer.project?.street ?? null,
+        zip: offer.project?.zip ?? null,
+        city: offer.project?.city ?? null,
         language: offer.language,
         offerDate: offer.offer_date,
         validUntil: offer.valid_until,

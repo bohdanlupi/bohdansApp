@@ -110,8 +110,8 @@ export async function deleteFeeOffer(id: string): Promise<FormState> {
 }
 
 /**
- * Accepted offer → project: name, address and language of the offer, the client as participant. The offer is
- * marked accepted and linked to the project.
+ * Accepted offer → project: name and language of the offer, the client as participant (the offer's address is the
+ * client's, not the project's). The offer is marked accepted and linked to the project.
  */
 export async function createProjectFromOffer(id: string): Promise<FormState> {
   await assertRole("admin", "planer");
@@ -128,9 +128,6 @@ export async function createProjectFromOffer(id: string): Promise<FormState> {
     .insert({
       number: await nextYearNumber("projects"),
       name: offer.title,
-      street: offer.street,
-      zip: offer.zip,
-      city: offer.city,
       language: offer.language,
       status: "active",
       cost_plan_template_id: bkp?.id ?? null,

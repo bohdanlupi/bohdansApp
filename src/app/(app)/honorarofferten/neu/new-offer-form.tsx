@@ -18,6 +18,9 @@ import { createFeeOffer } from "../actions";
 
 type ContactOption = Awaited<ReturnType<typeof getCompanyContacts>>[number];
 
+/** Company with its address: the offer's address fields are the Auftraggeber's address. */
+export type CompanyAddressOption = CompanyOption & { street: string | null; zip: string | null };
+
 export type NewOfferDefaults = {
   project_id: string;
   title: string;
@@ -36,7 +39,7 @@ export function NewFeeOfferForm({
   defaults,
 }: {
   suggestedNumber: string;
-  companies: CompanyOption[];
+  companies: CompanyAddressOption[];
   initialContacts: ContactOption[];
   defaults: NewOfferDefaults;
 }) {
@@ -47,17 +50,26 @@ export function NewFeeOfferForm({
   const [contacts, setContacts] = useState<ContactOption[]>(initialContacts);
   const [contactId, setContactId] = useState(defaults.contact_id ?? "");
   const [kind, setKind] = useState<"sia" | "positions">("sia");
+  const [address, setAddress] = useState({ street: defaults.street ?? "", zip: defaults.zip ?? "", city: defaults.city ?? "" });
 
   const selectCompany = async (id: string | null) => {
     setContacts([]);
     setContactId("");
+    const company = companies.find((c) => c.id === id);
+    if (company) setAddress({ street: company.street ?? "", zip: company.zip ?? "", city: company.city ?? "" });
     if (id) setContacts(await getCompanyContacts(id));
   };
 
-  const text = (name: "number" | "title" | "street" | "zip" | "city", className = "") => (
+  const text = (name: "number" | "title", className = "") => (
     <div className={`space-y-2 ${className}`}>
       <Label htmlFor={name}>{tf(name)}</Label>
-      <Input id={name} name={name} defaultValue={name === "number" ? suggestedNumber : (defaults[name] ?? "")} required={name === "number" || name === "title"} />
+      <Input id={name} name={name} defaultValue={name === "number" ? suggestedNumber : defaults.title} required />
+    </div>
+  );
+  const addressField = (name: "street" | "zip" | "city", className = "") => (
+    <div className={`space-y-2 ${className}`}>
+      <Label htmlFor={name}>{tf(name)}</Label>
+      <Input id={name} name={name} value={address[name]} onChange={(e) => setAddress((a) => ({ ...a, [name]: e.target.value }))} />
     </div>
   );
 
@@ -72,9 +84,6 @@ export function NewFeeOfferForm({
         <CardContent className="grid gap-4 sm:grid-cols-4">
           {text("number", "sm:col-span-1")}
           {text("title", "sm:col-span-3")}
-          {text("street", "sm:col-span-4")}
-          {text("zip", "sm:col-span-1")}
-          {text("city", "sm:col-span-3")}
         </CardContent>
       </Card>
 
@@ -109,6 +118,12 @@ export function NewFeeOfferForm({
               ))}
             </NativeSelect>
           </div>
+          <div className="grid gap-4 sm:col-span-2 sm:grid-cols-4">
+            {addressField("street", "sm:col-span-4")}
+            {addressField("zip", "sm:col-span-1")}
+            {addressField("city", "sm:col-span-3")}
+          </div>
+          <p className="text-xs text-muted-foreground sm:col-span-2">{t("feeOffers.addressHint")}</p>
         </CardContent>
       </Card>
 

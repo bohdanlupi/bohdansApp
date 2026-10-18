@@ -3541,7 +3541,7 @@
     "toProject": "Progetto {number}",
     "createProject": "Creare il progetto",
     "createProjectTitle": "Creare un progetto dall’offerta?",
-    "createProjectText": "Viene creato un nuovo progetto con nome, indirizzo e committente dell’offerta; l’offerta viene segnata come accettata.",
+    "createProjectText": "Viene creato un nuovo progetto con nome e committente dell’offerta; l’offerta viene segnata come accettata.",
     "delete": "Eliminare",
     "deleteTitle": "Eliminare l’offerta?",
     "deleteText": "L’offerta d’onorario {number} verrà eliminata definitivamente.",
@@ -3707,7 +3707,8 @@
         "pcs": "pz",
         "day": "giorno"
       }
-    }
+    },
+    "addressHint": "Indirizzo del committente per la lettera; viene ripreso dalla rubrica quando si cambia committente."
   },
   "feeInvoices": {
     "title": "Fatture d’onorario",

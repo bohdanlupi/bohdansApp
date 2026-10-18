@@ -3541,7 +3541,7 @@
     "toProject": "Projekt {number}",
     "createProject": "Projekt erstellen",
     "createProjectTitle": "Projekt aus der Offerte erstellen?",
-    "createProjectText": "Es wird ein neues Projekt mit Name, Adresse und Auftraggeber der Offerte angelegt; die Offerte wird als angenommen markiert.",
+    "createProjectText": "Es wird ein neues Projekt mit Name und Auftraggeber der Offerte angelegt; die Offerte wird als angenommen markiert.",
     "delete": "Löschen",
     "deleteTitle": "Offerte löschen?",
     "deleteText": "Die Honorarofferte {number} wird endgültig gelöscht.",
@@ -3707,7 +3707,8 @@
         "pcs": "Stk",
         "day": "Tag"
       }
-    }
+    },
+    "addressHint": "Adresse des Auftraggebers für den Brief; wird beim Wechsel des Auftraggebers aus dem Adressbuch übernommen."
   },
   "feeInvoices": {
     "title": "Honorarrechnungen",
