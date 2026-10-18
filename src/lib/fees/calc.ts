@@ -113,8 +113,10 @@ export function tradeFee(data: FeeOfferData, trade: FeeTrade): TradeFee {
         const amount = entries.reduce((sum, [id, v]) => sum + v * (rateOf(data, id) ?? 0), 0);
         return { phase, q, hours, amount: round2(amount) };
       }
-      // Fachkoordination: Tm with k instead of U (Art. 9.6.1).
-      const hours = b && bp ? predictedHours({ b, bp, z1, z2, n, r: t.r, i: t.i, s: t.s, u: fk ? 1 : t.u, k: fk ? t.k : 1 }, q) : null;
+      // Fachkoordination: Tm with k instead of U (Art. 9.6.1). Whole hours per phase as displayed, so the fee is
+      // hours × s × h exactly.
+      const raw = b && bp ? predictedHours({ b, bp, z1, z2, n, r: t.r, i: t.i, s: t.s, u: fk ? 1 : t.u, k: fk ? t.k : 1 }, q) : null;
+      const hours = raw === null ? null : Math.round(raw);
       return { phase, q, hours, amount: hours === null || h === null ? null : round2(hours * t.s * h) };
     });
 
