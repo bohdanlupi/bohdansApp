@@ -122,7 +122,7 @@ export function VatReportDocument({
     { label: "Rechnung", width: 60, value: (i) => i.number },
     { label: "Kategorie", width: 66, value: (i) => categoryLabels[i.category as CreditorCategory] ?? i.category },
     { label: "Ziff.", width: 26, value: (i) => (i.vat ? String(inputTaxZiffer(i.category)) : "") },
-    { label: "Satz", width: 32, right: true, value: (i) => `${formatQuantity(i.rate)} %` },
+    { label: "Satz", width: 58, right: true, value: (i) => i.rates },
     { label: "Netto", width: 56, right: true, value: (i) => formatAmount(i.net) },
     { label: "Vorsteuer", width: 50, right: true, value: (i) => formatAmount(i.vat) },
     { label: "Total", width: 56, right: true, value: (i) => formatAmount(i.total) },

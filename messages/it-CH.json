@@ -3856,7 +3856,7 @@
     "supplierFailed": "Non è stato possibile creare il fornitore.",
     "supplierHint": "Salvato nella rubrica con la categoria Fornitore, completabile lì.",
     "noProject": "Nessun progetto",
-    "split": "Netto CHF {net} · imposta precedente CHF {vat} (cifra {ziffer})",
+    "split": "Totale CHF {total} · netto CHF {net} · imposta precedente CHF {vat} (cifra {ziffer})",
     "splitEmpty": "Inserire l’importo IVA inclusa – netto e imposta precedente vengono calcolati.",
     "document": "Giustificativo",
     "removeDocument": "Rimuovi",
@@ -3885,7 +3885,8 @@
       "category": "Categoria",
       "description": "Descrizione",
       "status": "Stato",
-      "paidDate": "Pagata il"
+      "paidDate": "Pagata il",
+      "lines": "Importo IVA inclusa per aliquota"
     },
     "rates": {
       "0": "0 % senza IVA",
@@ -3927,6 +3928,8 @@
       "inputTaxTotal": "Totale imposta precedente ({count, plural, one {# fattura} other {# fatture}})",
       "toPay": "Da pagare",
       "credit": "Saldo a favore"
-    }
+    },
+    "addLine": "Aggiungi aliquota",
+    "removeLine": "Rimuovi aliquota"
   }
 }

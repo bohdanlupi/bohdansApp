@@ -6,9 +6,8 @@ import { z } from "zod";
 
 import type { CompanyOption } from "@/components/company-picker";
 import { assertRole } from "@/lib/auth";
-import { creditorCategories, creditorStatuses } from "@/lib/creditors";
+import { creditorCategories, creditorStatuses, splitLines } from "@/lib/creditors";
 import type { FormState } from "@/lib/form-state";
-import { parseNumber } from "@/lib/number-input";
 import { createClient } from "@/lib/supabase/server";
 import { optionalDate, optionalText } from "@/lib/validation";
 
@@ -25,8 +24,18 @@ const invoiceSchema = z.object({
   status: z.enum(creditorStatuses),
   paid_date: optionalDate,
   category: z.enum(creditorCategories),
-  total: z.string().transform((v, ctx) => parseNumber(v) ?? (ctx.addIssue({ code: "custom" }), z.NEVER)),
-  vat_rate: z.coerce.number().min(0).max(100),
+  // Amounts incl. MWST per rate, sent as JSON by the form.
+  vat_lines: z
+    .string()
+    .transform((v, ctx) => {
+      try {
+        return JSON.parse(v);
+      } catch {
+        ctx.addIssue({ code: "custom" });
+        return z.NEVER;
+      }
+    })
+    .pipe(z.array(z.object({ rate: z.number().min(0).max(100), total: z.number().finite() })).min(1).max(4)),
   description: z.string().trim().max(2000),
   // Uploaded from the browser into <id>/<name> before the form is sent; empty = no document.
   file_path: optionalText,
@@ -43,7 +52,8 @@ export async function saveCreditorInvoice(_prev: FormState, formData: FormData):
   if (!parsed.success) return { error: "invalidInput" };
   const { id, ...values } = parsed.data;
   if (values.file_path && !values.file_path.startsWith(`${id}/`)) return { error: "invalidInput" };
-  const row = { ...values, paid_date: values.status === "paid" ? (values.paid_date ?? today()) : null, total: Math.round(values.total * 100) / 100 };
+  const vat_lines = values.vat_lines.map((l) => ({ rate: l.rate, total: Math.round(l.total * 100) / 100 }));
+  const row = { ...values, vat_lines, total: splitLines(vat_lines).total, paid_date: values.status === "paid" ? (values.paid_date ?? today()) : null };
 
   const supabase = await createClient();
   const isNew = formData.get("isNew") === "1";

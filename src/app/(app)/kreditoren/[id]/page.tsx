@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/components/page-header";
 import { requireProfile } from "@/lib/auth";
-import { isCreditorCategory, isCreditorStatus } from "@/lib/creditors";
+import { isCreditorCategory, isCreditorStatus, parseVatLines } from "@/lib/creditors";
 import { createClient } from "@/lib/supabase/server";
 
 import { CreditorForm } from "../creditor-form";
@@ -57,8 +57,7 @@ export default async function CreditorInvoicePage({ params }: PageProps<"/kredit
           status: isCreditorStatus(invoice.status) ? invoice.status : "open",
           paid_date: invoice.paid_date,
           category: isCreditorCategory(invoice.category) ? invoice.category : "other",
-          total: invoice.total,
-          vat_rate: invoice.vat_rate,
+          vat_lines: parseVatLines(invoice.vat_lines),
           description: invoice.description,
           file_path: invoice.file_path,
           file_name: invoice.file_name,

@@ -3856,7 +3856,7 @@
     "supplierFailed": "Der Lieferant konnte nicht angelegt werden.",
     "supplierHint": "Wird im Adressbuch mit der Kategorie Lieferant gespeichert und kann dort ergänzt werden.",
     "noProject": "Kein Projekt",
-    "split": "Netto CHF {net} · Vorsteuer CHF {vat} (Ziffer {ziffer})",
+    "split": "Total CHF {total} · Netto CHF {net} · Vorsteuer CHF {vat} (Ziffer {ziffer})",
     "splitEmpty": "Betrag inkl. MWST eingeben – Netto und Vorsteuer werden berechnet.",
     "document": "Beleg",
     "removeDocument": "Entfernen",
@@ -3885,7 +3885,8 @@
       "category": "Kategorie",
       "description": "Beschreibung",
       "status": "Status",
-      "paidDate": "Bezahlt am"
+      "paidDate": "Bezahlt am",
+      "lines": "Betrag inkl. MWST pro Satz"
     },
     "rates": {
       "0": "0 % ohne MWST",
@@ -3927,6 +3928,8 @@
       "inputTaxTotal": "Total Vorsteuer ({count, plural, one {# Rechnung} other {# Rechnungen}})",
       "toPay": "Zu bezahlen",
       "credit": "Guthaben"
-    }
+    },
+    "addLine": "Weiteren Satz hinzufügen",
+    "removeLine": "Satz entfernen"
   }
 }

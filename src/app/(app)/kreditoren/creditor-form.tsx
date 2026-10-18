@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { creditorCategories, type CreditorCategory, creditorStatuses, type CreditorStatus, inputTaxZiffer, splitVat, vatRates } from "@/lib/creditors";
+import { creditorCategories, type CreditorCategory, creditorStatuses, type CreditorStatus, inputTaxZiffer, splitLines, type VatLine, vatRates } from "@/lib/creditors";
 import { initialFormState } from "@/lib/form-state";
 import { formatMoney, parseNumber } from "@/lib/number-input";
 import { createClient } from "@/lib/supabase/client";
@@ -30,8 +30,7 @@ export type CreditorInvoiceValues = {
   status: CreditorStatus;
   paid_date: string | null;
   category: CreditorCategory;
-  total: number | null;
-  vat_rate: number;
+  vat_lines: VatLine[];
   description: string;
   file_path: string | null;
   file_name: string | null;
@@ -71,8 +70,16 @@ export function CreditorForm({
   const [pickerKey, setPickerKey] = useState(0);
   const [supplierOpen, setSupplierOpen] = useState(false);
 
-  const [total, setTotal] = useState(initial.total === null ? "" : formatMoney(initial.total));
-  const [rate, setRate] = useState(initial.vat_rate);
+  // Amount incl. MWST per rate (one line per rate on the invoice), kept as typed until blur.
+  const [lines, setLines] = useState(() =>
+    (initial.vat_lines.length ? initial.vat_lines : [{ rate: 8.1, total: Number.NaN }]).map((l, i) => ({
+      key: i,
+      rate: l.rate,
+      total: Number.isNaN(l.total) ? "" : formatMoney(l.total),
+    })),
+  );
+  const nextKey = useRef(lines.length);
+  const setLine = (key: number, patch: Partial<{ rate: number; total: string }>) => setLines((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)));
   const [category, setCategory] = useState(initial.category);
   const [status, setStatus] = useState(initial.status);
   const [file, setFile] = useState<{ path: string; name: string } | null>(
@@ -81,8 +88,12 @@ export function CreditorForm({
   const [newFile, setNewFile] = useState<File | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const amount = parseNumber(total);
-  const split = amount === null ? null : splitVat(amount, rate);
+  const parsedLines = lines.flatMap((l) => {
+    const total = parseNumber(l.total);
+    return total === null ? [] : [{ rate: l.rate, total }];
+  });
+  const split = parsedLines.length ? splitLines(parsedLines) : null;
+  const unusedRate = vatRates.find((r) => !lines.some((l) => l.rate === r));
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -104,6 +115,7 @@ export function CreditorForm({
       }
       formData.set("file_path", document?.path ?? "");
       formData.set("file_name", document?.name ?? "");
+      formData.set("vat_lines", JSON.stringify(parsedLines));
       action(formData);
     });
   };
@@ -169,28 +181,47 @@ export function CreditorForm({
               </NativeSelect>
             </div>
 
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="total">{t("fields.total")}</Label>
-              <Input
-                id="total"
-                name="total"
-                inputMode="decimal"
-                className="text-right tabular-nums"
-                value={total}
-                onChange={(e) => setTotal(e.target.value)}
-                onBlur={() => amount !== null && setTotal(formatMoney(amount))}
-                required
-              />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="vat_rate">{t("fields.vatRate")}</Label>
-              <NativeSelect id="vat_rate" name="vat_rate" value={String(rate)} onChange={(e) => setRate(Number(e.target.value))}>
-                {vatRates.map((r) => (
-                  <option key={r} value={r}>
-                    {t(`rates.${String(r).replace(".", "_") as "8_1"}`)}
-                  </option>
-                ))}
-              </NativeSelect>
+            <div className="space-y-2 sm:col-span-4">
+              <Label>{t("fields.lines")}</Label>
+              {lines.map((l, i) => (
+                <div key={l.key} className="flex items-center gap-2">
+                  <Input
+                    aria-label={t("fields.total")}
+                    inputMode="decimal"
+                    className="w-40 text-right tabular-nums"
+                    value={l.total}
+                    onChange={(e) => setLine(l.key, { total: e.target.value })}
+                    onBlur={() => {
+                      const v = parseNumber(l.total);
+                      if (v !== null) setLine(l.key, { total: formatMoney(v) });
+                    }}
+                    required={i === 0}
+                  />
+                  <NativeSelect aria-label={t("fields.vatRate")} className="w-52" value={String(l.rate)} onChange={(e) => setLine(l.key, { rate: Number(e.target.value) })}>
+                    {vatRates.map((r) => (
+                      <option key={r} value={r}>
+                        {t(`rates.${String(r).replace(".", "_") as "8_1"}`)}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                  {lines.length > 1 && editable && (
+                    <Button type="button" variant="ghost" size="icon-sm" aria-label={t("removeLine")} onClick={() => setLines((ls) => ls.filter((x) => x.key !== l.key))}>
+                      <Trash2 className="size-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              {editable && unusedRate !== undefined && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLines((ls) => [...ls, { key: nextKey.current++, rate: unusedRate, total: "" }])}
+                >
+                  <Plus className="size-4" />
+                  {t("addLine")}
+                </Button>
+              )}
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="category">{t("fields.category")}</Label>
@@ -203,7 +234,7 @@ export function CreditorForm({
               </NativeSelect>
             </div>
             <p className="text-sm text-muted-foreground tabular-nums sm:col-span-6">
-              {split ? t("split", { net: formatMoney(split.net), vat: formatMoney(split.vat), ziffer: inputTaxZiffer(category) }) : t("splitEmpty")}
+              {split ? t("split", { total: formatMoney(split.total), net: formatMoney(split.net), vat: formatMoney(split.vat), ziffer: inputTaxZiffer(category) }) : t("splitEmpty")}
             </p>
 
             <div className="space-y-2 sm:col-span-6">

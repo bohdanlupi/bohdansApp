@@ -26,6 +26,32 @@ export function splitVat(total: number, rate: number) {
   return { net: round2(total - vat), vat };
 }
 
+/** Amount incl. MWST at one rate; an invoice has one line per rate it contains. */
+export type VatLine = { rate: number; total: number };
+
+/** vat_lines column → valid lines (unknown entries dropped). */
+export function parseVatLines(value: unknown): VatLine[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((l) => {
+    const rate = Number(l?.rate);
+    const total = Number(l?.total);
+    return Number.isFinite(rate) && rate >= 0 && rate <= 100 && Number.isFinite(total) ? [{ rate, total: round2(total) }] : [];
+  });
+}
+
+/** Totals of an invoice over all its lines. */
+export function splitLines(lines: VatLine[]) {
+  const parts = lines.map((l) => splitVat(l.total, l.rate));
+  return {
+    total: round2(lines.reduce((a, l) => a + l.total, 0)),
+    net: round2(parts.reduce((a, p) => a + p.net, 0)),
+    vat: round2(parts.reduce((a, p) => a + p.vat, 0)),
+  };
+}
+
+/** "8.1 / 2.6 %" – the rates of an invoice for lists. */
+export const ratesLabel = (lines: VatLine[]) => `${[...new Set(lines.map((l) => l.rate))].sort((a, b) => b - a).join(" / ") || "0"} %`;
+
 export type Quarter = { year: number; quarter: 1 | 2 | 3 | 4 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -60,7 +86,8 @@ export type VatIncoming = {
   net: number;
   vat: number;
   total: number;
-  rate: number;
+  /** Rates of the invoice, e.g. "8.1 / 2.6 %". */
+  rates: string;
   /** Number of the attached document in the report, null without one. */
   attachment: number | null;
 };

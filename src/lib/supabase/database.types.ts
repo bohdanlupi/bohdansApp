@@ -379,7 +379,7 @@ export type Database = {
           status: string
           total: number
           updated_at: string
-          vat_rate: number
+          vat_lines: Json
         }
         Insert: {
           category?: string
@@ -398,7 +398,7 @@ export type Database = {
           status?: string
           total: number
           updated_at?: string
-          vat_rate?: number
+          vat_lines?: Json
         }
         Update: {
           category?: string
@@ -417,7 +417,7 @@ export type Database = {
           status?: string
           total?: number
           updated_at?: string
-          vat_rate?: number
+          vat_lines?: Json
         }
         Relationships: [
           {

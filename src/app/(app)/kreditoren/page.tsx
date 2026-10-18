@@ -8,7 +8,7 @@ import { EmptyState, PageHeader } from "@/components/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireProfile } from "@/lib/auth";
-import { isCreditorStatus, parseQuarter, quarterOf, quarterRange } from "@/lib/creditors";
+import { isCreditorStatus, parseQuarter, parseVatLines, quarterOf, quarterRange } from "@/lib/creditors";
 import { formatMoney } from "@/lib/number-input";
 import { createClient } from "@/lib/supabase/server";
 import { param } from "@/lib/validation";
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("creditors") };
 }
 
-const SELECT = "id, number, invoice_date, due_date, paid_date, status, category, total, vat_rate, description, file_path, company:companies(name), project:projects(number, name)";
+const SELECT = "id, number, invoice_date, due_date, paid_date, status, category, total, vat_lines, description, file_path, company:companies(name), project:projects(number, name)";
 
 /**
  * Kreditoren: open invoices first (earliest due date on top), then the MWST-Abrechnung of a quarter (default: the
@@ -45,7 +45,7 @@ export default async function CreditorsPage({ searchParams }: PageProps<"/kredit
     supabase.from("creditor_invoices").select(SELECT).gte("invoice_date", from).lte("invoice_date", to).order("invoice_date").order("created_at"),
     loadVatData(supabase, quarter),
   ]);
-  const rows = (list: typeof open) => (list ?? []).map((r): CreditorRow => ({ ...r, status: isCreditorStatus(r.status) ? r.status : "open" }));
+  const rows = (list: typeof open) => (list ?? []).map((r): CreditorRow => ({ ...r, vat_lines: parseVatLines(r.vat_lines), status: isCreditorStatus(r.status) ? r.status : "open" }));
   const { report } = vat;
 
   const years = Array.from({ length: 5 }, (_, i) => current.year - i);

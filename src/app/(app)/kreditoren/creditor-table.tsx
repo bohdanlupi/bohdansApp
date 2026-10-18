@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { DeadlineDate } from "@/components/deadline-date";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type CreditorStatus, isCreditorCategory, splitVat } from "@/lib/creditors";
+import { type CreditorStatus, isCreditorCategory, ratesLabel, splitLines, type VatLine } from "@/lib/creditors";
 import { formatMoney } from "@/lib/number-input";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ export type CreditorRow = {
   status: CreditorStatus;
   category: string;
   total: number;
-  vat_rate: number;
+  vat_lines: VatLine[];
   description: string;
   file_path: string | null;
   company: { name: string } | null;
@@ -93,8 +93,8 @@ export function CreditorTable({ rows, editable }: { rows: CreditorRow[]; editabl
                 )}
               </TableCell>
               <TableCell className="text-right tabular-nums">
-                {formatMoney(splitVat(r.total, r.vat_rate).vat)}
-                <span className="block text-xs text-muted-foreground">{r.vat_rate} %</span>
+                {formatMoney(splitLines(r.vat_lines).vat)}
+                <span className="block text-xs text-muted-foreground">{ratesLabel(r.vat_lines)}</span>
               </TableCell>
               <TableCell className="text-right font-medium tabular-nums">{formatMoney(r.total)}</TableCell>
               <TableCell>

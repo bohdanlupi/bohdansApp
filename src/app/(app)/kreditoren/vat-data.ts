@@ -1,6 +1,6 @@
 import "server-only";
 
-import { type Quarter, quarterRange, splitVat, type VatIncoming, type VatOutgoing, vatReport } from "@/lib/creditors";
+import { parseVatLines, type Quarter, quarterRange, ratesLabel, splitLines, type VatIncoming, type VatOutgoing, vatReport } from "@/lib/creditors";
 import type { createClient } from "@/lib/supabase/server";
 
 import { invoiceRows } from "../debitoren/rechnungen/invoice-rows";
@@ -18,7 +18,7 @@ export async function loadVatData(supabase: Supabase, quarter: Quarter) {
     supabase.from("fee_invoices").select("offer_id").in("status", ["sent", "paid"]).gte("invoice_date", from).lte("invoice_date", to),
     supabase
       .from("creditor_invoices")
-      .select("id, number, invoice_date, category, total, vat_rate, file_path, file_name, company:companies(name)")
+      .select("id, number, invoice_date, category, vat_lines, file_path, file_name, company:companies(name)")
       .gte("invoice_date", from)
       .lte("invoice_date", to)
       .order("invoice_date")
@@ -55,7 +55,8 @@ export async function loadVatData(supabase: Supabase, quarter: Quarter) {
     const supplier = r.company?.name ?? "";
     const n = r.file_path ? ++attachment : null;
     if (r.file_path && n) receipts.push({ number: n, path: r.file_path, name: r.file_name ?? "", label: [supplier, r.number].filter(Boolean).join(" · ") });
-    return { supplier, number: r.number, date: r.invoice_date, category: r.category, ...splitVat(r.total, r.vat_rate), total: r.total, rate: r.vat_rate, attachment: n };
+    const lines = parseVatLines(r.vat_lines);
+    return { supplier, number: r.number, date: r.invoice_date, category: r.category, ...splitLines(lines), rates: ratesLabel(lines), attachment: n };
   });
 
   return { outgoing, incoming, receipts, report: vatReport(outgoing, incoming) };
