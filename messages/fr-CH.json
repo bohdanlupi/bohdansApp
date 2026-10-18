@@ -86,7 +86,9 @@
     "heatingStructureExists": "Le descriptif contient déjà une structure 24.",
     "noTradeChosen": "Veuillez choisir au moins un domaine.",
     "offerNumberExists": "Ce numéro d’offre existe déjà.",
-    "invoiceNumberExists": "Ce numéro de facture existe déjà."
+    "invoiceNumberExists": "Ce numéro de facture existe déjà.",
+    "invoiceLocked": "Cette facture est payée et verrouillée.",
+    "offerLocked": "Cette offre a une facture payée et est verrouillée."
   },
   "projects": {
     "title": "Projets",
@@ -3666,7 +3668,8 @@
       "removeCustom": "Supprimer la ligne",
       "addCustom": "Ligne propre"
     },
-    "emptyProjectText": "Créez une offre d’honoraires selon SIA 108 ; nom, adresse, langue et maître d’ouvrage sont repris du projet."
+    "emptyProjectText": "Créez une offre d’honoraires selon SIA 108 ; nom, adresse, langue et maître d’ouvrage sont repris du projet.",
+    "lockedHint": "Verrouillée, car une facture de cette offre est payée. Vous pouvez néanmoins créer d’autres factures."
   },
   "feeInvoices": {
     "title": "Factures d’honoraires",
@@ -3723,7 +3726,9 @@
       "net": "Montant de la facture hors TVA",
       "vat": "TVA {rate} %",
       "total": "Montant de la facture TVA incl."
-    }
+    },
+    "lockedPaid": "Payée – la facture est verrouillée. Pour la modifier, remettre le statut sur « Envoyée ».",
+    "lockedLater": "Verrouillée, car une facture ultérieure de cette offre est payée (elle déduit cette facture)."
   },
   "feeSettings": {
     "description": "Valeurs par défaut des nouvelles offres d’honoraires. Les offres existantes conservent leurs valeurs.",

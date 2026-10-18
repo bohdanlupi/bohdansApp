@@ -55,6 +55,8 @@ export function FeeOfferEditor({
   vatRate,
   defaults,
   editable,
+  locked,
+  canInvoice,
 }: {
   id: string;
   initialHeader: FeeOfferHeaderState;
@@ -65,6 +67,10 @@ export function FeeOfferEditor({
   vatRate: number;
   defaults: FeeDefaults;
   editable: boolean;
+  /** Has a paid invoice: read-only. */
+  locked: boolean;
+  /** May create invoices (writers; also when the offer is locked). */
+  canInvoice: boolean;
 }) {
   const t = useTranslations("feeOffers");
   const tCommon = useTranslations();
@@ -126,7 +132,7 @@ export function FeeOfferEditor({
             <FileText />
             {t("pdf")}
           </a>
-          {editable && project && header.status === "accepted" && status === "saved" && <CreateInvoiceButton offerId={id} offerNumber={header.number} variant="outline" />}
+          {canInvoice && project && header.status === "accepted" && status === "saved" && <CreateInvoiceButton offerId={id} offerNumber={header.number} variant="outline" />}
           {project ? (
             <Link href={`/projekte/${project.id}`} className={buttonVariants({ variant: "outline" })}>
               {t("toProject", { number: project.number })}
@@ -162,6 +168,8 @@ export function FeeOfferEditor({
           )}
         </div>
       </div>
+
+      {locked && <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">{t("lockedHint")}</p>}
 
       <Section title={t("sections.offer")} collapseKey="fee-offer:header">
         <div className="grid gap-4 sm:grid-cols-6">

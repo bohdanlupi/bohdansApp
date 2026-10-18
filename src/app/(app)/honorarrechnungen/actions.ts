@@ -13,6 +13,23 @@ import { PG_UNIQUE_VIOLATION } from "@/lib/validation";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
+/**
+ * A paid invoice is locked, and so are the invoices before it (they set its deduction "bisher verrechnet"): only the
+ * status of the paid invoice itself can still be changed (e.g. back to Versendet to unlock it).
+ */
+async function invoiceLock(id: string) {
+  const supabase = await createClient();
+  const { data: invoice } = await supabase.from("fee_invoices").select("offer_id, status, created_at").eq("id", id).maybeSingle();
+  if (!invoice) return null;
+  const { count } = await supabase
+    .from("fee_invoices")
+    .select("id", { count: "exact", head: true })
+    .eq("offer_id", invoice.offer_id)
+    .eq("status", "paid")
+    .gt("created_at", invoice.created_at);
+  return { paid: invoice.status === "paid", laterPaid: (count ?? 0) > 0 };
+}
+
 const addDays = (date: Date, days: number) => new Date(date.getTime() + days * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Zurich" });
 
 /**
@@ -68,10 +85,14 @@ export async function saveFeeInvoice(id: string, payload: unknown): Promise<{ er
   const header = headerSchema.safeParse(p.header);
   if (!z.uuid().safeParse(id).success || !header.success) return { error: "invalidInput" };
 
+  const lock = await invoiceLock(id);
+  if (!lock) return { error: "invalidInput" };
+  if (lock.laterPaid) return { error: "invoiceLocked" };
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("fee_invoices")
-    .update({ ...header.data, data: parseFeeInvoiceData(p.data) as unknown as Json })
+    .update(lock.paid ? { status: header.data.status } : { ...header.data, data: parseFeeInvoiceData(p.data) as unknown as Json })
     .eq("id", id);
   if (error) return { error: error.code === PG_UNIQUE_VIOLATION ? "invoiceNumberExists" : "saveFailed" };
 
@@ -82,6 +103,8 @@ export async function saveFeeInvoice(id: string, payload: unknown): Promise<{ er
 export async function deleteFeeInvoice(id: string): Promise<FormState> {
   await assertRole("admin", "planer");
   if (!z.uuid().safeParse(id).success) return { error: "invalidInput" };
+  const lock = await invoiceLock(id);
+  if (lock?.paid || lock?.laterPaid) return { error: "invoiceLocked" };
   const supabase = await createClient();
   const { data: invoice } = await supabase.from("fee_invoices").select("offer:fee_offers(project_id)").eq("id", id).maybeSingle();
   const { error } = await supabase.from("fee_invoices").delete().eq("id", id);

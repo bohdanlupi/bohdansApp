@@ -82,6 +82,9 @@ export async function saveFeeOffer(id: string, payload: unknown): Promise<{ erro
   if (!z.uuid().safeParse(id).success || !header.success) return { error: "invalidInput" };
 
   const supabase = await createClient();
+  // The fees of an offer with a paid invoice are the basis of that invoice: locked.
+  const { count } = await supabase.from("fee_invoices").select("id", { count: "exact", head: true }).eq("offer_id", id).eq("status", "paid");
+  if (count) return { error: "offerLocked" };
   const { error } = await supabase
     .from("fee_offers")
     .update({ ...header.data, data: parseFeeOfferData(p.data) as unknown as Json })

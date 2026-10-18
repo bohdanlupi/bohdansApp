@@ -86,7 +86,9 @@
     "heatingStructureExists": "Das LV enthält bereits eine Kapitelstruktur 24.",
     "noTradeChosen": "Bitte mindestens einen Fachbereich wählen.",
     "offerNumberExists": "Diese Offertnummer gibt es bereits.",
-    "invoiceNumberExists": "Diese Rechnungsnummer gibt es bereits."
+    "invoiceNumberExists": "Diese Rechnungsnummer gibt es bereits.",
+    "invoiceLocked": "Diese Rechnung ist bezahlt und gesperrt.",
+    "offerLocked": "Diese Offerte hat eine bezahlte Rechnung und ist gesperrt."
   },
   "projects": {
     "title": "Projekte",
@@ -3666,7 +3668,8 @@
       "removeCustom": "Zeile entfernen",
       "addCustom": "Eigene Zeile"
     },
-    "emptyProjectText": "Erstellen Sie eine Honorarofferte nach SIA 108; Name, Adresse, Sprache und Bauherr werden aus dem Projekt übernommen."
+    "emptyProjectText": "Erstellen Sie eine Honorarofferte nach SIA 108; Name, Adresse, Sprache und Bauherr werden aus dem Projekt übernommen.",
+    "lockedHint": "Gesperrt, weil eine Rechnung zu dieser Offerte bezahlt ist. Weitere Rechnungen können Sie trotzdem erstellen."
   },
   "feeInvoices": {
     "title": "Honorarrechnungen",
@@ -3723,7 +3726,9 @@
       "net": "Rechnungsbetrag exkl. MwSt.",
       "vat": "MwSt. {rate} %",
       "total": "Rechnungsbetrag inkl. MwSt."
-    }
+    },
+    "lockedPaid": "Bezahlt – die Rechnung ist gesperrt. Um sie zu ändern, Status zurück auf «Versendet» setzen.",
+    "lockedLater": "Gesperrt, weil eine spätere Rechnung dieser Offerte bezahlt ist (sie zieht diese Rechnung ab)."
   },
   "feeSettings": {
     "description": "Vorgaben für neue Honorarofferten. Bestehende Offerten behalten ihre Werte.",

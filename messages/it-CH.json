@@ -86,7 +86,9 @@
     "heatingStructureExists": "L’elenco contiene già una struttura 24.",
     "noTradeChosen": "Scegliere almeno un settore.",
     "offerNumberExists": "Questo numero d’offerta esiste già.",
-    "invoiceNumberExists": "Questo numero di fattura esiste già."
+    "invoiceNumberExists": "Questo numero di fattura esiste già.",
+    "invoiceLocked": "Questa fattura è pagata e bloccata.",
+    "offerLocked": "Questa offerta ha una fattura pagata ed è bloccata."
   },
   "projects": {
     "title": "Progetti",
@@ -3666,7 +3668,8 @@
       "removeCustom": "Rimuovere la riga",
       "addCustom": "Riga propria"
     },
-    "emptyProjectText": "Create un’offerta d’onorario secondo SIA 108; nome, indirizzo, lingua e committente sono ripresi dal progetto."
+    "emptyProjectText": "Create un’offerta d’onorario secondo SIA 108; nome, indirizzo, lingua e committente sono ripresi dal progetto.",
+    "lockedHint": "Bloccata, perché una fattura di questa offerta è pagata. Potete comunque creare altre fatture."
   },
   "feeInvoices": {
     "title": "Fatture d’onorario",
@@ -3723,7 +3726,9 @@
       "net": "Importo della fattura IVA esclusa",
       "vat": "IVA {rate} %",
       "total": "Importo della fattura IVA inclusa"
-    }
+    },
+    "lockedPaid": "Pagata – la fattura è bloccata. Per modificarla, reimpostare lo stato su «Inviata».",
+    "lockedLater": "Bloccata, perché una fattura successiva di questa offerta è pagata (deduce questa fattura)."
   },
   "feeSettings": {
     "description": "Valori predefiniti per le nuove offerte d’onorario. Le offerte esistenti mantengono i loro valori.",

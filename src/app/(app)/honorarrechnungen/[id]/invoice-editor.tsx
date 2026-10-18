@@ -42,6 +42,7 @@ export function FeeInvoiceEditor({
   previous,
   vatRate,
   editable,
+  laterPaid,
 }: {
   id: string;
   initialHeader: FeeInvoiceHeaderState;
@@ -51,11 +52,16 @@ export function FeeInvoiceEditor({
   previous: { number: string; data: FeeInvoiceData } | null;
   vatRate: number;
   editable: boolean;
+  /** A later invoice of the offer is paid: this one sets its deduction, so it is locked completely. */
+  laterPaid: boolean;
 }) {
   const t = useTranslations("feeInvoices");
   const language = localeToLanguage(useLocale() as Locale);
   const { plan, update, status } = usePlan<State>(id, { header: initialHeader, data: initialData }, editable, saveFeeInvoice);
   const { header, data } = plan;
+  // Paid invoices are locked; only their status can be changed (back), unless a later invoice is paid as well.
+  const canEdit = editable && header.status !== "paid" && !laterPaid;
+  const canSetStatus = editable && !laterPaid;
   const totals = useMemo(() => invoiceTotals(offer.data, vatRate, data, previous?.data ?? null), [offer.data, vatRate, data, previous]);
 
   const setHeader = (change: Partial<FeeInvoiceHeaderState>) => update((s) => ({ ...s, header: { ...s.header, ...change } }));
@@ -66,7 +72,7 @@ export function FeeInvoiceEditor({
   const date = (key: "invoice_date" | "due_date") => (
     <div className="space-y-1.5">
       <Label htmlFor={`invoice-${key}`}>{t(`fields.${key}`)}</Label>
-      <CommitInput id={`invoice-${key}`} type="date" value={header[key] ?? ""} required={key === "invoice_date"} disabled={!editable} onCommit={(v) => setHeader({ [key]: v || null })} />
+      <CommitInput id={`invoice-${key}`} type="date" value={header[key] ?? ""} required={key === "invoice_date"} disabled={!canEdit} onCommit={(v) => setHeader({ [key]: v || null })} />
     </div>
   );
 
@@ -82,7 +88,7 @@ export function FeeInvoiceEditor({
 
   const pctInput = (label: string, value: number, prev: number, onChange: (v: number | null) => void) => (
     <div className="flex items-center gap-1">
-      <NumberField label={label} value={value} decimals={0} disabled={!editable} className="w-20" onChange={onChange} />
+      <NumberField label={label} value={value} decimals={0} disabled={!canEdit} className="w-20" onChange={onChange} />
       <span className="text-muted-foreground">%</span>
       {value < prev && <span className="text-xs text-destructive">{t("belowPrevious")}</span>}
     </div>
@@ -131,7 +137,7 @@ export function FeeInvoiceEditor({
             <FileText />
             {t("pdf")}
           </a>
-          {editable && (
+          {canEdit && (
             <ConfirmButton
               variant="outline"
               label={t("delete")}
@@ -145,15 +151,19 @@ export function FeeInvoiceEditor({
         </div>
       </div>
 
+      {(header.status === "paid" || laterPaid) && (
+        <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">{laterPaid ? t("lockedLater") : t("lockedPaid")}</p>
+      )}
+
       <Section title={t("sections.invoice")} collapseKey="fee-invoice:header">
         <div className="grid gap-4 sm:grid-cols-4">
           <div className="space-y-1.5">
             <Label htmlFor="invoice-number">{t("fields.number")}</Label>
-            <CommitInput id="invoice-number" value={header.number} required disabled={!editable} onCommit={(v) => v && setHeader({ number: v })} />
+            <CommitInput id="invoice-number" value={header.number} required disabled={!canEdit} onCommit={(v) => v && setHeader({ number: v })} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="invoice-status">{t("fields.status")}</Label>
-            <NativeSelect id="invoice-status" value={header.status} disabled={!editable} onChange={(e) => setHeader({ status: e.target.value as FeeInvoiceStatus })}>
+            <NativeSelect id="invoice-status" value={header.status} disabled={!canSetStatus} onChange={(e) => setHeader({ status: e.target.value as FeeInvoiceStatus })}>
               {feeInvoiceStatuses.map((s) => (
                 <option key={s} value={s}>
                   {t(`status.${s}`)}
@@ -165,7 +175,7 @@ export function FeeInvoiceEditor({
           {date("due_date")}
           <div className="space-y-1.5 sm:col-span-4">
             <Label htmlFor="invoice-text">{t("fields.text")}</Label>
-            <CommitInput id="invoice-text" multiline rows={2} value={data.text} placeholder={t("textPlaceholder")} disabled={!editable} onCommit={(text) => setData((d) => ({ ...d, text }))} />
+            <CommitInput id="invoice-text" multiline rows={2} value={data.text} placeholder={t("textPlaceholder")} disabled={!canEdit} onCommit={(text) => setData((d) => ({ ...d, text }))} />
           </div>
         </div>
       </Section>
@@ -176,7 +186,7 @@ export function FeeInvoiceEditor({
             <div key={tr.trade}>
               <div className="mb-1 flex items-center justify-between gap-2">
                 <p className="font-medium">{tradeNames[tr.trade][language]}</p>
-                {editable && (
+                {canEdit && (
                   <Button
                     variant="ghost"
                     size="sm"

@@ -36,7 +36,7 @@ export default async function FeeInvoicePage({ params }: PageProps<"/honorarrech
   const { offer } = invoice;
 
   const supabase = await createClient();
-  const [{ data: previous }, { data: firm }] = await Promise.all([
+  const [{ data: previous }, { data: firm }, { count: laterPaid }] = await Promise.all([
     supabase
       .from("fee_invoices")
       .select("number, data")
@@ -46,6 +46,7 @@ export default async function FeeInvoicePage({ params }: PageProps<"/honorarrech
       .limit(1)
       .maybeSingle(),
     supabase.from("firm_settings").select("vat_rate").eq("id", true).single(),
+    supabase.from("fee_invoices").select("id", { count: "exact", head: true }).eq("offer_id", offer.id).eq("status", "paid").gt("created_at", invoice.created_at),
   ]);
 
   return (
@@ -70,6 +71,7 @@ export default async function FeeInvoicePage({ params }: PageProps<"/honorarrech
         previous={previous ? { number: previous.number, data: parseFeeInvoiceData(previous.data) } : null}
         vatRate={firm?.vat_rate ?? 0}
         editable={profile.role !== "viewer"}
+        laterPaid={Boolean(laterPaid)}
       />
     </div>
   );

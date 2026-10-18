@@ -33,13 +33,15 @@ export default async function FeeOfferPage({ params }: PageProps<"/honoraroffert
   const t = await getTranslations("feeOffers");
 
   const supabase = await createClient();
-  const [{ data: companies }, { data: contacts }, { data: firm }] = await Promise.all([
+  const [{ data: companies }, { data: contacts }, { data: firm }, { count: paidInvoices }] = await Promise.all([
     supabase.from("companies").select("id, name, city").eq("archived", false).order("name"),
     offer.company_id
       ? supabase.from("contacts").select("id, first_name, last_name, function").eq("company_id", offer.company_id).order("last_name")
       : Promise.resolve({ data: [] }),
     supabase.from("firm_settings").select("vat_rate, fee_settings").eq("id", true).single(),
+    supabase.from("fee_invoices").select("id", { count: "exact", head: true }).eq("offer_id", offer.id).eq("status", "paid"),
   ]);
+  const locked = Boolean(paidInvoices);
   const settings = parseFeeSettings(firm?.fee_settings);
 
   return (
@@ -73,7 +75,9 @@ export default async function FeeOfferPage({ params }: PageProps<"/honoraroffert
         initialContacts={contacts ?? []}
         vatRate={firm?.vat_rate ?? 0}
         defaults={{ rates: settings.rates, siaRateId: settings.siaRateId, z: settings.z }}
-        editable={profile.role !== "viewer"}
+        editable={profile.role !== "viewer" && !locked}
+        locked={locked}
+        canInvoice={profile.role !== "viewer"}
       />
     </div>
   );
