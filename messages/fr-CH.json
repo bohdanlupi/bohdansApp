@@ -26,11 +26,12 @@
   },
   "nav": {
     "projects": "Projets",
+    "debtors": "Débiteurs",
+    "creditors": "Créanciers",
     "addresses": "Adresses",
     "catalogs": "Catalogues",
     "settings": "Paramètres",
-    "profile": "Mon profil",
-    "feeOffers": "Offres d’honoraires"
+    "profile": "Mon profil"
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -3726,7 +3727,8 @@
       "status": "Statut"
     },
     "conditionsPlaceholder": "p. ex. hypothèses, délimitations, délais (une ligne par point)",
-    "conditionsHint": "Chapitre propre dans le PDF si les bases et la description du projet ne suffisent pas ; vide = pas de chapitre."
+    "conditionsHint": "Chapitre propre dans le PDF si les bases et la description du projet ne suffisent pas ; vide = pas de chapitre.",
+    "debtorsDescription": "Factures d’honoraires ouvertes et offres d’honoraires selon SIA 108 ou avec positions libres."
   },
   "feeInvoices": {
     "title": "Factures d’honoraires",
@@ -3838,6 +3840,93 @@
       "passed": "en retard de {days, plural, one {# jour} other {# jours}}",
       "today": "échue aujourd’hui",
       "soon": "échue dans {days, plural, one {# jour} other {# jours}}"
+    }
+  },
+  "creditors": {
+    "title": "Créanciers",
+    "description": "Factures reçues – à payer et payées – avec justificatif, et le décompte TVA par trimestre.",
+    "new": "Nouvelle facture",
+    "newDescription": "Saisir une facture reçue avec fournisseur, montant TVA incluse et justificatif.",
+    "readOnly": "Lecture seule : vous pouvez consulter les factures, mais pas les modifier.",
+    "uploadFailed": "Le justificatif n’a pas pu être téléversé.",
+    "fileType": "Uniquement PDF, JPEG ou PNG.",
+    "fileSize": "Le justificatif dépasse 10 Mo.",
+    "newSupplier": "Nouveau fournisseur",
+    "createSupplier": "Créer le fournisseur",
+    "supplierFailed": "Le fournisseur n’a pas pu être créé.",
+    "supplierHint": "Enregistré dans le carnet d’adresses avec la catégorie Fournisseur, complétable là-bas.",
+    "noProject": "Aucun projet",
+    "split": "Net CHF {net} · impôt préalable CHF {vat} (chiffre {ziffer})",
+    "splitEmpty": "Saisir le montant TVA incluse – le net et l’impôt préalable sont calculés.",
+    "document": "Justificatif",
+    "removeDocument": "Retirer",
+    "documentHint": "PDF, JPEG ou PNG jusqu’à 10 Mo. Joint en annexe au décompte TVA.",
+    "deleteTitle": "Supprimer la facture ?",
+    "deleteText": "La facture et son justificatif seront définitivement supprimés.",
+    "markPaid": "Payée",
+    "openTitle": "Factures ouvertes",
+    "noOpenTitle": "Aucune facture ouverte",
+    "noOpenText": "Saisir les factures reçues avec « Nouvelle facture ».",
+    "quarterInvoices": "Factures reçues {quarter}",
+    "noQuarterInvoices": "Aucune facture datée de ce trimestre.",
+    "sections": {
+      "invoice": "Facture",
+      "payment": "Paiement",
+      "document": "Justificatif"
+    },
+    "fields": {
+      "supplier": "Fournisseur",
+      "number": "N° de facture",
+      "invoiceDate": "Date de facture",
+      "dueDate": "Payable jusqu’au",
+      "project": "Projet",
+      "total": "Montant TVA incluse",
+      "vatRate": "Taux de TVA",
+      "category": "Catégorie",
+      "description": "Description",
+      "status": "Statut",
+      "paidDate": "Payée le"
+    },
+    "rates": {
+      "0": "0 % sans TVA",
+      "8_1": "8.1 % taux normal",
+      "2_6": "2.6 % taux réduit",
+      "3_8": "3.8 % hébergement"
+    },
+    "categories": {
+      "material": "Matériel",
+      "subcontractor": "Prestations de tiers",
+      "office": "Bureau/administration",
+      "vehicle": "Véhicule",
+      "software": "Logiciels/IT",
+      "rent": "Loyer",
+      "investment": "Investissement",
+      "other": "Autres"
+    },
+    "status": {
+      "open": "Ouverte",
+      "paid": "Payée"
+    },
+    "columns": {
+      "dueOrPaid": "Payable / payée",
+      "vat": "TVA",
+      "total": "Montant TVA incl."
+    },
+    "vat": {
+      "title": "Décompte TVA {quarter}",
+      "quarter": "Trimestre",
+      "year": "Année",
+      "show": "Afficher",
+      "pdf": "PDF avec justificatifs",
+      "summary": "Méthode effective, contre-prestations convenues · {from} – {to}",
+      "revenue": "Contre-prestations convenues ({count, plural, one {# facture} other {# factures}})",
+      "outputTax": "Impôt {rate} % sur CHF {base}",
+      "outputTaxTotal": "Total de l’impôt dû",
+      "inputTax400": "Impôt préalable sur matériel et prestations de services",
+      "inputTax405": "Impôt préalable sur investissements et autres charges",
+      "inputTaxTotal": "Total impôt préalable ({count, plural, one {# facture} other {# factures}})",
+      "toPay": "À payer",
+      "credit": "Solde en faveur"
     }
   }
 }

@@ -26,11 +26,12 @@
   },
   "nav": {
     "projects": "Projekte",
+    "debtors": "Debitoren",
+    "creditors": "Kreditoren",
     "addresses": "Adressen",
     "catalogs": "Kataloge",
     "settings": "Einstellungen",
-    "profile": "Mein Profil",
-    "feeOffers": "Honorarofferten"
+    "profile": "Mein Profil"
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -3726,7 +3727,8 @@
       "status": "Status"
     },
     "conditionsPlaceholder": "z. B. Annahmen, Abgrenzungen, Termine (eine Zeile pro Punkt)",
-    "conditionsHint": "Eigenes Kapitel im PDF, wenn Grundlagen und Projektbeschrieb nicht reichen; leer = kein Kapitel."
+    "conditionsHint": "Eigenes Kapitel im PDF, wenn Grundlagen und Projektbeschrieb nicht reichen; leer = kein Kapitel.",
+    "debtorsDescription": "Offene Honorarrechnungen und Honorarofferten nach SIA 108 oder mit freien Positionen."
   },
   "feeInvoices": {
     "title": "Honorarrechnungen",
@@ -3838,6 +3840,93 @@
       "passed": "überfällig seit {days, plural, one {# Tag} other {# Tagen}}",
       "today": "heute fällig",
       "soon": "fällig in {days, plural, one {# Tag} other {# Tagen}}"
+    }
+  },
+  "creditors": {
+    "title": "Kreditoren",
+    "description": "Erhaltene Rechnungen – zu bezahlen und bezahlt – mit Beleg, und die MWST-Abrechnung pro Quartal.",
+    "new": "Neue Rechnung",
+    "newDescription": "Erhaltene Rechnung mit Lieferant, Betrag inkl. MWST und Beleg erfassen.",
+    "readOnly": "Nur lesen: Sie können Rechnungen ansehen, aber nicht ändern.",
+    "uploadFailed": "Der Beleg konnte nicht hochgeladen werden.",
+    "fileType": "Nur PDF, JPEG oder PNG.",
+    "fileSize": "Der Beleg ist grösser als 10 MB.",
+    "newSupplier": "Neuer Lieferant",
+    "createSupplier": "Lieferant anlegen",
+    "supplierFailed": "Der Lieferant konnte nicht angelegt werden.",
+    "supplierHint": "Wird im Adressbuch mit der Kategorie Lieferant gespeichert und kann dort ergänzt werden.",
+    "noProject": "Kein Projekt",
+    "split": "Netto CHF {net} · Vorsteuer CHF {vat} (Ziffer {ziffer})",
+    "splitEmpty": "Betrag inkl. MWST eingeben – Netto und Vorsteuer werden berechnet.",
+    "document": "Beleg",
+    "removeDocument": "Entfernen",
+    "documentHint": "PDF, JPEG oder PNG bis 10 MB. Wird der MWST-Abrechnung als Beilage angefügt.",
+    "deleteTitle": "Rechnung löschen?",
+    "deleteText": "Die Rechnung und ihr Beleg werden endgültig gelöscht.",
+    "markPaid": "Bezahlt",
+    "openTitle": "Offene Rechnungen",
+    "noOpenTitle": "Keine offenen Rechnungen",
+    "noOpenText": "Erhaltene Rechnungen mit «Neue Rechnung» erfassen.",
+    "quarterInvoices": "Erhaltene Rechnungen {quarter}",
+    "noQuarterInvoices": "Keine Rechnungen mit Rechnungsdatum in diesem Quartal.",
+    "sections": {
+      "invoice": "Rechnung",
+      "payment": "Zahlung",
+      "document": "Beleg"
+    },
+    "fields": {
+      "supplier": "Lieferant",
+      "number": "Rechnungs-Nr.",
+      "invoiceDate": "Rechnungsdatum",
+      "dueDate": "Zahlbar bis",
+      "project": "Projekt",
+      "total": "Betrag inkl. MWST",
+      "vatRate": "MWST-Satz",
+      "category": "Kategorie",
+      "description": "Beschreibung",
+      "status": "Status",
+      "paidDate": "Bezahlt am"
+    },
+    "rates": {
+      "0": "0 % ohne MWST",
+      "8_1": "8.1 % Normalsatz",
+      "2_6": "2.6 % reduziert",
+      "3_8": "3.8 % Beherbergung"
+    },
+    "categories": {
+      "material": "Material",
+      "subcontractor": "Fremdleistung",
+      "office": "Büro/Verwaltung",
+      "vehicle": "Fahrzeug",
+      "software": "Software/IT",
+      "rent": "Miete",
+      "investment": "Investition",
+      "other": "Übriges"
+    },
+    "status": {
+      "open": "Offen",
+      "paid": "Bezahlt"
+    },
+    "columns": {
+      "dueOrPaid": "Zahlbar bis / bezahlt",
+      "vat": "MWST",
+      "total": "Betrag inkl. MWST"
+    },
+    "vat": {
+      "title": "MWST-Abrechnung {quarter}",
+      "quarter": "Quartal",
+      "year": "Jahr",
+      "show": "Anzeigen",
+      "pdf": "PDF mit Belegen",
+      "summary": "Effektive Methode, vereinbarte Entgelte · {from} – {to}",
+      "revenue": "Vereinbarte Entgelte ({count, plural, one {# Rechnung} other {# Rechnungen}})",
+      "outputTax": "Steuer {rate} % auf CHF {base}",
+      "outputTaxTotal": "Total geschuldete Steuer",
+      "inputTax400": "Vorsteuer Material und Dienstleistungen",
+      "inputTax405": "Vorsteuer Investitionen und übriger Betriebsaufwand",
+      "inputTaxTotal": "Total Vorsteuer ({count, plural, one {# Rechnung} other {# Rechnungen}})",
+      "toPay": "Zu bezahlen",
+      "credit": "Guthaben"
     }
   }
 }

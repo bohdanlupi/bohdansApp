@@ -20,9 +20,9 @@ import { type FeeOfferStatus, feeOfferStatuses, phaseLabel, tradeNames } from "@
 import { formatMoney } from "@/lib/number-input";
 import type { AppLanguage } from "@/lib/supabase/types";
 
-import { getCompanyContacts } from "../../projekte/actions";
-import { CreateInvoiceButton } from "../../honorarrechnungen/create-invoice-button";
-import { createProjectFromOffer, deleteFeeOffer, saveFeeOffer } from "../actions";
+import { getCompanyContacts } from "../../../projekte/actions";
+import { CreateInvoiceButton } from "../../rechnungen/create-invoice-button";
+import { createProjectFromOffer, deleteFeeOffer, saveFeeOffer } from "../../actions";
 import { CommitInput } from "@/components/planning/commit-input";
 import { type FeeDefaults, FeeSection } from "./fee-section";
 import { PositionsSection } from "./positions-section";

@@ -66,7 +66,7 @@ export async function createFeeInvoice(offerId: string): Promise<FormState> {
   if (error || !row) return { error: error?.code === PG_UNIQUE_VIOLATION ? "invoiceNumberExists" : "saveFailed" };
 
   revalidatePath(`/projekte/${project.id}/honorar`);
-  redirect(`/honorarrechnungen/${row.id}`);
+  redirect(`/debitoren/rechnungen/${row.id}`);
 }
 
 const headerSchema = z.object({

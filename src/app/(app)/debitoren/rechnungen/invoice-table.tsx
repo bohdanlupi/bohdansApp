@@ -58,7 +58,7 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceRow[] }) {
           {invoices.map((i) => (
             <TableRow key={i.id} className="relative">
               <TableCell className="pl-4 font-medium tabular-nums">
-                <Link href={`/honorarrechnungen/${i.id}`} className="after:absolute after:inset-0">
+                <Link href={`/debitoren/rechnungen/${i.id}`} className="after:absolute after:inset-0">
                   {i.number}
                 </Link>
               </TableCell>

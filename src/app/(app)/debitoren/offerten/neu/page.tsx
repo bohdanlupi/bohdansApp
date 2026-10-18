@@ -7,7 +7,7 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { param } from "@/lib/validation";
 
-import { loadProject } from "../../projekte/[id]/load-project";
+import { loadProject } from "../../../projekte/[id]/load-project";
 import { NewFeeOfferForm } from "./new-offer-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,8 +15,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("new") };
 }
 
-/** New offer of a project (/honorarofferten/neu?projekt=<id>): prefilled with name, language and Bauherr with its address. */
-export default async function NewFeeOfferPage({ searchParams }: PageProps<"/honorarofferten/neu">) {
+/** New offer of a project (/debitoren/offerten/neu?projekt=<id>): prefilled with name, language and Bauherr with its address. */
+export default async function NewFeeOfferPage({ searchParams }: PageProps<"/debitoren/offerten/neu">) {
   const profile = await requireProfile();
   const project = await loadProject(param((await searchParams).projekt) ?? "");
   if (!project) redirect("/projekte");

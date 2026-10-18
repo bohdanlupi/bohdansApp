@@ -14,18 +14,18 @@ import { feeOfferStatuses } from "@/lib/fees/options";
 import { createClient } from "@/lib/supabase/server";
 import { param, searchWords } from "@/lib/validation";
 
-import { invoiceRows } from "../honorarrechnungen/invoice-rows";
-import { InvoiceStatusBadge } from "../honorarrechnungen/invoice-table";
+import { invoiceRows } from "./rechnungen/invoice-rows";
+import { InvoiceStatusBadge } from "./rechnungen/invoice-table";
 import { isFeeOfferStatus } from "./offer-table";
 import { type OverviewRow, OverviewTable } from "./overview-table";
 import { FeeStatusBadge } from "./status-badge";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("nav");
-  return { title: t("feeOffers") };
+  return { title: t("debtors") };
 }
 
-export default async function FeeOffersPage({ searchParams }: PageProps<"/honorarofferten">) {
+export default async function FeeOffersPage({ searchParams }: PageProps<"/debitoren">) {
   await requireProfile();
   const t = await getTranslations();
   const search = await searchParams;
@@ -66,7 +66,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
     c ? { name: [c.first_name, c.last_name].filter(Boolean).join(" "), phone: c.mobile || c.phone, email: c.email } : null;
   const invoiceRow = (i: (typeof allInvoices)[number]): OverviewRow => ({
     id: i.id,
-    href: `/honorarrechnungen/${i.id}`,
+    href: `/debitoren/rechnungen/${i.id}`,
     projectNumber: i.project?.number || null,
     title: i.project?.title ?? "",
     number: `${i.number} · ${i.offerNumber}`,
@@ -84,7 +84,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
     const totals = feeTotals(parseFeeOfferData(o.data), vatRate);
     return {
       id: o.id,
-      href: `/honorarofferten/${o.id}`,
+      href: `/debitoren/offerten/${o.id}`,
       projectNumber: o.project?.number ?? null,
       title: o.title,
       number: o.number,
@@ -105,8 +105,8 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
   return (
     <>
       <PageHeader
-        title={t("feeOffers.title")}
-        description={t("feeOffers.description")}
+        title={t("nav.debtors")}
+        description={t("feeOffers.debtorsDescription")}
       />
 
       {openInvoices.length > 0 && (
@@ -116,7 +116,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
         </section>
       )}
 
-      {openInvoices.length > 0 && <h2 className="mb-3 text-lg font-semibold">{t("feeOffers.title")}</h2>}
+      <h2 className="mb-3 text-lg font-semibold">{t("feeOffers.title")}</h2>
       {isEmpty && !filtered ? (
         <EmptyState icon={FileSignature} title={t("feeOffers.emptyTitle")} text={t("feeOffers.emptyText")} />
       ) : (
@@ -135,7 +135,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
               {t("common.search")}
             </Button>
             {filtered && (
-              <Link href="/honorarofferten" className={buttonVariants({ variant: "ghost" })}>
+              <Link href="/debitoren" className={buttonVariants({ variant: "ghost" })}>
                 {t("common.reset")}
               </Link>
             )}

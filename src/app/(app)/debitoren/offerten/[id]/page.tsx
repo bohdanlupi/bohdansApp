@@ -19,13 +19,13 @@ async function loadOffer(id: string) {
   return data;
 }
 
-export async function generateMetadata({ params }: PageProps<"/honorarofferten/[id]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/debitoren/offerten/[id]">): Promise<Metadata> {
   const offer = await loadOffer((await params).id);
   const t = await getTranslations("feeOffers");
   return { title: offer ? `${offer.number} ${offer.title}` : t("title") };
 }
 
-export default async function FeeOfferPage({ params }: PageProps<"/honorarofferten/[id]">) {
+export default async function FeeOfferPage({ params }: PageProps<"/debitoren/offerten/[id]">) {
   const { id } = await params;
   const profile = await requireProfile();
   const offer = await loadOffer(id);
@@ -47,7 +47,7 @@ export default async function FeeOfferPage({ params }: PageProps<"/honoraroffert
   return (
     <div className="space-y-4">
       <Link
-        href={offer.project ? `/projekte/${offer.project.id}/honorar` : "/honorarofferten"}
+        href={offer.project ? `/projekte/${offer.project.id}/honorar` : "/debitoren"}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />

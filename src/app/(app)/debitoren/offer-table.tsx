@@ -47,7 +47,7 @@ export function OfferTable({ offers, vatRate }: { offers: OfferRow[]; vatRate: n
             <TableRow key={o.id} className="relative">
               <TableCell className="pl-4 font-medium tabular-nums">{o.number}</TableCell>
               <TableCell>
-                <Link href={`/honorarofferten/${o.id}`} className="font-medium after:absolute after:inset-0">
+                <Link href={`/debitoren/offerten/${o.id}`} className="font-medium after:absolute after:inset-0">
                   {o.title}
                 </Link>
               </TableCell>

@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/pdf/**": ["./public/brand/**"],
   },
+  // Honorarofferten and Honorarrechnungen moved under Debitoren.
+  async redirects() {
+    return [
+      { source: "/honorarofferten", destination: "/debitoren", permanent: true },
+      { source: "/honorarofferten/:path*", destination: "/debitoren/offerten/:path*", permanent: true },
+      { source: "/honorarrechnungen/:path*", destination: "/debitoren/rechnungen/:path*", permanent: true },
+    ];
+  },
   experimental: {
     serverActions: {
       // The address import sends up to 10'000 CSV rows in one action (Vercel caps bodies at 4.5 MB).

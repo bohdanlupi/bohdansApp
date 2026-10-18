@@ -14,7 +14,7 @@ import { type FeeSettings, MAX_RATES } from "@/lib/fees/settings-schema";
 import { feePhases, siaColumns } from "@/lib/fees/sia108";
 import { cn } from "@/lib/utils";
 
-import { saveFeeSettings } from "../../honorarofferten/actions";
+import { saveFeeSettings } from "../../debitoren/actions";
 import { CommitInput } from "@/components/planning/commit-input";
 
 /** Firm-wide SIA 108 defaults; new fee offers copy them. */

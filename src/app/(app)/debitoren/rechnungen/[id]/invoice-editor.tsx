@@ -126,7 +126,7 @@ export function FeeInvoiceEditor({
           </h1>
           <p className="text-sm text-muted-foreground tabular-nums">
             {t("ofOffer")}{" "}
-            <Link href={`/honorarofferten/${offer.id}`} className="underline-offset-2 hover:underline">
+            <Link href={`/debitoren/offerten/${offer.id}`} className="underline-offset-2 hover:underline">
               {offer.number}
             </Link>
             {" · "}

@@ -26,11 +26,12 @@
   },
   "nav": {
     "projects": "Progetti",
+    "debtors": "Debitori",
+    "creditors": "Creditori",
     "addresses": "Indirizzi",
     "catalogs": "Cataloghi",
     "settings": "Impostazioni",
-    "profile": "Il mio profilo",
-    "feeOffers": "Offerte d’onorario"
+    "profile": "Il mio profilo"
   },
   "auth": {
     "loginTitle": "Accesso",
@@ -3726,7 +3727,8 @@
       "status": "Stato"
     },
     "conditionsPlaceholder": "p. es. ipotesi, delimitazioni, scadenze (una riga per punto)",
-    "conditionsHint": "Capitolo proprio nel PDF se basi e descrizione del progetto non bastano; vuoto = nessun capitolo."
+    "conditionsHint": "Capitolo proprio nel PDF se basi e descrizione del progetto non bastano; vuoto = nessun capitolo.",
+    "debtorsDescription": "Fatture d’onorario aperte e offerte d’onorario secondo SIA 108 o con posizioni libere."
   },
   "feeInvoices": {
     "title": "Fatture d’onorario",
@@ -3838,6 +3840,93 @@
       "passed": "in ritardo di {days, plural, one {# giorno} other {# giorni}}",
       "today": "scade oggi",
       "soon": "scade tra {days, plural, one {# giorno} other {# giorni}}"
+    }
+  },
+  "creditors": {
+    "title": "Creditori",
+    "description": "Fatture ricevute – da pagare e pagate – con giustificativo, e il rendiconto IVA per trimestre.",
+    "new": "Nuova fattura",
+    "newDescription": "Registrare una fattura ricevuta con fornitore, importo IVA inclusa e giustificativo.",
+    "readOnly": "Sola lettura: può consultare le fatture, ma non modificarle.",
+    "uploadFailed": "Non è stato possibile caricare il giustificativo.",
+    "fileType": "Solo PDF, JPEG o PNG.",
+    "fileSize": "Il giustificativo supera 10 MB.",
+    "newSupplier": "Nuovo fornitore",
+    "createSupplier": "Crea fornitore",
+    "supplierFailed": "Non è stato possibile creare il fornitore.",
+    "supplierHint": "Salvato nella rubrica con la categoria Fornitore, completabile lì.",
+    "noProject": "Nessun progetto",
+    "split": "Netto CHF {net} · imposta precedente CHF {vat} (cifra {ziffer})",
+    "splitEmpty": "Inserire l’importo IVA inclusa – netto e imposta precedente vengono calcolati.",
+    "document": "Giustificativo",
+    "removeDocument": "Rimuovi",
+    "documentHint": "PDF, JPEG o PNG fino a 10 MB. Allegato al rendiconto IVA.",
+    "deleteTitle": "Eliminare la fattura?",
+    "deleteText": "La fattura e il suo giustificativo saranno eliminati definitivamente.",
+    "markPaid": "Pagata",
+    "openTitle": "Fatture aperte",
+    "noOpenTitle": "Nessuna fattura aperta",
+    "noOpenText": "Registrare le fatture ricevute con «Nuova fattura».",
+    "quarterInvoices": "Fatture ricevute {quarter}",
+    "noQuarterInvoices": "Nessuna fattura con data in questo trimestre.",
+    "sections": {
+      "invoice": "Fattura",
+      "payment": "Pagamento",
+      "document": "Giustificativo"
+    },
+    "fields": {
+      "supplier": "Fornitore",
+      "number": "N. fattura",
+      "invoiceDate": "Data fattura",
+      "dueDate": "Pagabile entro",
+      "project": "Progetto",
+      "total": "Importo IVA inclusa",
+      "vatRate": "Aliquota IVA",
+      "category": "Categoria",
+      "description": "Descrizione",
+      "status": "Stato",
+      "paidDate": "Pagata il"
+    },
+    "rates": {
+      "0": "0 % senza IVA",
+      "8_1": "8.1 % normale",
+      "2_6": "2.6 % ridotta",
+      "3_8": "3.8 % alloggio"
+    },
+    "categories": {
+      "material": "Materiale",
+      "subcontractor": "Prestazioni di terzi",
+      "office": "Ufficio/amministrazione",
+      "vehicle": "Veicolo",
+      "software": "Software/IT",
+      "rent": "Affitto",
+      "investment": "Investimento",
+      "other": "Altro"
+    },
+    "status": {
+      "open": "Aperta",
+      "paid": "Pagata"
+    },
+    "columns": {
+      "dueOrPaid": "Pagabile / pagata",
+      "vat": "IVA",
+      "total": "Importo IVA incl."
+    },
+    "vat": {
+      "title": "Rendiconto IVA {quarter}",
+      "quarter": "Trimestre",
+      "year": "Anno",
+      "show": "Mostra",
+      "pdf": "PDF con giustificativi",
+      "summary": "Metodo effettivo, controprestazioni convenute · {from} – {to}",
+      "revenue": "Controprestazioni convenute ({count, plural, one {# fattura} other {# fatture}})",
+      "outputTax": "Imposta {rate} % su CHF {base}",
+      "outputTaxTotal": "Totale imposta dovuta",
+      "inputTax400": "Imposta precedente su materiale e prestazioni di servizi",
+      "inputTax405": "Imposta precedente su investimenti e altri costi d’esercizio",
+      "inputTaxTotal": "Totale imposta precedente ({count, plural, one {# fattura} other {# fatture}})",
+      "toPay": "Da pagare",
+      "credit": "Saldo a favore"
     }
   }
 }

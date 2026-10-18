@@ -361,6 +361,102 @@ export type Database = {
         }
         Relationships: []
       }
+      creditor_invoices: {
+        Row: {
+          category: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string
+          due_date: string | null
+          file_name: string | null
+          file_path: string | null
+          id: string
+          invoice_date: string
+          number: string
+          paid_date: string | null
+          project_id: string | null
+          status: string
+          total: number
+          updated_at: string
+          vat_rate: number
+        }
+        Insert: {
+          category?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          invoice_date?: string
+          number?: string
+          paid_date?: string | null
+          project_id?: string | null
+          status?: string
+          total: number
+          updated_at?: string
+          vat_rate?: number
+        }
+        Update: {
+          category?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          invoice_date?: string
+          number?: string
+          paid_date?: string | null
+          project_id?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creditor_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditor_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditor_invoices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditor_invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditor_invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_invoices: {
         Row: {
           created_at: string

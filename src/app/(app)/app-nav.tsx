@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Building2, FileSignature, FolderKanban, Settings } from "lucide-react";
+import { BookOpen, Building2, FileSignature, FolderKanban, ReceiptText, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,8 +9,9 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { href: "/honorarofferten", key: "feeOffers", icon: FileSignature },
   { href: "/projekte", key: "projects", icon: FolderKanban },
+  { href: "/debitoren", key: "debtors", icon: FileSignature },
+  { href: "/kreditoren", key: "creditors", icon: ReceiptText },
   { href: "/adressen", key: "addresses", icon: Building2 },
   { href: "/kataloge", key: "catalogs", icon: BookOpen },
   { href: "/einstellungen", key: "settings", icon: Settings },

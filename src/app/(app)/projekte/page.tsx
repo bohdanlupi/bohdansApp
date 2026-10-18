@@ -14,8 +14,8 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { param, searchWords } from "@/lib/validation";
 
-import { isFeeOfferStatus } from "../honorarofferten/offer-table";
-import { FeeStatusBadge } from "../honorarofferten/status-badge";
+import { isFeeOfferStatus } from "../debitoren/offer-table";
+import { FeeStatusBadge } from "../debitoren/status-badge";
 import { StatusBadge } from "./status-badge";
 
 const PAGE_SIZE = 50;

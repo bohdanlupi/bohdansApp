@@ -13,8 +13,8 @@ import { feeTrades } from "@/lib/fees/sia108";
 import { initialFormState } from "@/lib/form-state";
 import { localeToLanguage, type Locale } from "@/i18n/config";
 
-import { getCompanyContacts } from "../../projekte/actions";
-import { createFeeOffer } from "../actions";
+import { getCompanyContacts } from "../../../projekte/actions";
+import { createFeeOffer } from "../../actions";
 
 type ContactOption = Awaited<ReturnType<typeof getCompanyContacts>>[number];
 

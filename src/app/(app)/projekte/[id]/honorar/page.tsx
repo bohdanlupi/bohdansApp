@@ -9,10 +9,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
-import { OfferTable } from "../../../honorarofferten/offer-table";
-import { CreateInvoiceButton } from "../../../honorarrechnungen/create-invoice-button";
-import { invoiceRows } from "../../../honorarrechnungen/invoice-rows";
-import { InvoiceTable } from "../../../honorarrechnungen/invoice-table";
+import { OfferTable } from "../../../debitoren/offer-table";
+import { CreateInvoiceButton } from "../../../debitoren/rechnungen/create-invoice-button";
+import { invoiceRows } from "../../../debitoren/rechnungen/invoice-rows";
+import { InvoiceTable } from "../../../debitoren/rechnungen/invoice-table";
 import { loadProject } from "../load-project";
 
 export async function generateMetadata({ params }: PageProps<"/projekte/[id]/honorar">): Promise<Metadata> {
@@ -56,7 +56,7 @@ export default async function ProjectFeePage({ params }: PageProps<"/projekte/[i
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">{t("feeOffers.title")}</h2>
           {canWrite && (
-            <Link href={`/honorarofferten/neu?projekt=${id}`} className={buttonVariants({ variant: "outline" })}>
+            <Link href={`/debitoren/offerten/neu?projekt=${id}`} className={buttonVariants({ variant: "outline" })}>
               <Plus />
               {t("feeOffers.new")}
             </Link>

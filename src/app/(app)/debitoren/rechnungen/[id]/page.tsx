@@ -22,13 +22,13 @@ async function loadInvoice(id: string) {
   return data;
 }
 
-export async function generateMetadata({ params }: PageProps<"/honorarrechnungen/[id]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/debitoren/rechnungen/[id]">): Promise<Metadata> {
   const invoice = await loadInvoice((await params).id);
   const t = await getTranslations("feeInvoices");
   return { title: invoice ? `${invoice.number} ${invoice.offer?.title ?? ""}` : t("title") };
 }
 
-export default async function FeeInvoicePage({ params }: PageProps<"/honorarrechnungen/[id]">) {
+export default async function FeeInvoicePage({ params }: PageProps<"/debitoren/rechnungen/[id]">) {
   const { id } = await params;
   const profile = await requireProfile();
   const invoice = await loadInvoice(id);
