@@ -36,16 +36,18 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
   const supabase = await createClient();
   let query = supabase
     .from("fee_offers")
-    .select("id, number, title, city, offer_date, valid_until, status, data, company:companies(name), project:projects(id, number)")
+    .select("id, number, title, city, offer_date, valid_until, status, data, company:companies(name), project:projects(id, number, status)")
     .order("number", { ascending: false })
     .limit(300);
   for (const word of searchWords(q)) query = query.or(`number.ilike.%${word}%,title.ilike.%${word}%,city.ilike.%${word}%`);
   if (status) query = query.eq("status", status);
-  const [{ data: offers }, { data: firm }] = await Promise.all([query, supabase.from("firm_settings").select("vat_rate").eq("id", true).single()]);
+  const [{ data: allOffers }, { data: firm }] = await Promise.all([query, supabase.from("firm_settings").select("vat_rate").eq("id", true).single()]);
+  // Offers of completed (or archived) projects are done: not listed (their open invoices still are).
+  const offers = (allOffers ?? []).filter((o) => o.project?.status !== "completed" && o.project?.status !== "archived");
 
-  // Open invoices (Entwurf / Versendet) first, earliest due date on top; paid invoices below the offers, newest first.
-  // Their amounts need all invoices of the offers.
-  const { data: invoiced } = await supabase.from("fee_invoices").select("offer_id");
+  // Open invoices (Entwurf / Versendet) first, earliest due date on top, also of completed projects. Their amounts need
+  // all invoices of the offers.
+  const { data: invoiced } = await supabase.from("fee_invoices").select("offer_id").in("status", ["draft", "sent"]);
   const invoicedOfferIds = [...new Set((invoiced ?? []).map((i) => i.offer_id))];
   const [{ data: invoicedOffers }, { data: offerInvoices }] = invoicedOfferIds.length
     ? await Promise.all([
@@ -54,9 +56,6 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
       ])
     : [{ data: [] }, { data: [] }];
   const allInvoices = invoiceRows(invoicedOffers ?? [], offerInvoices ?? [], firm?.vat_rate ?? 0);
-  const paidInvoices = allInvoices
-    .filter((i) => i.status === "paid")
-    .sort((a, b) => b.invoice_date.localeCompare(a.invoice_date) || b.number.localeCompare(a.number, "de", { numeric: true }));
   const openInvoices = allInvoices
     .filter((i) => i.status === "draft" || i.status === "sent")
     .sort((a, b) => (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999") || a.number.localeCompare(b.number, "de", { numeric: true }));
@@ -71,14 +70,13 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
     client: i.client,
     date: i.invoice_date,
     deadline: i.due_date,
-    deadlineActive: i.status !== "paid",
+    deadlineActive: true,
     net: i.net,
     total: i.total,
-    status: (i.status === "draft" || i.status === "sent" || i.status === "paid") && <InvoiceStatusBadge status={i.status} />,
+    status: (i.status === "draft" || i.status === "sent") && <InvoiceStatusBadge status={i.status} />,
   });
   const invoiceView = openInvoices.map(invoiceRow);
-  const paidView = paidInvoices.map(invoiceRow);
-  const offerView: OverviewRow[] = (offers ?? []).map((o) => {
+  const offerView: OverviewRow[] = offers.map((o) => {
     const totals = feeTotals(parseFeeOfferData(o.data), vatRate);
     return {
       id: o.id,
@@ -97,7 +95,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
   });
 
   const filtered = Boolean(q || status);
-  const isEmpty = !offers?.length;
+  const isEmpty = !offers.length;
 
   return (
     <>
@@ -113,7 +111,7 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
         </section>
       )}
 
-      {(openInvoices.length > 0 || paidInvoices.length > 0) && <h2 className="mb-3 text-lg font-semibold">{t("feeOffers.title")}</h2>}
+      {openInvoices.length > 0 && <h2 className="mb-3 text-lg font-semibold">{t("feeOffers.title")}</h2>}
       {isEmpty && !filtered ? (
         <EmptyState icon={FileSignature} title={t("feeOffers.emptyTitle")} text={t("feeOffers.emptyText")} />
       ) : (
@@ -144,13 +142,6 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/honora
             <OverviewTable rows={offerView} kind="offer" />
           )}
         </>
-      )}
-
-      {paidView.length > 0 && (
-        <section className="mt-8 space-y-3">
-          <h2 className="text-lg font-semibold">{t("feeInvoices.paidTitle")}</h2>
-          <OverviewTable rows={paidView} kind="invoice" />
-        </section>
       )}
     </>
   );

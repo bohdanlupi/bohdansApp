@@ -3793,7 +3793,6 @@
     "positions": "Positions",
     "allPositionsDone": "Toutes les positions 100 %",
     "openTitle": "Factures ouvertes",
-    "paidTitle": "Factures payées",
     "conditionsPlaceholder": "p. ex. remarques sur le paiement, délimitations (une ligne par point)",
     "conditionsHint": "Section propre dans le PDF sous le montant de la facture ; vide = pas de section. Reprise dans la facture suivante."
   },
