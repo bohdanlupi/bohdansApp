@@ -8,13 +8,13 @@ import { useMemo } from "react";
 import { ConfirmButton } from "@/components/confirm-button";
 import { NativeSelect } from "@/components/form";
 import { CommitInput } from "@/components/planning/commit-input";
-import { NumberField, Section } from "@/components/planning/fields";
-import { SaveIndicator } from "@/components/planning/plan-ui";
+import { fmt, NumberField, Section } from "@/components/planning/fields";
+import { NumberParam, SaveIndicator } from "@/components/planning/plan-ui";
 import { usePlan } from "@/components/planning/use-plan";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { localeToLanguage, type Locale } from "@/i18n/config";
-import { type FeeInvoiceData, type FeeInvoiceStatus, feeInvoiceStatuses, type InvoiceLine, invoiceTotals } from "@/lib/fees/invoice";
+import { type FeeInvoiceData, type FeeInvoiceStatus, feeInvoiceStatuses, type InvoiceLine, invoiceSkonto, invoiceTotals } from "@/lib/fees/invoice";
 import type { FeeOfferData } from "@/lib/fees/offer-schema";
 import { phaseLabel, tradeNames } from "@/lib/fees/options";
 import type { FeeTrade } from "@/lib/fees/sia108";
@@ -62,6 +62,8 @@ export function FeeInvoiceEditor({
   // Paid invoices are locked; only their status can be changed (back), unless a later invoice is paid as well.
   const canEdit = editable && header.status !== "paid" && !laterPaid;
   const canSetStatus = editable && !laterPaid;
+  const skonto = invoiceSkonto(offer.data, data);
+  const clampPct = (v: number | null) => Math.min(100, Math.max(0, v ?? 0));
   const totals = useMemo(() => invoiceTotals(offer.data, vatRate, data, previous?.data ?? null), [offer.data, vatRate, data, previous]);
 
   const setHeader = (change: Partial<FeeInvoiceHeaderState>) => update((s) => ({ ...s, header: { ...s.header, ...change } }));
@@ -210,6 +212,30 @@ export function FeeInvoiceEditor({
             </div>
           ))}
 
+          {totals.positions.length > 0 && (
+            <div>
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <p className="font-medium">{t("positions")}</p>
+                {canEdit && (
+                  <Button variant="ghost" size="sm" onClick={() => setData((d) => ({ ...d, positions: Object.fromEntries(totals.positions.map((p) => [p.id, 100])) }))}>
+                    {t("allPositionsDone")}
+                  </Button>
+                )}
+              </div>
+              <table className="w-full min-w-[40rem] text-sm">
+                <thead>{head}</thead>
+                <tbody>
+                  {totals.positions.map((p) => (
+                    <tr key={p.id} className="border-b last:border-0">
+                      <td className="py-1 whitespace-pre-line">{p.text || "–"}</td>
+                      {cells(p, pctInput(p.text, p.pct, p.prevPct, (v) => setData((d) => ({ ...d, positions: { ...d.positions, [p.id]: clampPct(v) } }))))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
           {totals.extras.length > 0 && (
             <div>
               <p className="mb-1 font-medium">{t("extras")}</p>
@@ -243,6 +269,22 @@ export function FeeInvoiceEditor({
           {sumRow(t("summary.net"), totals.net, { bold: true })}
           {sumRow(t("summary.vat", { rate: vatRate }), totals.vat)}
           {sumRow(t("summary.total"), totals.total, { bold: true })}
+          {totals.skonto > 0 && <div className="text-muted-foreground">{sumRow(t("summary.skonto", { pct: fmt(skonto.pct, 1), days: skonto.days }), totals.skonto, { negative: true })}</div>}
+        </div>
+        <div className="mt-4 grid max-w-md grid-cols-2 gap-3">
+          <NumberParam
+            label={t("fields.skontoPct")}
+            value={skonto.pct}
+            decimals={1}
+            editable={canEdit}
+            onChange={(v) => setData((d) => ({ ...d, skontoPct: v === null ? null : clampPct(v) }))}
+          />
+          <NumberParam
+            label={t("fields.skontoDays")}
+            value={skonto.days}
+            editable={canEdit && skonto.pct > 0}
+            onChange={(v) => setData((d) => ({ ...d, skontoDays: v === null ? null : Math.min(365, Math.max(0, Math.round(v))) }))}
+          />
         </div>
       </Section>
     </div>

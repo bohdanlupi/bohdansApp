@@ -25,6 +25,7 @@ import { CreateInvoiceButton } from "../../honorarrechnungen/create-invoice-butt
 import { createProjectFromOffer, deleteFeeOffer, saveFeeOffer } from "../actions";
 import { CommitInput } from "@/components/planning/commit-input";
 import { type FeeDefaults, FeeSection } from "./fee-section";
+import { PositionsSection } from "./positions-section";
 import { ServicesSection } from "./services-section";
 
 export type FeeOfferHeaderState = {
@@ -79,6 +80,7 @@ export function FeeOfferEditor({
   const [contacts, setContacts] = useState(initialContacts);
   const { header, data } = plan;
   const totals = useMemo(() => feeTotals(data, vatRate), [data, vatRate]);
+  const free = data.kind === "positions";
 
   const setHeader = (change: Partial<FeeOfferHeaderState>) => update((s) => ({ ...s, header: { ...s.header, ...change } }));
   const setData = (change: (d: FeeOfferData) => FeeOfferData) => update((s) => ({ ...s, data: change(s.data) }));
@@ -220,22 +222,31 @@ export function FeeOfferEditor({
               ))}
             </NativeSelect>
           </div>
-          <div className="space-y-1.5 sm:col-span-3">
-            <Label htmlFor="offer-description">{t("fields.description")}</Label>
-            <CommitInput id="offer-description" multiline rows={5} value={data.description} placeholder={t("descriptionPlaceholder")} disabled={!editable} onCommit={(description) => setData((d) => ({ ...d, description }))} />
+          <div className={free ? "space-y-1.5 sm:col-span-6" : "space-y-1.5 sm:col-span-3"}>
+            <Label htmlFor="offer-description">{t(free ? "fields.scope" : "fields.description")}</Label>
+            <CommitInput id="offer-description" multiline rows={5} value={data.description} placeholder={t(free ? "scopePlaceholder" : "descriptionPlaceholder")} disabled={!editable} onCommit={(description) => setData((d) => ({ ...d, description }))} />
           </div>
+          {!free && (
           <div className="space-y-1.5 sm:col-span-3">
             <Label htmlFor="offer-basis">{t("fields.basis")}</Label>
             <CommitInput id="offer-basis" multiline rows={5} value={data.basis} placeholder={t("basisPlaceholder")} disabled={!editable} onCommit={(basis) => setData((d) => ({ ...d, basis }))} />
             <p className="text-xs text-muted-foreground">{t("basisHint")}</p>
           </div>
+          )}
         </div>
       </Section>
 
-      <FeeSection data={data} onChange={setData} editable={editable} language={language} totals={totals} defaults={defaults} />
-      <ServicesSection data={data} onChange={setData} editable={editable} language={language} />
+      {free ? (
+        <PositionsSection data={data} onChange={setData} editable={editable} suggestion={defaults} />
+      ) : (
+        <>
+          <FeeSection data={data} onChange={setData} editable={editable} language={language} totals={totals} defaults={defaults} />
+          <ServicesSection data={data} onChange={setData} editable={editable} language={language} />
+        </>
+      )}
 
       <Section title={t("sections.conditions")} collapseKey="fee-offer:conditions">
+        {!free && (
         <div className="space-y-2">
           <p className="text-sm font-medium">{t("extras.title")}</p>
           <p className="text-xs text-muted-foreground">{t("extras.hint")}</p>
@@ -271,9 +282,14 @@ export function FeeOfferEditor({
             </Button>
           )}
         </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-3">
           <NumberParam label={t("fields.discountPct")} value={data.discountPct} decimals={1} editable={editable} onChange={(v) => setData((d) => ({ ...d, discountPct: Math.min(100, v ?? 0) }))} />
           <NumberParam label={t("fields.expensesPct")} value={data.expensesPct} decimals={1} editable={editable} onChange={(v) => setData((d) => ({ ...d, expensesPct: Math.min(100, v ?? 0) }))} />
+          <div className="grid grid-cols-2 gap-2">
+            <NumberParam label={t("fields.skontoPct")} value={data.skontoPct} decimals={1} editable={editable} onChange={(v) => setData((d) => ({ ...d, skontoPct: Math.min(100, v ?? 0) }))} />
+            <NumberParam label={t("fields.skontoDays")} value={data.skontoDays} editable={editable && data.skontoPct > 0} onChange={(v) => setData((d) => ({ ...d, skontoDays: Math.min(365, Math.max(0, Math.round(v ?? 0))) }))} />
+          </div>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="offer-expenses">{t("fields.expensesText")}</Label>
@@ -282,6 +298,7 @@ export function FeeOfferEditor({
       </Section>
 
       <Section title={t("sections.summary")} collapseKey="fee-offer:summary">
+        {!free && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm tabular-nums">
             <thead className="text-xs text-muted-foreground">
@@ -322,6 +339,7 @@ export function FeeOfferEditor({
             </tbody>
           </table>
         </div>
+        )}
         <dl className="ml-auto grid max-w-sm grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-sm tabular-nums">
           {totals.extras > 0 && (
             <>
@@ -329,7 +347,7 @@ export function FeeOfferEditor({
               <dd className="text-right">{formatMoney(totals.extras)}</dd>
             </>
           )}
-          <dt>{t("summary.subtotal")}</dt>
+          <dt>{t(free ? "summary.positions" : "summary.subtotal")}</dt>
           <dd className="text-right">{formatMoney(totals.subtotal)}</dd>
           {totals.discount > 0 && (
             <>
@@ -345,6 +363,12 @@ export function FeeOfferEditor({
           <dd className="text-right">{formatMoney(totals.vat)}</dd>
           <dt className="font-semibold">{t("summary.total")}</dt>
           <dd className="text-right font-semibold">{formatMoney(totals.total)}</dd>
+          {totals.skonto > 0 && (
+            <>
+              <dt className="text-muted-foreground">{t("summary.skonto", { pct: fmt(data.skontoPct, 1), days: data.skontoDays })}</dt>
+              <dd className="text-right text-muted-foreground">−{formatMoney(totals.skonto)}</dd>
+            </>
+          )}
         </dl>
       </Section>
     </div>

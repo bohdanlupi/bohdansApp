@@ -3521,7 +3521,10 @@
       "basis": "Autres bases",
       "discountPct": "Rabais [%]",
       "expensesPct": "Frais accessoires [%]",
-      "expensesText": "Frais selon dépenses (une ligne par poste)"
+      "expensesText": "Frais selon dépenses (une ligne par poste)",
+      "scope": "Description des prestations",
+      "skontoPct": "Escompte %",
+      "skontoDays": "Escompte dans les jours"
     },
     "sections": {
       "project": "Projet",
@@ -3529,7 +3532,8 @@
       "trades": "Domaines",
       "offer": "Offre",
       "conditions": "Positions supplémentaires et conditions",
-      "summary": "Récapitulatif"
+      "summary": "Récapitulatif",
+      "kind": "Type d’offre"
     },
     "tradesHint": "Pour chaque domaine choisi, toutes les phases partielles 31–53 sont proposées ; vous pouvez ensuite les désélectionner une à une.",
     "pdf": "PDF",
@@ -3570,7 +3574,9 @@
       "subtotal": "Sous-total",
       "discount": "Rabais {pct} %",
       "expenses": "Frais accessoires {pct} %",
-      "vat": "TVA {pct} %"
+      "vat": "TVA {pct} %",
+      "positions": "Total des positions",
+      "skonto": "Escompte {pct} % en cas de paiement dans les {days} jours"
     },
     "fee": {
       "title": "Calcul des honoraires",
@@ -3669,7 +3675,38 @@
       "addCustom": "Ligne propre"
     },
     "emptyProjectText": "Créez une offre d’honoraires selon SIA 108 ; nom, adresse, langue et maître d’ouvrage sont repris du projet.",
-    "lockedHint": "Verrouillée, car une facture de cette offre est payée. Vous pouvez néanmoins créer d’autres factures."
+    "lockedHint": "Verrouillée, car une facture de cette offre est payée. Vous pouvez néanmoins créer d’autres factures.",
+    "scopePlaceholder": "Quelles prestations sont fournies ? Figure dans le PDF au-dessus des positions.",
+    "kinds": {
+      "sia": "Honoraires selon SIA 108",
+      "siaHint": "Domaines, phases partielles et calcul des honoraires selon SIA 108 avec étendue des prestations en annexe.",
+      "positions": "Positions libres",
+      "positionsHint": "Positions propres avec quantité × prix, p. ex. quelques heures ou une prestation hors du processus de planification. Sans SIA 108."
+    },
+    "positions": {
+      "title": "Positions",
+      "hint": "Quantité × prix ; pour les heures, choisir le tarif d’une catégorie ou saisir un tarif propre.",
+      "text": "Prestation",
+      "textPlaceholder": "Description de la prestation",
+      "qty": "Quantité",
+      "unit": "Unité",
+      "price": "Prix CHF",
+      "rate": "Catégorie",
+      "ownRate": "Tarif propre",
+      "rateMissing": "Catégorie manquante",
+      "amount": "Montant CHF",
+      "up": "Vers le haut",
+      "down": "Vers le bas",
+      "remove": "Supprimer la position",
+      "add": "Ajouter une position",
+      "total": "Total des positions",
+      "units": {
+        "h": "h",
+        "lump": "forfait",
+        "pcs": "pce",
+        "day": "jour"
+      }
+    }
   },
   "feeInvoices": {
     "title": "Factures d’honoraires",
@@ -3696,7 +3733,9 @@
       "status": "Statut",
       "invoice_date": "Date de facture",
       "due_date": "Payable jusqu’au",
-      "text": "Remarque"
+      "text": "Remarque",
+      "skontoPct": "Escompte %",
+      "skontoDays": "Escompte dans les jours"
     },
     "sections": {
       "invoice": "Facture",
@@ -3725,10 +3764,13 @@
       "previous": "Moins déjà facturé (jusqu’à {number})",
       "net": "Montant de la facture hors TVA",
       "vat": "TVA {rate} %",
-      "total": "Montant de la facture TVA incl."
+      "total": "Montant de la facture TVA incl.",
+      "skonto": "Escompte {pct} % en cas de paiement dans les {days} jours"
     },
     "lockedPaid": "Payée – la facture est verrouillée. Pour la modifier, remettre le statut sur « Envoyée ».",
-    "lockedLater": "Verrouillée, car une facture ultérieure de cette offre est payée (elle déduit cette facture)."
+    "lockedLater": "Verrouillée, car une facture ultérieure de cette offre est payée (elle déduit cette facture).",
+    "positions": "Positions",
+    "allPositionsDone": "Toutes les positions 100 %"
   },
   "feeSettings": {
     "description": "Valeurs par défaut des nouvelles offres d’honoraires. Les offres existantes conservent leurs valeurs.",

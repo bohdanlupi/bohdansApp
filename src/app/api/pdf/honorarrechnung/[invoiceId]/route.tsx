@@ -1,7 +1,7 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 
 import { getCurrentProfile } from "@/lib/auth";
-import { invoiceTotals, parseFeeInvoiceData } from "@/lib/fees/invoice";
+import { invoiceSkonto, invoiceTotals, parseFeeInvoiceData } from "@/lib/fees/invoice";
 import { parseFeeOfferData } from "@/lib/fees/offer-schema";
 import { isQrIban, type QrBill, qrIban } from "@/lib/qr-bill";
 import { createClient } from "@/lib/supabase/server";
@@ -86,6 +86,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
         text: data.text,
         totals,
         previousNumber: previous?.number ?? null,
+        skonto: invoiceSkonto(offerData, data),
       }}
     />,
   );

@@ -140,7 +140,7 @@ export function FeeSection({ data, onChange, editable, language, totals, default
 
 /** Firm settings offered as suggestion: rate categories, and Z values for Fachgebiete added later. */
 export type FeeDefaults = { rates: FeeRate[]; siaRateId: string; z: Record<SiaColumn, ZValues> };
-type RateSuggestion = Pick<FeeDefaults, "rates" | "siaRateId">;
+export type RateSuggestion = Pick<FeeDefaults, "rates" | "siaRateId">;
 
 /** Bauwerksart once for the offer; n of each trade follows from its column (SIA 108 Art. 7.6.5). */
 function BuildingTypeSelect({ data, onChange, editable, language }: DataProps) {
@@ -357,7 +357,7 @@ const withoutRateHours = (trades: FeeOfferData["trades"], keep: (id: string) => 
   ) as FeeOfferData["trades"];
 
 /** Rates of this offer: copied from the settings at creation, then edited per offer only. */
-function RatesEditor({ data, onChange, editable, suggestion }: Omit<DataProps, "language"> & { suggestion: RateSuggestion }) {
+export function RatesEditor({ data, onChange, editable, suggestion }: Omit<DataProps, "language"> & { suggestion: RateSuggestion }) {
   const t = useTranslations("feeOffers.rates");
   const setRate = (id: string, change: Partial<FeeRate>) => onChange((d) => ({ ...d, rates: d.rates.map((x) => (x.id === id ? { ...x, ...change } : x)) }));
   const differs = JSON.stringify(data.rates) !== JSON.stringify(suggestion.rates) || data.siaRateId !== suggestion.siaRateId;

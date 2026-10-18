@@ -82,6 +82,12 @@ const texts = {
     placeDate: "Ort, Datum",
     client: "Auftraggeber",
     contractor: "Auftragnehmer",
+    positions: { text: "Leistung", qty: "Menge", unit: "Einheit", price: "Ansatz", amount: "Betrag", units: { h: "h", lump: "psch", pcs: "Stk", day: "Tag" } },
+    introPositions: "Vielen Dank für Ihre Anfrage. Gerne unterbreiten wir Ihnen die folgende Offerte.",
+    scope: "Leistungsbeschrieb",
+    outroPositions: "Wir würden uns sehr freuen, diesen Auftrag für Sie auszuführen. Bei Rückfragen stehen wir Ihnen jederzeit gerne zur Verfügung.",
+    paymentPositions: (days: number) => [`Zahlungsfrist: ${days} Tage netto`, "Mehrwertsteuer: zuzüglich gesetzliche MwSt."],
+    skonto: (pct: string, days: number, amount: string) => `Bei Zahlung innert ${days} Tagen ${pct} % Skonto (CHF ${amount}).`,
   },
   fr: {
     salutation: (p: Person) => (p?.salutation === "mr" ? "Monsieur," : p?.salutation === "ms" ? "Madame," : "Madame, Monsieur,"),
@@ -159,6 +165,12 @@ const texts = {
     placeDate: "Lieu, date",
     client: "Mandant",
     contractor: "Mandataire",
+    positions: { text: "Prestation", qty: "Quantité", unit: "Unité", price: "Prix", amount: "Montant", units: { h: "h", lump: "forfait", pcs: "pce", day: "jour" } },
+    introPositions: "Nous vous remercions de votre demande et avons le plaisir de vous soumettre l’offre suivante.",
+    scope: "Description des prestations",
+    outroPositions: "Nous serions très heureux d’exécuter ce mandat pour vous. Nous restons volontiers à votre disposition pour toute question.",
+    paymentPositions: (days: number) => [`Délai de paiement : ${days} jours net`, "TVA : en sus au taux légal"],
+    skonto: (pct: string, days: number, amount: string) => `Escompte de ${pct} % en cas de paiement dans les ${days} jours (CHF ${amount}).`,
   },
   it: {
     salutation: (p: Person) =>
@@ -237,6 +249,12 @@ const texts = {
     placeDate: "Luogo, data",
     client: "Committente",
     contractor: "Mandatario",
+    positions: { text: "Prestazione", qty: "Quantità", unit: "Unità", price: "Prezzo", amount: "Importo", units: { h: "h", lump: "forfait", pcs: "pz", day: "giorno" } },
+    introPositions: "Vi ringraziamo per la vostra richiesta e siamo lieti di sottoporvi la seguente offerta.",
+    scope: "Descrizione delle prestazioni",
+    outroPositions: "Saremmo molto lieti di eseguire questo incarico per voi. Restiamo volentieri a vostra disposizione per qualsiasi domanda.",
+    paymentPositions: (days: number) => [`Termine di pagamento: ${days} giorni netto`, "IVA: in aggiunta secondo l’aliquota legale"],
+    skonto: (pct: string, days: number, amount: string) => `Sconto di ${pct} % per pagamento entro ${days} giorni (CHF ${amount}).`,
   },
 };
 

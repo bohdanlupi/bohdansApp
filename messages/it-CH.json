@@ -3521,7 +3521,10 @@
       "basis": "Altre basi",
       "discountPct": "Sconto [%]",
       "expensesPct": "Spese accessorie [%]",
-      "expensesText": "Spese secondo dispendio (una riga per voce)"
+      "expensesText": "Spese secondo dispendio (una riga per voce)",
+      "scope": "Descrizione delle prestazioni",
+      "skontoPct": "Sconto %",
+      "skontoDays": "Sconto entro giorni"
     },
     "sections": {
       "project": "Progetto",
@@ -3529,7 +3532,8 @@
       "trades": "Settori",
       "offer": "Offerta",
       "conditions": "Posizioni supplementari e condizioni",
-      "summary": "Riepilogo"
+      "summary": "Riepilogo",
+      "kind": "Tipo di offerta"
     },
     "tradesHint": "Per ogni settore scelto vengono proposte tutte le fasi parziali 31–53; potete poi deselezionarle singolarmente.",
     "pdf": "PDF",
@@ -3570,7 +3574,9 @@
       "subtotal": "Subtotale",
       "discount": "Sconto {pct} %",
       "expenses": "Spese accessorie {pct} %",
-      "vat": "IVA {pct} %"
+      "vat": "IVA {pct} %",
+      "positions": "Totale posizioni",
+      "skonto": "Sconto {pct} % per pagamento entro {days} giorni"
     },
     "fee": {
       "title": "Calcolo dell’onorario",
@@ -3669,7 +3675,38 @@
       "addCustom": "Riga propria"
     },
     "emptyProjectText": "Create un’offerta d’onorario secondo SIA 108; nome, indirizzo, lingua e committente sono ripresi dal progetto.",
-    "lockedHint": "Bloccata, perché una fattura di questa offerta è pagata. Potete comunque creare altre fatture."
+    "lockedHint": "Bloccata, perché una fattura di questa offerta è pagata. Potete comunque creare altre fatture.",
+    "scopePlaceholder": "Quali prestazioni vengono fornite? Compare nel PDF sopra le posizioni.",
+    "kinds": {
+      "sia": "Onorario secondo SIA 108",
+      "siaHint": "Settori, fasi parziali e calcolo dell’onorario secondo SIA 108 con l’entità delle prestazioni in allegato.",
+      "positions": "Posizioni libere",
+      "positionsHint": "Posizioni proprie con quantità × prezzo, p. es. alcune ore o una prestazione al di fuori del processo di progettazione. Senza SIA 108."
+    },
+    "positions": {
+      "title": "Posizioni",
+      "hint": "Quantità × prezzo; per le ore scegliere la tariffa di una categoria o inserirne una propria.",
+      "text": "Prestazione",
+      "textPlaceholder": "Descrizione della prestazione",
+      "qty": "Quantità",
+      "unit": "Unità",
+      "price": "Prezzo CHF",
+      "rate": "Categoria",
+      "ownRate": "Tariffa propria",
+      "rateMissing": "Categoria mancante",
+      "amount": "Importo CHF",
+      "up": "Su",
+      "down": "Giù",
+      "remove": "Rimuovi posizione",
+      "add": "Aggiungi posizione",
+      "total": "Totale posizioni",
+      "units": {
+        "h": "h",
+        "lump": "forfait",
+        "pcs": "pz",
+        "day": "giorno"
+      }
+    }
   },
   "feeInvoices": {
     "title": "Fatture d’onorario",
@@ -3696,7 +3733,9 @@
       "status": "Stato",
       "invoice_date": "Data fattura",
       "due_date": "Pagabile entro",
-      "text": "Osservazione"
+      "text": "Osservazione",
+      "skontoPct": "Sconto %",
+      "skontoDays": "Sconto entro giorni"
     },
     "sections": {
       "invoice": "Fattura",
@@ -3725,10 +3764,13 @@
       "previous": "Dedotto già fatturato (fino a {number})",
       "net": "Importo della fattura IVA esclusa",
       "vat": "IVA {rate} %",
-      "total": "Importo della fattura IVA inclusa"
+      "total": "Importo della fattura IVA inclusa",
+      "skonto": "Sconto {pct} % per pagamento entro {days} giorni"
     },
     "lockedPaid": "Pagata – la fattura è bloccata. Per modificarla, reimpostare lo stato su «Inviata».",
-    "lockedLater": "Bloccata, perché una fattura successiva di questa offerta è pagata (deduce questa fattura)."
+    "lockedLater": "Bloccata, perché una fattura successiva di questa offerta è pagata (deduce questa fattura).",
+    "positions": "Posizioni",
+    "allPositionsDone": "Tutte le posizioni 100 %"
   },
   "feeSettings": {
     "description": "Valori predefiniti per le nuove offerte d’onorario. Le offerte esistenti mantengono i loro valori.",

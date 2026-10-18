@@ -3521,7 +3521,10 @@
       "basis": "Weitere Grundlagen",
       "discountPct": "Rabatt [%]",
       "expensesPct": "Nebenkosten [%]",
-      "expensesText": "Nebenkosten nach Aufwand (eine Zeile pro Position)"
+      "expensesText": "Nebenkosten nach Aufwand (eine Zeile pro Position)",
+      "scope": "Leistungsbeschrieb",
+      "skontoPct": "Skonto %",
+      "skontoDays": "Skonto innert Tagen"
     },
     "sections": {
       "project": "Projekt",
@@ -3529,7 +3532,8 @@
       "trades": "Fachbereiche",
       "offer": "Offerte",
       "conditions": "Zusatzpositionen und Konditionen",
-      "summary": "Zusammenstellung"
+      "summary": "Zusammenstellung",
+      "kind": "Art der Offerte"
     },
     "tradesHint": "Für jeden gewählten Fachbereich werden alle Teilphasen 31–53 vorgeschlagen; Sie können sie danach einzeln abwählen.",
     "pdf": "PDF",
@@ -3570,7 +3574,9 @@
       "subtotal": "Zwischensumme",
       "discount": "Rabatt {pct} %",
       "expenses": "Nebenkosten {pct} %",
-      "vat": "MwSt. {pct} %"
+      "vat": "MwSt. {pct} %",
+      "positions": "Total Positionen",
+      "skonto": "Skonto {pct} % bei Zahlung innert {days} Tagen"
     },
     "fee": {
       "title": "Honorarberechnung",
@@ -3669,7 +3675,38 @@
       "addCustom": "Eigene Zeile"
     },
     "emptyProjectText": "Erstellen Sie eine Honorarofferte nach SIA 108; Name, Adresse, Sprache und Bauherr werden aus dem Projekt übernommen.",
-    "lockedHint": "Gesperrt, weil eine Rechnung zu dieser Offerte bezahlt ist. Weitere Rechnungen können Sie trotzdem erstellen."
+    "lockedHint": "Gesperrt, weil eine Rechnung zu dieser Offerte bezahlt ist. Weitere Rechnungen können Sie trotzdem erstellen.",
+    "scopePlaceholder": "Was wird geleistet? Wird im PDF über den Positionen aufgeführt.",
+    "kinds": {
+      "sia": "Honorar nach SIA 108",
+      "siaHint": "Fachbereiche, Teilphasen und Honorarberechnung nach SIA 108 mit Leistungsumfang im Anhang.",
+      "positions": "Freie Positionen",
+      "positionsHint": "Eigene Positionen mit Menge × Ansatz, z. B. einige Stunden oder eine Leistung ausserhalb des Planungsprozesses. Ohne SIA 108."
+    },
+    "positions": {
+      "title": "Positionen",
+      "hint": "Menge × Ansatz; bei Stunden den Ansatz einer Kategorie wählen oder einen eigenen eingeben.",
+      "text": "Leistung",
+      "textPlaceholder": "Beschreibung der Leistung",
+      "qty": "Menge",
+      "unit": "Einheit",
+      "price": "Ansatz CHF",
+      "rate": "Kategorie",
+      "ownRate": "Eigener Ansatz",
+      "rateMissing": "Kategorie fehlt",
+      "amount": "Betrag CHF",
+      "up": "Nach oben",
+      "down": "Nach unten",
+      "remove": "Position entfernen",
+      "add": "Position hinzufügen",
+      "total": "Total Positionen",
+      "units": {
+        "h": "h",
+        "lump": "psch",
+        "pcs": "Stk",
+        "day": "Tag"
+      }
+    }
   },
   "feeInvoices": {
     "title": "Honorarrechnungen",
@@ -3696,7 +3733,9 @@
       "status": "Status",
       "invoice_date": "Rechnungsdatum",
       "due_date": "Zahlbar bis",
-      "text": "Bemerkung"
+      "text": "Bemerkung",
+      "skontoPct": "Skonto %",
+      "skontoDays": "Skonto innert Tagen"
     },
     "sections": {
       "invoice": "Rechnung",
@@ -3725,10 +3764,13 @@
       "previous": "Abzüglich bisher verrechnet (bis {number})",
       "net": "Rechnungsbetrag exkl. MwSt.",
       "vat": "MwSt. {rate} %",
-      "total": "Rechnungsbetrag inkl. MwSt."
+      "total": "Rechnungsbetrag inkl. MwSt.",
+      "skonto": "Skonto {pct} % bei Zahlung innert {days} Tagen"
     },
     "lockedPaid": "Bezahlt – die Rechnung ist gesperrt. Um sie zu ändern, Status zurück auf «Versendet» setzen.",
-    "lockedLater": "Gesperrt, weil eine spätere Rechnung dieser Offerte bezahlt ist (sie zieht diese Rechnung ab)."
+    "lockedLater": "Gesperrt, weil eine spätere Rechnung dieser Offerte bezahlt ist (sie zieht diese Rechnung ab).",
+    "positions": "Positionen",
+    "allPositionsDone": "Alle Positionen 100 %"
   },
   "feeSettings": {
     "description": "Vorgaben für neue Honorarofferten. Bestehende Offerten behalten ihre Werte.",

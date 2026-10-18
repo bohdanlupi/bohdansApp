@@ -36,8 +36,9 @@ export async function createFeeOffer(_prev: FormState, formData: FormData): Prom
   await assertRole("admin", "planer");
   const parsed = createSchema.safeParse(Object.fromEntries(formData));
   const trades = feeTrades.filter((t) => formData.getAll("trades").includes(t));
+  const kind = formData.get("kind") === "positions" ? "positions" : "sia";
   if (!parsed.success) return { error: "invalidInput" };
-  if (!trades.length) return { error: "noTradeChosen" };
+  if (kind === "sia" && !trades.length) return { error: "noTradeChosen" };
 
   const supabase = await createClient();
   const { data: firm } = await supabase.from("firm_settings").select("offer_validity_days, fee_settings").eq("id", true).single();
@@ -47,7 +48,7 @@ export async function createFeeOffer(_prev: FormState, formData: FormData): Prom
     .insert({
       ...parsed.data,
       valid_until: addDays(new Date(), firm?.offer_validity_days ?? 30),
-      data: newFeeOfferData(settings, trades) as unknown as Json,
+      data: newFeeOfferData(settings, kind === "sia" ? trades : [], kind) as unknown as Json,
     })
     .select("id")
     .single();

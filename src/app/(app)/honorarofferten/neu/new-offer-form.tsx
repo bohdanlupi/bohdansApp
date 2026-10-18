@@ -46,6 +46,7 @@ export function NewFeeOfferForm({
   const [state, action] = useActionState(createFeeOffer, initialFormState);
   const [contacts, setContacts] = useState<ContactOption[]>(initialContacts);
   const [contactId, setContactId] = useState(defaults.contact_id ?? "");
+  const [kind, setKind] = useState<"sia" | "positions">("sia");
 
   const selectCompany = async (id: string | null) => {
     setContacts([]);
@@ -113,6 +114,24 @@ export function NewFeeOfferForm({
 
       <Card>
         <CardHeader>
+          <CardTitle>{t("feeOffers.sections.kind")}</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2">
+          {(["sia", "positions"] as const).map((k) => (
+            <label key={k} className="flex cursor-pointer gap-3 rounded-lg border p-3 text-sm has-checked:border-brand has-checked:bg-brand/5">
+              <input type="radio" name="kind" value={k} checked={kind === k} onChange={() => setKind(k)} className="mt-0.5" />
+              <span>
+                <span className="block font-medium">{t(`feeOffers.kinds.${k}`)}</span>
+                <span className="text-muted-foreground">{t(`feeOffers.kinds.${k}Hint`)}</span>
+              </span>
+            </label>
+          ))}
+        </CardContent>
+      </Card>
+
+      {kind === "sia" && (
+      <Card>
+        <CardHeader>
           <CardTitle>{t("feeOffers.sections.trades")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -127,6 +146,7 @@ export function NewFeeOfferForm({
           </div>
         </CardContent>
       </Card>
+      )}
 
       <SubmitButton>{t("feeOffers.create")}</SubmitButton>
     </form>

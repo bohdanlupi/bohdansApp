@@ -24,6 +24,7 @@ export type FeeInvoicePdf = {
   totals: InvoiceTotals;
   /** Number of the previous invoice of the offer (null = first invoice). */
   previousNumber: string | null;
+  skonto: { pct: number; days: number };
 };
 
 const COL = 70;
@@ -54,6 +55,10 @@ export function FeeInvoiceDocument({
   const tx = feeInvoiceTexts(language);
   const pct = (value: number) => formatQuantity(value);
   const due = invoice.dueDate ? formatDate(new Date(invoice.dueDate)) : null;
+  const skontoLine =
+    totals.skonto > 0
+      ? tx.skonto(pct(invoice.skonto.pct), invoice.skonto.days, formatDate(new Date(new Date(invoice.invoiceDate).getTime() + invoice.skonto.days * 86_400_000)), formatAmount(totals.skonto))
+      : null;
 
   const cell = { flexDirection: "row" as const, paddingVertical: 3, paddingHorizontal: 4, borderBottomWidth: 0.5, borderBottomColor: colors.line };
   const num = (value: string, width = COL) => <Text style={{ width, textAlign: "right" }}>{value}</Text>;
@@ -108,7 +113,7 @@ export function FeeInvoiceDocument({
           ))}
 
         <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, paddingVertical: 5, paddingHorizontal: 4, marginTop: 6, ...styles.bold }}>
-          <Text style={{ flex: 1 }}>{tx.phase}</Text>
+          <Text style={{ flex: 1 }}>{offer.kind === "positions" ? tx.position : tx.phase}</Text>
           {num(tx.fee)}
           {num(tx.pct, PCT_COL)}
           {num(tx.earned)}
@@ -121,6 +126,11 @@ export function FeeInvoiceDocument({
             {t.phases.map((p) => lineRow(p.phase, phaseLabel(p.phase, language), p))}
           </View>
         ))}
+        {totals.positions.length > 0 && (
+          <View>
+            {totals.positions.map((p) => lineRow(p.id, p.text.replace(/\s*\n\s*/g, " ") || "–", p))}
+          </View>
+        )}
         {totals.extras.length > 0 && (
           <View>
             {groupHeader(tx.extras)}
@@ -140,6 +150,7 @@ export function FeeInvoiceDocument({
             <Text style={{ flex: 1 }}>{tx.gross}</Text>
             <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(totals.total)}</Text>
           </View>
+          {skontoLine && <Text style={{ marginTop: 4, paddingHorizontal: 4, color: colors.muted }}>{skontoLine}</Text>}
         </View>
 
         <View wrap={false} style={{ marginTop: 18 }}>

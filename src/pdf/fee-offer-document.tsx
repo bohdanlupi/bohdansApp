@@ -1,6 +1,6 @@
 import { Document, Text, View } from "@react-pdf/renderer";
 
-import { activeTrades, type FeeTotals, rateOf } from "@/lib/fees/calc";
+import { activeTrades, type FeeTotals, positionAmount, positionPrice, rateOf } from "@/lib/fees/calc";
 import type { FeeOfferData } from "@/lib/fees/offer-schema";
 import { phaseLabel, tradeNames } from "@/lib/fees/options";
 import { feeServices, serviceApplies, type ServiceState, serviceState } from "@/lib/fees/services";
@@ -142,6 +142,115 @@ export function FeeOfferDocument({
     </View>
   );
 
+  const cellStyle = { flexDirection: "row" as const, paddingVertical: 3, paddingHorizontal: 4, borderBottomWidth: 0.5, borderBottomColor: colors.line };
+  const skontoLine = totals.skonto > 0 ? tx.skonto(pct(data.skontoPct), data.skontoDays, formatAmount(totals.skonto)) : null;
+  const totalsBlock = (
+    <View wrap={false} style={{ marginTop: 8, marginLeft: "40%" }}>
+      {data.kind === "sia" &&
+        data.extras
+          .filter((e) => e.amount)
+          .map((e) => (
+            <View key={e.id}>{row(e.text || "–", e.amount ?? 0)}</View>
+          ))}
+      {(totals.extras > 0 || totals.discount > 0) && row(tx.subtotal, totals.subtotal)}
+      {totals.discount > 0 && row(tx.discount(pct(data.discountPct)), totals.discount, { negative: true })}
+      {totals.expenses > 0 && row(tx.expenses(pct(data.expensesPct)), totals.expenses)}
+      {row(tx.net, totals.net, { bold: true })}
+      {row(tx.vat(pct(vatRate)), totals.vat)}
+      <View style={{ flexDirection: "row", marginTop: 4, paddingVertical: 6, paddingHorizontal: 4, backgroundColor: colors.brand, color: colors.brandText, ...styles.bold }}>
+        <Text style={{ flex: 1 }}>{tx.gross}</Text>
+        <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(totals.total)}</Text>
+      </View>
+      {skontoLine && <Text style={{ marginTop: 4, paddingHorizontal: 4, color: colors.muted }}>{skontoLine}</Text>}
+    </View>
+  );
+  const meta: [string, string][] = [
+    [tx.offerNo, offer.number],
+    [l.date, formatDate(new Date(offer.offerDate))],
+    ...(validUntil ? ([[tx.validUntil, validUntil]] as [string, string][]) : []),
+  ];
+  const signatures = (
+    <View style={{ flexDirection: "row", gap: 30, marginTop: 24 }}>
+      {[tx.client, tx.contractor].map((who) => (
+        <View key={who} style={{ flex: 1 }}>
+          <Text style={{ borderTopWidth: 0.5, borderTopColor: colors.text, paddingTop: 3 }}>{tx.placeDate}</Text>
+          <Text style={{ marginTop: 30, borderTopWidth: 0.5, borderTopColor: colors.text, paddingTop: 3 }}>
+            {who}: {who === tx.client ? (recipient?.name ?? "") : firm.name}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+
+  // Free offer: one letter with the positions, conditions and acceptance, no SIA 108 Anhang.
+  if (data.kind === "positions") {
+    const P = tx.positions;
+    const cols = { qty: 50, unit: 44, price: 70 };
+    return (
+      <Document title={`${tx.offerNo} ${offer.number} – ${offer.title}`} author={firm.name}>
+        <LetterPage firm={firm} logo={logo} pageLabel={l.page}>
+          <AddressAndMeta recipient={address} meta={meta} />
+          <Text style={{ ...styles.title, marginTop: 36 }}>{tx.subject(projectLine)}</Text>
+          <Text style={{ marginBottom: 10 }}>{tx.salutation(contact)}</Text>
+          <Text style={{ marginBottom: 12 }}>{tx.introPositions}</Text>
+          {textLines(data.description).length > 0 && (
+            <View style={{ marginBottom: 12 }}>
+              <Text style={{ ...styles.bold, marginBottom: 3 }}>{tx.scope}</Text>
+              {textLines(data.description).map((line, i) => (
+                <Text key={i}>{line}</Text>
+              ))}
+            </View>
+          )}
+
+          <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, paddingVertical: 5, paddingHorizontal: 4, ...styles.bold }}>
+            <Text style={{ flex: 1 }}>{P.text}</Text>
+            <Text style={{ width: cols.qty, textAlign: "right" }}>{P.qty}</Text>
+            <Text style={{ width: cols.unit, paddingLeft: 6 }}>{P.unit}</Text>
+            <Text style={{ width: cols.price, textAlign: "right" }}>{P.price}</Text>
+            <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{P.amount}</Text>
+          </View>
+          {data.positions.map((p) => {
+            const price = positionPrice(data, p);
+            const rate = p.unit === "h" && p.rateId ? data.rates.find((r) => r.id === p.rateId)?.label : null;
+            return (
+              <View key={p.id} style={cellStyle} wrap={false}>
+                <View style={{ flex: 1, paddingRight: 6 }}>
+                  {textLines(p.text).map((line, i) => (
+                    <Text key={i}>{line}</Text>
+                  ))}
+                  {rate && <Text style={{ color: colors.muted, fontSize: 8.5 }}>{rate}</Text>}
+                </View>
+                <Text style={{ width: cols.qty, textAlign: "right" }}>{p.qty !== null ? formatQuantity(p.qty) : ""}</Text>
+                <Text style={{ width: cols.unit, paddingLeft: 6 }}>{P.units[p.unit]}</Text>
+                <Text style={{ width: cols.price, textAlign: "right" }}>{price !== null ? formatAmount(price) : ""}</Text>
+                <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(positionAmount(data, p))}</Text>
+              </View>
+            );
+          })}
+          {totalsBlock}
+
+          <View wrap={false} style={{ marginTop: 14 }}>
+            <Bullets lines={[...tx.paymentPositions(firm.payment_terms_days), ...(data.expensesPct > 0 ? [tx.expensesIncluded(pct(data.expensesPct))] : []), ...(validUntil ? [tx.validity(validUntil)] : [])]} />
+            {textLines(data.expensesText).length > 0 && data.expensesPct > 0 && <Bullets lines={textLines(data.expensesText)} />}
+          </View>
+
+          <View wrap={false} style={{ marginTop: 14 }}>
+            <Text style={{ marginBottom: 6 }}>{tx.outroPositions}</Text>
+            <Text style={{ marginTop: 10 }}>{tx.closing}</Text>
+            <Text style={{ marginTop: 6 }}>{firm.name}</Text>
+            <Text style={{ marginTop: 30 }}>{firm.managing_director}</Text>
+            <Text>{l.managingDirector}</Text>
+          </View>
+
+          <View wrap={false} style={{ marginTop: 20 }}>
+            <Text style={{ ...styles.bold, fontSize: 11 }}>{tx.sections.acceptance}</Text>
+            {signatures}
+          </View>
+        </LetterPage>
+      </Document>
+    );
+  }
+
   const phasesInOffer = feePhases.filter((p) => trades.some((t) => data.trades[t.trade].phases[p].on));
   const sia = data.method === "sia";
   const h = rateOf(data, data.siaRateId);
@@ -174,19 +283,11 @@ export function FeeOfferDocument({
       {total && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{tx.total}</Text>}
     </View>
   );
-  const cellStyle = { flexDirection: "row" as const, paddingVertical: 3, paddingHorizontal: 4, borderBottomWidth: 0.5, borderBottomColor: colors.line };
 
   return (
     <Document title={`${tx.offerNo} ${offer.number} – ${offer.title}`} author={firm.name}>
       <LetterPage firm={firm} logo={logo} pageLabel={l.page}>
-        <AddressAndMeta
-          recipient={address}
-          meta={[
-            [tx.offerNo, offer.number],
-            [l.date, formatDate(new Date(offer.offerDate))],
-            ...(validUntil ? ([[tx.validUntil, validUntil]] as [string, string][]) : []),
-          ]}
-        />
+        <AddressAndMeta recipient={address} meta={meta} />
         <Text style={{ ...styles.title, marginTop: 36 }}>{tx.subject(projectLine)}</Text>
         <Text style={{ marginBottom: 10 }}>{tx.salutation(contact)}</Text>
         <Text style={{ marginBottom: 12 }}>{tx.intro}</Text>
@@ -220,22 +321,7 @@ export function FeeOfferDocument({
           </View>
         ))}
 
-        <View wrap={false} style={{ marginTop: 8, marginLeft: "40%" }}>
-          {data.extras
-            .filter((e) => e.amount)
-            .map((e) => (
-              <View key={e.id}>{row(e.text || "–", e.amount ?? 0)}</View>
-            ))}
-          {(totals.extras > 0 || totals.discount > 0) && row(tx.subtotal, totals.subtotal)}
-          {totals.discount > 0 && row(tx.discount(pct(data.discountPct)), totals.discount, { negative: true })}
-          {totals.expenses > 0 && row(tx.expenses(pct(data.expensesPct)), totals.expenses)}
-          {row(tx.net, totals.net, { bold: true })}
-          {row(tx.vat(pct(vatRate)), totals.vat)}
-          <View style={{ flexDirection: "row", marginTop: 4, paddingVertical: 6, paddingHorizontal: 4, backgroundColor: colors.brand, color: colors.brandText, ...styles.bold }}>
-            <Text style={{ flex: 1 }}>{tx.gross}</Text>
-            <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(totals.total)}</Text>
-          </View>
-        </View>
+        {totalsBlock}
 
         <View wrap={false} style={{ marginTop: 18 }}>
           {tx.outro.map((p, i) => (
@@ -380,7 +466,7 @@ export function FeeOfferDocument({
         ))}
 
         <Heading n={8}>{tx.sections.payment}</Heading>
-        <Bullets lines={tx.payment(firm.payment_terms_days)} />
+        <Bullets lines={[...tx.payment(firm.payment_terms_days), ...(skontoLine ? [skontoLine] : [])]} />
 
         {validUntil && (
           <>
@@ -391,16 +477,7 @@ export function FeeOfferDocument({
 
         <View wrap={false}>
           <Heading n={validUntil ? 10 : 9}>{tx.sections.acceptance}</Heading>
-          <View style={{ flexDirection: "row", gap: 30, marginTop: 24 }}>
-            {[tx.client, tx.contractor].map((who) => (
-              <View key={who} style={{ flex: 1 }}>
-                <Text style={{ borderTopWidth: 0.5, borderTopColor: colors.text, paddingTop: 3 }}>{tx.placeDate}</Text>
-                <Text style={{ marginTop: 30, borderTopWidth: 0.5, borderTopColor: colors.text, paddingTop: 3 }}>
-                  {who}: {who === tx.client ? (recipient?.name ?? "") : firm.name}
-                </Text>
-              </View>
-            ))}
-          </View>
+          {signatures}
         </View>
       </LetterPage>
     </Document>

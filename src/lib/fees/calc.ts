@@ -1,4 +1,4 @@
-import { type FeeOfferData, phaseShare, tradeN } from "./offer-schema";
+import { type FeeOfferData, type OfferPosition, phaseShare, tradeN } from "./offer-schema";
 import {
   type BasisSystem,
   basisSystems,
@@ -16,6 +16,8 @@ import {
 
 // Fee of a Honorarofferte: per trade and phase (SIA 108 formula or hours × rates), then the totals
 // Honorar + Zusatzpositionen − Rabatt + Nebenkosten = Total exkl. MwSt. + MwSt. = Total inkl. MwSt. (5 Rp.).
+// Free offers (kind "positions") take Σ Menge × Ansatz of their positions as Honorar instead.
+// Skonto is a payment condition: shown with its amount, the total stays the full amount.
 
 export type PhaseFee = { phase: FeePhase; q: number; hours: number | null; amount: number | null };
 
@@ -47,12 +49,14 @@ export type FeeTotals = {
   net: number;
   vat: number;
   total: number;
+  /** Skonto on the total when paid within the Skonto days (0 without Skonto). */
+  skonto: number;
 };
 
 const roundTo5Rappen = (value: number) => Math.round(value * 20) / 20;
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
-export const activeTrades = (data: FeeOfferData) => feeTrades.filter((t) => data.trades[t].on);
+export const activeTrades = (data: FeeOfferData) => (data.kind === "sia" ? feeTrades.filter((t) => data.trades[t].on) : []);
 
 /** Costs of a basis system: entered, else the summed costs of its linked trades in the offer. */
 export function linkedCost(data: FeeOfferData, system: BasisSystem): number {
@@ -90,6 +94,14 @@ export function factorCosts(data: FeeOfferData, trade: FeeTrade): number | null 
   const sum = costs.reduce((a, b) => a + b, 0);
   return sum > 0 ? sum : null;
 }
+
+/** Ansatz of a position: the rate category for hours, else the entered price. */
+export function positionPrice(data: FeeOfferData, p: OfferPosition): number | null {
+  if (p.unit === "h" && p.rateId) return rateOf(data, p.rateId) ?? p.price;
+  return p.price;
+}
+
+export const positionAmount = (data: FeeOfferData, p: OfferPosition) => round2((p.qty ?? 0) * (positionPrice(data, p) ?? 0));
 
 export const rateOf = (data: FeeOfferData, id: string) => data.rates.find((r) => r.id === id)?.rate ?? null;
 
@@ -140,12 +152,14 @@ export function feeTotals(data: FeeOfferData, vatRate: number): FeeTotals {
     const fees = trades.flatMap((t) => t.phases.filter((p) => p.phase === phase));
     return fees.length ? [{ phase, amount: round2(fees.reduce((sum, p) => sum + (p.amount ?? 0), 0)) }] : [];
   });
-  const fees = round2(trades.reduce((sum, t) => sum + t.amount, 0));
-  const extras = round2(data.extras.reduce((sum, e) => sum + (e.amount ?? 0), 0));
+  const positions = data.kind === "positions";
+  const fees = positions ? round2(data.positions.reduce((sum, p) => sum + positionAmount(data, p), 0)) : round2(trades.reduce((sum, t) => sum + t.amount, 0));
+  const extras = positions ? 0 : round2(data.extras.reduce((sum, e) => sum + (e.amount ?? 0), 0));
   const subtotal = round2(fees + extras);
   const discount = round2((subtotal * data.discountPct) / 100);
   const expenses = round2(((subtotal - discount) * data.expensesPct) / 100);
   const net = round2(subtotal - discount + expenses);
   const vat = round2((net * vatRate) / 100);
-  return { trades, phases, fees, extras, subtotal, discount, expenses, net, vat, total: roundTo5Rappen(net + vat) };
+  const total = roundTo5Rappen(net + vat);
+  return { trades, phases, fees, extras, subtotal, discount, expenses, net, vat, total, skonto: round2((total * data.skontoPct) / 100) };
 }

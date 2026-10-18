@@ -26,6 +26,16 @@ import {
 
 export type FeeMethod = "sia" | "hours";
 
+/** "sia": fee per trade and phase (SIA 108 formula or hours); "positions": free positions, no SIA 108. */
+export const offerKinds = ["sia", "positions"] as const;
+export type OfferKind = (typeof offerKinds)[number];
+
+export const positionUnits = ["h", "lump", "pcs", "day"] as const;
+export type PositionUnit = (typeof positionUnits)[number];
+
+/** Free position: Menge × Ansatz; for hours the Ansatz can come from a rate category of the offer (rateId). */
+export type OfferPosition = { id: string; text: string; qty: number | null; unit: PositionUnit; rateId: string | null; price: number | null };
+
 export type TradePhase = {
   on: boolean;
   /** Leistungsanteil q in %; null = the offer's default share. */
@@ -63,6 +73,7 @@ export type TradeData = {
 export type ExtraItem = { id: string; text: string; amount: number | null };
 
 export type FeeOfferData = {
+  kind: OfferKind;
   method: FeeMethod;
   /** Bauwerksart (SIA 108 Art. 7.6.5) for all trades. */
   buildingType: string | null;
@@ -81,12 +92,18 @@ export type FeeOfferData = {
   /** Further Grundlagen, e.g. the project documents with their date. */
   basis: string;
   customServices: CustomService[];
-  /** Lump-sum items besides the phase fees (e.g. Fachkoordination, Kanalisationseingabe). */
+  /** Lump-sum items besides the phase fees (e.g. Fachkoordination, Kanalisationseingabe); SIA offers only. */
   extras: ExtraItem[];
+  /** Positions of a free offer (kind "positions"). */
+  positions: OfferPosition[];
+  /** Skonto as payment condition: pct within days (0 % = none). */
+  skontoPct: number;
+  skontoDays: number;
 };
 
 export const MAX_CUSTOM = 40;
 export const MAX_EXTRAS = 20;
+export const MAX_POSITIONS = 80;
 
 const record = (value: unknown) => (value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {});
 const inRange = (value: unknown, [min, max]: readonly [number, number], fallback: number) =>
@@ -168,6 +185,22 @@ function parseExtras(raw: unknown): ExtraItem[] {
   }).slice(0, MAX_EXTRAS);
 }
 
+function parsePositions(raw: unknown): OfferPosition[] {
+  return (Array.isArray(raw) ? raw : []).flatMap((e): OfferPosition[] => {
+    const o = record(e);
+    if (typeof o.id !== "string") return [];
+    const qty = typeof o.qty === "number" && Number.isFinite(o.qty) && Math.abs(o.qty) <= 1e7 ? o.qty : null;
+    return [{
+      id: o.id.slice(0, 40),
+      text: text(o.text, 1000),
+      qty,
+      unit: positionUnits.includes(o.unit as PositionUnit) ? (o.unit as PositionUnit) : "h",
+      rateId: typeof o.rateId === "string" && o.rateId ? o.rateId.slice(0, 40) : null,
+      price: money.parse(o.price ?? null),
+    }];
+  }).slice(0, MAX_POSITIONS);
+}
+
 export function parseFeeOfferData(raw: unknown): FeeOfferData {
   const v = record(raw);
   const trades = record(v.trades);
@@ -190,6 +223,7 @@ export function parseFeeOfferData(raw: unknown): FeeOfferData {
   const scores = record(v.fkScores);
   for (const c of fkCriteria) if (scores[c.id] === 1 || scores[c.id] === 2 || scores[c.id] === 3) fkScores[c.id] = scores[c.id] as number;
   return {
+    kind: v.kind === "positions" ? "positions" : "sia",
     method: v.method === "hours" ? "hours" : "sia",
     buildingType,
     fkScores,
@@ -211,12 +245,16 @@ export function parseFeeOfferData(raw: unknown): FeeOfferData {
     basis: text(v.basis, 2000),
     customServices: parseCustomServices(v.customServices),
     extras: parseExtras(v.extras),
+    positions: parsePositions(v.positions),
+    skontoPct: inRange(v.skontoPct, [0, 100], 0),
+    skontoDays: Math.round(inRange(v.skontoDays, [0, 365], 10)),
   };
 }
 
-/** New offer: all phases switched on for the chosen trades, settings copied. */
-export function newFeeOfferData(settings: FeeSettings, trades: FeeTrade[]): FeeOfferData {
-  const data = parseFeeOfferData({});
+/** New offer: all phases switched on for the chosen trades (or one empty position for a free offer), settings copied. */
+export function newFeeOfferData(settings: FeeSettings, trades: FeeTrade[], kind: OfferKind = "sia"): FeeOfferData {
+  const data = parseFeeOfferData({ kind });
+  if (kind === "positions") data.positions = [{ id: crypto.randomUUID(), text: "", qty: null, unit: "h", rateId: settings.siaRateId || null, price: null }];
   for (const t of trades) {
     data.trades[t].on = true;
     for (const p of feePhases) data.trades[t].phases[p].on = true;
