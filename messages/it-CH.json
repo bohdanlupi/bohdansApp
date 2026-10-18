@@ -3754,7 +3754,8 @@
       "due_date": "Pagabile entro",
       "text": "Osservazione",
       "skontoPct": "Sconto %",
-      "skontoDays": "Sconto entro giorni"
+      "skontoDays": "Sconto entro giorni",
+      "conditions": "Condizioni supplementari"
     },
     "sections": {
       "invoice": "Fattura",
@@ -3792,7 +3793,9 @@
     "positions": "Posizioni",
     "allPositionsDone": "Tutte le posizioni 100 %",
     "openTitle": "Fatture aperte",
-    "paidTitle": "Fatture pagate"
+    "paidTitle": "Fatture pagate",
+    "conditionsPlaceholder": "p. es. indicazioni sul pagamento, delimitazioni (una riga per punto)",
+    "conditionsHint": "Sezione propria nel PDF sotto l’importo della fattura; vuoto = nessuna sezione. Ripresa nella fattura successiva."
   },
   "feeSettings": {
     "description": "Valori predefiniti per le nuove offerte d’onorario. Le offerte esistenti mantengono i loro valori.",

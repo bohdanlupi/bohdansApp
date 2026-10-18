@@ -3754,7 +3754,8 @@
       "due_date": "Zahlbar bis",
       "text": "Bemerkung",
       "skontoPct": "Skonto %",
-      "skontoDays": "Skonto innert Tagen"
+      "skontoDays": "Skonto innert Tagen",
+      "conditions": "Zusätzliche Bedingungen"
     },
     "sections": {
       "invoice": "Rechnung",
@@ -3792,7 +3793,9 @@
     "positions": "Positionen",
     "allPositionsDone": "Alle Positionen 100 %",
     "openTitle": "Offene Rechnungen",
-    "paidTitle": "Bezahlte Rechnungen"
+    "paidTitle": "Bezahlte Rechnungen",
+    "conditionsPlaceholder": "z. B. Hinweise zur Zahlung, Abgrenzungen (eine Zeile pro Punkt)",
+    "conditionsHint": "Eigener Abschnitt im PDF unter dem Rechnungsbetrag; leer = kein Abschnitt. Wird in die nächste Rechnung übernommen."
   },
   "feeSettings": {
     "description": "Vorgaben für neue Honorarofferten. Bestehende Offerten behalten ihre Werte.",

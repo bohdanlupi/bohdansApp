@@ -3754,7 +3754,8 @@
       "due_date": "Payable jusqu’au",
       "text": "Remarque",
       "skontoPct": "Escompte %",
-      "skontoDays": "Escompte dans les jours"
+      "skontoDays": "Escompte dans les jours",
+      "conditions": "Conditions supplémentaires"
     },
     "sections": {
       "invoice": "Facture",
@@ -3792,7 +3793,9 @@
     "positions": "Positions",
     "allPositionsDone": "Toutes les positions 100 %",
     "openTitle": "Factures ouvertes",
-    "paidTitle": "Factures payées"
+    "paidTitle": "Factures payées",
+    "conditionsPlaceholder": "p. ex. remarques sur le paiement, délimitations (une ligne par point)",
+    "conditionsHint": "Section propre dans le PDF sous le montant de la facture ; vide = pas de section. Reprise dans la facture suivante."
   },
   "feeSettings": {
     "description": "Valeurs par défaut des nouvelles offres d’honoraires. Les offres existantes conservent leurs valeurs.",

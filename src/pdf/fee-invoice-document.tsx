@@ -21,6 +21,8 @@ export type FeeInvoicePdf = {
   language: AppLanguage;
   offer: FeeOfferData;
   text: string;
+  /** Zusätzliche Bedingungen, one point per line. */
+  conditions: string;
   totals: InvoiceTotals;
   /** Number of the previous invoice of the offer (null = first invoice). */
   previousNumber: string | null;
@@ -54,6 +56,7 @@ export function FeeInvoiceDocument({
   const l = pdfLabels(language);
   const tx = feeInvoiceTexts(language);
   const pct = (value: number) => formatQuantity(value);
+  const conditionLines = invoice.conditions.split("\n").map((l) => l.trim()).filter(Boolean);
   const due = invoice.dueDate ? formatDate(new Date(invoice.dueDate)) : null;
   const skontoLine =
     totals.skonto > 0
@@ -152,6 +155,18 @@ export function FeeInvoiceDocument({
           </View>
           {skontoLine && <Text style={{ marginTop: 4, paddingHorizontal: 4, color: colors.muted }}>{skontoLine}</Text>}
         </View>
+
+        {conditionLines.length > 0 && (
+          <View wrap={false} style={{ marginTop: 18 }}>
+            <Text style={{ ...styles.bold, marginBottom: 3 }}>{tx.conditions}</Text>
+            {conditionLines.map((line, i) => (
+              <View key={i} style={{ flexDirection: "row", marginBottom: 2 }}>
+                <Text style={{ width: 10 }}>–</Text>
+                <Text style={{ flex: 1 }}>{line}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <View wrap={false} style={{ marginTop: 18 }}>
           {due && <Text style={{ marginBottom: 6 }}>{qr ? tx.payment(due) : tx.paymentNoQr(due)}</Text>}

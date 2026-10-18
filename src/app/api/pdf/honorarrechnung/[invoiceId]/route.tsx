@@ -87,6 +87,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
         language,
         offer: offerData,
         text: data.text,
+        conditions: data.conditions,
         totals,
         previousNumber: previous?.number ?? null,
         skonto: invoiceSkonto(offerData, data),

@@ -22,6 +22,8 @@ export type FeeInvoiceData = {
   skontoDays: number | null;
   /** Remark printed above the table. */
   text: string;
+  /** Zusätzliche Bedingungen (own block in the PDF, left out when empty). */
+  conditions: string;
 };
 
 const record = (value: unknown) => (value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {});
@@ -55,10 +57,11 @@ export function parseFeeInvoiceData(raw: unknown): FeeInvoiceData {
     skontoPct: typeof v.skontoPct === "number" ? pct(v.skontoPct) : null,
     skontoDays: days,
     text: typeof v.text === "string" ? v.text.slice(0, 2000) : "",
+    conditions: typeof v.conditions === "string" ? v.conditions.slice(0, 4000) : "",
   };
 }
 
-export const emptyInvoiceData = (): FeeInvoiceData => ({ progress: {}, extras: {}, positions: {}, skontoPct: null, skontoDays: null, text: "" });
+export const emptyInvoiceData = (): FeeInvoiceData => ({ progress: {}, extras: {}, positions: {}, skontoPct: null, skontoDays: null, text: "", conditions: "" });
 
 /** Skonto of an invoice: its own values, else those of the offer. */
 export const invoiceSkonto = (offer: FeeOfferData, data: FeeInvoiceData) => ({ pct: data.skontoPct ?? offer.skontoPct, days: data.skontoDays ?? offer.skontoDays });

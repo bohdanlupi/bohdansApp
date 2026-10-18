@@ -179,6 +179,19 @@ export function FeeInvoiceEditor({
             <Label htmlFor="invoice-text">{t("fields.text")}</Label>
             <CommitInput id="invoice-text" multiline rows={2} value={data.text} placeholder={t("textPlaceholder")} disabled={!canEdit} onCommit={(text) => setData((d) => ({ ...d, text }))} />
           </div>
+          <div className="space-y-1.5 sm:col-span-4">
+            <Label htmlFor="invoice-conditions">{t("fields.conditions")}</Label>
+            <CommitInput
+              id="invoice-conditions"
+              multiline
+              rows={3}
+              value={data.conditions}
+              placeholder={t("conditionsPlaceholder")}
+              disabled={!canEdit}
+              onCommit={(conditions) => setData((d) => ({ ...d, conditions }))}
+            />
+            <p className="text-xs text-muted-foreground">{t("conditionsHint")}</p>
+          </div>
         </div>
       </Section>
 
