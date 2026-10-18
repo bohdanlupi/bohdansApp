@@ -25,6 +25,7 @@ const firm: FirmSettings = {
   vat_rate: 8.1,
   offer_validity_days: 30,
   payment_terms_days: 30,
+  fee_settings: {},
   logo_path: null,
   updated_at: new Date().toISOString(),
   updated_by: null,

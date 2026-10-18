@@ -29,7 +29,8 @@
     "addresses": "Adresses",
     "catalogs": "Catalogues",
     "settings": "Paramètres",
-    "profile": "Mon profil"
+    "profile": "Mon profil",
+    "feeOffers": "Offres d’honoraires"
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -82,7 +83,9 @@
     "catalogReadOnly": "Les catalogues fournisseurs ne peuvent pas être modifiés. Ils sont mis à jour par une nouvelle importation.",
     "tooManyEntries": "La sélection est trop grande (5000 entrées au maximum). Veuillez choisir des groupes plus petits.",
     "structureExists": "Le descriptif contient déjà une structure 244.",
-    "heatingStructureExists": "Le descriptif contient déjà une structure 24."
+    "heatingStructureExists": "Le descriptif contient déjà une structure 24.",
+    "noTradeChosen": "Veuillez choisir au moins un domaine.",
+    "offerNumberExists": "Ce numéro d’offre existe déjà."
   },
   "projects": {
     "title": "Projets",
@@ -290,7 +293,8 @@
       "firm": "Entreprise",
       "users": "Utilisateurs",
       "profile": "Mon profil",
-      "costPlans": "Plans des coûts"
+      "costPlans": "Plans des coûts",
+      "fees": "Honoraires SIA 108"
     },
     "firm": {
       "readOnly": "Seuls les administrateurs peuvent modifier les données de l'entreprise.",
@@ -3440,6 +3444,183 @@
       "cabinetResult": "Coffret de distribution {size} mm, pièces séparées",
       "single": "Pièces séparées",
       "hint": "Derrière le lavabo : seulement arrêt + compteur / pièce d’adaptation → boîtier pour lavabo 70120, seulement arrêt + réduction de pression → boîtier de robinetterie 70112, sinon pièces séparées."
+    }
+  },
+  "feeOffers": {
+    "title": "Offres d’honoraires",
+    "description": "Offres d’honoraires selon SIA 108 pour chauffage, froid, ventilation/climatisation et sanitaire – phases, étendue des prestations et calcul des honoraires.",
+    "new": "Nouvelle offre d’honoraires",
+    "newDescription": "Projet, mandant et domaines à offrir. Phases, honoraires et prestations suivent à l’étape suivante.",
+    "create": "Créer l’offre",
+    "emptyTitle": "Aucune offre d’honoraires",
+    "emptyText": "Créez une offre, choisissez les domaines et les phases et calculez les honoraires selon SIA 108.",
+    "searchPlaceholder": "Numéro, projet ou lieu",
+    "allStatuses": "Tous les statuts",
+    "noResults": "Aucune offre trouvée.",
+    "columns": {
+      "number": "N°",
+      "title": "Projet",
+      "client": "Mandant",
+      "date": "Date",
+      "net": "Honoraires hors TVA",
+      "status": "Statut"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "sent": "Envoyée",
+      "accepted": "Acceptée",
+      "declined": "Refusée"
+    },
+    "fields": {
+      "number": "N° d’offre",
+      "title": "Projet",
+      "street": "Rue",
+      "zip": "NPA",
+      "city": "Lieu",
+      "company": "Mandant",
+      "contact": "Personne de contact",
+      "language": "Langue de l’offre",
+      "status": "Statut",
+      "offer_date": "Date de l’offre",
+      "valid_until": "Valable jusqu’au",
+      "description": "Description du projet",
+      "basis": "Autres bases",
+      "discountPct": "Rabais [%]",
+      "expensesPct": "Frais accessoires [%]",
+      "expensesText": "Frais selon dépenses (une ligne par poste)"
+    },
+    "sections": {
+      "project": "Projet",
+      "client": "Mandant",
+      "trades": "Domaines",
+      "offer": "Offre",
+      "conditions": "Positions supplémentaires et conditions",
+      "summary": "Récapitulatif"
+    },
+    "tradesHint": "Pour chaque domaine choisi, toutes les phases partielles 31–53 sont proposées ; vous pouvez ensuite les désélectionner une à une.",
+    "pdf": "PDF",
+    "toProject": "Projet {number}",
+    "createProject": "Créer le projet",
+    "createProjectTitle": "Créer un projet à partir de l’offre ?",
+    "createProjectText": "Un nouveau projet est créé avec le nom, l’adresse et le mandant de l’offre ; l’offre est marquée comme acceptée.",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer l’offre ?",
+    "deleteText": "L’offre d’honoraires {number} sera supprimée définitivement.",
+    "descriptionPlaceholder": "Projet de construction, standard, production de chaleur, diffusion, ventilation, installations sanitaires …",
+    "basisPlaceholder": "Les documents de projet mis à notre disposition (état : …)",
+    "basisHint": "SIA 108, SIA 118 ainsi que les normes SIA et directives AEAI/SSIGE figurent toujours ; une ligne par base.",
+    "extras": {
+      "title": "Positions supplémentaires (forfait)",
+      "hint": "p. ex. coordination spécialisée, demande de raccordement aux canalisations ou simulations non comprises dans les phases.",
+      "text": "Désignation",
+      "amount": "Montant CHF",
+      "remove": "Supprimer la position",
+      "add": "Ajouter une position"
+    },
+    "rates": {
+      "title": "Tarifs horaires de cette offre",
+      "hint": "Repris des paramètres lors de la création ; ils s’appliquent aussi aux prestations supplémentaires selon dépenses."
+    },
+    "summary": {
+      "net": "Total hors TVA",
+      "total": "Total TVA comprise",
+      "sum": "Total",
+      "fees": "Honoraires",
+      "extras": "Positions supplémentaires",
+      "subtotal": "Sous-total",
+      "discount": "Rabais {pct} %",
+      "expenses": "Frais accessoires {pct} %",
+      "vat": "TVA {pct} %"
+    },
+    "fee": {
+      "title": "Calcul des honoraires",
+      "description": "Selon SIA 108 art. 7 à partir des coûts de l’ouvrage ou selon le temps estimé par phase.",
+      "method": "Mode de calcul",
+      "methods": {
+        "sia": "SIA 108 (coûts de l’ouvrage)",
+        "hours": "Temps consacré"
+      },
+      "methodHints": {
+        "sia": "H = B · p/100 · n · q/100 · r · U · i · s · h avec p = Z1 + Z2/∛Bp",
+        "hours": "Heures par phase et catégorie × tarif horaire"
+      },
+      "siaRate": "Tarif horaire h",
+      "siaRateHint": "Tarif moyen de l’équipe engagée.",
+      "trades": "Domaines",
+      "zTitle": "Coefficients Z1 / Z2 (repris des paramètres)",
+      "columns": {
+        "hk": "Chauffage / froid",
+        "lk": "Ventilation / climatisation",
+        "s": "Sanitaire"
+      },
+      "zMissing": "Sans Z1 et Z2, le facteur de base p ne peut pas être calculé. Saisissez les valeurs ici ou dans les paramètres (valable pour les nouvelles offres).",
+      "noTrades": "Choisissez au moins un domaine.",
+      "factors": {
+        "n": "Degré de difficulté n",
+        "r": "Facteur d’ajustement r",
+        "i": "Facteur d’équipe i",
+        "s": "Prestations spéciales s",
+        "u": "Transformation U"
+      },
+      "range": "{min} – {max}",
+      "cost": "Coûts de l’ouvrage B [CHF]",
+      "costHint": "Déterminants du temps, hors TVA.",
+      "buildingType": "Type d’ouvrage (degré de difficulté SIA 108 art. 7.6.5)",
+      "buildingTypeManual": "Degré de difficulté manuel",
+      "buildingTypeHint": "Fixe n au cas normal du type d’ouvrage ; n peut ensuite être adapté.",
+      "bp": "Coûts déterminants du facteur Bp",
+      "p": "Facteur de base p",
+      "qSum": "Part de prestations Σq",
+      "bpShared": "Chauffage et froid forment un seul domaine (SIA 108 art. 7.5.21) : p est calculé à partir de la somme de leurs coûts.",
+      "phase": "Phase partielle",
+      "hours": "Heures",
+      "costMissing": "Saisissez les coûts de l’ouvrage B pour calculer les honoraires.",
+      "noRates": "Aucun tarif horaire – saisissez des catégories dans les paramètres.",
+      "rateMissing": "Le tarif horaire choisi manque.",
+      "qHint": "Vide = part de prestations selon SIA 108 art. 7.7 (somme de toutes les phases {sum} %)."
+    },
+    "services": {
+      "title": "Étendue des prestations",
+      "description": "Par phase partielle et domaine : comprise (prestation ordinaire), non comprise (offerte selon dépenses) ou non mentionnée.",
+      "states": {
+        "in": "comprise",
+        "out": "non comprise",
+        "no": "–"
+      },
+      "customPlaceholder": "Prestation propre",
+      "removeCustom": "Supprimer la ligne",
+      "addCustom": "Ligne propre"
+    }
+  },
+  "feeSettings": {
+    "description": "Valeurs par défaut des nouvelles offres d’honoraires. Les offres existantes conservent leurs valeurs.",
+    "readOnly": "Seuls les administrateurs peuvent modifier ces valeurs.",
+    "z": {
+      "title": "Coefficients Z1 / Z2",
+      "description": "Coefficients du facteur de base p = Z1 + Z2/∛Bp (SIA 108 art. 7.2.2), publiés périodiquement par la SIA.",
+      "column": "Domaine"
+    },
+    "shares": {
+      "title": "Parts de prestations q",
+      "description": "Pondération en pour-cent des phases partielles selon SIA 108 art. 7.7.3. La norme indique 32 et 33 ensemble ; la répartition 33 = 2 % est une valeur par défaut.",
+      "phase": "Phase partielle",
+      "sum": "Somme"
+    },
+    "rates": {
+      "title": "Tarifs horaires",
+      "description": "Catégories pour le temps consacré et les prestations supplémentaires.",
+      "label": "Désignation",
+      "rate": "Tarif CHF/h",
+      "remove": "Supprimer la catégorie",
+      "newLabel": "Nouvelle catégorie",
+      "add": "Ajouter une catégorie",
+      "sia": "Tarif pour SIA 108 (h)",
+      "siaHint": "Utilisé dans les nouvelles offres pour le calcul selon les coûts de l’ouvrage."
+    },
+    "expenses": {
+      "title": "Frais accessoires",
+      "pct": "Frais accessoires [%]",
+      "text": "Frais selon dépenses (une ligne par poste)"
     }
   }
 }

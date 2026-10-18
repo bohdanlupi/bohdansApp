@@ -361,6 +361,109 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_offers: {
+        Row: {
+          city: string | null
+          company_id: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          data: Json
+          id: string
+          language: Database["public"]["Enums"]["app_language"]
+          number: string
+          offer_date: string
+          project_id: string | null
+          status: string
+          street: string | null
+          title: string
+          updated_at: string
+          valid_until: string | null
+          zip: string | null
+        }
+        Insert: {
+          city?: string | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          id?: string
+          language?: Database["public"]["Enums"]["app_language"]
+          number: string
+          offer_date?: string
+          project_id?: string | null
+          status?: string
+          street?: string | null
+          title: string
+          updated_at?: string
+          valid_until?: string | null
+          zip?: string | null
+        }
+        Update: {
+          city?: string | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          id?: string
+          language?: Database["public"]["Enums"]["app_language"]
+          number?: string
+          offer_date?: string
+          project_id?: string | null
+          status?: string
+          street?: string | null
+          title?: string
+          updated_at?: string
+          valid_until?: string | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_offers_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_offers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_offers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_offers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       firm_settings: {
         Row: {
           bank_name: string | null
@@ -368,6 +471,7 @@ export type Database = {
           city: string | null
           country: string
           email: string | null
+          fee_settings: Json
           iban: string | null
           id: boolean
           logo_path: string | null
@@ -390,6 +494,7 @@ export type Database = {
           city?: string | null
           country?: string
           email?: string | null
+          fee_settings?: Json
           iban?: string | null
           id?: boolean
           logo_path?: string | null
@@ -412,6 +517,7 @@ export type Database = {
           city?: string | null
           country?: string
           email?: string | null
+          fee_settings?: Json
           iban?: string | null
           id?: boolean
           logo_path?: string | null

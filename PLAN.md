@@ -104,6 +104,14 @@ heating_systems     id, project_id, name, sort, data jsonb (243 Fussbodenheizung
 heating_plants      id, project_id, name, sort, data jsonb (242 Wärmeerzeugungsanlage: generators, cooling, storage …)
                     → src/lib/heating/plant-schema.ts; radiators jsonb (243 Heizkörper per Heizgruppe → radiator-schema.ts,
                     computed in radiators.ts)
+
+-- Honorarofferten (SIA 108)
+fee_offers          id, number (unique, YYYY-NNN), title, status (draft | sent | accepted | declined), company_id, contact_id,
+                    project_id (set when the accepted offer becomes a project), street, zip, city, language, offer_date,
+                    valid_until, data jsonb (method sia | hours, trades Heizung/Kälte/Lüftung-Klima/Sanitär with B, n, r, i, s, U
+                    and phases 31–53, services per trade + phase, own lines, extras, copy of rates / Z1 Z2 / shares)
+                    → src/lib/fees/offer-schema.ts, computed in calc.ts (SIA 108:2014 Art. 7, sia108.ts), services.ts
+firm_settings.fee_settings  Z1/Z2 per Fachgebiet, Leistungsanteile q, rate categories, Nebenkosten → settings-schema.ts
 ```
 
 All tables get `created_at/updated_at/created_by`. RLS policies: authenticated users of the firm
@@ -130,6 +138,9 @@ can read everything; write access by role.
 /adressen                      companies + contacts
 /kataloge                      own catalogue editor (same tree + detail UI as the LV)
 /einstellungen                 users, letterhead, MwSt, cost plan templates
+/einstellungen/honorar         SIA 108 defaults for fee offers (Z1/Z2, Leistungsanteile, rates, Nebenkosten)
+/honorarofferten[/neu|/id]     fee offers by SIA 108 (trades, phases, services), PDF /api/pdf/honorarofferte/[id],
+                               «Projekt erstellen» turns an accepted offer into a project
 ```
 
 ## Phases

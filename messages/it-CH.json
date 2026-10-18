@@ -29,7 +29,8 @@
     "addresses": "Indirizzi",
     "catalogs": "Cataloghi",
     "settings": "Impostazioni",
-    "profile": "Il mio profilo"
+    "profile": "Il mio profilo",
+    "feeOffers": "Offerte d’onorario"
   },
   "auth": {
     "loginTitle": "Accesso",
@@ -82,7 +83,9 @@
     "catalogReadOnly": "I cataloghi dei fornitori non possono essere modificati. Vengono aggiornati con una nuova importazione.",
     "tooManyEntries": "La selezione è troppo grande (al massimo 5000 voci). Selezioni gruppi più piccoli.",
     "structureExists": "L’elenco contiene già una struttura 244.",
-    "heatingStructureExists": "L’elenco contiene già una struttura 24."
+    "heatingStructureExists": "L’elenco contiene già una struttura 24.",
+    "noTradeChosen": "Scegliere almeno un settore.",
+    "offerNumberExists": "Questo numero d’offerta esiste già."
   },
   "projects": {
     "title": "Progetti",
@@ -290,7 +293,8 @@
       "firm": "Azienda",
       "users": "Utenti",
       "profile": "Il mio profilo",
-      "costPlans": "Piani dei costi"
+      "costPlans": "Piani dei costi",
+      "fees": "Onorario SIA 108"
     },
     "firm": {
       "readOnly": "Solo gli amministratori possono modificare i dati aziendali.",
@@ -3440,6 +3444,183 @@
       "cabinetResult": "Cassetta di distribuzione {size} mm, pezzi singoli",
       "single": "Pezzi singoli",
       "hint": "Dietro il lavabo: solo arresto + contatore / pezzo di adattamento → scatola per lavabo 70120, solo arresto + riduzione di pressione → scatola di rubinetteria 70112, altrimenti pezzi singoli."
+    }
+  },
+  "feeOffers": {
+    "title": "Offerte d’onorario",
+    "description": "Offerte d’onorario secondo SIA 108 per riscaldamento, refrigerazione, ventilazione/climatizzazione e sanitario – fasi, prestazioni e calcolo dell’onorario.",
+    "new": "Nuova offerta d’onorario",
+    "newDescription": "Progetto, committente e settori da offrire. Fasi, onorario e prestazioni seguono nel passo successivo.",
+    "create": "Creare l’offerta",
+    "emptyTitle": "Ancora nessuna offerta d’onorario",
+    "emptyText": "Create un’offerta, scegliete settori e fasi e calcolate l’onorario secondo SIA 108.",
+    "searchPlaceholder": "Numero, progetto o luogo",
+    "allStatuses": "Tutti gli stati",
+    "noResults": "Nessuna offerta trovata.",
+    "columns": {
+      "number": "N.",
+      "title": "Progetto",
+      "client": "Committente",
+      "date": "Data",
+      "net": "Onorario IVA escl.",
+      "status": "Stato"
+    },
+    "status": {
+      "draft": "Bozza",
+      "sent": "Inviata",
+      "accepted": "Accettata",
+      "declined": "Rifiutata"
+    },
+    "fields": {
+      "number": "N. offerta",
+      "title": "Progetto",
+      "street": "Via",
+      "zip": "NPA",
+      "city": "Luogo",
+      "company": "Committente",
+      "contact": "Persona di contatto",
+      "language": "Lingua dell’offerta",
+      "status": "Stato",
+      "offer_date": "Data dell’offerta",
+      "valid_until": "Valida fino al",
+      "description": "Descrizione del progetto",
+      "basis": "Altre basi",
+      "discountPct": "Sconto [%]",
+      "expensesPct": "Spese accessorie [%]",
+      "expensesText": "Spese secondo dispendio (una riga per voce)"
+    },
+    "sections": {
+      "project": "Progetto",
+      "client": "Committente",
+      "trades": "Settori",
+      "offer": "Offerta",
+      "conditions": "Posizioni supplementari e condizioni",
+      "summary": "Riepilogo"
+    },
+    "tradesHint": "Per ogni settore scelto vengono proposte tutte le fasi parziali 31–53; potete poi deselezionarle singolarmente.",
+    "pdf": "PDF",
+    "toProject": "Progetto {number}",
+    "createProject": "Creare il progetto",
+    "createProjectTitle": "Creare un progetto dall’offerta?",
+    "createProjectText": "Viene creato un nuovo progetto con nome, indirizzo e committente dell’offerta; l’offerta viene segnata come accettata.",
+    "delete": "Eliminare",
+    "deleteTitle": "Eliminare l’offerta?",
+    "deleteText": "L’offerta d’onorario {number} verrà eliminata definitivamente.",
+    "descriptionPlaceholder": "Progetto edilizio, standard, produzione di calore, distribuzione, ventilazione, impianti sanitari …",
+    "basisPlaceholder": "La documentazione di progetto messa a nostra disposizione (stato: …)",
+    "basisHint": "SIA 108, SIA 118 e le norme SIA e direttive AICAA/SSIGA sono sempre elencate; una riga per base.",
+    "extras": {
+      "title": "Posizioni supplementari (forfait)",
+      "hint": "p. es. coordinamento specialistico, domanda di allacciamento alla canalizzazione o simulazioni non comprese nelle fasi.",
+      "text": "Designazione",
+      "amount": "Importo CHF",
+      "remove": "Rimuovere la posizione",
+      "add": "Aggiungere una posizione"
+    },
+    "rates": {
+      "title": "Tariffe orarie di questa offerta",
+      "hint": "Riprese dalle impostazioni alla creazione; valgono anche per le prestazioni supplementari secondo dispendio."
+    },
+    "summary": {
+      "net": "Totale IVA escl.",
+      "total": "Totale IVA incl.",
+      "sum": "Totale",
+      "fees": "Onorario",
+      "extras": "Posizioni supplementari",
+      "subtotal": "Subtotale",
+      "discount": "Sconto {pct} %",
+      "expenses": "Spese accessorie {pct} %",
+      "vat": "IVA {pct} %"
+    },
+    "fee": {
+      "title": "Calcolo dell’onorario",
+      "description": "Secondo SIA 108 art. 7 dai costi dell’opera o secondo il tempo stimato per fase.",
+      "method": "Metodo di calcolo",
+      "methods": {
+        "sia": "SIA 108 (costi dell’opera)",
+        "hours": "Tempo impiegato"
+      },
+      "methodHints": {
+        "sia": "H = B · p/100 · n · q/100 · r · U · i · s · h con p = Z1 + Z2/∛Bp",
+        "hours": "Ore per fase e categoria × tariffa oraria"
+      },
+      "siaRate": "Tariffa oraria h",
+      "siaRateHint": "Tariffa media del team impiegato.",
+      "trades": "Settori",
+      "zTitle": "Coefficienti Z1 / Z2 (ripresi dalle impostazioni)",
+      "columns": {
+        "hk": "Riscaldamento / refrigerazione",
+        "lk": "Ventilazione / climatizzazione",
+        "s": "Sanitario"
+      },
+      "zMissing": "Senza Z1 e Z2 il fattore di base p non può essere calcolato. Inserite i valori qui o nelle impostazioni (vale per le nuove offerte).",
+      "noTrades": "Scegliete almeno un settore.",
+      "factors": {
+        "n": "Grado di difficoltà n",
+        "r": "Fattore d’adeguamento r",
+        "i": "Fattore di team i",
+        "s": "Prestazioni speciali s",
+        "u": "Trasformazione U"
+      },
+      "range": "{min} – {max}",
+      "cost": "Costi dell’opera B [CHF]",
+      "costHint": "Determinanti il tempo, IVA escl.",
+      "buildingType": "Tipo d’opera (grado di difficoltà SIA 108 art. 7.6.5)",
+      "buildingTypeManual": "Grado di difficoltà manuale",
+      "buildingTypeHint": "Imposta n sul caso normale del tipo d’opera; n può poi essere adattato.",
+      "bp": "Costi determinanti il fattore Bp",
+      "p": "Fattore di base p",
+      "qSum": "Quota di prestazioni Σq",
+      "bpShared": "Riscaldamento e refrigerazione formano un solo settore (SIA 108 art. 7.5.21): p è calcolato dalla somma dei loro costi.",
+      "phase": "Fase parziale",
+      "hours": "Ore",
+      "costMissing": "Inserite i costi dell’opera B per calcolare l’onorario.",
+      "noRates": "Nessuna tariffa oraria – inserite le categorie nelle impostazioni.",
+      "rateMissing": "Manca la tariffa oraria scelta.",
+      "qHint": "Vuoto = quota di prestazioni secondo SIA 108 art. 7.7 (somma di tutte le fasi {sum} %)."
+    },
+    "services": {
+      "title": "Estensione delle prestazioni",
+      "description": "Per fase parziale e settore: compresa (prestazione ordinaria), non compresa (offerta secondo dispendio) o non elencata.",
+      "states": {
+        "in": "compresa",
+        "out": "non compresa",
+        "no": "–"
+      },
+      "customPlaceholder": "Prestazione propria",
+      "removeCustom": "Rimuovere la riga",
+      "addCustom": "Riga propria"
+    }
+  },
+  "feeSettings": {
+    "description": "Valori predefiniti per le nuove offerte d’onorario. Le offerte esistenti mantengono i loro valori.",
+    "readOnly": "Solo gli amministratori possono modificare questi valori.",
+    "z": {
+      "title": "Coefficienti Z1 / Z2",
+      "description": "Coefficienti per il fattore di base p = Z1 + Z2/∛Bp (SIA 108 art. 7.2.2), pubblicati periodicamente dalla SIA.",
+      "column": "Settore"
+    },
+    "shares": {
+      "title": "Quote di prestazioni q",
+      "description": "Ponderazione percentuale delle fasi parziali secondo SIA 108 art. 7.7.3. La norma indica 32 e 33 insieme; la ripartizione 33 = 2 % è un valore predefinito.",
+      "phase": "Fase parziale",
+      "sum": "Somma"
+    },
+    "rates": {
+      "title": "Tariffe orarie",
+      "description": "Categorie per il tempo impiegato e le prestazioni supplementari.",
+      "label": "Designazione",
+      "rate": "Tariffa CHF/h",
+      "remove": "Rimuovere la categoria",
+      "newLabel": "Nuova categoria",
+      "add": "Aggiungere una categoria",
+      "sia": "Tariffa per SIA 108 (h)",
+      "siaHint": "Usata nelle nuove offerte per il calcolo secondo i costi dell’opera."
+    },
+    "expenses": {
+      "title": "Spese accessorie",
+      "pct": "Spese accessorie [%]",
+      "text": "Spese secondo dispendio (una riga per voce)"
     }
   }
 }

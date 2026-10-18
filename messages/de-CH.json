@@ -29,7 +29,8 @@
     "addresses": "Adressen",
     "catalogs": "Kataloge",
     "settings": "Einstellungen",
-    "profile": "Mein Profil"
+    "profile": "Mein Profil",
+    "feeOffers": "Honorarofferten"
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -82,7 +83,9 @@
     "catalogReadOnly": "Lieferantenkataloge können nicht bearbeitet werden. Sie werden durch einen neuen Import aktualisiert.",
     "tooManyEntries": "Die Auswahl ist zu gross (höchstens 5000 Einträge). Bitte kleinere Gruppen wählen.",
     "structureExists": "Das LV enthält bereits eine Kapitelstruktur 244.",
-    "heatingStructureExists": "Das LV enthält bereits eine Kapitelstruktur 24."
+    "heatingStructureExists": "Das LV enthält bereits eine Kapitelstruktur 24.",
+    "noTradeChosen": "Bitte mindestens einen Fachbereich wählen.",
+    "offerNumberExists": "Diese Offertnummer gibt es bereits."
   },
   "projects": {
     "title": "Projekte",
@@ -290,7 +293,8 @@
       "firm": "Firma",
       "users": "Benutzer",
       "profile": "Mein Profil",
-      "costPlans": "Kostenpläne"
+      "costPlans": "Kostenpläne",
+      "fees": "Honorar SIA 108"
     },
     "firm": {
       "readOnly": "Nur Administratoren können die Firmendaten ändern.",
@@ -3440,6 +3444,183 @@
       "cabinetResult": "Verteilerkasten {size} mm, Einzelteile",
       "single": "Einzelteile",
       "hint": "Hinter dem Waschtisch: nur Absperrung + Wasserzähler / Passstück → Waschtischbox 70120, nur Absperrung + Druckreduzierung → Armaturenbox 70112, sonst Einzelteile."
+    }
+  },
+  "feeOffers": {
+    "title": "Honorarofferten",
+    "description": "Honorarofferten nach SIA 108 für Heizung, Kälte, Lüftung/Klima und Sanitär – Phasen, Leistungsumfang und Honorarberechnung.",
+    "new": "Neue Honorarofferte",
+    "newDescription": "Projekt, Auftraggeber und die zu offerierenden Fachbereiche. Phasen, Honorar und Leistungen folgen im nächsten Schritt.",
+    "create": "Offerte anlegen",
+    "emptyTitle": "Noch keine Honorarofferte",
+    "emptyText": "Legen Sie eine Offerte an, wählen Sie Fachbereiche und Phasen und berechnen Sie das Honorar nach SIA 108.",
+    "searchPlaceholder": "Nummer, Projekt oder Ort",
+    "allStatuses": "Alle Status",
+    "noResults": "Keine Offerten gefunden.",
+    "columns": {
+      "number": "Nr.",
+      "title": "Projekt",
+      "client": "Auftraggeber",
+      "date": "Datum",
+      "net": "Honorar exkl. MwSt.",
+      "status": "Status"
+    },
+    "status": {
+      "draft": "Entwurf",
+      "sent": "Versendet",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt"
+    },
+    "fields": {
+      "number": "Offert-Nr.",
+      "title": "Projekt",
+      "street": "Strasse",
+      "zip": "PLZ",
+      "city": "Ort",
+      "company": "Auftraggeber",
+      "contact": "Kontaktperson",
+      "language": "Sprache der Offerte",
+      "status": "Status",
+      "offer_date": "Offertdatum",
+      "valid_until": "Gültig bis",
+      "description": "Projektbeschrieb",
+      "basis": "Weitere Grundlagen",
+      "discountPct": "Rabatt [%]",
+      "expensesPct": "Nebenkosten [%]",
+      "expensesText": "Nebenkosten nach Aufwand (eine Zeile pro Position)"
+    },
+    "sections": {
+      "project": "Projekt",
+      "client": "Auftraggeber",
+      "trades": "Fachbereiche",
+      "offer": "Offerte",
+      "conditions": "Zusatzpositionen und Konditionen",
+      "summary": "Zusammenstellung"
+    },
+    "tradesHint": "Für jeden gewählten Fachbereich werden alle Teilphasen 31–53 vorgeschlagen; Sie können sie danach einzeln abwählen.",
+    "pdf": "PDF",
+    "toProject": "Projekt {number}",
+    "createProject": "Projekt erstellen",
+    "createProjectTitle": "Projekt aus der Offerte erstellen?",
+    "createProjectText": "Es wird ein neues Projekt mit Name, Adresse und Auftraggeber der Offerte angelegt; die Offerte wird als angenommen markiert.",
+    "delete": "Löschen",
+    "deleteTitle": "Offerte löschen?",
+    "deleteText": "Die Honorarofferte {number} wird endgültig gelöscht.",
+    "descriptionPlaceholder": "Bauvorhaben, Gebäudestandard, Wärmeerzeugung, Wärmeabgabe, Lüftung, Sanitäranlagen …",
+    "basisPlaceholder": "Den uns zur Verfügung gestellten Projektunterlagen (Stand: …)",
+    "basisHint": "SIA 108, SIA 118 sowie die SIA-Normen und VKF-/SVGW-Richtlinien sind immer aufgeführt; eine Zeile pro Grundlage.",
+    "extras": {
+      "title": "Zusatzpositionen (pauschal)",
+      "hint": "z. B. Fachkoordination, Kanalisationseingabe oder Simulationen, die nicht in den Phasen enthalten sind.",
+      "text": "Bezeichnung",
+      "amount": "Betrag CHF",
+      "remove": "Position entfernen",
+      "add": "Position hinzufügen"
+    },
+    "rates": {
+      "title": "Stundenansätze dieser Offerte",
+      "hint": "Übernommen aus den Einstellungen beim Anlegen; sie gelten auch für Zusatzleistungen nach Aufwand."
+    },
+    "summary": {
+      "net": "Total exkl. MwSt.",
+      "total": "Total inkl. MwSt.",
+      "sum": "Total",
+      "fees": "Honorar",
+      "extras": "Zusatzpositionen",
+      "subtotal": "Zwischensumme",
+      "discount": "Rabatt {pct} %",
+      "expenses": "Nebenkosten {pct} %",
+      "vat": "MwSt. {pct} %"
+    },
+    "fee": {
+      "title": "Honorarberechnung",
+      "description": "Nach SIA 108 Art. 7 aus den Baukosten oder nach geschätztem Stundenaufwand pro Phase.",
+      "method": "Berechnungsart",
+      "methods": {
+        "sia": "SIA 108 (Baukosten)",
+        "hours": "Stundenaufwand"
+      },
+      "methodHints": {
+        "sia": "H = B · p/100 · n · q/100 · r · U · i · s · h mit p = Z1 + Z2/∛Bp",
+        "hours": "Stunden pro Phase und Kategorie × Stundenansatz"
+      },
+      "siaRate": "Stundenansatz h",
+      "siaRateHint": "Mittlerer Ansatz des eingesetzten Teams.",
+      "trades": "Fachbereiche",
+      "zTitle": "Grundfaktoren Z1 / Z2 (aus den Einstellungen übernommen)",
+      "columns": {
+        "hk": "Heizung / Kälte",
+        "lk": "Lüftung / Klima",
+        "s": "Sanitär"
+      },
+      "zMissing": "Ohne Z1 und Z2 kann der Grundfaktor p nicht berechnet werden. Erfassen Sie die Werte hier oder in den Einstellungen (gilt für neue Offerten).",
+      "noTrades": "Wählen Sie mindestens einen Fachbereich.",
+      "factors": {
+        "n": "Schwierigkeitsgrad n",
+        "r": "Anpassungsfaktor r",
+        "i": "Teamfaktor i",
+        "s": "Sonderleistungen s",
+        "u": "Umbau U"
+      },
+      "range": "{min} – {max}",
+      "cost": "Baukosten B [CHF]",
+      "costHint": "Aufwandbestimmend, exkl. MwSt.",
+      "buildingType": "Bauwerksart (Schwierigkeitsgrad SIA 108 Art. 7.6.5)",
+      "buildingTypeManual": "Schwierigkeitsgrad manuell",
+      "buildingTypeHint": "Setzt n auf den Normalfall der Bauwerksart; n kann danach angepasst werden.",
+      "bp": "Faktorbestimmende Baukosten Bp",
+      "p": "Grundfaktor p",
+      "qSum": "Leistungsanteil Σq",
+      "bpShared": "Heizung und Kälte bilden zusammen ein Fachgebiet (SIA 108 Art. 7.5.21): p wird aus der Summe ihrer Baukosten berechnet.",
+      "phase": "Teilphase",
+      "hours": "Stunden",
+      "costMissing": "Erfassen Sie die Baukosten B, um das Honorar zu berechnen.",
+      "noRates": "Keine Stundenansätze – erfassen Sie Kategorien in den Einstellungen.",
+      "rateMissing": "Der gewählte Stundenansatz fehlt.",
+      "qHint": "Leer = Leistungsanteil nach SIA 108 Art. 7.7 (Summe aller Teilphasen {sum} %)."
+    },
+    "services": {
+      "title": "Leistungsumfang",
+      "description": "Pro Teilphase und Fachbereich: enthalten (Grundleistung), nicht enthalten (wird nach Aufwand angeboten) oder nicht aufgeführt.",
+      "states": {
+        "in": "enthalten",
+        "out": "nicht enthalten",
+        "no": "–"
+      },
+      "customPlaceholder": "Eigene Leistung",
+      "removeCustom": "Zeile entfernen",
+      "addCustom": "Eigene Zeile"
+    }
+  },
+  "feeSettings": {
+    "description": "Vorgaben für neue Honorarofferten. Bestehende Offerten behalten ihre Werte.",
+    "readOnly": "Nur Administratoren können diese Werte ändern.",
+    "z": {
+      "title": "Grundfaktoren Z1 / Z2",
+      "description": "Koeffizienten für den Grundfaktor p = Z1 + Z2/∛Bp (SIA 108 Art. 7.2.2), periodisch von der SIA veröffentlicht.",
+      "column": "Fachgebiet"
+    },
+    "shares": {
+      "title": "Leistungsanteile q",
+      "description": "Prozentuale Gewichtung der Teilphasen nach SIA 108 Art. 7.7.3. Die Norm gibt 32 und 33 zusammen an; die Aufteilung 33 = 2 % ist eine Vorgabe.",
+      "phase": "Teilphase",
+      "sum": "Summe"
+    },
+    "rates": {
+      "title": "Stundenansätze",
+      "description": "Kategorien für den Stundenaufwand und die Zusatzleistungen.",
+      "label": "Bezeichnung",
+      "rate": "Ansatz CHF/h",
+      "remove": "Kategorie entfernen",
+      "newLabel": "Neue Kategorie",
+      "add": "Kategorie hinzufügen",
+      "sia": "Ansatz für SIA 108 (h)",
+      "siaHint": "Wird bei neuen Offerten für die Berechnung nach Baukosten verwendet."
+    },
+    "expenses": {
+      "title": "Nebenkosten",
+      "pct": "Nebenkosten [%]",
+      "text": "Nebenkosten nach Aufwand (eine Zeile pro Position)"
     }
   }
 }

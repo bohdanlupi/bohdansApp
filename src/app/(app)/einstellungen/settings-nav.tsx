@@ -10,6 +10,7 @@ const tabs = [
   { href: "/einstellungen", key: "firm" },
   { href: "/einstellungen/benutzer", key: "users" },
   { href: "/einstellungen/kostenplaene", key: "costPlans" },
+  { href: "/einstellungen/honorar", key: "fees" },
   { href: "/einstellungen/profil", key: "profile" },
 ] as const;
 
