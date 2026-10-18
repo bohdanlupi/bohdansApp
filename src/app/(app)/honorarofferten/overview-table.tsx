@@ -23,11 +23,19 @@ export type OverviewRow = {
   status: React.ReactNode;
 };
 
+/** Fixed column widths, so the tables of the overview (open invoices, offers, paid invoices) line up. */
+const columns = ["w-28", "", "w-56", "w-28", "w-52", "w-36", "w-36", "w-28"];
+
 export function OverviewTable({ rows, kind }: { rows: OverviewRow[]; kind: "invoice" | "offer" }) {
   const t = useTranslations("feeOffers.overview");
   return (
     <div className="rounded-xl border">
-      <Table>
+      <Table className="min-w-[64rem] table-fixed">
+        <colgroup>
+          {columns.map((c, i) => (
+            <col key={i} className={c} />
+          ))}
+        </colgroup>
         <TableHeader>
           <TableRow>
             <TableHead className="pl-4">{t("projectNumber")}</TableHead>
@@ -44,15 +52,15 @@ export function OverviewTable({ rows, kind }: { rows: OverviewRow[]; kind: "invo
           {rows.map((r) => (
             <TableRow key={r.id} className="relative">
               <TableCell className="pl-4 font-medium tabular-nums">{r.projectNumber ?? "–"}</TableCell>
-              <TableCell>
+              <TableCell className="truncate">
                 <Link href={r.href} className="font-medium after:absolute after:inset-0">
                   {r.title}
                 </Link>
                 <span className="block text-xs text-muted-foreground tabular-nums">{r.number}</span>
               </TableCell>
-              <TableCell className="max-w-64 truncate">{r.client}</TableCell>
+              <TableCell className="truncate">{r.client}</TableCell>
               <TableCell className="tabular-nums">{new Date(r.date).toLocaleDateString("de-CH")}</TableCell>
-              <TableCell>
+              <TableCell className="whitespace-normal">
                 <DeadlineDate date={r.deadline} kind={kind === "invoice" ? "due" : "validUntil"} active={r.deadlineActive} />
               </TableCell>
               <TableCell className="text-right tabular-nums">{formatMoney(r.net)}</TableCell>
