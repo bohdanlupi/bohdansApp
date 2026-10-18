@@ -2,10 +2,26 @@ import { z } from "zod";
 
 import { type FeeRate, type FeeSettings, parseRates, parseShares, type ZValues } from "./settings-schema";
 import type { ServiceState } from "./services";
-import { buildingTypes, defaultShares, factorLimits, type FeePhase, feePhases, type FeeTrade, feeTrades, type PhaseShares, type SiaColumn, siaColumns, tradeColumn } from "./sia108";
+import { fkCriteria } from "./factor-guide";
+import {
+  basisSystems,
+  buildingTypes,
+  defaultShares,
+  factorLimits,
+  type FeePhase,
+  feePhases,
+  type FeeTrade,
+  feeTrades,
+  isBasisTrade,
+  type PhaseShares,
+  type SiaColumn,
+  siaColumns,
+  tradeColumn,
+} from "./sia108";
 
 // Data of a Honorarofferte (fee_offers.data): fee method, trades with their SIA 108 factors and phases, the
 // services per trade and phase, and the copy of the firm settings (rates, Z values, shares) taken at creation.
+// The Bauwerksart is chosen once per offer; n per trade follows from it unless entered.
 // Parsed leniently: invalid parts fall back to the defaults one by one.
 
 export type FeeMethod = "sia" | "hours";
@@ -21,17 +37,24 @@ export type TradePhase = {
 /** Own service line of a phase with its state per trade (missing trade = not listed). */
 export type CustomService = { id: string; phase: FeePhase; text: string; states: Partial<Record<FeeTrade, ServiceState>> };
 
+/** Line of the basis of Gebäudeautomation / Fachkoordination; null = linked trade cost resp. default share. */
+export type BasisLine = { cost: number | null; pct: number | null };
+
 export type TradeData = {
   on: boolean;
-  /** Aufwandbestimmende Baukosten B in CHF exkl. MwSt. */
+  /** Aufwandbestimmende Baukosten B in CHF exkl. MwSt. (not used by Gebäudeautomation / Fachkoordination). */
   cost: number | null;
-  buildingType: string | null;
-  n: number;
+  /** Schwierigkeitsgrad n; null = from the Bauwerksart of the offer. */
+  n: number | null;
   r: number;
   i: number;
   s: number;
   /** Faktor für Umbauten U (1.0 = Neubau). */
   u: number;
+  /** Faktor für die Fachkoordination k (Art. 9.6.1). */
+  k: number;
+  /** Basis of Gebäudeautomation / Fachkoordination per system (Art. 8.3 / 9.7). */
+  basis: Record<string, BasisLine>;
   phases: Record<FeePhase, TradePhase>;
   /** Service choices that differ from the defaults (see services.ts). */
   services: Record<string, ServiceState>;
@@ -41,6 +64,10 @@ export type ExtraItem = { id: string; text: string; amount: number | null };
 
 export type FeeOfferData = {
   method: FeeMethod;
+  /** Bauwerksart (SIA 108 Art. 7.6.5) for all trades. */
+  buildingType: string | null;
+  /** Scores 1–3 of the Fachkoordination criteria (Art. 9.2). */
+  fkScores: Record<string, number>;
   trades: Record<FeeTrade, TradeData>;
   rates: FeeRate[];
   siaRateId: string;
@@ -82,7 +109,24 @@ function parsePhase(raw: unknown): TradePhase {
 
 const serviceStates = new Set<ServiceState>(["in", "out", "no"]);
 
-function parseTrade(raw: unknown): TradeData {
+const nullablePct = (value: unknown) => (typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100 ? value : null);
+
+function parseBasis(trade: FeeTrade, raw: unknown): Record<string, BasisLine> {
+  if (!isBasisTrade(trade)) return {};
+  const v = record(raw);
+  const out: Record<string, BasisLine> = {};
+  for (const system of basisSystems[trade]) {
+    const line = record(v[system.id]);
+    const cost = money.parse(line.cost ?? null);
+    const pct = nullablePct(line.pct);
+    if (cost !== null || pct !== null) out[system.id] = { cost, pct };
+  }
+  return out;
+}
+
+const validBuildingType = (value: unknown) => (typeof value === "string" && buildingTypes.some((b) => b.id === value) ? value : null);
+
+function parseTrade(trade: FeeTrade, raw: unknown): TradeData {
   const v = record(raw);
   const services: Record<string, ServiceState> = {};
   for (const [id, state] of Object.entries(record(v.services))) {
@@ -92,12 +136,13 @@ function parseTrade(raw: unknown): TradeData {
   return {
     on: v.on === true,
     cost: money.parse(v.cost ?? null),
-    buildingType: typeof v.buildingType === "string" && buildingTypes.some((b) => b.id === v.buildingType) ? v.buildingType : null,
-    n: inRange(v.n, factorLimits.n, 1),
+    n: typeof v.n === "number" ? inRange(v.n, factorLimits.n, 1) : null,
     r: inRange(v.r, factorLimits.r, 1),
     i: inRange(v.i, factorLimits.i, 1),
     s: inRange(v.s, factorLimits.s, 1),
     u: inRange(v.u, factorLimits.u, 1),
+    k: inRange(v.k, factorLimits.k, 0.15),
+    basis: parseBasis(trade, v.basis),
     phases: Object.fromEntries(feePhases.map((p) => [p, parsePhase(phases[p])])) as Record<FeePhase, TradePhase>,
     services,
   };
@@ -129,9 +174,26 @@ export function parseFeeOfferData(raw: unknown): FeeOfferData {
   const z = record(v.z);
   const shares = record(v.shares);
   const rates = parseRates(v.rates, []);
+  const parsedTrades = Object.fromEntries(feeTrades.map((t) => [t, parseTrade(t, trades[t])])) as Record<FeeTrade, TradeData>;
+  // Offers before the Bauwerksart per offer stored it per trade together with its n: take the first one and keep
+  // n only where it differs from the table value.
+  let buildingType = validBuildingType(v.buildingType);
+  if (!("buildingType" in v)) {
+    const legacy = feeTrades.map((t) => validBuildingType(record(trades[t]).buildingType)).find(Boolean) ?? null;
+    buildingType = legacy;
+    const type = buildingTypes.find((b) => b.id === legacy);
+    if (type) {
+      for (const t of feeTrades) if (parsedTrades[t].n === type.n[tradeColumn[t]]) parsedTrades[t].n = null;
+    }
+  }
+  const fkScores: Record<string, number> = {};
+  const scores = record(v.fkScores);
+  for (const c of fkCriteria) if (scores[c.id] === 1 || scores[c.id] === 2 || scores[c.id] === 3) fkScores[c.id] = scores[c.id] as number;
   return {
     method: v.method === "hours" ? "hours" : "sia",
-    trades: Object.fromEntries(feeTrades.map((t) => [t, parseTrade(trades[t])])) as Record<FeeTrade, TradeData>,
+    buildingType,
+    fkScores,
+    trades: parsedTrades,
     rates,
     siaRateId: typeof v.siaRateId === "string" ? v.siaRateId.slice(0, 40) : "",
     z: Object.fromEntries(
@@ -168,6 +230,13 @@ export function newFeeOfferData(settings: FeeSettings, trades: FeeTrade[]): FeeO
     expensesPct: settings.expensesPct,
     expensesText: settings.expensesText,
   };
+}
+
+/** Schwierigkeitsgrad n of a trade: entered, else from the Bauwerksart, else 1.0. */
+export function tradeN(data: FeeOfferData, trade: FeeTrade): number {
+  const own = data.trades[trade].n;
+  if (own !== null) return own;
+  return buildingTypes.find((b) => b.id === data.buildingType)?.n[tradeColumn[trade]] ?? 1;
 }
 
 /** Leistungsanteil q of a phase: the offer's override, else the share of the trade's Fachgebiet. */

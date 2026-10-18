@@ -69,7 +69,7 @@ export default async function FeeOfferPage({ params }: PageProps<"/honoraroffert
         companies={companies ?? []}
         initialContacts={contacts ?? []}
         vatRate={firm?.vat_rate ?? 0}
-        rateSuggestion={{ rates: settings.rates, siaRateId: settings.siaRateId }}
+        defaults={{ rates: settings.rates, siaRateId: settings.siaRateId, z: settings.z }}
         editable={profile.role !== "viewer"}
       />
     </div>

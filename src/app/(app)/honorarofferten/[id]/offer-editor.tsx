@@ -23,7 +23,7 @@ import type { AppLanguage } from "@/lib/supabase/types";
 import { getCompanyContacts } from "../../projekte/actions";
 import { createProjectFromOffer, deleteFeeOffer, saveFeeOffer } from "../actions";
 import { CommitInput } from "@/components/planning/commit-input";
-import { FeeSection, type RateSuggestion } from "./fee-section";
+import { type FeeDefaults, FeeSection } from "./fee-section";
 import { ServicesSection } from "./services-section";
 
 export type FeeOfferHeaderState = {
@@ -52,7 +52,7 @@ export function FeeOfferEditor({
   companies,
   initialContacts,
   vatRate,
-  rateSuggestion,
+  defaults,
   editable,
 }: {
   id: string;
@@ -62,7 +62,7 @@ export function FeeOfferEditor({
   companies: CompanyOption[];
   initialContacts: ContactOption[];
   vatRate: number;
-  rateSuggestion: RateSuggestion;
+  defaults: FeeDefaults;
   editable: boolean;
 }) {
   const t = useTranslations("feeOffers");
@@ -222,7 +222,7 @@ export function FeeOfferEditor({
         </div>
       </Section>
 
-      <FeeSection data={data} onChange={setData} editable={editable} language={language} totals={totals} suggestion={rateSuggestion} />
+      <FeeSection data={data} onChange={setData} editable={editable} language={language} totals={totals} defaults={defaults} />
       <ServicesSection data={data} onChange={setData} editable={editable} language={language} />
 
       <Section title={t("sections.conditions")} collapseKey="fee-offer:conditions">

@@ -3557,7 +3557,10 @@
       "columns": {
         "hk": "Riscaldamento / refrigerazione",
         "lk": "Ventilazione / climatizzazione",
-        "s": "Sanitario"
+        "s": "Sanitario",
+        "e": "Elettricità",
+        "ga": "Automazione degli edifici",
+        "fk": "Coordinamento specialistico"
       },
       "zMissing": "Senza Z1 e Z2 il fattore di base p non può essere calcolato. Inserite i valori qui o nelle impostazioni (vale per le nuove offerte).",
       "noTrades": "Scegliete almeno un settore.",
@@ -3566,13 +3569,14 @@
         "r": "Fattore d’adeguamento r",
         "i": "Fattore di team i",
         "s": "Prestazioni speciali s",
-        "u": "Trasformazione U"
+        "u": "Trasformazione U",
+        "k": "Coordinamento k"
       },
       "range": "{min} – {max}",
       "cost": "Costi dell’opera B [CHF]",
       "costHint": "Determinanti il tempo, IVA escl.",
-      "buildingType": "Tipo d’opera (grado di difficoltà SIA 108 art. 7.6.5)",
-      "buildingTypeManual": "Grado di difficoltà manuale",
+      "buildingType": "Tipo d’opera (per tutti i settori, SIA 108 art. 7.6.5)",
+      "buildingTypeNone": "Nessun tipo d’opera – inserire n per settore",
       "buildingTypeHint": "Imposta n sul caso normale del tipo d’opera; n può poi essere adattato.",
       "bp": "Costi determinanti il fattore Bp",
       "p": "Fattore di base p",
@@ -3583,7 +3587,40 @@
       "costMissing": "Inserite i costi dell’opera B per calcolare l’onorario.",
       "noRates": "Nessuna tariffa oraria – inserite le categorie in «Tariffe orarie di questa offerta».",
       "rateMissing": "Manca la tariffa oraria scelta.",
-      "qHint": "Vuoto = quota di prestazioni secondo SIA 108 art. 7.7 (somma di tutte le fasi {sum} %)."
+      "qHint": "Vuoto = quota di prestazioni secondo SIA 108 art. 7.7 (somma di tutte le fasi {sum} %).",
+      "factorCustom": "Valore proprio",
+      "factorOwn": "Valore indicativo LUPI, la norma indica solo 1,0",
+      "factorExamples": "Influssi secondo la norma",
+      "nNoType": "Senza tipo d’opera vale 1,0",
+      "nFromType": "Dal tipo d’opera: {n}",
+      "nOwn": "Valore proprio (tipo d’opera: {n}; vuoto = riprendere)",
+      "ba": "Base determinante Ba",
+      "basisMissing": "Inserite i costi degli impianti coordinati per calcolare l’onorario.",
+      "fkCheck": {
+        "question": "Serve un coordinamento specialistico? (SIA 108 art. 9.2)",
+        "title": "Classificazione secondo SIA 108 art. 9.2",
+        "description": "Valutare ogni criterio da 1 a 3; la somma N indica se occorre un coordinatore specialistico.",
+        "result": "N = {sum}:",
+        "advice": {
+          "lead": "Coordinamento da parte del responsabile generale.",
+          "check": "Ricorso a un coordinatore specialistico da valutare (ev. coordinamento parziale).",
+          "recommended": "Ricorso a un coordinatore specialistico raccomandato."
+        }
+      },
+      "basis": {
+        "title": {
+          "automation": "Base automazione degli edifici (SIA 108 art. 8.3)",
+          "coordination": "Base coordinamento specialistico (SIA 108 art. 9.7)"
+        },
+        "system": "Impianto / sistema (quota secondo la norma)",
+        "cost": "Costi CHF",
+        "pct": "Quota %",
+        "amount": "Ba CHF",
+        "hint": {
+          "automation": "Costi vuoti = costi del settore in questa offerta; quota vuota = metà della forbice della norma. La quota descrive la profondità d’integrazione e va fissata con il committente e il responsabile generale.",
+          "coordination": "Costi vuoti = costi del settore in questa offerta; quota vuota = metà della forbice della norma. Le quote vanno fissate con il committente e il responsabile generale."
+        }
+      }
     },
     "services": {
       "title": "Estensione delle prestazioni",

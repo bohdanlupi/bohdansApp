@@ -12,6 +12,9 @@ export const tradeNames: Record<FeeTrade, L10n> = {
   cooling: { de: "Kälte", fr: "Froid", it: "Refrigerazione" },
   ventilation: { de: "Lüftung / Klima", fr: "Ventilation / climatisation", it: "Ventilazione / climatizzazione" },
   sanitary: { de: "Sanitär", fr: "Sanitaire", it: "Sanitario" },
+  electrical: { de: "Elektro", fr: "Électricité", it: "Elettricità" },
+  automation: { de: "Gebäudeautomation", fr: "Automatisation du bâtiment", it: "Automazione degli edifici" },
+  coordination: { de: "Fachkoordination", fr: "Coordination spécialisée", it: "Coordinamento specialistico" },
 };
 
 export const phaseNames: Record<FeePhase, L10n> = {

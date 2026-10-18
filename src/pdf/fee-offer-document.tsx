@@ -3,7 +3,7 @@ import { Document, Text, View } from "@react-pdf/renderer";
 import { activeTrades, type FeeTotals, rateOf } from "@/lib/fees/calc";
 import type { FeeOfferData } from "@/lib/fees/offer-schema";
 import { phaseLabel, tradeNames } from "@/lib/fees/options";
-import { feeServices, type ServiceState, serviceState } from "@/lib/fees/services";
+import { feeServices, serviceApplies, type ServiceState, serviceState } from "@/lib/fees/services";
 import { type FeePhase, feePhases, type FeeTrade } from "@/lib/fees/sia108";
 import type { AppLanguage, FirmSettings } from "@/lib/supabase/types";
 
@@ -30,6 +30,15 @@ type Person = { salutation: string | null; first_name: string | null; last_name:
 
 const TRADE_COL = 78;
 const TOTAL_COL = 82;
+/** At most this many trade columns per table; more trades are split into blocks (total column in the last). */
+const MAX_TRADE_COLS = 4;
+
+/** Trades in balanced blocks of at most MAX_TRADE_COLS (7 → 4 + 3). */
+function tradeGroups<T>(items: T[]): T[][] {
+  const count = Math.max(1, Math.ceil(items.length / MAX_TRADE_COLS));
+  const size = Math.ceil(items.length / count);
+  return Array.from({ length: count }, (_, i) => items.slice(i * size, (i + 1) * size));
+}
 
 const fmtNum = (value: number, decimals: number) =>
   new Intl.NumberFormat("de-CH", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value);
@@ -37,15 +46,22 @@ const fmtNum = (value: number, decimals: number) =>
 /** Trade name inside a sentence: lower case in French and Italian. */
 const tradeInText = (trade: FeeTrade, language: AppLanguage) => (language === "de" ? tradeNames[trade][language] : tradeNames[trade][language].toLowerCase());
 
-/** Service lines of a phase with the given state, with "(nur …)" when not all trades of the phase have it. */
+/**
+ * Service lines of a phase with the given state, with "(nur …)" when not all trades of the phase have it. General
+ * items (installation trades) only get it when some installation trade differs; items of Gebäudeautomation or
+ * Fachkoordination get it whenever other trades are in the phase.
+ */
 function serviceLines(data: FeeOfferData, phase: FeePhase, state: ServiceState, language: AppLanguage, only: (t: string) => string) {
   const trades = activeTrades(data).filter((t) => data.trades[t].phases[phase].on);
   const suffix = (matching: FeeTrade[]) => (matching.length < trades.length ? ` ${only(matching.map((t) => tradeInText(t, language)).join(", "))}` : "");
+  const offered = activeTrades(data);
   const builtIn = feeServices
     .filter((s) => s.phase === phase)
     .flatMap((s) => {
-      const matching = trades.filter((t) => serviceState(s, t, data.trades[t].services) === state);
-      return matching.length ? [`${s.text[language]}${suffix(matching)}`] : [];
+      const matching = trades.filter((t) => serviceState(s, t, data.trades[t].services, offered) === state);
+      if (!matching.length) return [];
+      const partial = s.trades ? matching.length < trades.length : matching.length < trades.filter((t) => serviceApplies(s, t)).length;
+      return [`${s.text[language]}${partial ? suffix(matching) : ""}`];
     });
   const custom = data.customServices
     .filter((c) => c.phase === phase && c.text.trim())
@@ -100,6 +116,10 @@ export function FeeOfferDocument({
   const tx = feeOfferTexts(language);
   const trades = totals.trades;
   const multi = trades.length > 1;
+  const groups = tradeGroups(trades);
+  const isLast = (gi: number) => gi === groups.length - 1;
+  const hasFk = trades.some((t) => t.trade === "coordination");
+  const hasBasis = trades.some((t) => t.trade === "automation" || t.trade === "coordination");
   const title = contact?.salutation === "mr" ? tx.mr : contact?.salutation === "ms" ? tx.ms : null;
   const address = [
     recipient?.name,
@@ -124,14 +144,16 @@ export function FeeOfferDocument({
   const phasesInOffer = feePhases.filter((p) => trades.some((t) => data.trades[t.trade].phases[p].on));
   const sia = data.method === "sia";
   const h = rateOf(data, data.siaRateId);
-  const paramRows: [string, (t: (typeof trades)[number]) => string][] = [
-    [tx.params.b, (t) => formatAmount(data.trades[t.trade].cost ?? 0)],
+  type ParamRow = [string, (t: (typeof trades)[number]) => string];
+  const paramRows: ParamRow[] = [
+    [hasBasis ? tx.params.bBasis : tx.params.b, (t) => formatAmount(t.b ?? 0)],
     [tx.params.bp, (t) => (t.bp ? formatAmount(t.bp) : "–")],
     [tx.params.p, (t) => (t.p !== null ? fmtNum(t.p, 4) : "–")],
-    [tx.params.n, (t) => fmtNum(data.trades[t.trade].n, 2)],
+    [tx.params.n, (t) => fmtNum(t.n, 2)],
     [tx.params.q, (t) => `${fmtNum(t.q, 1)} %`],
     [tx.params.r, (t) => fmtNum(data.trades[t.trade].r, 2)],
-    [tx.params.u, (t) => fmtNum(data.trades[t.trade].u, 2)],
+    [tx.params.u, (t) => (t.trade === "coordination" ? "–" : fmtNum(data.trades[t.trade].u, 2))],
+    ...(hasFk ? ([[tx.params.k, (t) => (t.trade === "coordination" ? fmtNum(data.trades[t.trade].k, 3) : "–")]] as ParamRow[]) : []),
     [tx.params.i, (t) => fmtNum(data.trades[t.trade].i, 2)],
     [tx.params.s, (t) => fmtNum(data.trades[t.trade].s, 2)],
     [tx.params.h, () => (h !== null ? `${formatAmount(h)} ${tx.perHour}` : "–")],
@@ -140,15 +162,15 @@ export function FeeOfferDocument({
   ];
   const hoursOf = (trade: FeeTrade, rateId: string) => feePhases.reduce((sum, p) => sum + (data.trades[trade].phases[p].on ? (data.trades[trade].phases[p].hours[rateId] ?? 0) : 0), 0);
 
-  const tableHeader = (first: string) => (
+  const tableHeader = (first: string, group: typeof trades, total: boolean) => (
     <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, paddingVertical: 5, paddingHorizontal: 4, ...styles.bold }}>
       <Text style={{ flex: 1 }}>{first}</Text>
-      {trades.map((t) => (
+      {group.map((t) => (
         <Text key={t.trade} style={{ width: TRADE_COL, paddingLeft: 6, textAlign: "right" }}>
           {tradeNames[t.trade][language]}
         </Text>
       ))}
-      {multi && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{tx.total}</Text>}
+      {total && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{tx.total}</Text>}
     </View>
   );
   const cellStyle = { flexDirection: "row" as const, paddingVertical: 3, paddingHorizontal: 4, borderBottomWidth: 0.5, borderBottomColor: colors.line };
@@ -168,30 +190,34 @@ export function FeeOfferDocument({
         <Text style={{ marginBottom: 10 }}>{tx.salutation(contact)}</Text>
         <Text style={{ marginBottom: 12 }}>{tx.intro}</Text>
 
-        {tableHeader(tx.phase)}
-        {totals.phases.map((ph) => (
-          <View key={ph.phase} style={cellStyle} wrap={false}>
-            <Text style={{ flex: 1, paddingRight: 4 }}>{phaseLabel(ph.phase, language)}</Text>
-            {trades.map((t) => {
-              const p = t.phases.find((x) => x.phase === ph.phase);
-              return (
+        {groups.map((group, gi) => (
+          <View key={gi} style={gi ? { marginTop: 10 } : undefined}>
+            {tableHeader(tx.phase, group, multi && isLast(gi))}
+            {totals.phases.map((ph) => (
+              <View key={ph.phase} style={cellStyle} wrap={false}>
+                <Text style={{ flex: 1, paddingRight: 4 }}>{phaseLabel(ph.phase, language)}</Text>
+                {group.map((t) => {
+                  const p = t.phases.find((x) => x.phase === ph.phase);
+                  return (
+                    <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
+                      {p?.amount != null ? formatAmount(p.amount) : ""}
+                    </Text>
+                  );
+                })}
+                {multi && isLast(gi) && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(ph.amount)}</Text>}
+              </View>
+            ))}
+            <View style={{ ...cellStyle, ...styles.bold }} wrap={false}>
+              <Text style={{ flex: 1 }}>{tx.fees}</Text>
+              {group.map((t) => (
                 <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
-                  {p?.amount != null ? formatAmount(p.amount) : ""}
+                  {formatAmount(t.amount)}
                 </Text>
-              );
-            })}
-            {multi && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(ph.amount)}</Text>}
+              ))}
+              {multi && isLast(gi) && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(totals.fees)}</Text>}
+            </View>
           </View>
         ))}
-        <View style={{ ...cellStyle, ...styles.bold }} wrap={false}>
-          <Text style={{ flex: 1 }}>{tx.fees}</Text>
-          {trades.map((t) => (
-            <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
-              {formatAmount(t.amount)}
-            </Text>
-          ))}
-          {multi && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(totals.fees)}</Text>}
-        </View>
 
         <View wrap={false} style={{ marginTop: 8, marginLeft: "40%" }}>
           {data.extras
@@ -251,51 +277,54 @@ export function FeeOfferDocument({
 
         <Heading n={3}>{tx.sections.fee}</Heading>
         <Text style={{ marginBottom: 6 }}>{sia ? tx.feeSia : tx.feeHours}</Text>
-        <View wrap={false}>
-          {tableHeader("")}
-          {sia
-            ? paramRows.map(([label, value]) => (
-                <View key={label} style={cellStyle}>
-                  <Text style={{ flex: 1 }}>{label}</Text>
-                  {trades.map((t) => (
-                    <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
-                      {value(t)}
-                    </Text>
-                  ))}
-                  {multi && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{label === tx.params.fee ? formatAmount(totals.fees) : label === tx.params.hours ? `${fmtNum(trades.reduce((s, t) => s + t.hours, 0), 0)} ${tx.hoursUnit}` : ""}</Text>}
-                </View>
-              ))
-            : [
-                ...data.rates
-                  .filter((r) => trades.some((t) => hoursOf(t.trade, r.id) > 0))
-                  .map((r) => (
-                    <View key={r.id} style={cellStyle}>
-                      <Text style={{ flex: 1 }}>
-                        {r.label} ({formatAmount(r.rate)} {tx.perHour})
+        {sia && hasBasis && <Text style={{ marginBottom: 6 }}>{tx.feeBasis}</Text>}
+        {groups.map((group, gi) => (
+          <View key={gi} wrap={false} style={gi ? { marginTop: 10 } : undefined}>
+            {tableHeader("", group, multi && isLast(gi))}
+            {sia
+              ? paramRows.map(([label, value]) => (
+                  <View key={label} style={cellStyle}>
+                    <Text style={{ flex: 1 }}>{label}</Text>
+                    {group.map((t) => (
+                      <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
+                        {value(t)}
                       </Text>
-                      {trades.map((t) => (
-                        <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
-                          {hoursOf(t.trade, r.id) ? `${fmtNum(hoursOf(t.trade, r.id), 1)} ${tx.hoursUnit}` : ""}
+                    ))}
+                    {multi && isLast(gi) && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{label === tx.params.fee ? formatAmount(totals.fees) : label === tx.params.hours ? `${fmtNum(trades.reduce((s, t) => s + t.hours, 0), 0)} ${tx.hoursUnit}` : ""}</Text>}
+                  </View>
+                ))
+              : [
+                  ...data.rates
+                    .filter((r) => trades.some((t) => hoursOf(t.trade, r.id) > 0))
+                    .map((r) => (
+                      <View key={r.id} style={cellStyle}>
+                        <Text style={{ flex: 1 }}>
+                          {r.label} ({formatAmount(r.rate)} {tx.perHour})
                         </Text>
-                      ))}
-                      {multi && (
-                        <Text style={{ width: TOTAL_COL, textAlign: "right" }}>
-                          {fmtNum(trades.reduce((s, t) => s + hoursOf(t.trade, r.id), 0), 1)} {tx.hoursUnit}
-                        </Text>
-                      )}
-                    </View>
-                  )),
-                <View key="fee" style={{ ...cellStyle, ...styles.bold }}>
-                  <Text style={{ flex: 1 }}>{tx.params.fee}</Text>
-                  {trades.map((t) => (
-                    <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
-                      {formatAmount(t.amount)}
-                    </Text>
-                  ))}
-                  {multi && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(totals.fees)}</Text>}
-                </View>,
-              ]}
-        </View>
+                        {group.map((t) => (
+                          <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
+                            {hoursOf(t.trade, r.id) ? `${fmtNum(hoursOf(t.trade, r.id), 1)} ${tx.hoursUnit}` : ""}
+                          </Text>
+                        ))}
+                        {multi && isLast(gi) && (
+                          <Text style={{ width: TOTAL_COL, textAlign: "right" }}>
+                            {fmtNum(trades.reduce((s, t) => s + hoursOf(t.trade, r.id), 0), 1)} {tx.hoursUnit}
+                          </Text>
+                        )}
+                      </View>
+                    )),
+                  <View key="fee" style={{ ...cellStyle, ...styles.bold }}>
+                    <Text style={{ flex: 1 }}>{tx.params.fee}</Text>
+                    {group.map((t) => (
+                      <Text key={t.trade} style={{ width: TRADE_COL, textAlign: "right" }}>
+                        {formatAmount(t.amount)}
+                      </Text>
+                    ))}
+                    {multi && isLast(gi) && <Text style={{ width: TOTAL_COL, textAlign: "right" }}>{formatAmount(totals.fees)}</Text>}
+                  </View>,
+                ]}
+          </View>
+        ))}
 
         <Heading n={4}>{tx.sections.scope}</Heading>
         <Text style={{ marginBottom: 4 }}>{tx.scopeIntro}</Text>

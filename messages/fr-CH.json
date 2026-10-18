@@ -3557,7 +3557,10 @@
       "columns": {
         "hk": "Chauffage / froid",
         "lk": "Ventilation / climatisation",
-        "s": "Sanitaire"
+        "s": "Sanitaire",
+        "e": "Électricité",
+        "ga": "Automatisation du bâtiment",
+        "fk": "Coordination spécialisée"
       },
       "zMissing": "Sans Z1 et Z2, le facteur de base p ne peut pas être calculé. Saisissez les valeurs ici ou dans les paramètres (valable pour les nouvelles offres).",
       "noTrades": "Choisissez au moins un domaine.",
@@ -3566,13 +3569,14 @@
         "r": "Facteur d’ajustement r",
         "i": "Facteur d’équipe i",
         "s": "Prestations spéciales s",
-        "u": "Transformation U"
+        "u": "Transformation U",
+        "k": "Coordination k"
       },
       "range": "{min} – {max}",
       "cost": "Coûts de l’ouvrage B [CHF]",
       "costHint": "Déterminants du temps, hors TVA.",
-      "buildingType": "Type d’ouvrage (degré de difficulté SIA 108 art. 7.6.5)",
-      "buildingTypeManual": "Degré de difficulté manuel",
+      "buildingType": "Type d’ouvrage (pour tous les domaines, SIA 108 art. 7.6.5)",
+      "buildingTypeNone": "Aucun type d’ouvrage – saisir n par domaine",
       "buildingTypeHint": "Fixe n au cas normal du type d’ouvrage ; n peut ensuite être adapté.",
       "bp": "Coûts déterminants du facteur Bp",
       "p": "Facteur de base p",
@@ -3583,7 +3587,40 @@
       "costMissing": "Saisissez les coûts de l’ouvrage B pour calculer les honoraires.",
       "noRates": "Aucun tarif horaire – saisissez des catégories sous « Tarifs horaires de cette offre ».",
       "rateMissing": "Le tarif horaire choisi manque.",
-      "qHint": "Vide = part de prestations selon SIA 108 art. 7.7 (somme de toutes les phases {sum} %)."
+      "qHint": "Vide = part de prestations selon SIA 108 art. 7.7 (somme de toutes les phases {sum} %).",
+      "factorCustom": "Valeur propre",
+      "factorOwn": "Valeur indicative LUPI, la norme ne donne que 1,0",
+      "factorExamples": "Influences selon la norme",
+      "nNoType": "Sans type d’ouvrage, 1,0 s’applique",
+      "nFromType": "Du type d’ouvrage : {n}",
+      "nOwn": "Valeur propre (type d’ouvrage : {n} ; vide = reprendre)",
+      "ba": "Base déterminante Ba",
+      "basisMissing": "Saisissez les coûts des installations coordonnées pour calculer les honoraires.",
+      "fkCheck": {
+        "question": "Faut-il une coordination spécialisée ? (SIA 108 art. 9.2)",
+        "title": "Classement selon SIA 108 art. 9.2",
+        "description": "Évaluer chaque critère de 1 à 3 ; la somme N indique s’il faut faire appel à un coordinateur spécialisé.",
+        "result": "N = {sum} :",
+        "advice": {
+          "lead": "Coordination par le responsable général.",
+          "check": "Recours à un coordinateur spécialisé à examiner (év. coordination partielle).",
+          "recommended": "Recours à un coordinateur spécialisé recommandé."
+        }
+      },
+      "basis": {
+        "title": {
+          "automation": "Base automatisation du bâtiment (SIA 108 art. 8.3)",
+          "coordination": "Base coordination spécialisée (SIA 108 art. 9.7)"
+        },
+        "system": "Installation / système (part selon la norme)",
+        "cost": "Coûts CHF",
+        "pct": "Part %",
+        "amount": "Ba CHF",
+        "hint": {
+          "automation": "Coûts vides = coûts du domaine dans cette offre ; part vide = milieu de la fourchette de la norme. La part décrit la profondeur d’intégration et se fixe avec le mandant et le responsable général.",
+          "coordination": "Coûts vides = coûts du domaine dans cette offre ; part vide = milieu de la fourchette de la norme. Les parts se fixent avec le mandant et le responsable général."
+        }
+      }
     },
     "services": {
       "title": "Étendue des prestations",

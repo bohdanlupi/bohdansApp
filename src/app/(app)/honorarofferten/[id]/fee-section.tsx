@@ -9,11 +9,24 @@ import { fmt, Notice, NumberField, Section } from "@/components/planning/fields"
 import { Fact, NumberParam, OptionField } from "@/components/planning/plan-ui";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { activeTrades, type FeeTotals, rateOf, type TradeFee } from "@/lib/fees/calc";
-import { type FeeMethod, type FeeOfferData, phaseShare, type TradeData } from "@/lib/fees/offer-schema";
+import { activeTrades, basisRows, type FeeTotals, linkedCost, rateOf, type TradeFee } from "@/lib/fees/calc";
+import { type FactorKey, factorGuides, fkAdvice, fkCriteria, presetOf } from "@/lib/fees/factor-guide";
+import { type BasisLine, type FeeMethod, type FeeOfferData, phaseShare, type TradeData } from "@/lib/fees/offer-schema";
 import { phaseLabel, tradeNames } from "@/lib/fees/options";
-import { type FeeRate, MAX_RATES } from "@/lib/fees/settings-schema";
-import { buildingTypes, factorLimits, feePhases, type FeeTrade, feeTrades, siaColumns, tradeColumn } from "@/lib/fees/sia108";
+import { type FeeRate, MAX_RATES, type ZValues } from "@/lib/fees/settings-schema";
+import {
+  type BasisTrade,
+  buildingTypes,
+  defaultBasisPct,
+  factorLimits,
+  feePhases,
+  type FeeTrade,
+  feeTrades,
+  isBasisTrade,
+  type SiaColumn,
+  siaColumns,
+  tradeColumn,
+} from "@/lib/fees/sia108";
 import { formatMoney } from "@/lib/number-input";
 import type { AppLanguage } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
@@ -28,7 +41,7 @@ export type DataProps = {
 const clamp = (value: number | null, [min, max]: readonly [number, number], fallback: number) => (value === null ? fallback : Math.min(max, Math.max(min, value)));
 
 /** Fee method, trades with their SIA 108 factors and the phases per trade. */
-export function FeeSection({ data, onChange, editable, language, totals, suggestion }: DataProps & { totals: FeeTotals; suggestion: RateSuggestion }) {
+export function FeeSection({ data, onChange, editable, language, totals, defaults }: DataProps & { totals: FeeTotals; defaults: FeeDefaults }) {
   const t = useTranslations("feeOffers.fee");
   const trades = activeTrades(data);
   const columns = siaColumns.filter((c) => trades.some((tr) => tradeColumn[tr] === c));
@@ -37,12 +50,17 @@ export function FeeSection({ data, onChange, editable, language, totals, suggest
   const setTrade = (trade: FeeTrade, change: (t: TradeData) => TradeData) =>
     onChange((d) => ({ ...d, trades: { ...d.trades, [trade]: change(d.trades[trade]) } }));
 
+  // A Fachgebiet added later (e.g. Elektro in an older offer) takes its missing Z values from the settings.
   const toggleTrade = (trade: FeeTrade, on: boolean) =>
-    setTrade(trade, (tr) => {
+    onChange((d) => {
+      const tr = d.trades[trade];
+      const column = tradeColumn[trade];
+      const z = on && d.z[column].z1 === null && d.z[column].z2 === null ? { ...d.z, [column]: defaults.z[column] } : d.z;
       const anyPhase = feePhases.some((p) => tr.phases[p].on);
-      if (!on || anyPhase) return { ...tr, on };
-      return { ...tr, on, phases: Object.fromEntries(feePhases.map((p) => [p, { ...tr.phases[p], on: true }])) as TradeData["phases"] };
+      const next = !on || anyPhase ? { ...tr, on } : { ...tr, on, phases: Object.fromEntries(feePhases.map((p) => [p, { ...tr.phases[p], on: true }])) as TradeData["phases"] };
+      return { ...d, z, trades: { ...d.trades, [trade]: next } };
     });
+  const installCount = trades.filter((tr) => !isBasisTrade(tr)).length;
 
   return (
     <Section title={t("title")} description={t("description")} collapseKey="fee-offer:fee">
@@ -82,7 +100,18 @@ export function FeeSection({ data, onChange, editable, language, totals, suggest
         </div>
       </div>
 
-      <RatesEditor data={data} onChange={onChange} editable={editable} suggestion={suggestion} />
+      {data.method === "sia" && <BuildingTypeSelect data={data} onChange={onChange} editable={editable} language={language} />}
+
+      {!data.trades.coordination.on && installCount >= 2 && (
+        <details className="rounded-lg border px-3 py-2 text-sm">
+          <summary className="cursor-pointer font-medium">{t("fkCheck.question")}</summary>
+          <div className="pt-2">
+            <FkCheck data={data} onChange={onChange} editable={editable} language={language} />
+          </div>
+        </details>
+      )}
+
+      <RatesEditor data={data} onChange={onChange} editable={editable} suggestion={defaults} />
 
       {data.method === "sia" && columns.length > 0 && (
         <div className="space-y-2">
@@ -103,14 +132,215 @@ export function FeeSection({ data, onChange, editable, language, totals, suggest
       {trades.length === 0 && <Notice tone="info">{t("noTrades")}</Notice>}
 
       {totals.trades.map((fee) => (
-        <TradeCard key={fee.trade} fee={fee} data={data} editable={editable} language={language} onTrade={(change) => setTrade(fee.trade, change)} />
+        <TradeCard key={fee.trade} fee={fee} data={data} editable={editable} language={language} onChange={onChange} onTrade={(change) => setTrade(fee.trade, change)} />
       ))}
     </Section>
   );
 }
 
-/** Rate categories of the firm settings, offered as suggestion for this offer. */
-export type RateSuggestion = { rates: FeeRate[]; siaRateId: string };
+/** Firm settings offered as suggestion: rate categories, and Z values for Fachgebiete added later. */
+export type FeeDefaults = { rates: FeeRate[]; siaRateId: string; z: Record<SiaColumn, ZValues> };
+type RateSuggestion = Pick<FeeDefaults, "rates" | "siaRateId">;
+
+/** Bauwerksart once for the offer; n of each trade follows from its column (SIA 108 Art. 7.6.5). */
+function BuildingTypeSelect({ data, onChange, editable, language }: DataProps) {
+  const t = useTranslations("feeOffers.fee");
+  const trades = activeTrades(data);
+  const type = buildingTypes.find((b) => b.id === data.buildingType);
+  const nOf = (b: (typeof buildingTypes)[number]) => {
+    const values = [...new Set(trades.map((tr) => b.n[tradeColumn[tr]]))];
+    return values.length === 1 ? fmt(values[0], 1) : `${fmt(Math.min(...values), 1)}–${fmt(Math.max(...values), 1)}`;
+  };
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor="building-type">{t("buildingType")}</Label>
+      <NativeSelect id="building-type" value={data.buildingType ?? ""} disabled={!editable} onChange={(e) => onChange((d) => ({ ...d, buildingType: e.target.value || null }))}>
+        <option value="">{t("buildingTypeNone")}</option>
+        {Object.entries(Object.groupBy(buildingTypes, (b) => b.group[language])).map(([group, types]) => (
+          <optgroup key={group} label={group}>
+            {types!.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.text[language]}
+                {trades.length ? ` (n = ${nOf(b)})` : ""}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </NativeSelect>
+      <p className="text-xs text-muted-foreground">
+        {type && trades.length ? `${trades.map((tr) => `${tradeNames[tr][language]} ${fmt(type.n[tradeColumn[tr]], 1)}`).join(" · ")}. ` : ""}
+        {t("buildingTypeHint")}
+      </p>
+    </div>
+  );
+}
+
+/** Factor with the choosable values and their meaning (factor-guide.ts). */
+function FactorField({
+  factorKey,
+  value,
+  editable,
+  language,
+  onChange,
+}: {
+  factorKey: FactorKey;
+  value: number;
+  editable: boolean;
+  language: AppLanguage;
+  onChange: (value: number) => void;
+}) {
+  const t = useTranslations("feeOffers.fee");
+  const guide = factorGuides[factorKey];
+  const limits = factorLimits[factorKey];
+  const preset = presetOf(factorKey, value);
+  const decimals = factorKey === "k" ? 3 : 2;
+  return (
+    <div className="space-y-1.5">
+      <NumberParam label={t(`factors.${factorKey}`)} value={value} decimals={decimals} editable={editable} onChange={(v) => onChange(clamp(v, limits, guide.presets.find((p) => p.value === 1)?.value ?? limits[0]))} />
+      <div className="flex flex-wrap gap-1">
+        {guide.presets.map((p) => (
+          <button
+            key={p.value}
+            type="button"
+            title={p.text[language]}
+            disabled={!editable}
+            onClick={() => onChange(p.value)}
+            className={cn(
+              "rounded border px-1.5 py-0.5 text-xs tabular-nums hover:bg-muted disabled:pointer-events-none",
+              preset?.value === p.value && "border-primary bg-primary/10 font-medium",
+            )}
+          >
+            {fmt(p.value, decimals)}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {preset ? preset.text[language] : t("factorCustom")} · {t("range", { min: fmt(limits[0], decimals), max: fmt(limits[1], decimals) })} · {guide.ref}
+        {!guide.norm && ` · ${t("factorOwn")}`}
+      </p>
+      {guide.examples && (
+        <details className="text-xs text-muted-foreground">
+          <summary className="cursor-pointer">{t("factorExamples")}</summary>
+          <ul className="list-disc space-y-0.5 pt-1 pl-4">
+            {guide.examples.map((e) => (
+              <li key={e.de}>{e[language]}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+}
+
+/** Decision matrix of SIA 108 Art. 9.2: does the project need a Fachkoordinator? */
+function FkCheck({ data, onChange, editable, language }: DataProps) {
+  const t = useTranslations("feeOffers.fee.fkCheck");
+  const result = fkAdvice(data.fkScores);
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">{t("description")}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {fkCriteria.map((c) => (
+          <div key={c.id} className="space-y-1">
+            <Label htmlFor={`fk-${c.id}`}>{c.text[language]}</Label>
+            <NativeSelect
+              id={`fk-${c.id}`}
+              value={String(data.fkScores[c.id] ?? "")}
+              disabled={!editable}
+              onChange={(e) =>
+                onChange((d) => {
+                  const fkScores = { ...d.fkScores };
+                  if (e.target.value) fkScores[c.id] = Number(e.target.value);
+                  else delete fkScores[c.id];
+                  return { ...d, fkScores };
+                })
+              }
+            >
+              <option value="">–</option>
+              {c.levels.map((level, i) => (
+                <option key={i} value={i + 1}>
+                  {i + 1} – {level[language]}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
+        ))}
+      </div>
+      {result.complete && (
+        <Notice tone={result.advice === "lead" ? "info" : undefined}>
+          {t("result", { sum: result.sum })} {t(`advice.${result.advice}`)}
+        </Notice>
+      )}
+    </div>
+  );
+}
+
+/** Basis Ba of Gebäudeautomation / Fachkoordination: Anlagekosten × Anteil per system (Art. 8.3 / 9.7). */
+function BasisTable({ data, trade, editable, language, onTrade }: { data: FeeOfferData; trade: BasisTrade; editable: boolean; language: AppLanguage; onTrade: (change: (t: TradeData) => TradeData) => void }) {
+  const t = useTranslations("feeOffers.fee.basis");
+  const rows = basisRows(data, trade);
+  const setLine = (id: string, change: Partial<BasisLine>) =>
+    onTrade((tr) => {
+      const line = { ...(tr.basis[id] ?? { cost: null, pct: null }), ...change };
+      const basis = { ...tr.basis };
+      if (line.cost === null && line.pct === null) delete basis[id];
+      else basis[id] = line;
+      return { ...tr, basis };
+    });
+  return (
+    <div className="space-y-1.5">
+      <p className="text-sm font-medium">{t(`title.${trade}`)}</p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-xs text-muted-foreground">
+            <tr className="border-b">
+              <th className="py-1.5 text-left font-medium">{t("system")}</th>
+              <th className="w-36 py-1.5 text-right font-medium">{t("cost")}</th>
+              <th className="w-24 py-1.5 text-right font-medium">{t("pct")}</th>
+              <th className="w-32 py-1.5 text-right font-medium">{t("amount")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const line = data.trades[trade].basis[r.system.id];
+              const linked = linkedCost(data, r.system);
+              const [min, max] = r.system.range;
+              return (
+                <tr key={r.system.id} className={cn("border-b last:border-0", !r.amount && "text-muted-foreground")}>
+                  <td className="py-1">
+                    {r.system.text[language]}
+                    <span className="text-xs text-muted-foreground"> ({min === max ? `${fmt(min, 0)} %` : `${fmt(min, 0)}–${fmt(max, 0)} %`})</span>
+                  </td>
+                  <td className="py-1 pl-2">
+                    <NumberField
+                      label={`${t("cost")} ${r.system.text[language]}`}
+                      value={line?.cost ?? null}
+                      placeholder={r.system.link ? fmt(linked, 0) : "0"}
+                      decimals={0}
+                      disabled={!editable}
+                      onChange={(cost) => setLine(r.system.id, { cost })}
+                    />
+                  </td>
+                  <td className="py-1 pl-2">
+                    <NumberField
+                      label={`${t("pct")} ${r.system.text[language]}`}
+                      value={line?.pct ?? null}
+                      placeholder={fmt(defaultBasisPct(r.system), 1)}
+                      disabled={!editable}
+                      onChange={(pct) => setLine(r.system.id, { pct: pct === null ? null : Math.min(100, pct) })}
+                    />
+                  </td>
+                  <td className="py-1 text-right tabular-nums">{r.amount ? formatMoney(r.amount) : ""}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-xs text-muted-foreground">{t(`hint.${trade}`)}</p>
+    </div>
+  );
+}
 
 /** Hours entered for a removed rate category are dropped with it. */
 const withoutRateHours = (trades: FeeOfferData["trades"], keep: (id: string) => boolean) =>
@@ -190,28 +420,25 @@ function TradeCard({
   data,
   editable,
   language,
+  onChange,
   onTrade,
 }: {
   fee: TradeFee;
   data: FeeOfferData;
   editable: boolean;
   language: AppLanguage;
+  onChange: DataProps["onChange"];
   onTrade: (change: (t: TradeData) => TradeData) => void;
 }) {
   const t = useTranslations("feeOffers.fee");
   const trade = data.trades[fee.trade];
   const sia = data.method === "sia";
   const column = tradeColumn[fee.trade];
-  const factor = (key: "n" | "r" | "i" | "s" | "u") => (
-    <NumberParam
-      label={t(`factors.${key}`)}
-      value={trade[key]}
-      decimals={2}
-      editable={editable}
-      hint={t("range", { min: fmt(factorLimits[key][0], 2), max: fmt(factorLimits[key][1], 2) })}
-      onChange={(v) => onTrade((tr) => ({ ...tr, [key]: clamp(v, factorLimits[key], 1), ...(key === "n" ? { buildingType: null } : {}) }))}
-    />
+  const basisTrade = isBasisTrade(fee.trade) ? fee.trade : null;
+  const factor = (key: FactorKey) => (
+    <FactorField key={key} factorKey={key} value={trade[key]} editable={editable} language={language} onChange={(v) => onTrade((tr) => ({ ...tr, [key]: v }))} />
   );
+  const tableN = buildingTypes.find((b) => b.id === data.buildingType)?.n[column] ?? null;
   const setPhase = (phase: (typeof feePhases)[number], change: (p: TradeData["phases"][typeof phase]) => TradeData["phases"][typeof phase]) =>
     onTrade((tr) => ({ ...tr, phases: { ...tr.phases, [phase]: change(tr.phases[phase]) } }));
   const amountOf = (phase: (typeof feePhases)[number]) => fee.phases.find((p) => p.phase === phase);
@@ -227,42 +454,42 @@ function TradeCard({
 
       {sia && (
         <>
-          <div className="grid gap-3 sm:grid-cols-4">
-            <NumberParam label={t("cost")} value={trade.cost} decimals={0} editable={editable} hint={t("costHint")} onChange={(cost) => onTrade((tr) => ({ ...tr, cost }))} />
-            <div className="space-y-1.5 sm:col-span-3">
-              <Label htmlFor={`bt-${fee.trade}`}>{t("buildingType")}</Label>
-              <NativeSelect
-                id={`bt-${fee.trade}`}
-                value={trade.buildingType ?? ""}
-                disabled={!editable}
-                onChange={(e) => {
-                  const type = buildingTypes.find((b) => b.id === e.target.value);
-                  onTrade((tr) => ({ ...tr, buildingType: type?.id ?? null, n: type ? type.n[column] : tr.n }));
-                }}
-              >
-                <option value="">{t("buildingTypeManual")}</option>
-                {Object.entries(Object.groupBy(buildingTypes, (b) => b.group[language])).map(([group, types]) => (
-                  <optgroup key={group} label={group}>
-                    {types!.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.text[language]} (n = {fmt(b.n[column], 1)})
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </NativeSelect>
-              <p className="text-xs text-muted-foreground">{t("buildingTypeHint")}</p>
+          {basisTrade ? (
+            <BasisTable data={data} trade={basisTrade} editable={editable} language={language} onTrade={onTrade} />
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-4">
+              <NumberParam label={t("cost")} value={trade.cost} decimals={0} editable={editable} hint={t("costHint")} onChange={(cost) => onTrade((tr) => ({ ...tr, cost }))} />
             </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-5">
-            {factor("n")}
+          )}
+          {fee.trade === "coordination" && (
+            <details className="rounded-lg border px-3 py-2 text-sm">
+              <summary className="cursor-pointer font-medium">{t("fkCheck.title")}</summary>
+              <div className="pt-2">
+                <FkCheck data={data} onChange={onChange} editable={editable} language={language} />
+              </div>
+            </details>
+          )}
+          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="space-y-1.5">
+              <NumberParam
+                label={t("factors.n")}
+                value={trade.n}
+                placeholder={fmt(fee.n, 2)}
+                decimals={2}
+                editable={editable}
+                onChange={(v) => onTrade((tr) => ({ ...tr, n: v === null ? null : clamp(v, factorLimits.n, 1) }))}
+              />
+              <p className="text-xs text-muted-foreground">
+                {tableN === null ? t("nNoType") : trade.n === null ? t("nFromType", { n: fmt(tableN, 1) }) : t("nOwn", { n: fmt(tableN, 1) })} · SIA 108 Art. 7.6
+              </p>
+            </div>
             {factor("r")}
             {factor("i")}
             {factor("s")}
-            {factor("u")}
+            {fee.trade === "coordination" ? factor("k") : factor("u")}
           </div>
           <div className="grid gap-x-6 sm:grid-cols-3">
-            <Fact label={t("bp")} value={fee.bp ? `CHF ${fmt(fee.bp, 0)}` : "–"} />
+            <Fact label={basisTrade ? t("ba") : t("bp")} value={fee.bp ? `CHF ${fmt(fee.bp, 0)}` : "–"} />
             <Fact label={t("p")} value={fee.p !== null ? fmt(fee.p, 4) : "–"} />
             <Fact label={t("qSum")} value={`${fmt(fee.q, 1)} %`} />
           </div>
@@ -340,7 +567,7 @@ function TradeCard({
           </tbody>
         </table>
       </div>
-      {sia && trade.cost === null && <Notice>{t("costMissing")}</Notice>}
+      {sia && fee.b === null && <Notice>{t(isBasisTrade(fee.trade) ? "basisMissing" : "costMissing")}</Notice>}
       {!sia && data.rates.length === 0 && <Notice>{t("noRates")}</Notice>}
       {sia && rateOf(data, data.siaRateId) === null && <Notice>{t("rateMissing")}</Notice>}
       {sia && <p className="text-xs text-muted-foreground">{t("qHint", { sum: fmt(feePhases.reduce((s, ph) => s + phaseShare(data, fee.trade, ph), 0), 1) })}</p>}

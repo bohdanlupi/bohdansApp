@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { activeTrades } from "@/lib/fees/calc";
 import { MAX_CUSTOM } from "@/lib/fees/offer-schema";
 import { phaseLabel, tradeNames } from "@/lib/fees/options";
-import { feeServices, type ServiceState, serviceState } from "@/lib/fees/services";
+import { feeServices, serviceApplies, type ServiceState, serviceState } from "@/lib/fees/services";
 import { type FeePhase, feePhases, type FeeTrade } from "@/lib/fees/sia108";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +43,7 @@ export function ServicesSection({ data, onChange, editable, language }: DataProp
   return (
     <Section title={t("title")} description={t("description")} collapseKey="fee-offer:services">
       {phases.map((phase) => {
-        const items = feeServices.filter((s) => s.phase === phase && trades.some((tr) => !s.trades || s.trades.includes(tr)));
+        const items = feeServices.filter((s) => s.phase === phase && trades.some((tr) => serviceApplies(s, tr)));
         const custom = data.customServices.filter((c) => c.phase === phase);
         const phaseOn = (tr: FeeTrade) => data.trades[tr].phases[phase].on;
         return (
@@ -69,7 +69,7 @@ export function ServicesSection({ data, onChange, editable, language }: DataProp
                       return (
                         <td key={tr} className="py-1 pl-2">
                           {applies && phaseOn(tr) ? (
-                            <StateSelect editable={editable} value={serviceState(s, tr, data.trades[tr].services)} label={`${s.text[language]} – ${tradeNames[tr][language]}`} onSelect={(state) => setService(tr, s.id, state)} />
+                            <StateSelect editable={editable} value={serviceState(s, tr, data.trades[tr].services, trades)} label={`${s.text[language]} – ${tradeNames[tr][language]}`} onSelect={(state) => setService(tr, s.id, state)} />
                           ) : (
                             <span className="text-xs text-muted-foreground">–</span>
                           )}

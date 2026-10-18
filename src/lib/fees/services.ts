@@ -1,17 +1,21 @@
 import type { L10n } from "@/lib/planning";
 
-import type { FeePhase, FeeTrade } from "./sia108";
+import { type FeePhase, type FeeTrade, installTrades } from "./sia108";
 
 // Services of the fee offer per SIA 108 phase, from the LUPI Offerte_Anhang template (vorlagen/) and SIA 108:2014
 // Art. 4.53 (phase 53 is missing in the template). `state` is the default: "in" = Grundleistung included,
 // "out" = listed as not included (besonders zu vereinbarende Leistung, offered on a time basis).
-// `trades` limits an item to some trades.
+// `trades` limits an item to some trades; without it an item belongs to the installation trades (HLKSE). The
+// Gebäudeautomation (Art. 8) and Fachkoordination (Art. 9.3/9.4) have their own items. `unlessOffered`: default
+// "no" when that trade is part of the offer (e.g. «Fachkoordination nicht inbegriffen» next to an offered FK).
 
 export type ServiceState = "in" | "out" | "no";
 
-export type FeeService = { id: string; phase: FeePhase; state: Exclude<ServiceState, "no">; text: L10n; trades?: FeeTrade[] };
+export type FeeService = { id: string; phase: FeePhase; state: Exclude<ServiceState, "no">; text: L10n; trades?: FeeTrade[]; unlessOffered?: FeeTrade };
 
 const hvac: FeeTrade[] = ["heating", "cooling", "ventilation"];
+const ga: FeeTrade[] = ["automation"];
+const fk: FeeTrade[] = ["coordination"];
 
 const item = (id: string, phase: FeePhase, state: "in" | "out", de: string, fr: string, it: string, trades?: FeeTrade[]): FeeService => ({
   id,
@@ -34,7 +38,7 @@ export const feeServices: FeeService[] = [
   item("31-schedule", "31", "in", "Mitwirken beim Aufstellen des generellen Terminplans", "Participation à l’établissement du calendrier général", "Partecipazione all’allestimento del programma generale"),
   item("31-simulation", "31", "out", "Thermische, raumluftdynamische und Tageslichtsimulationen", "Simulations thermiques, aérauliques et de lumière du jour", "Simulazioni termiche, aerauliche e della luce diurna"),
   item("31-variants", "31", "out", "Erarbeiten und Bewerten von Varianten zum Vorprojekt", "Élaboration et évaluation de variantes de l’avant-projet", "Elaborazione e valutazione di varianti del progetto di massima"),
-  item("31-fk", "31", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"),
+  { ...item("31-fk", "31", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"), unlessOffered: "coordination" },
   item("31-utilities", "31", "out", "Planung der Ver- und Entsorgungsleitungen", "Planification des conduites d’approvisionnement et d’évacuation", "Pianificazione delle condotte di approvvigionamento e smaltimento"),
   item("31-safety", "31", "out", "Erstellen eines umfassenden Sicherheitskonzeptes (bauliche, betriebliche und technische Massnahmen)", "Établissement d’un concept de sécurité global (mesures constructives, d’exploitation et techniques)", "Allestimento di un concetto di sicurezza completo (misure edili, d’esercizio e tecniche)"),
   item("31-variant-costs", "31", "out", "Vergleich von Kostenschätzungen von Varianten", "Comparaison des estimations de coûts de variantes", "Confronto delle stime dei costi di varianti"),
@@ -51,13 +55,13 @@ export const feeServices: FeeService[] = [
   item("32-energy", "32", "in", "Überprüfen der baulichen Massnahmen in Bezug auf rationellen Energieeinsatz", "Vérification des mesures constructives quant à l’utilisation rationnelle de l’énergie", "Verifica delle misure edili riguardo all’uso razionale dell’energia"),
   item("32-coordination", "32", "in", "Mitwirken bei der Koordination der Anlagen und Installationen", "Participation à la coordination des installations", "Partecipazione al coordinamento degli impianti"),
   item("32-description", "32", "in", "Erstellen des Anlage- und Funktionsbeschriebs", "Établissement du descriptif des installations et de leur fonctionnement", "Allestimento della descrizione degli impianti e del loro funzionamento"),
-  item("32-control", "32", "in", "Erstellen des Regelbeschriebs, sofern kein Gebäudeautomationsplaner beauftragt ist", "Établissement du descriptif de régulation, si aucun spécialiste en automatisation n’est mandaté", "Allestimento della descrizione della regolazione, se non è incaricato un progettista dell’automazione", hvac),
+  { ...item("32-control", "32", "in", "Erstellen des Regelbeschriebs, sofern kein Gebäudeautomationsplaner beauftragt ist", "Établissement du descriptif de régulation, si aucun spécialiste en automatisation n’est mandaté", "Allestimento della descrizione della regolazione, se non è incaricato un progettista dell’automazione", hvac), unlessOffered: "automation" },
   item("32-kv", "32", "in", "Erstellen des Kostenvoranschlags mit Ausmass und geschätzten Preisen (Genauigkeit ± 10 %)", "Établissement du devis avec métrés et prix estimés (précision ± 10 %)", "Allestimento del preventivo con quantità e prezzi stimati (precisione ± 10 %)"),
   item("32-operating-cost", "32", "in", "Ermitteln der voraussichtlichen Betriebs- und Instandhaltungskosten (fachspezifisch)", "Détermination des coûts prévisibles d’exploitation et d’entretien (spécifiques)", "Determinazione dei costi presumibili di esercizio e manutenzione (specifici)"),
   item("32-suppliers", "32", "in", "Rücksprache mit Unternehmern und Lieferanten", "Consultation des entrepreneurs et fournisseurs", "Consultazione di imprenditori e fornitori"),
   item("32-schedule", "32", "in", "Mitwirken beim Nachführen des generellen Terminplans", "Participation à la mise à jour du calendrier général", "Partecipazione all’aggiornamento del programma generale"),
   item("32-variants", "32", "out", "Erarbeiten und Bewerten von Varianten zum Bauprojekt", "Élaboration et évaluation de variantes du projet de l’ouvrage", "Elaborazione e valutazione di varianti del progetto definitivo"),
-  item("32-fk", "32", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"),
+  { ...item("32-fk", "32", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"), unlessOffered: "coordination" },
   item("32-utilities", "32", "out", "Planen der Ver- und Entsorgungsleitungen", "Planification des conduites d’approvisionnement et d’évacuation", "Pianificazione delle condotte di approvvigionamento e smaltimento"),
   item("32-economy", "32", "out", "Wirtschaftlichkeitsberechnungen (fachspezifisch)", "Calculs de rentabilité (spécifiques)", "Calcoli di redditività (specifici)"),
   item("32-cost-cut", "32", "out", "Projektänderungen zur Kostenreduktion auf Vorgabe des Auftraggebers und Anpassen des Kostenvoranschlags", "Modifications du projet pour réduire les coûts à la demande du mandant et adaptation du devis", "Modifiche del progetto per ridurre i costi su richiesta del committente e adeguamento del preventivo"),
@@ -106,7 +110,7 @@ export const feeServices: FeeService[] = [
   item("51-permits", "51", "in", "Bereitstellen von Unterlagen für Ausführungsbewilligungen", "Mise à disposition des documents pour les autorisations d’exécution", "Messa a disposizione dei documenti per le autorizzazioni esecutive"),
   item("51-schedule", "51", "in", "Mitwirken beim Nachführen des definitiven Terminplans", "Participation à la mise à jour du calendrier définitif", "Partecipazione all’aggiornamento del programma definitivo"),
   item("51-shop-drawings", "51", "out", "Erstellen der Werkstattpläne für Unternehmer und Lieferanten", "Établissement des plans d’atelier pour les entrepreneurs et fournisseurs", "Allestimento dei piani d’officina per imprese e fornitori"),
-  item("51-fk", "51", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"),
+  { ...item("51-fk", "51", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"), unlessOffered: "coordination" },
   item("51-third-party", "51", "out", "Eintragen der von Dritten projektierten Anlagen und Installationen in eigene Pläne", "Report dans nos plans des installations projetées par des tiers", "Inserimento nei propri piani degli impianti progettati da terzi"),
   item("51-utilities", "51", "out", "Erstellen der Ausführungspläne der Ver- und Entsorgungsleitungen", "Plans d’exécution des conduites d’approvisionnement et d’évacuation", "Piani esecutivi delle condotte di approvvigionamento e smaltimento"),
 
@@ -128,7 +132,7 @@ export const feeServices: FeeService[] = [
   item("52-third-party", "52", "out", "Bauleitung für Anlageteile, welche von Dritten projektiert wurden", "Direction des travaux pour des installations projetées par des tiers", "Direzione dei lavori per impianti progettati da terzi"),
   item("52-permanent", "52", "out", "Vom Auftraggeber oder von der Gesamtleitung gewünschte ständige Bauaufsicht bzw. regelmässige Teilnahme an Bau- und Koordinationssitzungen", "Surveillance permanente du chantier ou participation régulière aux séances, demandée par le mandant ou la direction générale", "Sorveglianza permanente del cantiere o partecipazione regolare alle riunioni, richiesta dal committente o dalla direzione generale"),
   item("52-replacement", "52", "out", "Mehrleistungen infolge der Auswechslung von Unternehmern oder Lieferanten (Konkurse usw.)", "Prestations supplémentaires suite au remplacement d’entrepreneurs ou de fournisseurs (faillites, etc.)", "Prestazioni supplementari per la sostituzione di imprese o fornitori (fallimenti ecc.)"),
-  item("52-fk", "52", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"),
+  { ...item("52-fk", "52", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"), unlessOffered: "coordination" },
   item("52-concrete", "52", "out", "Kontrolle von Einlagen wie Rohren und Kanälen im Beton", "Contrôle des éléments noyés dans le béton (tubes, gaines)", "Controllo degli elementi annegati nel calcestruzzo (tubi, canali)"),
   item("52-utilities", "52", "out", "Kontrolle der Ver- und Entsorgungsleitungen", "Contrôle des conduites d’approvisionnement et d’évacuation", "Controllo delle condotte di approvvigionamento e smaltimento"),
   item("52-lcc", "52", "out", "Ermitteln der Lebenszykluskosten", "Détermination des coûts du cycle de vie", "Determinazione dei costi del ciclo di vita"),
@@ -145,14 +149,59 @@ export const feeServices: FeeService[] = [
   item("53-final-account", "53", "in", "Prüfen der Schlussabrechnungen und Gegenüberstellen mit dem Kostenvoranschlag", "Vérification des décomptes finaux et comparaison avec le devis", "Verifica dei conteggi finali e confronto con il preventivo"),
   item("53-documents", "53", "in", "Protokollieren der Abnahmen und Zusammenstellen der für Betrieb und Erhaltung erforderlichen Dokumente", "Procès-verbaux des réceptions et compilation des documents nécessaires à l’exploitation et à l’entretien", "Verbalizzazione dei collaudi e raccolta dei documenti necessari per l’esercizio e la manutenzione"),
   item("53-integral-tests", "53", "out", "Planung, Organisation und Überwachung integraler Tests", "Planification, organisation et surveillance de tests intégraux", "Pianificazione, organizzazione e sorveglianza di test integrali"),
-  item("53-fk", "53", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"),
+  { ...item("53-fk", "53", "out", "Fachkoordination gemäss Art. 9", "Coordination spécialisée selon art. 9", "Coordinamento specialistico secondo art. 9"), unlessOffered: "coordination" },
   item("53-maintenance-plan", "53", "out", "Erstellen eines Instandhaltungsplans inkl. Einholen von Wartungsverträgen", "Établissement d’un plan d’entretien, y compris obtention des contrats de maintenance", "Allestimento di un piano di manutenzione, compreso l’ottenimento dei contratti di manutenzione"),
   item("53-training", "53", "out", "Personalschulung", "Formation du personnel", "Formazione del personale"),
   item("53-after-warranty", "53", "out", "Leistungen nach Ablauf der zweijährigen Rügefrist", "Prestations après l’échéance du délai de deux ans", "Prestazioni dopo la scadenza del termine di due anni"),
+  // Gebäudeautomation (SIA 108 Art. 8.1)
+  item("31-ga-concepts", "31", "in", "Zusammentragen der Konzepte der Fachplaner (Messstellenplan usw.)", "Rassemblement des concepts des ingénieurs spécialisés (plan des points de mesure, etc.)", "Raccolta dei concetti dei progettisti specialisti (piano dei punti di misura ecc.)", ga),
+  item("31-ga-requirements", "31", "in", "Erfassen der übergeordneten Anforderungen an die Gebäudeautomation", "Relevé des exigences générales relatives à l’automatisation du bâtiment", "Rilevamento dei requisiti generali per l’automazione degli edifici", ga),
+  item("31-ga-interfaces", "31", "in", "Definieren der Anforderungen und Verbindungsstellen (Schnittstellen) der Systeme", "Définition des exigences et des points de liaison (interfaces) des systèmes", "Definizione dei requisiti e dei punti di collegamento (interfacce) dei sistemi", ga),
+  item("31-ga-rules", "31", "in", "Festlegen der Regeln für Gesamtbetrieb, Bedienung, Alarmierung und Überwachung", "Définition des règles d’exploitation globale, de commande, d’alarme et de surveillance", "Definizione delle regole per l’esercizio globale, il comando, l’allarme e la sorveglianza", ga),
+  item("32-ga-description", "32", "in", "Erstellen des Anlage- und Funktionsbeschriebs der Gebäudeautomation", "Établissement du descriptif des installations et des fonctions de l’automatisation", "Allestimento della descrizione degli impianti e delle funzioni dell’automazione", ga),
+  item("32-ga-control", "32", "in", "Erstellen des Regelbeschriebs", "Établissement du descriptif de régulation", "Allestimento della descrizione della regolazione", ga),
+  item("32-ga-operation", "32", "in", "Erstellen des Betriebskonzepts", "Établissement du concept d’exploitation", "Allestimento del concetto d’esercizio", ga),
+  item("32-ga-fire", "32", "in", "Festlegen der Brandfallsteuerungen (Brandabschaltungen)", "Définition des commandes en cas d’incendie (déclenchements)", "Definizione dei comandi in caso d’incendio (disinserimenti)", ga),
+  item("32-ga-management", "32", "in", "Definieren der gewerkübergreifenden Funktionen und der Managementebene", "Définition des fonctions intercorps de métier et du niveau de gestion", "Definizione delle funzioni intersettoriali e del livello di gestione", ga),
+  item("32-ga-energy", "32", "in", "Erarbeiten des Konzepts für den energieeffizienten Betrieb", "Élaboration du concept d’exploitation efficace en énergie", "Elaborazione del concetto d’esercizio efficiente dal profilo energetico", ga),
+  item("32-ga-datapoints", "32", "in", "R&I-Schemata und Datenpunktliste, wenn die Aufgabe dies erfordert", "Schémas R&I et liste des points de données si la tâche l’exige", "Schemi R&I e lista dei punti dati se il compito lo richiede", ga),
+  item("33-ga-permit", "33", "in", "Mitwirken im Bewilligungsverfahren (Unterlagen Gebäudeautomation)", "Participation à la procédure d’autorisation (documents d’automatisation)", "Partecipazione alla procedura d’autorizzazione (documenti di automazione)", ga),
+  item("41-ga-tender", "41", "in", "Erstellen der Ausschreibungsunterlagen inkl. Leistungsabgrenzung zu den Fachplanern", "Établissement des documents d’appel d’offres, y compris délimitation des prestations avec les ingénieurs spécialisés", "Allestimento della documentazione d’appalto, inclusa la delimitazione delle prestazioni con i progettisti specialisti", ga),
+  item("41-ga-offers", "41", "in", "Prüfen und Vergleichen der Angebote, Vergabeantrag", "Contrôle et comparaison des offres, proposition d’adjudication", "Verifica e confronto delle offerte, proposta di aggiudicazione", ga),
+  item("51-ga-concepts", "51", "in", "Zusammentragen der freigegebenen Konzepte der Fachplaner", "Rassemblement des concepts approuvés des ingénieurs spécialisés", "Raccolta dei concetti approvati dei progettisti specialisti", ga),
+  item("51-ga-documents", "51", "in", "Erstellen der Ausführungsunterlagen der Gebäudeautomation (Funktionsbeschriebe, Datenpunktlisten)", "Établissement des documents d’exécution de l’automatisation (descriptifs de fonctions, listes de points)", "Allestimento della documentazione esecutiva dell’automazione (descrizioni delle funzioni, liste dei punti)", ga),
+  item("51-ga-check", "51", "in", "Überprüfen der Unternehmerunterlagen", "Contrôle des documents des entreprises", "Verifica della documentazione delle imprese", ga),
+  item("52-ga-supervision", "52", "in", "Fachbauleitung Gebäudeautomation, Teilnahme an Koordinationssitzungen nach Bedarf", "Direction des travaux spécialisée en automatisation, participation aux séances de coordination selon besoin", "Direzione lavori specialistica dell’automazione, partecipazione alle sedute di coordinamento secondo necessità", ga),
+  item("52-ga-invoices", "52", "in", "Prüfen von Nachträgen und Rechnungen", "Contrôle des avenants et des factures", "Verifica delle aggiunte e delle fatture", ga),
+  item("53-ga-function", "53", "in", "Kontrolle der Funktionsnachweise und Mitwirken bei den Funktionskontrollen", "Contrôle des preuves de fonctionnement et participation aux contrôles de fonctionnement", "Controllo delle prove di funzionamento e partecipazione ai controlli", ga),
+  item("53-ga-management", "53", "in", "Kontrolle der Managementfunktionen", "Contrôle des fonctions de gestion", "Controllo delle funzioni di gestione", ga),
+  item("53-ga-tests", "53", "in", "Durchführen der integralen Tests gemäss vereinbarter Integrationstiefe", "Exécution des tests intégraux selon la profondeur d’intégration convenue", "Esecuzione dei test integrali secondo la profondità d’integrazione convenuta", ga),
+  item("53-ga-permit-tests", "53", "out", "Integrale Tests im Zusammenhang mit der Bezugsbewilligung (Gesamtleitung)", "Tests intégraux liés au permis d’habiter (direction générale)", "Test integrali legati al permesso d’abitabilità (direzione generale)", ga),
+  // Fachkoordination: räumliche (Art. 9.3) included, technische (Art. 9.4) besonders zu vereinbaren
+  item("31-fk-meetings", "31", "in", "Leiten der Koordinationssitzungen mit Protokoll, Pendenzen- und Beschlussliste", "Conduite des séances de coordination avec procès-verbal, liste des tâches et des décisions", "Conduzione delle sedute di coordinamento con verbale, lista delle pendenze e delle decisioni", fk),
+  item("31-fk-rough", "31", "in", "Grobkoordination der Gebäudetechnik und Erstellen des Koordinationsplans", "Coordination générale des installations du bâtiment et établissement du plan de coordination", "Coordinamento generale dell’impiantistica ed elaborazione del piano di coordinamento", fk),
+  item("31-fk-cad", "31", "in", "CAD-Organisation und Entwurf des CAD-Pflichtenhefts", "Organisation DAO et projet de cahier des charges DAO", "Organizzazione CAD e bozza del capitolato CAD", fk),
+  item("32-fk-meetings", "32", "in", "Leiten der Koordinationssitzungen", "Conduite des séances de coordination", "Conduzione delle sedute di coordinamento", fk),
+  item("32-fk-plans", "32", "in", "Überarbeiten der Koordinationspläne inkl. Schachtdetails", "Mise à jour des plans de coordination, y compris détails des gaines", "Aggiornamento dei piani di coordinamento, inclusi i dettagli dei cavedi", fk),
+  item("32-fk-statics", "32", "in", "Veranlassen der statischen Prüfung durch den Bauingenieur", "Demande de vérification statique par l’ingénieur civil", "Richiesta della verifica statica da parte dell’ingegnere civile", fk),
+  item("32-fk-technical", "32", "out", "Technische Fachkoordination: koordiniertes technisches Gesamtkonzept", "Coordination technique : concept technique global coordonné", "Coordinamento tecnico: concetto tecnico globale coordinato", fk),
+  item("32-fk-metering", "32", "out", "Gesamt-Messkonzept inkl. Erfolgskontrolle nach dem ersten Betriebsjahr", "Concept global de mesure, y compris contrôle des résultats après la première année d’exploitation", "Concetto di misura globale, incluso il controllo dei risultati dopo il primo anno d’esercizio", fk),
+  item("32-fk-operation", "32", "out", "Bedienungs- und Betriebskonzept", "Concept de commande et d’exploitation", "Concetto di comando e d’esercizio", fk),
+  item("41-fk-meetings", "41", "in", "Leiten der Koordinationssitzungen und Weiterführen der Koordinationspläne", "Conduite des séances de coordination et mise à jour des plans de coordination", "Conduzione delle sedute di coordinamento e aggiornamento dei piani di coordinamento", fk),
+  item("51-fk-meetings", "51", "in", "Leiten der Koordinationssitzungen", "Conduite des séances de coordination", "Conduzione delle sedute di coordinamento", fk),
+  item("51-fk-plans", "51", "in", "Erstellen der koordinierten Ausführungspläne und Koordinationsschnittpläne", "Établissement des plans d’exécution coordonnés et des coupes de coordination", "Allestimento dei piani esecutivi coordinati e delle sezioni di coordinamento", fk),
+  item("51-fk-openings", "51", "in", "Erstellen der koordinierten Aussparungspläne zusammen mit dem Bauingenieur", "Établissement des plans de réservations coordonnés avec l’ingénieur civil", "Allestimento dei piani delle aperture coordinati con l’ingegnere civile", fk),
+  item("52-fk-meetings", "52", "in", "Leiten der Koordinationssitzungen während der Ausführung", "Conduite des séances de coordination pendant l’exécution", "Conduzione delle sedute di coordinamento durante l’esecuzione", fk),
+  item("53-fk-as-built", "53", "in", "Erstellen der Revisionskoordinationspläne", "Établissement des plans de coordination révisés", "Allestimento dei piani di coordinamento di revisione", fk),
+  item("53-fk-commissioning", "53", "out", "Koordinierte Inbetriebnahme und integrale Tests (technische Fachkoordination)", "Mise en service coordonnée et tests intégraux (coordination technique)", "Messa in esercizio coordinata e test integrali (coordinamento tecnico)", fk),
+  item("53-fk-documents", "53", "out", "Technische Bauwerksakten", "Dossier technique de l’ouvrage", "Documentazione tecnica dell’opera", fk),
 ];
 
+/** Whether a service is listed for a trade. */
+export const serviceApplies = (service: FeeService, trade: FeeTrade) => (service.trades ?? (installTrades as readonly FeeTrade[])).includes(trade);
+
 /** State of a service for a trade: the stored choice, else the default (items limited to other trades: "no"). */
-export function serviceState(service: FeeService, trade: FeeTrade, stored: Record<string, ServiceState> | undefined): ServiceState {
-  if (service.trades && !service.trades.includes(trade)) return "no";
-  return stored?.[service.id] ?? service.state;
+export function serviceState(service: FeeService, trade: FeeTrade, stored: Record<string, ServiceState> | undefined, offered: readonly FeeTrade[]): ServiceState {
+  if (!serviceApplies(service, trade)) return "no";
+  return stored?.[service.id] ?? (service.unlessOffered && offered.includes(service.unlessOffered) ? "no" : service.state);
 }

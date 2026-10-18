@@ -3557,7 +3557,10 @@
       "columns": {
         "hk": "Heizung / Kälte",
         "lk": "Lüftung / Klima",
-        "s": "Sanitär"
+        "s": "Sanitär",
+        "e": "Elektro",
+        "ga": "Gebäudeautomation",
+        "fk": "Fachkoordination"
       },
       "zMissing": "Ohne Z1 und Z2 kann der Grundfaktor p nicht berechnet werden. Erfassen Sie die Werte hier oder in den Einstellungen (gilt für neue Offerten).",
       "noTrades": "Wählen Sie mindestens einen Fachbereich.",
@@ -3566,13 +3569,14 @@
         "r": "Anpassungsfaktor r",
         "i": "Teamfaktor i",
         "s": "Sonderleistungen s",
-        "u": "Umbau U"
+        "u": "Umbau U",
+        "k": "Fachkoordination k"
       },
       "range": "{min} – {max}",
       "cost": "Baukosten B [CHF]",
       "costHint": "Aufwandbestimmend, exkl. MwSt.",
-      "buildingType": "Bauwerksart (Schwierigkeitsgrad SIA 108 Art. 7.6.5)",
-      "buildingTypeManual": "Schwierigkeitsgrad manuell",
+      "buildingType": "Bauwerksart (für alle Fachbereiche, SIA 108 Art. 7.6.5)",
+      "buildingTypeNone": "Keine Bauwerksart – n pro Fachbereich eingeben",
       "buildingTypeHint": "Setzt n auf den Normalfall der Bauwerksart; n kann danach angepasst werden.",
       "bp": "Faktorbestimmende Baukosten Bp",
       "p": "Grundfaktor p",
@@ -3583,7 +3587,40 @@
       "costMissing": "Erfassen Sie die Baukosten B, um das Honorar zu berechnen.",
       "noRates": "Keine Stundenansätze – erfassen Sie Kategorien unter «Stundenansätze dieser Offerte».",
       "rateMissing": "Der gewählte Stundenansatz fehlt.",
-      "qHint": "Leer = Leistungsanteil nach SIA 108 Art. 7.7 (Summe aller Teilphasen {sum} %)."
+      "qHint": "Leer = Leistungsanteil nach SIA 108 Art. 7.7 (Summe aller Teilphasen {sum} %).",
+      "factorCustom": "Eigener Wert",
+      "factorOwn": "Richtwert LUPI, die Norm nennt nur 1.0",
+      "factorExamples": "Einflüsse nach Norm",
+      "nNoType": "Ohne Bauwerksart gilt 1.0",
+      "nFromType": "Aus Bauwerksart: {n}",
+      "nOwn": "Eigener Wert (Bauwerksart: {n}; leer = übernehmen)",
+      "ba": "Aufwandbestimmende Basis Ba",
+      "basisMissing": "Erfassen Sie die Anlagekosten der koordinierten Systeme, um das Honorar zu berechnen.",
+      "fkCheck": {
+        "question": "Braucht es eine Fachkoordination? (SIA 108 Art. 9.2)",
+        "title": "Einstufung nach SIA 108 Art. 9.2",
+        "description": "Jedes Kriterium mit 1–3 bewerten; die Summe N zeigt, ob ein Fachkoordinator beigezogen werden sollte.",
+        "result": "N = {sum}:",
+        "advice": {
+          "lead": "Koordination durch den Gesamtleiter.",
+          "check": "Beizug eines Fachkoordinators prüfenswert (evtl. partielle Fachkoordination).",
+          "recommended": "Beizug eines Fachkoordinators empfohlen."
+        }
+      },
+      "basis": {
+        "title": {
+          "automation": "Basis Gebäudeautomation (SIA 108 Art. 8.3)",
+          "coordination": "Basis Fachkoordination (SIA 108 Art. 9.7)"
+        },
+        "system": "Anlage / System (Anteil nach Norm)",
+        "cost": "Anlagekosten CHF",
+        "pct": "Anteil %",
+        "amount": "Ba CHF",
+        "hint": {
+          "automation": "Kosten leer = Baukosten des Fachbereichs in dieser Offerte; Anteil leer = Mitte der Norm-Bandbreite. Der Anteil beschreibt die Integrationstiefe und ist mit Auftraggeber und Gesamtleiter festzulegen.",
+          "coordination": "Kosten leer = Baukosten des Fachbereichs in dieser Offerte; Anteil leer = Mitte der Norm-Bandbreite. Die Anteile sind mit Auftraggeber und Gesamtleiter festzulegen."
+        }
+      }
     },
     "services": {
       "title": "Leistungsumfang",

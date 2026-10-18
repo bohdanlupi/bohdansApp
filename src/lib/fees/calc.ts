@@ -1,5 +1,18 @@
-import { type FeeOfferData, phaseShare } from "./offer-schema";
-import { baseFactor, type FeePhase, feePhases, type FeeTrade, feeTrades, predictedHours, tradeColumn } from "./sia108";
+import { type FeeOfferData, phaseShare, tradeN } from "./offer-schema";
+import {
+  type BasisSystem,
+  basisSystems,
+  type BasisTrade,
+  baseFactor,
+  defaultBasisPct,
+  type FeePhase,
+  feePhases,
+  type FeeTrade,
+  feeTrades,
+  isBasisTrade,
+  predictedHours,
+  tradeColumn,
+} from "./sia108";
 
 // Fee of a Honorarofferte: per trade and phase (SIA 108 formula or hours × rates), then the totals
 // Honorar + Zusatzpositionen − Rabatt + Nebenkosten = Total exkl. MwSt. + MwSt. = Total inkl. MwSt. (5 Rp.).
@@ -8,6 +21,9 @@ export type PhaseFee = { phase: FeePhase; q: number; hours: number | null; amoun
 
 export type TradeFee = {
   trade: FeeTrade;
+  /** Aufwandbestimmende Baukosten B (Gebäudeautomation / Fachkoordination: the weighted basis Ba). */
+  b: number | null;
+  n: number;
   /** Faktorbestimmende Baukosten Bp and Grundfaktor p (method "sia"). */
   bp: number | null;
   p: number | null;
@@ -38,6 +54,30 @@ const round2 = (value: number) => Math.round(value * 100) / 100;
 
 export const activeTrades = (data: FeeOfferData) => feeTrades.filter((t) => data.trades[t].on);
 
+/** Costs of a basis system: entered, else the summed costs of its linked trades in the offer. */
+export function linkedCost(data: FeeOfferData, system: BasisSystem): number {
+  return (system.link ?? []).reduce((sum, t) => sum + (data.trades[t].on ? (data.trades[t].cost ?? 0) : 0), 0);
+}
+
+export type BasisRow = { system: BasisSystem; cost: number; pct: number; amount: number };
+
+/** Basis Ba of Gebäudeautomation (Art. 8.3) or Fachkoordination (Art. 9.7): Σ Anlagekosten × Anteil. */
+export function basisRows(data: FeeOfferData, trade: BasisTrade): BasisRow[] {
+  return basisSystems[trade].map((system) => {
+    const line = data.trades[trade].basis[system.id];
+    const cost = line?.cost ?? linkedCost(data, system);
+    const pct = line?.pct ?? defaultBasisPct(system);
+    return { system, cost, pct, amount: round2((cost * pct) / 100) };
+  });
+}
+
+/** Aufwandbestimmende Baukosten B of a trade. */
+export function tradeCost(data: FeeOfferData, trade: FeeTrade): number | null {
+  if (!isBasisTrade(trade)) return data.trades[trade].cost;
+  const sum = basisRows(data, trade).reduce((a, r) => a + r.amount, 0);
+  return sum > 0 ? round2(sum) : null;
+}
+
 /**
  * Bp per SIA 108 Art. 7.5.21: the Grundfaktor is computed per Fachgebiet, so Heizung and Kälte (both H/K) use their
  * summed costs when both are offered.
@@ -46,7 +86,7 @@ export function factorCosts(data: FeeOfferData, trade: FeeTrade): number | null 
   const column = tradeColumn[trade];
   const costs = activeTrades(data)
     .filter((t) => tradeColumn[t] === column)
-    .map((t) => data.trades[t].cost ?? 0);
+    .map((t) => tradeCost(data, t) ?? 0);
   const sum = costs.reduce((a, b) => a + b, 0);
   return sum > 0 ? sum : null;
 }
@@ -55,6 +95,9 @@ export const rateOf = (data: FeeOfferData, id: string) => data.rates.find((r) =>
 
 export function tradeFee(data: FeeOfferData, trade: FeeTrade): TradeFee {
   const t = data.trades[trade];
+  const b = tradeCost(data, trade);
+  const n = tradeN(data, trade);
+  const fk = trade === "coordination";
   const bp = factorCosts(data, trade);
   const { z1, z2 } = data.z[tradeColumn[trade]];
   const p = baseFactor(z1, z2, bp);
@@ -70,12 +113,15 @@ export function tradeFee(data: FeeOfferData, trade: FeeTrade): TradeFee {
         const amount = entries.reduce((sum, [id, v]) => sum + v * (rateOf(data, id) ?? 0), 0);
         return { phase, q, hours, amount: round2(amount) };
       }
-      const hours = t.cost && bp ? predictedHours({ b: t.cost, bp, z1, z2, n: t.n, r: t.r, i: t.i, s: t.s, u: t.u }, q) : null;
+      // Fachkoordination: Tm with k instead of U (Art. 9.6.1).
+      const hours = b && bp ? predictedHours({ b, bp, z1, z2, n, r: t.r, i: t.i, s: t.s, u: fk ? 1 : t.u, k: fk ? t.k : 1 }, q) : null;
       return { phase, q, hours, amount: hours === null || h === null ? null : round2(hours * t.s * h) };
     });
 
   return {
     trade,
+    b,
+    n,
     bp,
     p,
     phases,
