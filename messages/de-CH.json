@@ -3525,7 +3525,8 @@
       "expensesText": "Nebenkosten nach Aufwand (eine Zeile pro Position)",
       "scope": "Leistungsbeschrieb",
       "skontoPct": "Skonto %",
-      "skontoDays": "Skonto innert Tagen"
+      "skontoDays": "Skonto innert Tagen",
+      "conditions": "Zusätzliche Bedingungen"
     },
     "sections": {
       "project": "Projekt",
@@ -3722,7 +3723,9 @@
       "net": "Betrag exkl. MwSt.",
       "total": "Betrag inkl. MwSt.",
       "status": "Status"
-    }
+    },
+    "conditionsPlaceholder": "z. B. Annahmen, Abgrenzungen, Termine (eine Zeile pro Punkt)",
+    "conditionsHint": "Eigenes Kapitel im PDF, wenn Grundlagen und Projektbeschrieb nicht reichen; leer = kein Kapitel."
   },
   "feeInvoices": {
     "title": "Honorarrechnungen",

@@ -33,6 +33,7 @@ const texts = {
     sections: {
       basis: "Grundlagen",
       project: "Projektbeschrieb",
+      conditions: "Zusätzliche Bedingungen",
       fee: "Honorar",
       scope: "Leistungsumfang gemäss SIA 108",
       expenses: "Nebenkosten",
@@ -116,6 +117,7 @@ const texts = {
     sections: {
       basis: "Bases",
       project: "Description du projet",
+      conditions: "Conditions supplémentaires",
       fee: "Honoraires",
       scope: "Étendue des prestations selon SIA 108",
       expenses: "Frais accessoires",
@@ -200,6 +202,7 @@ const texts = {
     sections: {
       basis: "Basi",
       project: "Descrizione del progetto",
+      conditions: "Condizioni supplementari",
       fee: "Onorario",
       scope: "Estensione delle prestazioni secondo SIA 108",
       expenses: "Spese accessorie",

@@ -3525,7 +3525,8 @@
       "expensesText": "Frais selon dépenses (une ligne par poste)",
       "scope": "Description des prestations",
       "skontoPct": "Escompte %",
-      "skontoDays": "Escompte dans les jours"
+      "skontoDays": "Escompte dans les jours",
+      "conditions": "Conditions supplémentaires"
     },
     "sections": {
       "project": "Projet",
@@ -3722,7 +3723,9 @@
       "net": "Montant hors TVA",
       "total": "Montant TVA incl.",
       "status": "Statut"
-    }
+    },
+    "conditionsPlaceholder": "p. ex. hypothèses, délimitations, délais (une ligne par point)",
+    "conditionsHint": "Chapitre propre dans le PDF si les bases et la description du projet ne suffisent pas ; vide = pas de chapitre."
   },
   "feeInvoices": {
     "title": "Factures d’honoraires",

@@ -202,6 +202,13 @@ export function FeeOfferDocument({
             </View>
           )}
 
+          {textLines(data.conditions).length > 0 && (
+            <View style={{ marginBottom: 12 }}>
+              <Text style={{ ...styles.bold, marginBottom: 3 }}>{tx.sections.conditions}</Text>
+              <Bullets lines={textLines(data.conditions)} />
+            </View>
+          )}
+
           <View style={{ flexDirection: "row", backgroundColor: colors.headerFill, paddingVertical: 5, paddingHorizontal: 4, ...styles.bold }}>
             <Text style={{ flex: 1 }}>{P.text}</Text>
             <Text style={{ width: cols.qty, textAlign: "right" }}>{P.qty}</Text>
@@ -250,6 +257,10 @@ export function FeeOfferDocument({
       </Document>
     );
   }
+
+  // Zusätzliche Bedingungen: chapter 3 when written, the following chapters move by one.
+  const conditions = textLines(data.conditions);
+  const ch = (n: number) => (conditions.length ? n + 1 : n);
 
   const phasesInOffer = feePhases.filter((p) => trades.some((t) => data.trades[t.trade].phases[p].on));
   const sia = data.method === "sia";
@@ -362,7 +373,14 @@ export function FeeOfferDocument({
           <Text key={i}>{line}</Text>
         ))}
 
-        <Heading n={3} newPage>{tx.sections.fee}</Heading>
+        {conditions.length > 0 && (
+          <>
+            <Heading n={3}>{tx.sections.conditions}</Heading>
+            <Bullets lines={conditions} />
+          </>
+        )}
+
+        <Heading n={ch(3)} newPage>{tx.sections.fee}</Heading>
         <Text style={{ marginBottom: 6 }}>{sia ? tx.feeSia : tx.feeHours}</Text>
         {sia && hasBasis && <Text style={{ marginBottom: 6 }}>{tx.feeBasis}</Text>}
         {groups.map((group, gi) => (
@@ -413,7 +431,7 @@ export function FeeOfferDocument({
           </View>
         ))}
 
-        <Heading n={4} newPage>{tx.sections.scope}</Heading>
+        <Heading n={ch(4)} newPage>{tx.sections.scope}</Heading>
         <Text style={{ marginBottom: 4 }}>{tx.scopeIntro}</Text>
         {phasesInOffer.map((phase) => {
           const lines = serviceLines(data, phase, "in", language, tx.only);
@@ -429,7 +447,7 @@ export function FeeOfferDocument({
           );
         })}
 
-        <Heading n={5}>{tx.sections.expenses}</Heading>
+        <Heading n={ch(5)}>{tx.sections.expenses}</Heading>
         {data.expensesPct > 0 && <Text style={{ marginBottom: 3 }}>{tx.expensesIncluded(pct(data.expensesPct))}</Text>}
         {textLines(data.expensesText).length > 0 && (
           <>
@@ -438,7 +456,7 @@ export function FeeOfferDocument({
           </>
         )}
 
-        <Heading n={6} newPage>{tx.sections.excluded}</Heading>
+        <Heading n={ch(6)} newPage>{tx.sections.excluded}</Heading>
         <Text style={{ marginBottom: 4 }}>{tx.excludedIntro}</Text>
         {phasesInOffer.map((phase) => {
           const lines = serviceLines(data, phase, "out", language, tx.only);
@@ -454,7 +472,7 @@ export function FeeOfferDocument({
         })}
         <Text style={{ marginTop: 2 }}>{tx.excludedOutro}</Text>
 
-        <Heading n={7} newPage>{tx.sections.extra}</Heading>
+        <Heading n={ch(7)} newPage>{tx.sections.extra}</Heading>
         <Text style={{ marginBottom: 3 }}>{tx.extraIntro}</Text>
         {data.rates.map((r) => (
           <View key={r.id} style={{ flexDirection: "row" }}>
@@ -465,18 +483,18 @@ export function FeeOfferDocument({
           </View>
         ))}
 
-        <Heading n={8}>{tx.sections.payment}</Heading>
+        <Heading n={ch(8)}>{tx.sections.payment}</Heading>
         <Bullets lines={[...tx.payment(firm.payment_terms_days), ...(skontoLine ? [skontoLine] : [])]} />
 
         {validUntil && (
           <>
-            <Heading n={9}>{tx.sections.validity}</Heading>
+            <Heading n={ch(9)}>{tx.sections.validity}</Heading>
             <Text>{tx.validity(validUntil)}</Text>
           </>
         )}
 
         <View wrap={false}>
-          <Heading n={validUntil ? 10 : 9}>{tx.sections.acceptance}</Heading>
+          <Heading n={ch(validUntil ? 10 : 9)}>{tx.sections.acceptance}</Heading>
           {signatures}
         </View>
       </LetterPage>

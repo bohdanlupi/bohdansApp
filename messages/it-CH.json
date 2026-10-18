@@ -3525,7 +3525,8 @@
       "expensesText": "Spese secondo dispendio (una riga per voce)",
       "scope": "Descrizione delle prestazioni",
       "skontoPct": "Sconto %",
-      "skontoDays": "Sconto entro giorni"
+      "skontoDays": "Sconto entro giorni",
+      "conditions": "Condizioni supplementari"
     },
     "sections": {
       "project": "Progetto",
@@ -3722,7 +3723,9 @@
       "net": "Importo IVA esclusa",
       "total": "Importo IVA inclusa",
       "status": "Stato"
-    }
+    },
+    "conditionsPlaceholder": "p. es. ipotesi, delimitazioni, scadenze (una riga per punto)",
+    "conditionsHint": "Capitolo proprio nel PDF se basi e descrizione del progetto non bastano; vuoto = nessun capitolo."
   },
   "feeInvoices": {
     "title": "Fatture d’onorario",

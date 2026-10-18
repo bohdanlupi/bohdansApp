@@ -91,6 +91,8 @@ export type FeeOfferData = {
   description: string;
   /** Further Grundlagen, e.g. the project documents with their date. */
   basis: string;
+  /** Zusätzliche Bedingungen (own chapter in the PDF, left out when empty). */
+  conditions: string;
   customServices: CustomService[];
   /** Lump-sum items besides the phase fees (e.g. Fachkoordination, Kanalisationseingabe); SIA offers only. */
   extras: ExtraItem[];
@@ -248,6 +250,7 @@ export function parseFeeOfferData(raw: unknown): FeeOfferData {
     expensesText: text(v.expensesText, 2000),
     description: text(v.description, 4000),
     basis: text(v.basis, 2000),
+    conditions: text(v.conditions, 4000),
     customServices: parseCustomServices(v.customServices),
     extras: parseExtras(v.extras),
     positions: parsePositions(v.positions),

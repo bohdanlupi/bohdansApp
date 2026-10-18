@@ -259,6 +259,19 @@ export function FeeOfferEditor({
             <p className="text-xs text-muted-foreground">{t("basisHint")}</p>
           </div>
           )}
+          <div className="space-y-1.5 sm:col-span-6">
+            <Label htmlFor="offer-conditions">{t("fields.conditions")}</Label>
+            <CommitInput
+              id="offer-conditions"
+              multiline
+              rows={3}
+              value={data.conditions}
+              placeholder={t("conditionsPlaceholder")}
+              disabled={!editable}
+              onCommit={(conditions) => setData((d) => ({ ...d, conditions }))}
+            />
+            <p className="text-xs text-muted-foreground">{t("conditionsHint")}</p>
+          </div>
         </div>
       </Section>
 
