@@ -101,7 +101,8 @@
       "name": "Projekt",
       "city": "Ort",
       "client": "Bauherr",
-      "status": "Status"
+      "status": "Status",
+      "feeOffer": "Honorarofferte"
     },
     "form": {
       "newTitle": "Neues Projekt",
@@ -144,6 +145,7 @@
     },
     "tabs": {
       "overview": "Übersicht",
+      "fee": "Honorar",
       "lvs": "Leistungsverzeichnisse",
       "costPlan": "Kostenplan",
       "heating": "Heizung",
@@ -3481,7 +3483,7 @@
     "newDescription": "Projekt, Auftraggeber und die zu offerierenden Fachbereiche. Phasen, Honorar und Leistungen folgen im nächsten Schritt.",
     "create": "Offerte anlegen",
     "emptyTitle": "Noch keine Honorarofferte",
-    "emptyText": "Legen Sie eine Offerte an, wählen Sie Fachbereiche und Phasen und berechnen Sie das Honorar nach SIA 108.",
+    "emptyText": "Honorarofferten werden im Projekt erstellt: Projekt öffnen → Tab «Honorar» → «Neue Honorarofferte».",
     "searchPlaceholder": "Nummer, Projekt oder Ort",
     "allStatuses": "Alle Status",
     "noResults": "Keine Offerten gefunden.",
@@ -3491,7 +3493,8 @@
       "client": "Auftraggeber",
       "date": "Datum",
       "net": "Honorar exkl. MwSt.",
-      "status": "Status"
+      "status": "Status",
+      "project": "Projekt-Nr."
     },
     "status": {
       "draft": "Entwurf",
@@ -3661,7 +3664,8 @@
       "customPlaceholder": "Eigene Leistung",
       "removeCustom": "Zeile entfernen",
       "addCustom": "Eigene Zeile"
-    }
+    },
+    "emptyProjectText": "Erstellen Sie eine Honorarofferte nach SIA 108; Name, Adresse, Sprache und Bauherr werden aus dem Projekt übernommen."
   },
   "feeSettings": {
     "description": "Vorgaben für neue Honorarofferten. Bestehende Offerten behalten ihre Werte.",

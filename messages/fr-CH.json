@@ -101,7 +101,8 @@
       "name": "Projet",
       "city": "Lieu",
       "client": "Maître d'ouvrage",
-      "status": "Statut"
+      "status": "Statut",
+      "feeOffer": "Offre d’honoraires"
     },
     "form": {
       "newTitle": "Nouveau projet",
@@ -144,6 +145,7 @@
     },
     "tabs": {
       "overview": "Aperçu",
+      "fee": "Honoraires",
       "lvs": "Descriptifs",
       "costPlan": "Plan des coûts",
       "heating": "Chauffage",
@@ -3481,7 +3483,7 @@
     "newDescription": "Projet, mandant et domaines à offrir. Phases, honoraires et prestations suivent à l’étape suivante.",
     "create": "Créer l’offre",
     "emptyTitle": "Aucune offre d’honoraires",
-    "emptyText": "Créez une offre, choisissez les domaines et les phases et calculez les honoraires selon SIA 108.",
+    "emptyText": "Les offres d’honoraires se créent dans le projet : ouvrir le projet → onglet « Honoraires » → « Nouvelle offre d’honoraires ».",
     "searchPlaceholder": "Numéro, projet ou lieu",
     "allStatuses": "Tous les statuts",
     "noResults": "Aucune offre trouvée.",
@@ -3491,7 +3493,8 @@
       "client": "Mandant",
       "date": "Date",
       "net": "Honoraires hors TVA",
-      "status": "Statut"
+      "status": "Statut",
+      "project": "N° projet"
     },
     "status": {
       "draft": "Brouillon",
@@ -3661,7 +3664,8 @@
       "customPlaceholder": "Prestation propre",
       "removeCustom": "Supprimer la ligne",
       "addCustom": "Ligne propre"
-    }
+    },
+    "emptyProjectText": "Créez une offre d’honoraires selon SIA 108 ; nom, adresse, langue et maître d’ouvrage sont repris du projet."
   },
   "feeSettings": {
     "description": "Valeurs par défaut des nouvelles offres d’honoraires. Les offres existantes conservent leurs valeurs.",

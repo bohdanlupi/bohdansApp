@@ -101,7 +101,8 @@
       "name": "Progetto",
       "city": "Luogo",
       "client": "Committente",
-      "status": "Stato"
+      "status": "Stato",
+      "feeOffer": "Offerta d’onorario"
     },
     "form": {
       "newTitle": "Nuovo progetto",
@@ -144,6 +145,7 @@
     },
     "tabs": {
       "overview": "Panoramica",
+      "fee": "Onorario",
       "lvs": "Capitolati",
       "costPlan": "Piano dei costi",
       "heating": "Riscaldamento",
@@ -3481,7 +3483,7 @@
     "newDescription": "Progetto, committente e settori da offrire. Fasi, onorario e prestazioni seguono nel passo successivo.",
     "create": "Creare l’offerta",
     "emptyTitle": "Ancora nessuna offerta d’onorario",
-    "emptyText": "Create un’offerta, scegliete settori e fasi e calcolate l’onorario secondo SIA 108.",
+    "emptyText": "Le offerte d’onorario si creano nel progetto: aprire il progetto → scheda «Onorario» → «Nuova offerta d’onorario».",
     "searchPlaceholder": "Numero, progetto o luogo",
     "allStatuses": "Tutti gli stati",
     "noResults": "Nessuna offerta trovata.",
@@ -3491,7 +3493,8 @@
       "client": "Committente",
       "date": "Data",
       "net": "Onorario IVA escl.",
-      "status": "Stato"
+      "status": "Stato",
+      "project": "N. progetto"
     },
     "status": {
       "draft": "Bozza",
@@ -3661,7 +3664,8 @@
       "customPlaceholder": "Prestazione propria",
       "removeCustom": "Rimuovere la riga",
       "addCustom": "Riga propria"
-    }
+    },
+    "emptyProjectText": "Create un’offerta d’onorario secondo SIA 108; nome, indirizzo, lingua e committente sono ripresi dal progetto."
   },
   "feeSettings": {
     "description": "Valori predefiniti per le nuove offerte d’onorario. Le offerte esistenti mantengono i loro valori.",

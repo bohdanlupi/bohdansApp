@@ -23,6 +23,7 @@ const createSchema = z.object({
   title: z.string().trim().min(1).max(200),
   company_id: z.union([z.uuid(), z.literal("")]).transform((v) => v || null),
   contact_id: z.union([z.uuid(), z.literal("")]).transform((v) => v || null),
+  project_id: z.uuid(),
   street: optionalText,
   zip: optionalText,
   city: optionalText,
@@ -53,6 +54,7 @@ export async function createFeeOffer(_prev: FormState, formData: FormData): Prom
   if (error || !row) return { error: error?.code === PG_UNIQUE_VIOLATION ? "offerNumberExists" : "saveFailed" };
 
   revalidatePath("/honorarofferten");
+  revalidatePath("/projekte");
   redirect(`/honorarofferten/${row.id}`);
 }
 
@@ -87,6 +89,7 @@ export async function saveFeeOffer(id: string, payload: unknown): Promise<{ erro
   if (error) return { error: error.code === PG_UNIQUE_VIOLATION ? "offerNumberExists" : "saveFailed" };
 
   revalidatePath("/honorarofferten");
+  revalidatePath("/projekte");
   return {};
 }
 
@@ -94,10 +97,12 @@ export async function deleteFeeOffer(id: string): Promise<FormState> {
   await assertRole("admin", "planer");
   if (!z.uuid().safeParse(id).success) return { error: "invalidInput" };
   const supabase = await createClient();
+  const { data: offer } = await supabase.from("fee_offers").select("project_id").eq("id", id).maybeSingle();
   const { error } = await supabase.from("fee_offers").delete().eq("id", id);
   if (error) return { error: "deleteFailed" };
   revalidatePath("/honorarofferten");
-  redirect("/honorarofferten");
+  revalidatePath("/projekte");
+  redirect(offer?.project_id ? `/projekte/${offer.project_id}/honorar` : "/honorarofferten");
 }
 
 /**

@@ -14,6 +14,8 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { param, searchWords } from "@/lib/validation";
 
+import { isFeeOfferStatus } from "../honorarofferten/offer-table";
+import { FeeStatusBadge } from "../honorarofferten/status-badge";
 import { StatusBadge } from "./status-badge";
 
 const PAGE_SIZE = 50;
@@ -43,6 +45,14 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/projekt
   // Without a status filter, archived projects are hidden.
   query = status ? query.eq("status", status) : query.neq("status", "archived");
   const { data: projects, count } = await query;
+
+  // Status of the latest fee offer per project (newest offer date first).
+  const ids = (projects ?? []).flatMap((p) => (p.id ? [p.id] : []));
+  const { data: offers } = ids.length
+    ? await supabase.from("fee_offers").select("project_id, status").in("project_id", ids).order("offer_date", { ascending: false }).order("created_at", { ascending: false })
+    : { data: [] };
+  const offerStatus = new Map<string, string>();
+  for (const o of offers ?? []) if (o.project_id && !offerStatus.has(o.project_id)) offerStatus.set(o.project_id, o.status);
 
   const filtered = Boolean(q || status);
   const isEmpty = !projects?.length;
@@ -105,6 +115,7 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/projekt
                     <TableHead>{t("projects.columns.name")}</TableHead>
                     <TableHead>{t("projects.columns.city")}</TableHead>
                     <TableHead>{t("projects.columns.client")}</TableHead>
+                    <TableHead>{t("projects.columns.feeOffer")}</TableHead>
                     <TableHead className="pr-4">{t("projects.columns.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -119,6 +130,12 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/projekt
                       </TableCell>
                       <TableCell>{[p.zip, p.city].filter(Boolean).join(" ")}</TableCell>
                       <TableCell className="max-w-64 truncate">{p.client_names}</TableCell>
+                      <TableCell>
+                        {(() => {
+                          const status = p.id ? offerStatus.get(p.id) : undefined;
+                          return isFeeOfferStatus(status) && <FeeStatusBadge status={status} />;
+                        })()}
+                      </TableCell>
                       <TableCell className="pr-4">{p.status && <StatusBadge status={p.status} />}</TableCell>
                     </TableRow>
                   ))}

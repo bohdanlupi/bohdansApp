@@ -4,9 +4,10 @@ import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/components/page-header";
 import { requireProfile } from "@/lib/auth";
-import { nextYearNumber } from "@/lib/next-number";
 import { createClient } from "@/lib/supabase/server";
+import { param } from "@/lib/validation";
 
+import { loadProject } from "../../projekte/[id]/load-project";
 import { NewFeeOfferForm } from "./new-offer-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,17 +15,46 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("new") };
 }
 
-export default async function NewFeeOfferPage() {
+/** New offer of a project (/honorarofferten/neu?projekt=<id>): prefilled with name, address, language and Bauherr. */
+export default async function NewFeeOfferPage({ searchParams }: PageProps<"/honorarofferten/neu">) {
   const profile = await requireProfile();
-  if (profile.role === "viewer") redirect("/honorarofferten");
+  const project = await loadProject(param((await searchParams).projekt) ?? "");
+  if (!project) redirect("/projekte");
+  if (profile.role === "viewer") redirect(`/projekte/${project.id}/honorar`);
   const t = await getTranslations("feeOffers");
+
   const supabase = await createClient();
-  const { data: companies } = await supabase.from("companies").select("id, name, city").eq("archived", false).order("name");
+  const [{ data: companies }, { data: offers }, { data: client }] = await Promise.all([
+    supabase.from("companies").select("id, name, city").eq("archived", false).order("name"),
+    supabase.from("fee_offers").select("number").eq("project_id", project.id),
+    supabase.from("project_participants").select("company_id, contact_id").eq("project_id", project.id).eq("role", "client").limit(1).maybeSingle(),
+  ]);
+  const { data: contacts } = client?.company_id
+    ? await supabase.from("contacts").select("id, first_name, last_name, function").eq("company_id", client.company_id).order("last_name")
+    : { data: [] };
+
+  // Offer numbers follow the project: 2026-010-H1, -H2 … (offers without suffix count as well).
+  const used = (offers ?? []).map((o) => Number(o.number.match(/-H(\d+)$/)?.[1] ?? 0));
+  const suggestedNumber = `${project.number}-H${Math.max(used.length, ...used) + 1}`;
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title={t("new")} description={t("newDescription")} />
-      <NewFeeOfferForm suggestedNumber={await nextYearNumber("fee_offers")} companies={companies ?? []} />
+      <PageHeader title={t("new")} description={`${project.number} · ${project.name}`} />
+      <NewFeeOfferForm
+        suggestedNumber={suggestedNumber}
+        companies={companies ?? []}
+        initialContacts={contacts ?? []}
+        defaults={{
+          project_id: project.id,
+          title: project.name,
+          street: project.street,
+          zip: project.zip,
+          city: project.city,
+          language: project.language,
+          company_id: client?.company_id ?? null,
+          contact_id: client?.contact_id ?? null,
+        }}
+      />
     </div>
   );
 }

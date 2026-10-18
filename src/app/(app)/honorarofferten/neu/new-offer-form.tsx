@@ -18,28 +18,52 @@ import { createFeeOffer } from "../actions";
 
 type ContactOption = Awaited<ReturnType<typeof getCompanyContacts>>[number];
 
-export function NewFeeOfferForm({ suggestedNumber, companies }: { suggestedNumber: string; companies: CompanyOption[] }) {
+export type NewOfferDefaults = {
+  project_id: string;
+  title: string;
+  street: string | null;
+  zip: string | null;
+  city: string | null;
+  language: "de" | "fr" | "it";
+  company_id: string | null;
+  contact_id: string | null;
+};
+
+export function NewFeeOfferForm({
+  suggestedNumber,
+  companies,
+  initialContacts,
+  defaults,
+}: {
+  suggestedNumber: string;
+  companies: CompanyOption[];
+  initialContacts: ContactOption[];
+  defaults: NewOfferDefaults;
+}) {
   const t = useTranslations();
   const tf = useTranslations("feeOffers.fields");
-  const language = localeToLanguage(useLocale() as Locale);
+  const uiLanguage = localeToLanguage(useLocale() as Locale);
   const [state, action] = useActionState(createFeeOffer, initialFormState);
-  const [contacts, setContacts] = useState<ContactOption[]>([]);
+  const [contacts, setContacts] = useState<ContactOption[]>(initialContacts);
+  const [contactId, setContactId] = useState(defaults.contact_id ?? "");
 
   const selectCompany = async (id: string | null) => {
     setContacts([]);
+    setContactId("");
     if (id) setContacts(await getCompanyContacts(id));
   };
 
   const text = (name: "number" | "title" | "street" | "zip" | "city", className = "") => (
     <div className={`space-y-2 ${className}`}>
       <Label htmlFor={name}>{tf(name)}</Label>
-      <Input id={name} name={name} defaultValue={name === "number" ? suggestedNumber : ""} required={name === "number" || name === "title"} autoFocus={name === "title"} />
+      <Input id={name} name={name} defaultValue={name === "number" ? suggestedNumber : (defaults[name] ?? "")} required={name === "number" || name === "title"} />
     </div>
   );
 
   return (
     <form action={action} className="space-y-6">
       <FormMessage state={state} />
+      <input type="hidden" name="project_id" value={defaults.project_id} />
       <Card>
         <CardHeader>
           <CardTitle>{t("feeOffers.sections.project")}</CardTitle>
@@ -60,11 +84,11 @@ export function NewFeeOfferForm({ suggestedNumber, companies }: { suggestedNumbe
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="company_id">{tf("company")}</Label>
-            <CompanyPicker id="company_id" name="company_id" options={companies} onChange={selectCompany} />
+            <CompanyPicker id="company_id" name="company_id" options={companies} defaultValue={defaults.company_id} onChange={selectCompany} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="contact_id">{tf("contact")}</Label>
-            <NativeSelect id="contact_id" name="contact_id" defaultValue="" disabled={!contacts.length}>
+            <NativeSelect id="contact_id" name="contact_id" value={contactId} onChange={(e) => setContactId(e.target.value)} disabled={!contacts.length}>
               <option value="">–</option>
               {contacts.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -76,7 +100,7 @@ export function NewFeeOfferForm({ suggestedNumber, companies }: { suggestedNumbe
           </div>
           <div className="space-y-2">
             <Label htmlFor="language">{tf("language")}</Label>
-            <NativeSelect id="language" name="language" defaultValue={language}>
+            <NativeSelect id="language" name="language" defaultValue={defaults.language}>
               {(["de", "fr", "it"] as const).map((l) => (
                 <option key={l} value={l}>
                   {t(`languages.${l}`)}
@@ -97,7 +121,7 @@ export function NewFeeOfferForm({ suggestedNumber, companies }: { suggestedNumbe
             {feeTrades.map((trade) => (
               <label key={trade} className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="trades" value={trade} />
-                {tradeNames[trade][language]}
+                {tradeNames[trade][uiLanguage]}
               </label>
             ))}
           </div>

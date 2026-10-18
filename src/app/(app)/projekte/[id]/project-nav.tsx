@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 const tabs = [
   { path: "", key: "overview" },
+  { path: "/honorar", key: "fee" },
   { path: "/lv", key: "lvs" },
   { path: "/kostenplan", key: "costPlan" },
   { path: "/heizung", key: "heating" },

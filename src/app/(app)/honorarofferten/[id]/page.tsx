@@ -44,9 +44,12 @@ export default async function FeeOfferPage({ params }: PageProps<"/honoraroffert
 
   return (
     <div className="space-y-4">
-      <Link href="/honorarofferten" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        href={offer.project ? `/projekte/${offer.project.id}/honorar` : "/honorarofferten"}
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="size-4" />
-        {t("title")}
+        {offer.project ? `${offer.project.number} · ${offer.project.name}` : t("title")}
       </Link>
       <FeeOfferEditor
         key={offer.id}
