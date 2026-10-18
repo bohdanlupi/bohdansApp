@@ -136,7 +136,7 @@ export function FeeOfferDocument({
     <View style={{ flexDirection: "row", paddingVertical: 2, paddingHorizontal: 4, ...(opts.bold ? styles.bold : {}) }}>
       <Text style={{ flex: 1 }}>{label}</Text>
       <Text style={{ width: TOTAL_COL, textAlign: "right" }}>
-        {opts.negative ? "−" : ""}
+        {opts.negative ? "-" : ""}
         {formatAmount(value)}
       </Text>
     </View>

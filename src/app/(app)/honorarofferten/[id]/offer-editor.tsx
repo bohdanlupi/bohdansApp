@@ -21,6 +21,7 @@ import { formatMoney } from "@/lib/number-input";
 import type { AppLanguage } from "@/lib/supabase/types";
 
 import { getCompanyContacts } from "../../projekte/actions";
+import { CreateInvoiceButton } from "../../honorarrechnungen/create-invoice-button";
 import { createProjectFromOffer, deleteFeeOffer, saveFeeOffer } from "../actions";
 import { CommitInput } from "@/components/planning/commit-input";
 import { type FeeDefaults, FeeSection } from "./fee-section";
@@ -125,6 +126,7 @@ export function FeeOfferEditor({
             <FileText />
             {t("pdf")}
           </a>
+          {editable && project && header.status === "accepted" && status === "saved" && <CreateInvoiceButton offerId={id} offerNumber={header.number} variant="outline" />}
           {project ? (
             <Link href={`/projekte/${project.id}`} className={buttonVariants({ variant: "outline" })}>
               {t("toProject", { number: project.number })}

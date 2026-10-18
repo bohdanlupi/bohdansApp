@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -360,6 +360,60 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      fee_invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data: Json
+          due_date: string | null
+          id: string
+          invoice_date: string
+          number: string
+          offer_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          number: string
+          offer_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          number?: string
+          offer_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_invoices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_invoices_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "fee_offers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fee_offers: {
         Row: {

@@ -85,7 +85,8 @@
     "structureExists": "Le descriptif contient déjà une structure 244.",
     "heatingStructureExists": "Le descriptif contient déjà une structure 24.",
     "noTradeChosen": "Veuillez choisir au moins un domaine.",
-    "offerNumberExists": "Ce numéro d’offre existe déjà."
+    "offerNumberExists": "Ce numéro d’offre existe déjà.",
+    "invoiceNumberExists": "Ce numéro de facture existe déjà."
   },
   "projects": {
     "title": "Projets",
@@ -3666,6 +3667,63 @@
       "addCustom": "Ligne propre"
     },
     "emptyProjectText": "Créez une offre d’honoraires selon SIA 108 ; nom, adresse, langue et maître d’ouvrage sont repris du projet."
+  },
+  "feeInvoices": {
+    "title": "Factures d’honoraires",
+    "create": "Facture pour {number}",
+    "empty": "Aucune facture pour l’instant. Créez la première facture d’une offre acceptée.",
+    "pdf": "PDF",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer la facture ?",
+    "deleteText": "La facture d’honoraires {number} sera définitivement supprimée. Les factures suivantes de la même offre se baseront ensuite sur la facture précédente.",
+    "ofOffer": "Facture de l’offre",
+    "belowPrevious": "inférieur au précédent",
+    "allDone": "Toutes les phases 100 %",
+    "extras": "Postes supplémentaires",
+    "textPlaceholder": "Remarque facultative, p. ex. facture d’acompte n° 1",
+    "progressHint": "État d’avancement par domaine et phase partielle en % (cumulé). La facture porte sur les honoraires fournis à ce jour.",
+    "progressHintPrevious": "État d’avancement par domaine et phase partielle en % (cumulé). Est déduit ce qui a été facturé jusqu’à la facture {number}.",
+    "status": {
+      "draft": "Brouillon",
+      "sent": "Envoyée",
+      "paid": "Payée"
+    },
+    "fields": {
+      "number": "N° de facture",
+      "status": "Statut",
+      "invoice_date": "Date de facture",
+      "due_date": "Payable jusqu’au",
+      "text": "Remarque"
+    },
+    "sections": {
+      "invoice": "Facture",
+      "progress": "État d’avancement",
+      "summary": "Récapitulation"
+    },
+    "columns": {
+      "phase": "Phase partielle",
+      "fee": "Honoraires offre",
+      "prevPct": "Précédent",
+      "pct": "État",
+      "earned": "Fourni",
+      "amount": "Cette facture",
+      "number": "N°",
+      "offer": "Offre",
+      "date": "Date",
+      "due": "Payable jusqu’au",
+      "total": "Montant TVA incl.",
+      "status": "Statut"
+    },
+    "summary": {
+      "earned": "Prestations fournies",
+      "discount": "Rabais {pct} %",
+      "expenses": "Frais annexes {pct} %",
+      "earnedNet": "Total fourni hors TVA",
+      "previous": "Moins déjà facturé (jusqu’à {number})",
+      "net": "Montant de la facture hors TVA",
+      "vat": "TVA {rate} %",
+      "total": "Montant de la facture TVA incl."
+    }
   },
   "feeSettings": {
     "description": "Valeurs par défaut des nouvelles offres d’honoraires. Les offres existantes conservent leurs valeurs.",

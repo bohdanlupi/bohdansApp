@@ -85,7 +85,8 @@
     "structureExists": "Das LV enthält bereits eine Kapitelstruktur 244.",
     "heatingStructureExists": "Das LV enthält bereits eine Kapitelstruktur 24.",
     "noTradeChosen": "Bitte mindestens einen Fachbereich wählen.",
-    "offerNumberExists": "Diese Offertnummer gibt es bereits."
+    "offerNumberExists": "Diese Offertnummer gibt es bereits.",
+    "invoiceNumberExists": "Diese Rechnungsnummer gibt es bereits."
   },
   "projects": {
     "title": "Projekte",
@@ -3666,6 +3667,63 @@
       "addCustom": "Eigene Zeile"
     },
     "emptyProjectText": "Erstellen Sie eine Honorarofferte nach SIA 108; Name, Adresse, Sprache und Bauherr werden aus dem Projekt übernommen."
+  },
+  "feeInvoices": {
+    "title": "Honorarrechnungen",
+    "create": "Rechnung zu {number}",
+    "empty": "Noch keine Rechnung. Erstellen Sie die erste Rechnung zu einer angenommenen Offerte.",
+    "pdf": "PDF",
+    "delete": "Löschen",
+    "deleteTitle": "Rechnung löschen?",
+    "deleteText": "Die Honorarrechnung {number} wird endgültig gelöscht. Spätere Rechnungen derselben Offerte rechnen danach ab der vorherigen Rechnung.",
+    "ofOffer": "Rechnung zu Offerte",
+    "belowPrevious": "unter bisher",
+    "allDone": "Alle Phasen 100 %",
+    "extras": "Zusatzpositionen",
+    "textPlaceholder": "Optionale Bemerkung, z. B. Akontorechnung Nr. 1",
+    "progressHint": "Leistungsstand pro Gewerk und Teilphase in % (kumuliert). Die Rechnung stellt das bis heute erbrachte Honorar in Rechnung.",
+    "progressHintPrevious": "Leistungsstand pro Gewerk und Teilphase in % (kumuliert). Abgezogen wird, was bis Rechnung {number} verrechnet wurde.",
+    "status": {
+      "draft": "Entwurf",
+      "sent": "Versendet",
+      "paid": "Bezahlt"
+    },
+    "fields": {
+      "number": "Rechnungs-Nr.",
+      "status": "Status",
+      "invoice_date": "Rechnungsdatum",
+      "due_date": "Zahlbar bis",
+      "text": "Bemerkung"
+    },
+    "sections": {
+      "invoice": "Rechnung",
+      "progress": "Leistungsstand",
+      "summary": "Zusammenstellung"
+    },
+    "columns": {
+      "phase": "Teilphase",
+      "fee": "Honorar Offerte",
+      "prevPct": "Bisher",
+      "pct": "Stand",
+      "earned": "Erbracht",
+      "amount": "Diese Rechnung",
+      "number": "Nr.",
+      "offer": "Offerte",
+      "date": "Datum",
+      "due": "Zahlbar bis",
+      "total": "Betrag inkl. MwSt.",
+      "status": "Status"
+    },
+    "summary": {
+      "earned": "Leistungen erbracht",
+      "discount": "Rabatt {pct} %",
+      "expenses": "Nebenkosten {pct} %",
+      "earnedNet": "Total erbracht exkl. MwSt.",
+      "previous": "Abzüglich bisher verrechnet (bis {number})",
+      "net": "Rechnungsbetrag exkl. MwSt.",
+      "vat": "MwSt. {rate} %",
+      "total": "Rechnungsbetrag inkl. MwSt."
+    }
   },
   "feeSettings": {
     "description": "Vorgaben für neue Honorarofferten. Bestehende Offerten behalten ihre Werte.",

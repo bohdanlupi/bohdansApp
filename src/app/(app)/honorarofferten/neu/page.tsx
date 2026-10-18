@@ -33,9 +33,9 @@ export default async function NewFeeOfferPage({ searchParams }: PageProps<"/hono
     ? await supabase.from("contacts").select("id, first_name, last_name, function").eq("company_id", client.company_id).order("last_name")
     : { data: [] };
 
-  // Offer numbers follow the project: 2026-010-H1, -H2 … (offers without suffix count as well).
-  const used = (offers ?? []).map((o) => Number(o.number.match(/-H(\d+)$/)?.[1] ?? 0));
-  const suggestedNumber = `${project.number}-H${Math.max(used.length, ...used) + 1}`;
+  // Offer numbers follow the project: 2026-010-HO1, -HO2 … (offers without suffix count as well).
+  const used = (offers ?? []).map((o) => Number(o.number.match(/-HO(\d+)$/)?.[1] ?? 0));
+  const suggestedNumber = `${project.number}-HO${Math.max(used.length, ...used) + 1}`;
 
   return (
     <div className="max-w-3xl">

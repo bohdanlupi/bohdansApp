@@ -85,7 +85,8 @@
     "structureExists": "L’elenco contiene già una struttura 244.",
     "heatingStructureExists": "L’elenco contiene già una struttura 24.",
     "noTradeChosen": "Scegliere almeno un settore.",
-    "offerNumberExists": "Questo numero d’offerta esiste già."
+    "offerNumberExists": "Questo numero d’offerta esiste già.",
+    "invoiceNumberExists": "Questo numero di fattura esiste già."
   },
   "projects": {
     "title": "Progetti",
@@ -3666,6 +3667,63 @@
       "addCustom": "Riga propria"
     },
     "emptyProjectText": "Create un’offerta d’onorario secondo SIA 108; nome, indirizzo, lingua e committente sono ripresi dal progetto."
+  },
+  "feeInvoices": {
+    "title": "Fatture d’onorario",
+    "create": "Fattura per {number}",
+    "empty": "Ancora nessuna fattura. Create la prima fattura di un’offerta accettata.",
+    "pdf": "PDF",
+    "delete": "Elimina",
+    "deleteTitle": "Eliminare la fattura?",
+    "deleteText": "La fattura d’onorario {number} sarà eliminata definitivamente. Le fatture successive della stessa offerta si baseranno poi sulla fattura precedente.",
+    "ofOffer": "Fattura dell’offerta",
+    "belowPrevious": "inferiore al precedente",
+    "allDone": "Tutte le fasi 100 %",
+    "extras": "Posizioni supplementari",
+    "textPlaceholder": "Osservazione facoltativa, p. es. fattura d’acconto n. 1",
+    "progressHint": "Stato delle prestazioni per settore e fase parziale in % (cumulato). La fattura comprende l’onorario fornito finora.",
+    "progressHintPrevious": "Stato delle prestazioni per settore e fase parziale in % (cumulato). Viene dedotto quanto fatturato fino alla fattura {number}.",
+    "status": {
+      "draft": "Bozza",
+      "sent": "Inviata",
+      "paid": "Pagata"
+    },
+    "fields": {
+      "number": "N. fattura",
+      "status": "Stato",
+      "invoice_date": "Data fattura",
+      "due_date": "Pagabile entro",
+      "text": "Osservazione"
+    },
+    "sections": {
+      "invoice": "Fattura",
+      "progress": "Stato delle prestazioni",
+      "summary": "Riepilogo"
+    },
+    "columns": {
+      "phase": "Fase parziale",
+      "fee": "Onorario offerta",
+      "prevPct": "Precedente",
+      "pct": "Stato",
+      "earned": "Fornito",
+      "amount": "Questa fattura",
+      "number": "N.",
+      "offer": "Offerta",
+      "date": "Data",
+      "due": "Pagabile entro",
+      "total": "Importo IVA incl.",
+      "status": "Stato"
+    },
+    "summary": {
+      "earned": "Prestazioni fornite",
+      "discount": "Sconto {pct} %",
+      "expenses": "Spese accessorie {pct} %",
+      "earnedNet": "Totale fornito IVA esclusa",
+      "previous": "Dedotto già fatturato (fino a {number})",
+      "net": "Importo della fattura IVA esclusa",
+      "vat": "IVA {rate} %",
+      "total": "Importo della fattura IVA inclusa"
+    }
   },
   "feeSettings": {
     "description": "Valori predefiniti per le nuove offerte d’onorario. Le offerte esistenti mantengono i loro valori.",
