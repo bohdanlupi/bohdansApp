@@ -130,3 +130,64 @@ export function vatReport(outgoing: VatOutgoing[], incoming: VatIncoming[]): Vat
     balance: round2(outputTaxTotal - inputTaxTotal),
   };
 }
+
+/** Columns of the Kreditoren list that can be sorted (URL param `sortierung`). */
+export const creditorSortKeys = ["supplier", "number", "invoiceDate", "dueDate", "category", "project", "vat", "total", "status"] as const;
+export type CreditorSortKey = (typeof creditorSortKeys)[number];
+export const isCreditorSortKey = (v: unknown): v is CreditorSortKey => creditorSortKeys.includes(v as CreditorSortKey);
+
+export type CreditorSort = { key: CreditorSortKey; desc: boolean };
+
+/** Fields the list sorting and the text search need; the table row type extends it. */
+export type CreditorListItem = {
+  number: string;
+  invoice_date: string;
+  due_date: string | null;
+  paid_date: string | null;
+  status: CreditorStatus;
+  category: string;
+  total: number;
+  vat_lines: VatLine[];
+  description: string;
+  company: { name: string } | null;
+  project: { number: string; name: string } | null;
+};
+
+/** True when every search word appears in supplier, number, description or project of the invoice. */
+export function matchesCreditorSearch(item: CreditorListItem, words: string[]) {
+  const text = [item.company?.name, item.number, item.description, item.project?.number, item.project?.name].filter(Boolean).join(" ").toLowerCase();
+  return words.every((w) => text.includes(w));
+}
+
+/** Comparator for the list; ties fall back to the invoice date (newest first) so the order is stable. */
+export function compareCreditors(sort: CreditorSort) {
+  const text = (a: string, b: string) => a.localeCompare(b, "de", { numeric: true, sensitivity: "base" });
+  const nullable = (a: string | null, b: string | null) => (a ?? "9999").localeCompare(b ?? "9999");
+  const value = (a: CreditorListItem, b: CreditorListItem): number => {
+    switch (sort.key) {
+      case "supplier":
+        return text(a.company?.name ?? "", b.company?.name ?? "");
+      case "number":
+        return text(a.number, b.number);
+      case "invoiceDate":
+        return a.invoice_date.localeCompare(b.invoice_date);
+      case "dueDate":
+        // Open invoices by due date, paid ones by paid date (the column shows that date).
+        return nullable(a.status === "paid" ? a.paid_date : a.due_date, b.status === "paid" ? b.paid_date : b.due_date);
+      case "category":
+        return text(a.category, b.category);
+      case "project":
+        return text(a.project?.number ?? "\uffff", b.project?.number ?? "\uffff");
+      case "vat":
+        return splitLines(a.vat_lines).vat - splitLines(b.vat_lines).vat;
+      case "total":
+        return a.total - b.total;
+      case "status":
+        return text(a.status, b.status);
+    }
+  };
+  return (a: CreditorListItem, b: CreditorListItem) => {
+    const v = value(a, b);
+    return (sort.desc ? -v : v) || b.invoice_date.localeCompare(a.invoice_date);
+  };
+}

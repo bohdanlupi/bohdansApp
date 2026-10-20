@@ -1,31 +1,24 @@
-import { Paperclip } from "lucide-react";
+import { ArrowDown, ArrowUp, Paperclip } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
 import { DeadlineDate } from "@/components/deadline-date";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type CreditorStatus, isCreditorCategory, ratesLabel, splitLines, type VatLine } from "@/lib/creditors";
+import { type CreditorListItem, type CreditorSort, type CreditorSortKey, type CreditorStatus, isCreditorCategory, ratesLabel, splitLines } from "@/lib/creditors";
 import { formatMoney } from "@/lib/number-input";
 import { cn } from "@/lib/utils";
 
 import { PaidButton } from "./paid-button";
 
-export type CreditorRow = {
+export type CreditorRow = CreditorListItem & {
   id: string;
-  number: string;
-  invoice_date: string;
-  due_date: string | null;
-  paid_date: string | null;
-  status: CreditorStatus;
-  category: string;
-  total: number;
-  vat_lines: VatLine[];
-  description: string;
   file_path: string | null;
-  company: { name: string } | null;
-  project: { number: string; name: string } | null;
 };
+
+/** Sorting of the list: the current order and the search params the header links have to keep. */
+export type SortProps = { current: CreditorSort; params: Record<string, string | undefined> };
 
 const statusStyles: Record<CreditorStatus, string> = {
   open: "bg-brand/15 text-foreground",
@@ -36,9 +29,31 @@ const WEIGHTS = [2.4, 1.2, 1, 1.3, 1.3, 1.6, 1, 1.1, 1.1, 0.4];
 const WEIGHT_SUM = WEIGHTS.reduce((a, b) => a + b, 0);
 
 /** Received invoices; open ones with their due date (marked when near or passed) and a button to mark them paid. */
-export function CreditorTable({ rows, editable }: { rows: CreditorRow[]; editable: boolean }) {
+export function CreditorTable({ rows, editable, sort }: { rows: CreditorRow[]; editable: boolean; sort?: SortProps }) {
   const t = useTranslations("creditors");
   const date = (value: string | null) => (value ? new Date(value).toLocaleDateString("de-CH") : "");
+
+  /** Column header; a link that sorts by the column (second click reverses) when the table is sortable. */
+  const head = (key: CreditorSortKey, label: ReactNode, className?: string) => {
+    if (!sort) return <TableHead className={className}>{label}</TableHead>;
+    const active = sort.current.key === key;
+    const desc = active ? !sort.current.desc : key === "invoiceDate" || key === "dueDate" || key === "total" || key === "vat";
+    const search = new URLSearchParams();
+    for (const [k, v] of Object.entries(sort.params)) if (v) search.set(k, v);
+    search.set("sortierung", key);
+    if (desc) search.set("richtung", "desc");
+    else search.delete("richtung");
+    const Icon = sort.current.desc ? ArrowDown : ArrowUp;
+    return (
+      <TableHead className={className} aria-sort={active ? (sort.current.desc ? "descending" : "ascending") : undefined}>
+        <Link href={`?${search}`} className="inline-flex items-center gap-1 underline-offset-4 hover:underline">
+          {label}
+          {active && <Icon className="size-3.5" aria-hidden />}
+        </Link>
+      </TableHead>
+    );
+  };
+
   return (
     <div className="overflow-x-auto rounded-xl border">
       <Table className="min-w-[72rem] table-fixed">
@@ -49,15 +64,15 @@ export function CreditorTable({ rows, editable }: { rows: CreditorRow[]; editabl
         </colgroup>
         <TableHeader>
           <TableRow>
-            <TableHead className="pl-4">{t("fields.supplier")}</TableHead>
-            <TableHead>{t("fields.number")}</TableHead>
-            <TableHead>{t("fields.invoiceDate")}</TableHead>
-            <TableHead>{t("columns.dueOrPaid")}</TableHead>
-            <TableHead>{t("fields.category")}</TableHead>
-            <TableHead>{t("fields.project")}</TableHead>
-            <TableHead className="text-right">{t("columns.vat")}</TableHead>
-            <TableHead className="text-right">{t("columns.total")}</TableHead>
-            <TableHead>{t("fields.status")}</TableHead>
+            {head("supplier", t("fields.supplier"), "pl-4")}
+            {head("number", t("fields.number"))}
+            {head("invoiceDate", t("fields.invoiceDate"))}
+            {head("dueDate", t("columns.dueOrPaid"))}
+            {head("category", t("fields.category"))}
+            {head("project", t("fields.project"))}
+            {head("vat", t("columns.vat"), "text-right")}
+            {head("total", t("columns.total"), "text-right")}
+            {head("status", t("fields.status"))}
             <TableHead className="pr-4">
               <span className="sr-only">{t("sections.document")}</span>
             </TableHead>
