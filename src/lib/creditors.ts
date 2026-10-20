@@ -131,6 +131,43 @@ export function vatReport(outgoing: VatOutgoing[], incoming: VatIncoming[]): Vat
   };
 }
 
+type BalanceInvoice = { status: string; total: number; due_date: string | null };
+/** Sum and count of invoices. */
+type Amount = { sum: number; count: number };
+
+export type AccountBalance = {
+  opening: number;
+  /** Paid Honorarrechnungen. */
+  received: Amount;
+  /** Paid Kreditoren. */
+  paid: Amount;
+  /** opening + received − paid: what should be on the account today. */
+  expected: number;
+  /** Honorarrechnungen Versendet, not paid yet. */
+  receivable: Amount;
+  /** Open Kreditoren, and the part of them whose due date has passed. */
+  payable: Amount;
+  overdue: Amount;
+  /** expected + receivable − payable. */
+  afterOpen: number;
+};
+
+/**
+ * Expected account balance: the opening balance plus every paid outgoing invoice minus every paid received invoice,
+ * and the open amounts still to come. Skonto taken by clients is not known to the app and not deducted.
+ */
+export function accountBalance({ opening, today, outgoing, incoming }: { opening: number; today: string; outgoing: BalanceInvoice[]; incoming: BalanceInvoice[] }): AccountBalance {
+  const amount = (rows: BalanceInvoice[]): Amount => ({ sum: round2(rows.reduce((a, r) => a + r.total, 0)), count: rows.length });
+  const received = amount(outgoing.filter((i) => i.status === "paid"));
+  const paid = amount(incoming.filter((i) => i.status === "paid"));
+  const receivable = amount(outgoing.filter((i) => i.status === "sent"));
+  const open = incoming.filter((i) => i.status === "open");
+  const payable = amount(open);
+  const overdue = amount(open.filter((i) => i.due_date !== null && i.due_date < today));
+  const expected = round2(opening + received.sum - paid.sum);
+  return { opening, received, paid, expected, receivable, payable, overdue, afterOpen: round2(expected + receivable.sum - payable.sum) };
+}
+
 /** Columns of the Kreditoren list that can be sorted (URL param `sortierung`). */
 export const creditorSortKeys = ["supplier", "number", "quarter", "invoiceDate", "dueDate", "category", "project", "vat", "total", "status"] as const;
 export type CreditorSortKey = (typeof creditorSortKeys)[number];

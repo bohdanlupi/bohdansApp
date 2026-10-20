@@ -354,7 +354,8 @@
         "bic": "BIC",
         "vat_rate": "Taux de TVA (%)",
         "offer_validity_days": "Validité des offres (jours)",
-        "payment_terms_days": "Délai de paiement (jours)"
+        "payment_terms_days": "Délai de paiement (jours)",
+        "opening_balance": "Solde initial du compte (CHF, avant le premier paiement saisi)"
       },
       "letterheadHint": "Ainsi apparaissent le logo, l'adresse et le pied de page sur tous les documents (contenu d'exemple).",
       "letterheadPreview": "Ouvrir l'aperçu PDF",
@@ -3872,6 +3873,18 @@
     "allCategories": "Toutes les catégories",
     "allYears": "Toutes les années",
     "noResults": "Aucune facture pour ces filtres.",
+    "balance": {
+      "title": "Solde du compte (théorique)",
+      "hint": "Solde initial des paramètres, plus les notes d’honoraires payées, moins les créanciers payés – à comparer avec le relevé bancaire. L’escompte pris par les mandants n’est pas déduit.",
+      "opening": "Solde initial",
+      "received": "Notes d’honoraires payées ({count})",
+      "paid": "Créanciers payés ({count})",
+      "expected": "Solde théorique aujourd’hui",
+      "receivable": "Notes d’honoraires ouvertes, envoyées ({count})",
+      "payable": "Créanciers ouverts ({count})",
+      "overdue": "dont en retard ({count})",
+      "afterOpen": "Solde après tous les paiements ouverts"
+    },
     "quarterInvoices": "Factures reçues {quarter}",
     "noQuarterInvoices": "Aucune facture datée de ce trimestre.",
     "sections": {

@@ -26,6 +26,7 @@ const firmSchema = z.object({
   vat_rate: z.coerce.number().min(0).max(100),
   offer_validity_days: z.coerce.number().int().min(0).max(365),
   payment_terms_days: z.coerce.number().int().min(0).max(365),
+  opening_balance: z.coerce.number().min(-1e9).max(1e9),
 });
 
 export async function updateFirmSettings(_prev: FormState, formData: FormData): Promise<FormState> {

@@ -628,6 +628,7 @@ export type Database = {
           managing_director: string | null
           name: string
           offer_validity_days: number
+          opening_balance: number
           payment_terms_days: number
           phone: string | null
           street: string | null
@@ -651,6 +652,7 @@ export type Database = {
           managing_director?: string | null
           name: string
           offer_validity_days?: number
+          opening_balance?: number
           payment_terms_days?: number
           phone?: string | null
           street?: string | null
@@ -674,6 +676,7 @@ export type Database = {
           managing_director?: string | null
           name?: string
           offer_validity_days?: number
+          opening_balance?: number
           payment_terms_days?: number
           phone?: string | null
           street?: string | null

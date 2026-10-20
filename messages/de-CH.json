@@ -354,7 +354,8 @@
         "bic": "BIC",
         "vat_rate": "MwSt.-Satz (%)",
         "offer_validity_days": "Gültigkeit Offerten (Tage)",
-        "payment_terms_days": "Zahlungsfrist (Tage)"
+        "payment_terms_days": "Zahlungsfrist (Tage)",
+        "opening_balance": "Anfangsbestand Konto (CHF, vor der ersten erfassten Zahlung)"
       },
       "letterheadHint": "So erscheinen Logo, Adresse und Fusszeile auf allen Dokumenten (Beispielinhalt).",
       "letterheadPreview": "PDF-Vorschau öffnen",
@@ -3872,6 +3873,18 @@
     "allCategories": "Alle Kategorien",
     "allYears": "Alle Jahre",
     "noResults": "Keine Rechnungen für diese Filter.",
+    "balance": {
+      "title": "Kontostand (Soll)",
+      "hint": "Anfangsbestand aus den Einstellungen, plus bezahlte Honorarrechnungen, minus bezahlte Kreditoren – zum Abgleich mit dem Kontoauszug. Skonto der Auftraggeber ist nicht berücksichtigt.",
+      "opening": "Anfangsbestand",
+      "received": "Bezahlte Honorarrechnungen ({count})",
+      "paid": "Bezahlte Kreditoren ({count})",
+      "expected": "Soll-Kontostand heute",
+      "receivable": "Offene Honorarrechnungen, versendet ({count})",
+      "payable": "Offene Kreditoren ({count})",
+      "overdue": "davon überfällig ({count})",
+      "afterOpen": "Kontostand nach allen offenen Zahlungen"
+    },
     "quarterInvoices": "Erhaltene Rechnungen {quarter}",
     "noQuarterInvoices": "Keine Rechnungen mit Rechnungsdatum in diesem Quartal.",
     "sections": {

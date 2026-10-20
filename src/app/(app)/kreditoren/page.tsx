@@ -7,7 +7,7 @@ import { NativeSelect } from "@/components/form";
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { requireProfile } from "@/lib/auth";
 import {
@@ -28,6 +28,7 @@ import { formatMoney } from "@/lib/number-input";
 import { createClient } from "@/lib/supabase/server";
 import { param, searchWords } from "@/lib/validation";
 
+import { loadAccountBalance } from "./balance-data";
 import { type CreditorRow, CreditorTable } from "./creditor-table";
 import { loadVatData } from "./vat-data";
 
@@ -87,11 +88,12 @@ export default async function CreditorsPage({ searchParams }: PageProps<"/kredit
   if (status) query = query.eq("status", status);
   if (category) query = query.eq("category", category);
   if (year) query = query.gte("invoice_date", `${year}-01-01`).lte("invoice_date", `${year}-12-31`);
-  const [{ data: list }, { data: inQuarter }, { count: total }, vat] = await Promise.all([
+  const [{ data: list }, { data: inQuarter }, { count: total }, vat, balance] = await Promise.all([
     query,
     supabase.from("creditor_invoices").select(SELECT).gte("invoice_date", from).lte("invoice_date", to).order("invoice_date").order("created_at"),
     supabase.from("creditor_invoices").select("id", { count: "exact", head: true }),
     loadVatData(supabase, quarter),
+    loadAccountBalance(supabase, today),
   ]);
   const rows = (data: typeof list) => (data ?? []).map((r): CreditorRow => ({ ...r, vat_lines: parseVatLines(r.vat_lines), status: isCreditorStatus(r.status) ? r.status : "open" }));
   const words = searchWords(q);
@@ -128,6 +130,31 @@ export default async function CreditorsPage({ searchParams }: PageProps<"/kredit
           )
         }
       />
+
+      <section className="mb-8 space-y-3">
+        <h2 className="text-lg font-semibold">{t("balance.title")}</h2>
+        <Card>
+          <CardHeader>
+            <CardDescription>{t("balance.hint")}</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-x-10 text-sm md:grid-cols-2">
+            <div>
+              {line("", t("balance.opening"), balance.opening)}
+              {line("+", t("balance.received", { count: balance.received.count }), balance.received.sum)}
+              {line("−", t("balance.paid", { count: balance.paid.count }), balance.paid.sum)}
+              <div className="mt-2 border-t pt-2">{line("=", t("balance.expected"), balance.expected, true)}</div>
+            </div>
+            <div>
+              {line("+", t("balance.receivable", { count: balance.receivable.count }), balance.receivable.sum)}
+              {line("−", t("balance.payable", { count: balance.payable.count }), balance.payable.sum)}
+              {balance.overdue.count > 0 && (
+                <div className="text-destructive">{line("", t("balance.overdue", { count: balance.overdue.count }), balance.overdue.sum)}</div>
+              )}
+              <div className="mt-2 border-t pt-2">{line("=", t("balance.afterOpen"), balance.afterOpen, true)}</div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
       <section className="mb-8 space-y-3">
         <h2 className="text-lg font-semibold">{t("allTitle")}</h2>

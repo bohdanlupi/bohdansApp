@@ -354,7 +354,8 @@
         "bic": "BIC",
         "vat_rate": "Aliquota IVA (%)",
         "offer_validity_days": "Validità offerte (giorni)",
-        "payment_terms_days": "Termine di pagamento (giorni)"
+        "payment_terms_days": "Termine di pagamento (giorni)",
+        "opening_balance": "Saldo iniziale del conto (CHF, prima del primo pagamento registrato)"
       },
       "letterheadHint": "Così appaiono logo, indirizzo e piè di pagina su tutti i documenti (contenuto di esempio).",
       "letterheadPreview": "Apri anteprima PDF",
@@ -3872,6 +3873,18 @@
     "allCategories": "Tutte le categorie",
     "allYears": "Tutti gli anni",
     "noResults": "Nessuna fattura per questi filtri.",
+    "balance": {
+      "title": "Saldo del conto (teorico)",
+      "hint": "Saldo iniziale dalle impostazioni, più le note d’onorario pagate, meno i creditori pagati – da confrontare con l’estratto conto. Lo sconto preso dai committenti non è dedotto.",
+      "opening": "Saldo iniziale",
+      "received": "Note d’onorario pagate ({count})",
+      "paid": "Creditori pagati ({count})",
+      "expected": "Saldo teorico oggi",
+      "receivable": "Note d’onorario aperte, inviate ({count})",
+      "payable": "Creditori aperti ({count})",
+      "overdue": "di cui in ritardo ({count})",
+      "afterOpen": "Saldo dopo tutti i pagamenti aperti"
+    },
     "quarterInvoices": "Fatture ricevute {quarter}",
     "noQuarterInvoices": "Nessuna fattura con data in questo trimestre.",
     "sections": {

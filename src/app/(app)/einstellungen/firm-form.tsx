@@ -47,6 +47,7 @@ const sections: { key: keyof (typeof messages)["settings"]["firm"]["sections"]; 
       { name: "vat_rate", type: "number", step: "0.01" },
       { name: "offer_validity_days", type: "number" },
       { name: "payment_terms_days", type: "number" },
+      { name: "opening_balance", type: "number", step: "0.05" },
     ],
   },
 ];
