@@ -22,7 +22,8 @@ const invoiceSchema = z.object({
   invoice_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   due_date: optionalDate,
   status: z.enum(creditorStatuses),
-  paid_date: optionalDate,
+  // The form only renders the field once the status is paid, so it may be missing entirely.
+  paid_date: optionalDate.optional(),
   category: z.enum(creditorCategories),
   // Amounts incl. MWST per rate, sent as JSON by the form.
   vat_lines: z
