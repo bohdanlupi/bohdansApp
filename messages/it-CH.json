@@ -3914,7 +3914,9 @@
       "paid": "Pagata"
     },
     "columns": {
+      "quarter": "Trimestre",
       "dueOrPaid": "Pagabile / pagata",
+      "document": "Giustificativo",
       "vat": "IVA",
       "total": "Importo IVA incl."
     },

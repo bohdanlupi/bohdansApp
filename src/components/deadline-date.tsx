@@ -22,7 +22,7 @@ export function DeadlineDate({ date, active, kind }: { date: string | null; acti
   const passed = days < 0;
   const soon = !passed && days <= SOON_DAYS;
   return (
-    <span className={cn("inline-flex items-center gap-1.5 tabular-nums", passed && "font-medium text-destructive", soon && "font-medium text-amber-700 dark:text-amber-400")}>
+    <span className={cn("inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5 tabular-nums", passed && "font-medium text-destructive", soon && "font-medium text-amber-700 dark:text-amber-400")}>
       {label}
       {(passed || soon) && (
         <span

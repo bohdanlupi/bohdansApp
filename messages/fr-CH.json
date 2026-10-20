@@ -3914,7 +3914,9 @@
       "paid": "Payée"
     },
     "columns": {
+      "quarter": "Trimestre",
       "dueOrPaid": "Payable / payée",
+      "document": "Justificatif",
       "vat": "TVA",
       "total": "Montant TVA incl."
     },

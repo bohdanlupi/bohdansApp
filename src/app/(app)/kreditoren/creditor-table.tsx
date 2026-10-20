@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { DeadlineDate } from "@/components/deadline-date";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type CreditorListItem, type CreditorSort, type CreditorSortKey, type CreditorStatus, isCreditorCategory, ratesLabel, splitLines } from "@/lib/creditors";
+import { type CreditorListItem, type CreditorSort, type CreditorSortKey, type CreditorStatus, isCreditorCategory, quarterOf, ratesLabel, splitLines } from "@/lib/creditors";
 import { formatMoney } from "@/lib/number-input";
 import { cn } from "@/lib/utils";
 
@@ -25,8 +25,14 @@ const statusStyles: Record<CreditorStatus, string> = {
   paid: "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200",
 };
 
-const WEIGHTS = [2.4, 1.2, 1, 1.3, 1.3, 1.6, 1, 1.1, 1.1, 0.4];
+const WEIGHTS = [2.4, 1.2, 0.9, 1, 1.8, 1.3, 1.6, 1, 1.1, 1.1, 0.7];
 const WEIGHT_SUM = WEIGHTS.reduce((a, b) => a + b, 0);
+
+/** "Q3 2026" – year and quarter of the invoice date (vereinbarte Entgelte: the quarter of the MWST-Abrechnung). */
+const quarterLabel = (isoDate: string) => {
+  const q = quarterOf(isoDate);
+  return `Q${q.quarter} ${q.year}`;
+};
 
 /** Received invoices; open ones with their due date (marked when near or passed) and a button to mark them paid. */
 export function CreditorTable({ rows, editable, sort }: { rows: CreditorRow[]; editable: boolean; sort?: SortProps }) {
@@ -37,7 +43,7 @@ export function CreditorTable({ rows, editable, sort }: { rows: CreditorRow[]; e
   const head = (key: CreditorSortKey, label: ReactNode, className?: string) => {
     if (!sort) return <TableHead className={className}>{label}</TableHead>;
     const active = sort.current.key === key;
-    const desc = active ? !sort.current.desc : key === "invoiceDate" || key === "dueDate" || key === "total" || key === "vat";
+    const desc = active ? !sort.current.desc : key === "quarter" || key === "invoiceDate" || key === "dueDate" || key === "total" || key === "vat";
     const search = new URLSearchParams();
     for (const [k, v] of Object.entries(sort.params)) if (v) search.set(k, v);
     search.set("sortierung", key);
@@ -56,7 +62,7 @@ export function CreditorTable({ rows, editable, sort }: { rows: CreditorRow[]; e
 
   return (
     <div className="overflow-x-auto rounded-xl border">
-      <Table className="min-w-[72rem] table-fixed">
+      <Table className="min-w-[80rem] table-fixed">
         <colgroup>
           {WEIGHTS.map((w, i) => (
             <col key={i} style={{ width: `${(100 * w) / WEIGHT_SUM}%` }} />
@@ -66,6 +72,7 @@ export function CreditorTable({ rows, editable, sort }: { rows: CreditorRow[]; e
           <TableRow>
             {head("supplier", t("fields.supplier"), "pl-4")}
             {head("number", t("fields.number"))}
+            {head("quarter", t("columns.quarter"))}
             {head("invoiceDate", t("fields.invoiceDate"))}
             {head("dueDate", t("columns.dueOrPaid"))}
             {head("category", t("fields.category"))}
@@ -73,9 +80,7 @@ export function CreditorTable({ rows, editable, sort }: { rows: CreditorRow[]; e
             {head("vat", t("columns.vat"), "text-right")}
             {head("total", t("columns.total"), "text-right")}
             {head("status", t("fields.status"))}
-            <TableHead className="pr-4">
-              <span className="sr-only">{t("sections.document")}</span>
-            </TableHead>
+            <TableHead className="pr-4">{t("columns.document")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -88,6 +93,7 @@ export function CreditorTable({ rows, editable, sort }: { rows: CreditorRow[]; e
                 {r.description && <span className="block truncate text-xs text-muted-foreground">{r.description}</span>}
               </TableCell>
               <TableCell className="truncate tabular-nums">{r.number}</TableCell>
+              <TableCell className="tabular-nums">{quarterLabel(r.invoice_date)}</TableCell>
               <TableCell className="tabular-nums">{date(r.invoice_date)}</TableCell>
               <TableCell className="whitespace-normal">
                 {r.status === "paid" ? (
@@ -121,8 +127,15 @@ export function CreditorTable({ rows, editable, sort }: { rows: CreditorRow[]; e
               </TableCell>
               <TableCell className="pr-4">
                 {r.file_path && (
-                  <a href={`/api/kreditoren/beleg/${r.id}`} target="_blank" rel="noreferrer" aria-label={t("document")} className="relative z-10 text-muted-foreground hover:text-foreground">
-                    <Paperclip className="size-4" />
+                  <a
+                    href={`/api/kreditoren/beleg/${r.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={t("document")}
+                    className="relative z-10 inline-flex items-center gap-1 rounded bg-brand/15 px-1.5 py-0.5 text-xs font-medium hover:bg-brand/25"
+                  >
+                    <Paperclip className="size-3.5" aria-hidden />
+                    {t("document")}
                   </a>
                 )}
               </TableCell>

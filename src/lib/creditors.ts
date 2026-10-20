@@ -132,7 +132,7 @@ export function vatReport(outgoing: VatOutgoing[], incoming: VatIncoming[]): Vat
 }
 
 /** Columns of the Kreditoren list that can be sorted (URL param `sortierung`). */
-export const creditorSortKeys = ["supplier", "number", "invoiceDate", "dueDate", "category", "project", "vat", "total", "status"] as const;
+export const creditorSortKeys = ["supplier", "number", "quarter", "invoiceDate", "dueDate", "category", "project", "vat", "total", "status"] as const;
 export type CreditorSortKey = (typeof creditorSortKeys)[number];
 export const isCreditorSortKey = (v: unknown): v is CreditorSortKey => creditorSortKeys.includes(v as CreditorSortKey);
 
@@ -169,6 +169,11 @@ export function compareCreditors(sort: CreditorSort) {
         return text(a.company?.name ?? "", b.company?.name ?? "");
       case "number":
         return text(a.number, b.number);
+      case "quarter": {
+        const qa = quarterOf(a.invoice_date);
+        const qb = quarterOf(b.invoice_date);
+        return qa.year - qb.year || qa.quarter - qb.quarter;
+      }
       case "invoiceDate":
         return a.invoice_date.localeCompare(b.invoice_date);
       case "dueDate":

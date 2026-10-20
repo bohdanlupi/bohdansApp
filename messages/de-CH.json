@@ -3914,7 +3914,9 @@
       "paid": "Bezahlt"
     },
     "columns": {
+      "quarter": "Quartal",
       "dueOrPaid": "Zahlbar bis / bezahlt",
+      "document": "Beleg",
       "vat": "MWST",
       "total": "Betrag inkl. MWST"
     },
