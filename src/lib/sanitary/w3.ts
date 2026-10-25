@@ -8,14 +8,20 @@
 // W3 publishes these tables as examples (the SVGW certifies system-specific ones); the steel tables use the
 // dimensions of Optipress (15×1 … 35×1.5), the PE-X table those of Optiflex 16×2.2 / 20×2.8.
 
-/** Outlets of Tabelle 3: LU cold / warm and the flow of the single connection [l/s]. */
+/**
+ * Outlets of Tabelle 3: LU cold / warm and the flow of the single connection [l/s]. Bidet shares the row of the
+ * Waschtisch, Spülbecken and Ausguss the row of the Dusche; they are separate here for their symbols in the schema.
+ */
 export const appliances = {
   wc: { cold: 1, warm: 0, q: 0.1 },
   basin: { cold: 1, warm: 1, q: 0.1 },
+  bidet: { cold: 1, warm: 1, q: 0.1 },
   dishwasher: { cold: 1, warm: 0, q: 0.1 },
   washer: { cold: 2, warm: 0, q: 0.2 },
   balcony: { cold: 2, warm: 0, q: 0.2 },
   shower: { cold: 2, warm: 2, q: 0.2 },
+  sink: { cold: 2, warm: 2, q: 0.2 },
+  slopSink: { cold: 2, warm: 2, q: 0.2 },
   urinal: { cold: 3, warm: 0, q: 0.3 },
   bathtub: { cold: 3, warm: 3, q: 0.3 },
   garden: { cold: 5, warm: 0, q: 0.5 },

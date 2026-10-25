@@ -85,25 +85,31 @@ export type SymbolKey =
   | ApplianceSymbol;
 
 /** Apparate (drawn upright, standing on their connections); Balkon- and Gartenventil share one symbol. */
-export type ApplianceSymbol = "wc" | "basin" | "shower" | "bathtub" | "dishwasher" | "washer" | "urinal" | "outlet";
+export type ApplianceSymbol = "wc" | "basin" | "bidet" | "shower" | "sink" | "slopSink" | "bathtub" | "dishwasher" | "washer" | "urinal" | "outlet";
 export const applianceSymbol: Record<ApplianceKey, ApplianceSymbol> = {
   wc: "wc",
   basin: "basin",
+  bidet: "bidet",
   dishwasher: "dishwasher",
   washer: "washer",
   balcony: "outlet",
   shower: "shower",
+  sink: "sink",
+  slopSink: "slopSink",
   urinal: "urinal",
   bathtub: "bathtub",
   garden: "outlet",
 };
-export const applianceSymbols: ApplianceSymbol[] = ["wc", "basin", "shower", "bathtub", "dishwasher", "washer", "urinal", "outlet"];
+export const applianceSymbols: ApplianceSymbol[] = ["wc", "basin", "bidet", "shower", "sink", "slopSink", "bathtub", "dishwasher", "washer", "urinal", "outlet"];
 export const isApplianceSymbol = (key: SymbolKey): key is ApplianceSymbol => (applianceSymbols as SymbolKey[]).includes(key);
 /** Width of each Apparat in the row and the x offsets of its connections (warm null: cold water only). */
 const APPLIANCE: Record<ApplianceSymbol, { w: number; cold: number; warm: number | null }> = {
   wc: { w: 26, cold: 0, warm: null },
   basin: { w: 38, cold: 6, warm: -6 },
+  bidet: { w: 30, cold: 5, warm: -5 },
   shower: { w: 42, cold: 6, warm: -6 },
+  sink: { w: 44, cold: 6, warm: -6 },
+  slopSink: { w: 34, cold: 6, warm: -6 },
   bathtub: { w: 60, cold: 6, warm: -6 },
   dishwasher: { w: 30, cold: 0, warm: null },
   washer: { w: 30, cold: 0, warm: null },
@@ -325,9 +331,44 @@ export function drawSymbol(key: SymbolKey, x: number, y: number, vertical = fals
         head(8, -34),
         ...taps(key),
       ];
+    case "bidet":
+      // Bidet: low bowl on its pedestal, Standmischbatterie.
+      return [
+        rect(-4, -12, 8, 5, APP_FILL, APP_EDGE, 1),
+        body([[-11, -22], [11, -22], [5, -12], [-5, -12]]),
+        line(0, -24, 0, -31, 0.9),
+        dot(0, -24, 1.3),
+        dot(0, -31, 1.3),
+        line(0, -27.5, 4, -27.5, 0.9),
+        head(7, -27.5),
+        ...taps(key),
+      ];
     case "shower":
       // Dusche: tray, Wandmischbatterie and Brause.
       return [rect(-19, -14, 38, 5, APP_FILL, APP_EDGE, 1.2), ...wallMixer(-6, -24), ...brause(-6, -28, -48), ...taps(key)];
+    case "sink":
+      // Spülbecken (Küche): rim with two basins, drain, tall Standmischbatterie between them.
+      return [
+        rect(-1.8, -14, 3.6, 7, APP_FILL, APP_EDGE, 1),
+        rect(-20, -26, 40, 3, APP_FILL, APP_EDGE, 1.2),
+        rect(-18, -23, 16, 9, APP_FILL, APP_EDGE, 1),
+        rect(2, -23, 16, 9, APP_FILL, APP_EDGE, 1),
+        line(0, -28, 0, -41, 0.9),
+        dot(0, -28, 1.3),
+        dot(0, -41, 1.3),
+        line(0, -36.5, 6, -36.5, 0.9),
+        head(9, -36.5),
+        ...taps(key),
+      ];
+    case "slopSink":
+      // Ausguss: deep wall-hung basin with its Spülrand, Wandmischbatterie.
+      return [
+        body([[-13, -30], [13, -30], [13, -19], [9, -14], [-9, -14], [-13, -19]]),
+        line(-13, -27, 13, -27, 1, APP_EDGE),
+        line(-9, -16.5, 9, -16.5, 0.6, APP_EDGE),
+        ...wallMixer(-5, -37),
+        ...taps(key),
+      ];
     case "bathtub":
       // Badewanne with Wandmischbatterie and Brause.
       return [body([[-29, -28], [27, -28], [27, -10], [-19, -10]]), ...wallMixer(10, -34), ...brause(10, -38, -50), ...taps(key)];
