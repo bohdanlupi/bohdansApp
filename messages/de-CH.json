@@ -3493,6 +3493,7 @@
     "searchPlaceholder": "Nummer, Projekt oder Ort",
     "allStatuses": "Alle Status",
     "noResults": "Keine Offerten gefunden.",
+    "alsoShowProjects": "Auch anzeigen:",
     "columns": {
       "number": "Nr.",
       "title": "Projekt",

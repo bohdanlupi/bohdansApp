@@ -7,11 +7,13 @@ import { NativeSelect } from "@/components/form";
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { onlyKnown } from "@/lib/address-options";
 import { requireProfile } from "@/lib/auth";
 import { feeTotals } from "@/lib/fees/calc";
 import { parseFeeOfferData } from "@/lib/fees/offer-schema";
 import { feeOfferStatuses } from "@/lib/fees/options";
 import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 import { param, searchWords } from "@/lib/validation";
 
 import { invoiceRows } from "./rechnungen/invoice-rows";
@@ -19,6 +21,11 @@ import { InvoiceStatusBadge } from "./rechnungen/invoice-table";
 import { isFeeOfferStatus } from "./offer-table";
 import { type OverviewRow, OverviewTable } from "./overview-table";
 import { FeeStatusBadge } from "./status-badge";
+
+/** Project statuses whose offers are hidden unless toggled on (Akquisition and In Bearbeitung are always listed). */
+const hiddenProjectStatuses = ["on_hold", "completed", "archived"] as const;
+type HiddenProjectStatus = (typeof hiddenProjectStatuses)[number];
+const isHiddenProjectStatus = (value: string | undefined): value is HiddenProjectStatus => (hiddenProjectStatuses as readonly string[]).includes(value ?? "");
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("nav");
@@ -32,6 +39,8 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/debito
   const q = param(search.q)?.trim() ?? "";
   const statusParam = param(search.status);
   const status = isFeeOfferStatus(statusParam) ? statusParam : null;
+  const projektParam = search.projekt;
+  const shownProjects = onlyKnown(Array.isArray(projektParam) ? projektParam : projektParam ? [projektParam] : [], hiddenProjectStatuses);
 
   const supabase = await createClient();
   let query = supabase
@@ -42,8 +51,12 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/debito
   for (const word of searchWords(q)) query = query.or(`number.ilike.%${word}%,title.ilike.%${word}%,city.ilike.%${word}%`);
   if (status) query = query.eq("status", status);
   const [{ data: allOffers }, { data: firm }] = await Promise.all([query, supabase.from("firm_settings").select("vat_rate").eq("id", true).single()]);
-  // Offers of completed (or archived) projects are done: not listed (their open invoices still are).
-  const offers = (allOffers ?? []).filter((o) => o.project?.status !== "completed" && o.project?.status !== "archived");
+  // Offers of paused, completed or archived projects are only listed while their project status is toggled on (their
+  // open invoices still are).
+  const offers = (allOffers ?? []).filter((o) => {
+    const projectStatus = o.project?.status;
+    return !isHiddenProjectStatus(projectStatus) || shownProjects.includes(projectStatus);
+  });
 
   // Open invoices (Entwurf / Versendet) first, earliest due date on top, also of completed projects. Their amounts need
   // all invoices of the offers.
@@ -99,8 +112,19 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/debito
     };
   });
 
-  const filtered = Boolean(q || status);
+  const filtered = Boolean(q || status || shownProjects.length);
   const isEmpty = !offers.length;
+
+  /** Link that keeps search and status, with the project status toggled on or off. */
+  const toggleHref = (projectStatus: HiddenProjectStatus) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (status) params.set("status", status);
+    const next = shownProjects.includes(projectStatus) ? shownProjects.filter((s) => s !== projectStatus) : [...shownProjects, projectStatus];
+    for (const s of next) params.append("projekt", s);
+    const qs = params.toString();
+    return qs ? `/debitoren?${qs}` : "/debitoren";
+  };
 
   return (
     <>
@@ -131,6 +155,9 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/debito
                 </option>
               ))}
             </NativeSelect>
+            {shownProjects.map((s) => (
+              <input key={s} type="hidden" name="projekt" value={s} />
+            ))}
             <Button type="submit" variant="secondary">
               {t("common.search")}
             </Button>
@@ -139,6 +166,22 @@ export default async function FeeOffersPage({ searchParams }: PageProps<"/debito
                 {t("common.reset")}
               </Link>
             )}
+            <div className="flex flex-wrap items-center gap-1.5 sm:ml-auto">
+              <span className="text-xs text-muted-foreground">{t("feeOffers.alsoShowProjects")}</span>
+              {hiddenProjectStatuses.map((s) => {
+                const on = shownProjects.includes(s);
+                return (
+                  <Link
+                    key={s}
+                    href={toggleHref(s)}
+                    aria-pressed={on}
+                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "rounded-full", on && "border-brand bg-brand/10 text-foreground")}
+                  >
+                    {t(`options.projectStatus.${s}`)}
+                  </Link>
+                );
+              })}
+            </div>
           </form>
 
           {isEmpty ? (
