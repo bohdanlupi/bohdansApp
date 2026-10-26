@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
-import { type BuildingModel, defaultFloors, parseBuildingModel, type PlanInfo } from "@/lib/building/schema";
+import { type BuildingModel, defaultFloors, parseBuildingModel, type PlanInfo, planLabelsSchema } from "@/lib/building/schema";
 import { createClient } from "@/lib/supabase/server";
 
 /** Gebäudemodell of a project (default Geschosse when none is saved yet). Deduplicated per request. */
@@ -18,9 +18,11 @@ export const loadBuildingPlans = cache(async (projectId: string): Promise<PlanIn
   const supabase = await createClient();
   const { data } = await supabase
     .from("building_plans")
-    .select("id, floor, name, page, width, height, scale, rotation, north, origin_x, origin_y")
+    .select("id, floor, name, page, width, height, scale, rotation, north, origin_x, origin_y, labels, preview_path")
     .eq("project_id", projectId);
   return (data ?? []).map((p) => ({
+    labels: planLabelsSchema.parse(p.labels),
+    previewPath: p.preview_path,
     id: p.id,
     floor: p.floor,
     name: p.name,

@@ -2113,7 +2113,8 @@
         "horizon": "Orizzonte",
         "overhang": "Sporto",
         "finLeft": "Aletta sinistra",
-        "finRight": "Aletta destra"
+        "finRight": "Aletta destra",
+        "usage": "Uso del locale SIA 2024"
       },
       "kinds": {
         "heated": "riscaldato",
@@ -2165,7 +2166,9 @@
       "origin": "Punto di riferimento",
       "originUnset": "non impostato",
       "zoneAuto": "automatico ({name})",
-      "zoneNone": "non assegnato"
+      "zoneNone": "non assegnato",
+      "planSays": "Planimetria:",
+      "adoptName": "Riprendi il nome"
     },
     "unheated": {
       "case": "Locale non riscaldato",
@@ -2322,6 +2325,25 @@
           "zone": "altra zona"
         }
       }
+    },
+    "planPdf": {
+      "link": "PDF planimetrie",
+      "title": "Modello dell’edificio",
+      "rooms": "Locali",
+      "number": "N.",
+      "name": "Locale",
+      "kind": "Tipo",
+      "kinds": {
+        "heated": "riscaldato",
+        "passive": "non riscaldato"
+      },
+      "heatedTotal": "Superficie riscaldata ({count} locali)",
+      "scale": "1 m = {px} px",
+      "uncalibrated": "non calibrata",
+      "storey": "altezza libera {h} m · altezza di piano {hs} m",
+      "envelope": "Involucro con {n} vertici",
+      "noEnvelope": "senza involucro",
+      "legend": "Rosso: locali riscaldati, blu: non riscaldati. Involucro: blu esterno, grigio tratteggiato non riscaldato, marrone terreno; turchese finestre, arancione porte."
     }
   },
   "heatingPlan": {

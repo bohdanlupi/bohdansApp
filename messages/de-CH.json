@@ -2113,7 +2113,8 @@
         "horizon": "Horizont",
         "overhang": "Überhang",
         "finLeft": "Blende links",
-        "finRight": "Blende rechts"
+        "finRight": "Blende rechts",
+        "usage": "Raumnutzung SIA 2024"
       },
       "kinds": {
         "heated": "beheizt",
@@ -2165,7 +2166,9 @@
       "origin": "Referenzpunkt",
       "originUnset": "nicht gesetzt",
       "zoneAuto": "automatisch ({name})",
-      "zoneNone": "nicht zugeordnet"
+      "zoneNone": "nicht zugeordnet",
+      "planSays": "Plan:",
+      "adoptName": "Namen übernehmen"
     },
     "unheated": {
       "case": "Unbeheizter Raum",
@@ -2322,6 +2325,25 @@
           "zone": "andere Zone"
         }
       }
+    },
+    "planPdf": {
+      "link": "Plan-PDF",
+      "title": "Gebäudemodell",
+      "rooms": "Räume",
+      "number": "Nr.",
+      "name": "Raum",
+      "kind": "Art",
+      "kinds": {
+        "heated": "beheizt",
+        "passive": "unbeheizt"
+      },
+      "heatedTotal": "Fläche beheizt ({count} Räume)",
+      "scale": "1 m = {px} px",
+      "uncalibrated": "nicht kalibriert",
+      "storey": "lichte Höhe {h} m · Geschosshöhe {hs} m",
+      "envelope": "Hülle mit {n} Eckpunkten",
+      "noEnvelope": "ohne Hülle",
+      "legend": "Rot: beheizte Räume, blau: unbeheizte Räume. Hülle: blau Aussenklima, grau gestrichelt unbeheizt, braun Erdreich; türkis Fenster, orange Türen."
     }
   },
   "heatingPlan": {

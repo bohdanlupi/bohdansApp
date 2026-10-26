@@ -68,11 +68,13 @@ export type Database = {
           floor: string
           height: number
           id: string
+          labels: Json
           name: string
           north: number | null
           origin_x: number
           origin_y: number
           page: number
+          preview_path: string | null
           project_id: string
           rotation: number
           scale: number | null
@@ -87,11 +89,13 @@ export type Database = {
           floor: string
           height: number
           id?: string
+          labels?: Json
           name?: string
           north?: number | null
           origin_x?: number
           origin_y?: number
           page?: number
+          preview_path?: string | null
           project_id: string
           rotation?: number
           scale?: number | null
@@ -106,11 +110,13 @@ export type Database = {
           floor?: string
           height?: number
           id?: string
+          labels?: Json
           name?: string
           north?: number | null
           origin_x?: number
           origin_y?: number
           page?: number
+          preview_path?: string | null
           project_id?: string
           rotation?: number
           scale?: number | null

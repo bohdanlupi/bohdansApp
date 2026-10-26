@@ -4,7 +4,7 @@ import { createTranslator } from "next-intl";
 import { languageToLocale } from "@/i18n/config";
 import { getCurrentProfile } from "@/lib/auth";
 import { deriveElements } from "@/lib/building/heat-link";
-import { parseBuildingModel, type PlanInfo } from "@/lib/building/schema";
+import { parseBuildingModel, type PlanInfo, planLabelsSchema } from "@/lib/building/schema";
 import { evaluateSia3801 } from "@/lib/building/sia3801";
 import { parseHeatingPlan } from "@/lib/heating/plan-schema";
 import { createClient } from "@/lib/supabase/server";
@@ -26,7 +26,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
     supabase.from("projects").select("*").eq("id", id).maybeSingle(),
     supabase.from("firm_settings").select("*").eq("id", true).single(),
     supabase.from("building_models").select("data").eq("project_id", id).maybeSingle(),
-    supabase.from("building_plans").select("id, floor, name, page, width, height, scale, rotation, north, origin_x, origin_y").eq("project_id", id),
+    supabase.from("building_plans").select("id, floor, name, page, width, height, scale, rotation, north, origin_x, origin_y, labels, preview_path").eq("project_id", id),
     supabase.from("heating_plans").select("data").eq("project_id", id).maybeSingle(),
   ]);
   if (!project) return new Response("Not found", { status: 404 });
@@ -38,6 +38,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/pdf/
   const labels = pdfLabels(project.language);
   const model = parseBuildingModel(modelRow?.data);
   const plans: PlanInfo[] = (planRows ?? []).map((p) => ({
+    labels: planLabelsSchema.parse(p.labels),
+    previewPath: p.preview_path,
     id: p.id,
     floor: p.floor,
     name: p.name,

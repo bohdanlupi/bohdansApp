@@ -71,6 +71,8 @@ export type BuildingRoom = {
   /** Passive rooms: Tabelle 17 case for elements of heated rooms towards this room. */
   unheatedCase: UnheatedCase;
   unheatedInsulated: boolean;
+  /** SIA 2024 Raumnutzung code (1.01 …); null = none. */
+  usage: string | null;
 };
 
 export const openingKinds = ["window", "door"] as const;
@@ -210,6 +212,7 @@ const roomSchema = z.object({
   zoneId: id.nullable().catch(null),
   unheatedCase: unheatedCaseSchema.catch("cellarAbove"),
   unheatedInsulated: bool(false),
+  usage: z.string().max(10).nullable().catch(null),
 });
 
 const openingSchema = z.object({
@@ -357,8 +360,24 @@ export const newOpening = (at: number, width: number | null, constructionId: str
   finRight: null,
 });
 
+/** Text of the plan's PDF text layer at a position (snapshot px): room names, printed areas, dimensions. */
+export type PlanLabel = { text: string; x: number; y: number };
+
+export const planLabelsSchema = z
+  .array(z.unknown())
+  .transform((list) =>
+    list.slice(0, 5000).flatMap((raw) => {
+      const parsed = z.object({ text: z.string().min(1).max(200), x: z.number().finite(), y: z.number().finite() }).safeParse(raw);
+      return parsed.success ? [parsed.data] : [];
+    }),
+  )
+  .catch([]);
+
 /** Plan calibration of a Geschoss as the editor needs it (building_plans row). */
 export type PlanInfo = {
+  labels: PlanLabel[];
+  /** Smaller PNG for the plan PDF; null for plans uploaded before phase D (the snapshot is used). */
+  previewPath: string | null;
   id: string;
   floor: string;
   name: string;

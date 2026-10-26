@@ -9,6 +9,8 @@ export type RenderedPage = { blob: Blob; width: number; height: number };
 
 /** Longest side of a plan snapshot [px]: ≈ 210 dpi on an A1 sheet, 1 px ≈ 6 mm at 1:50. */
 export const SNAPSHOT_MAX_SIDE = 7000;
+/** Longest side of the preview used in the plan PDF. */
+export const PREVIEW_MAX_SIDE = 2400;
 
 let lib: Promise<typeof import("pdfjs-dist")> | null = null;
 
@@ -30,6 +32,8 @@ export type LoadedPdf = {
   render: (page: number, maxSide: number) => Promise<RenderedPage>;
   /** Printed scale «1:50» found in the page text, if any. */
   printedScale: (page: number) => Promise<number | null>;
+  /** Text items of the page (room names, areas, dimensions) in the pixel frame of a snapshot with `maxSide`. */
+  labels: (page: number, maxSide: number) => Promise<{ text: string; x: number; y: number }[]>;
   destroy: () => void;
 };
 
@@ -69,6 +73,21 @@ export async function loadPdf(file: File): Promise<LoadedPdf> {
       const text = (await p.getTextContent()).items.map((i) => ("str" in i ? i.str : "")).join(" ");
       const match = /1\s*:\s*(\d{2,4})\b/.exec(text);
       return match ? Number(match[1]) : null;
+    },
+    labels: async (page, maxSide) => {
+      const p = await doc.getPage(page);
+      const base = p.getViewport({ scale: 1 });
+      const scale = maxSide / Math.max(base.width, base.height);
+      const viewport = p.getViewport({ scale });
+      const items = (await p.getTextContent()).items;
+      const out: { text: string; x: number; y: number }[] = [];
+      for (const i of items) {
+        if (!("str" in i) || !i.str.trim()) continue;
+        // Text origin (PDF user space) → viewport px; the label sits at its baseline start.
+        const [x, y] = viewport.convertToViewportPoint(i.transform[4], i.transform[5]);
+        out.push({ text: i.str.trim(), x: Math.round(x), y: Math.round(y) });
+      }
+      return out;
     },
     destroy: () => void doc.destroy(),
   };

@@ -36,6 +36,7 @@ import {
   type UnheatedCase,
   unheatedCaseKeys,
 } from "@/lib/building/schema";
+import { roomUsages } from "@/lib/building/sia2024-data";
 import type { Construction } from "@/lib/heating/heat-load";
 import { parseNumber } from "@/lib/number-input";
 import { cn } from "@/lib/utils";
@@ -193,11 +194,21 @@ export function PlanEditor({
   const selectedSegment = selection?.type === "segment" ? (segments.find((s) => s.vertex.id === selection.vertexId) ?? null) : null;
 
   // --- rooms -------------------------------------------------------------------------------------------------------
+  /** What the plan's text layer says inside a polygon: a room name and a printed area (BF / NGF / HNF … in m²). */
+  const suggestionFor = (polygon: readonly Point[]): { name: string | null; area: number | null; areaLabel: string | null } => {
+    const inside = plan.labels.filter((l) => pointInPolygon([l.x, l.y], polygon)).sort((a, b) => a.y - b.y || a.x - b.x);
+    const text = inside.map((l) => l.text).join(" ");
+    const area = /\b(BF|NGF|HNF|NF|GF)\s*:?\s*(\d+(?:[.,]\d+)?)\s*m/i.exec(text);
+    const name = inside.map((l) => l.text).find((s) => /[A-Za-zÄÖÜäöüéè]{3,}/.test(s) && !/^(BF|NGF|HNF|NF|FF|GF|m²|m2)\b/i.test(s) && !/\d+(?:[.,]\d+)?\s*m/.test(s) && !/^\d/.test(s)) ?? null;
+    return { name, area: area ? Number(area[2].replace(",", ".")) : null, areaLabel: area ? area[1].toUpperCase() : null };
+  };
+
   const addRoom = (polygon: Point[]) => {
+    const suggestion = suggestionFor(polygon);
     const room: BuildingRoom = {
       id: crypto.randomUUID(),
       number: nextRoomNumber(model.rooms, floor),
-      name: "",
+      name: suggestion.name ?? "",
       floor: floorKey,
       polygon: polygon.map(r1),
       kind: "heated",
@@ -206,6 +217,7 @@ export function PlanEditor({
       zoneId: model.zones.length === 1 ? model.zones[0].id : null,
       unheatedCase: "cellarAbove",
       unheatedInsulated: false,
+      usage: null,
     };
     commit((m) => ({ ...m, rooms: [...m.rooms, room] }));
     setSelection({ type: "room", id: room.id });
@@ -742,6 +754,35 @@ export function PlanEditor({
                 </div>
               )}
             </div>
+            <div className="space-y-1">
+              <Label htmlFor="rm-usage" className="text-xs">
+                {t("fields.usage")}
+              </Label>
+              <NativeSelect id="rm-usage" value={selectedRoom.usage ?? ""} disabled={!editable} className="h-8 text-xs" onChange={(e) => setRoom(selectedRoom.id, { usage: e.target.value || null })}>
+                <option value="">–</option>
+                {roomUsages.map((u) => (
+                  <option key={u.code} value={u.code}>
+                    {u.code} {u.name}
+                  </option>
+                ))}
+              </NativeSelect>
+            </div>
+            {(() => {
+              const sg = suggestionFor(selectedRoom.polygon);
+              if (!sg.name && sg.area === null) return null;
+              const diff = sg.area !== null && metrics.area !== null && sg.area > 0 ? ((metrics.area - sg.area) / sg.area) * 100 : null;
+              return (
+                <p className="rounded-lg bg-muted/40 px-2 py-1.5 text-xs text-muted-foreground">
+                  {t("planSays")} {[sg.name, sg.area === null ? null : `${sg.areaLabel} ${fmt(sg.area, 2)} m²`].filter(Boolean).join(" · ")}
+                  {diff !== null && <span className={cn("ml-1 tabular-nums", Math.abs(diff) > 5 && "text-amber-700 dark:text-amber-400")}>({diff >= 0 ? "+" : ""}{fmt(diff, 1)} %)</span>}
+                  {editable && sg.name && sg.name !== selectedRoom.name && (
+                    <button type="button" className="ml-2 underline" onClick={() => setRoom(selectedRoom.id, { name: sg.name! })}>
+                      {t("adoptName")}
+                    </button>
+                  )}
+                </p>
+              );
+            })()}
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
               <dt className="text-muted-foreground">{t("fields.area")}</dt>
               <dd className="tabular-nums">{metrics.area === null ? t("uncalibrated") : `${fmt(metrics.area, 2)} m²`}</dd>

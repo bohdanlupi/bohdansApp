@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronRight, PenLine, Plus, Trash2, TriangleAlert } from "lucide-react";
+import { Check, ChevronRight, FileText, PenLine, Plus, Trash2, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -57,10 +57,16 @@ export function BuildingView({ projectId, initial, plans, catalog, editable }: {
           <Result label={t("summary.rooms")} value={String(roomCount)} />
           <Result label={t("summary.heatedArea")} value={totalArea === null ? "–" : fmt(totalArea, 1)} unit="m²" hint={totalArea === null && roomCount ? t("summary.uncalibrated") : undefined} />
         </div>
-        <Link href={`/projekte/${projectId}/gebaeude/sia3801`} className={buttonVariants({ variant: "outline" })}>
-          {t("sia3801.link")}
-          <ChevronRight />
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <a href={`/api/pdf/building/${projectId}`} target="_blank" rel="noopener" className={cn(buttonVariants({ variant: "outline" }), plans.length === 0 && "pointer-events-none opacity-50")} aria-disabled={plans.length === 0}>
+            <FileText />
+            {t("planPdf.link")}
+          </a>
+          <Link href={`/projekte/${projectId}/gebaeude/sia3801`} className={buttonVariants({ variant: "outline" })}>
+            {t("sia3801.link")}
+            <ChevronRight />
+          </Link>
+        </div>
       </div>
 
       <FloorsTable projectId={projectId} plans={plans} status={status} {...shared} />

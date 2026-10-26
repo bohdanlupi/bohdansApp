@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { imageSize, type LoadedPdf, loadPdf, SNAPSHOT_MAX_SIDE } from "@/lib/building/pdf-render";
+import { imageSize, type LoadedPdf, loadPdf, PREVIEW_MAX_SIDE, SNAPSHOT_MAX_SIDE } from "@/lib/building/pdf-render";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -88,12 +88,17 @@ function UploadForm({ projectId, floorKey, floorName, onDone }: { projectId: str
     const dir = `${projectId}/${planId}`;
     try {
       let snapshot: { blob: Blob; width: number; height: number; path: string };
+      let preview: { blob: Blob; path: string } | null = null;
+      let labels: { text: string; x: number; y: number }[] = [];
       let filePath: string;
       if (pdf) {
         setStage("rendering");
         const rendered = await pdf.render(page, SNAPSHOT_MAX_SIDE);
         filePath = `${dir}/source.pdf`;
         snapshot = { ...rendered, path: `${dir}/page-${page}.png` };
+        // Smaller preview for the plan PDF and the text layer as suggestions for the editor (snapshot pixel frame).
+        preview = { blob: (await pdf.render(page, PREVIEW_MAX_SIDE)).blob, path: `${dir}/preview-${page}.png` };
+        labels = await pdf.labels(page, SNAPSHOT_MAX_SIDE);
       } else {
         const size = await imageSize(file);
         filePath = `${dir}/source.${file.type === "image/png" ? "png" : "jpg"}`;
@@ -107,12 +112,18 @@ function UploadForm({ projectId, floorKey, floorName, onDone }: { projectId: str
         const { error: e2 } = await storage.upload(snapshot.path, snapshot.blob, { contentType: "image/png" });
         if (e2) throw e2;
       }
+      if (preview) {
+        const { error: e3 } = await storage.upload(preview.path, preview.blob, { contentType: "image/png" });
+        if (e3) throw e3;
+      }
       const result = await createBuildingPlan(projectId, {
         id: planId,
         floor: floorKey,
         name,
         filePath,
         snapshotPath: snapshot.path,
+        previewPath: preview?.path ?? null,
+        labels,
         page: pdf ? page : 1,
         width: snapshot.width,
         height: snapshot.height,

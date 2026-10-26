@@ -2113,7 +2113,8 @@
         "horizon": "Horizon",
         "overhang": "Surplomb",
         "finLeft": "Joue gauche",
-        "finRight": "Joue droite"
+        "finRight": "Joue droite",
+        "usage": "Affectation SIA 2024"
       },
       "kinds": {
         "heated": "chauffé",
@@ -2165,7 +2166,9 @@
       "origin": "Point de référence",
       "originUnset": "non défini",
       "zoneAuto": "automatique ({name})",
-      "zoneNone": "non attribué"
+      "zoneNone": "non attribué",
+      "planSays": "Plan :",
+      "adoptName": "Reprendre le nom"
     },
     "unheated": {
       "case": "Local non chauffé",
@@ -2322,6 +2325,25 @@
           "zone": "autre zone"
         }
       }
+    },
+    "planPdf": {
+      "link": "PDF des plans",
+      "title": "Modèle du bâtiment",
+      "rooms": "Locaux",
+      "number": "N°",
+      "name": "Local",
+      "kind": "Type",
+      "kinds": {
+        "heated": "chauffé",
+        "passive": "non chauffé"
+      },
+      "heatedTotal": "Surface chauffée ({count} locaux)",
+      "scale": "1 m = {px} px",
+      "uncalibrated": "non calibré",
+      "storey": "hauteur libre {h} m · hauteur d’étage {hs} m",
+      "envelope": "Enveloppe à {n} sommets",
+      "noEnvelope": "sans enveloppe",
+      "legend": "Rouge : locaux chauffés, bleu : non chauffés. Enveloppe : bleu extérieur, gris pointillé non chauffé, brun terrain ; turquoise fenêtres, orange portes."
     }
   },
   "heatingPlan": {
