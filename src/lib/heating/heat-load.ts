@@ -98,6 +98,8 @@ export type RoomElement = {
   height: number | null;
   /** Surface with integrated heating (Δθs of Tabelle 9 applies). */
   heatedSurface: boolean;
+  /** Derived from the Gebäudemodell (envelope segment, opening or partition); null = entered by hand. */
+  sourceId: string | null;
 };
 
 export const ventilationConcepts = ["natural", "wrg", "airHeating", "exhaust"] as const;

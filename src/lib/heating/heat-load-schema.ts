@@ -79,6 +79,7 @@ const elementSchema = z.object({
   table4HighAirChange: z.boolean().catch(false),
   height: num(0, 100),
   heatedSurface: z.boolean().catch(false),
+  sourceId: z.string().min(1).max(120).nullable().catch(null),
 });
 
 const roomSchema = z.object({

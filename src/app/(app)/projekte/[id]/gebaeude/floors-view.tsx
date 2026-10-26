@@ -32,9 +32,10 @@ export function FloorsView({ projectId, initial, plans, editable }: { projectId:
     const level = top + 1;
     const key = `f${Date.now().toString(36)}`;
     const name = level === 0 ? "EG" : level < 0 ? `${-level}. UG` : `${level}. OG`;
-    update((m) => ({ ...m, floors: [...m.floors, { key, name, level, height: 2.5, wallThickness: 0.5 }] }));
+    update((m) => ({ ...m, floors: [...m.floors, { key, name, level, height: 2.5, storeyHeight: 2.8, wallThickness: 0.5, windowHeight: 1.3 }] }));
   };
-  const removeFloor = (key: string) => update((m) => ({ ...m, floors: m.floors.filter((f) => f.key !== key), rooms: m.rooms.filter((r) => r.floor !== key) }));
+  const removeFloor = (key: string) =>
+    update((m) => ({ ...m, floors: m.floors.filter((f) => f.key !== key), rooms: m.rooms.filter((r) => r.floor !== key), envelopes: m.envelopes.filter((e) => e.floor !== key) }));
 
   const totalArea = floors.every((f) => f.heatedArea !== null) ? floors.reduce((s, f) => s + (f.heatedArea ?? 0), 0) : null;
   const roomCount = floors.reduce((s, f) => s + f.roomCount, 0);
@@ -67,7 +68,9 @@ export function FloorsView({ projectId, initial, plans, editable }: { projectId:
                 <th className="py-1.5 pl-4 font-medium">{t("floor.name")}</th>
                 <th className="px-1 text-right font-medium">{t("floor.level")}</th>
                 <th className="px-1 text-right font-medium">{t("floor.height")}</th>
+                <th className="px-1 text-right font-medium">{t("floor.storeyHeight")}</th>
                 <th className="px-1 text-right font-medium">{t("floor.wall")}</th>
+                <th className="px-1 text-right font-medium">{t("floor.windowHeight")}</th>
                 <th className="px-1 font-medium">{t("floor.plan")}</th>
                 <th className="px-1 text-right font-medium">{t("floor.rooms")}</th>
                 <th className="px-1 text-right font-medium">{t("floor.area")}</th>
@@ -87,7 +90,20 @@ export function FloorsView({ projectId, initial, plans, editable }: { projectId:
                     <NumberField value={floor.height} decimals={2} label={t("floor.height")} disabled={!editable} onChange={(v) => setFloor(floor.key, { height: v })} />
                   </td>
                   <td className="w-20 px-1">
+                    <NumberField
+                      value={floor.storeyHeight}
+                      decimals={2}
+                      label={t("floor.storeyHeight")}
+                      disabled={!editable}
+                      placeholder={floor.height === null ? "" : fmt(floor.height + 0.3, 2)}
+                      onChange={(v) => setFloor(floor.key, { storeyHeight: v })}
+                    />
+                  </td>
+                  <td className="w-20 px-1">
                     <NumberField value={floor.wallThickness} decimals={2} label={t("floor.wall")} disabled={!editable} onChange={(v) => setFloor(floor.key, { wallThickness: v })} />
+                  </td>
+                  <td className="w-20 px-1">
+                    <NumberField value={floor.windowHeight} decimals={2} label={t("floor.windowHeight")} disabled={!editable} onChange={(v) => setFloor(floor.key, { windowHeight: v })} />
                   </td>
                   <td className="px-1">
                     <div className="flex flex-wrap items-center gap-2">

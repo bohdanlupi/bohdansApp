@@ -2016,7 +2016,9 @@
       "deletePlanText": "Retirer le plan de l’étage « {name} » ? Les locaux dessinés sont conservés.",
       "noPlan": "pas de plan",
       "delete": "Supprimer l’étage",
-      "deleteText": "Supprimer l’étage « {name} » avec {rooms} locaux et son plan ?"
+      "deleteText": "Supprimer l’étage « {name} » avec {rooms} locaux et son plan ?",
+      "storeyHeight": "Hauteur d’étage [m]",
+      "windowHeight": "Hauteur fenêtre [m]"
     },
     "upload": {
       "button": "Charger un plan",
@@ -2049,7 +2051,11 @@
         "roomHint": "Tracer un local en polygone le long des faces intérieures des murs (2)",
         "calibrateHint": "Cliquer deux points et saisir la distance réelle",
         "northHint": "Cliquer deux points : du départ vers le nord",
-        "measureHint": "Mesurer la distance entre deux points"
+        "measureHint": "Mesurer la distance entre deux points",
+        "envelope": "Enveloppe",
+        "envelopeHint": "Tracer l’enveloppe thermique en polygone le long de la face extérieure (3)",
+        "opening": "Ouverture",
+        "openingHint": "Fenêtre / porte : cliquer le début et la fin sur un segment de l’enveloppe (4)"
       },
       "ortho": "Ortho",
       "orthoHint": "Nouvelles arêtes horizontales / verticales (Shift inverse, touche o)",
@@ -2065,7 +2071,9 @@
         "room": "Clic : poser un sommet · Clic sur le premier point, double-clic ou Entrée : fermer · Backspace : dernier point · Esc : annuler",
         "calibrate": "Cliquer deux points de distance connue (p. ex. une cote).",
         "north": "Cliquer le point de départ, puis un point vers le nord.",
-        "measure": "Cliquer deux points. Esc : retour à la sélection."
+        "measure": "Cliquer deux points. Esc : retour à la sélection.",
+        "envelope": "Clic : sommet de l’enveloppe le long de la face extérieure · premier point, double-clic ou Entrée : fermer · Esc : annuler",
+        "opening": "Cliquer le début et la fin de l’ouverture sur un segment ; hauteur et élément ensuite dans le panneau."
       },
       "plan": "Plan",
       "pageN": "Page {n}",
@@ -2082,7 +2090,19 @@
         "area": "Surface nette",
         "perimeter": "Périmètre",
         "volume": "Volume",
-        "vertices": "Sommets"
+        "vertices": "Sommets",
+        "walls": "Murs extérieurs",
+        "length": "Longueur",
+        "bearing": "Direction",
+        "rooms": "Locaux derrière",
+        "construction": "Élément",
+        "adjacency": "Adjacent",
+        "orientation": "Orientation",
+        "tolerance": "Épaisseur mur [m]",
+        "width": "Largeur [m]",
+        "height": "Hauteur [m]",
+        "count": "Nombre",
+        "at": "Position"
       },
       "kinds": {
         "heated": "chauffé",
@@ -2095,13 +2115,42 @@
       "help": {
         "pan": "Déplacer : glisser avec le bouton du milieu / droit ou Alt + glisser ; zoom avec la molette.",
         "snap": "Les points s’accrochent aux sommets existants ; Ortho garde les arêtes horizontales / verticales.",
-        "keys": "Touches : 1 sélection, 2 local, o ortho, Ctrl+Z annuler, Esc abandonner."
+        "keys": "Touches : 1 sélection, 2 local, o ortho, Ctrl+Z annuler, Esc abandonner.",
+        "envelope": "Enveloppe : double-clic sur un segment insère un sommet ; choisir un segment pour l’élément, l’adjacence et les ouvertures."
       },
       "calibrateTitle": "Calibrer l’échelle",
       "calibrateText": "Le segment cliqué mesure {px} px. Quelle est sa longueur réelle ?",
       "calibrateDistance": "Distance [m]",
       "cancel": "Annuler",
-      "calibrateConfirm": "Appliquer"
+      "calibrateConfirm": "Appliquer",
+      "storeyHeight": "Hauteur d’étage",
+      "envelope": "Enveloppe",
+      "envelopeInfo": "{n} sommets",
+      "noEnvelope": "non tracée",
+      "uncoveredTotal": "{m} m sans local",
+      "northFirst": "Définir le nord pour que les éléments reçoivent une orientation.",
+      "deleteEnvelope": "Supprimer l’enveloppe",
+      "noWalls": "aucun (enveloppe absente ou mur hors de l’épaisseur)",
+      "segment": "Segment d’enveloppe",
+      "removeVertex": "Retirer le sommet",
+      "noMatch": "Aucun local dans l’épaisseur du mur – vérifier la tolérance.",
+      "uncovered": "{m} m sans local",
+      "noCatalog": "Le catalogue d’éléments est vide – le saisir sous Chauffage › Besoin de chaleur.",
+      "adjacency": {
+        "outside": "Extérieur",
+        "unheated": "local non chauffé",
+        "ground": "Terrain"
+      },
+      "auto": "automatique",
+      "openings": "Ouvertures ({count})",
+      "addOpening": "Ouverture",
+      "noOpenings": "Pas de fenêtre ni de porte sur ce segment.",
+      "openingKinds": {
+        "window": "Fenêtre",
+        "door": "Porte"
+      },
+      "removeOpening": "Retirer l’ouverture",
+      "openingNoRoom": "aucun local derrière l’ouverture"
     }
   },
   "heatingPlan": {
@@ -3104,7 +3153,8 @@
       "upToDate": "Tous les locaux du modèle sont déjà repris.",
       "linked": "du modèle du bâtiment",
       "synced": "Les locaux liés ont été ajustés au modèle du bâtiment – enregistrer.",
-      "none": "Le modèle du bâtiment n’a pas encore de locaux avec surface."
+      "none": "Le modèle du bâtiment n’a pas encore de locaux avec surface.",
+      "derived": "Dérivé du modèle du bâtiment – modifier dans l’éditeur de plan."
     }
   },
   "floorHeating": {

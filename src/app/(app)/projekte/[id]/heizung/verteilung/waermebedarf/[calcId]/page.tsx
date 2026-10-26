@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { requireProfile } from "@/lib/auth";
-import { modelRoomInfos, syncLinkedRooms } from "@/lib/building/heat-link";
+import { deriveElements, modelRoomInfos, syncLinkedRooms } from "@/lib/building/heat-link";
 import { allRoomMetrics } from "@/lib/building/model";
 
 import { loadBuildingModel, loadBuildingPlans } from "../../../../gebaeude/load-model";
@@ -27,7 +27,7 @@ export default async function HeatCalcPage({ params }: PageProps<"/projekte/[id]
   if (!calc) notFound();
   const t = await getTranslations("heatLoad");
   // Rooms taken from the Gebäudemodell follow it (geometry wins); the editor starts dirty when something changed.
-  const modelRooms = modelRoomInfos(allRoomMetrics(model, plans));
+  const modelRooms = modelRoomInfos(allRoomMetrics(model, plans), deriveElements(model, plans));
   const synced = syncLinkedRooms(calc.data, modelRooms);
 
   return (

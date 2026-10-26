@@ -552,7 +552,28 @@ dragging, undo (state history, Ctrl+Z), room panel (Nr., Name, beheizt / unbehei
 volume), room list with zoom-to. Geometry in snapshot px, metres via scale (model.ts roomMetrics). Wärmebedarf: HeatRoom.
 modelRoomId; button «Räume aus Gebäudemodell» imports unlinked rooms, linked rooms are re-synced on page load (geometry
 wins: Nr., Name, Geschoss, Art, θi, A, h read-only, Notice + Save enabled when the stored values differed).
-Next: phase B (envelope polygons, segment ↔ room matching, constructions / adjacency / openings → derived 384/2 elements).
+Phase B followed the same day (below).
+Phase B built 2026-10-26 (same day): thermal envelope per Geschoss (BuildingModel.envelopes, one polygon along the external
+face; vertex carries the attributes of the segment starting there: constructionId, adjacency outside / unheated / ground,
+orientation override, tolerance override, openings [kind window / door, at (fraction), width, height (null = Geschoss
+windowHeight / 2.1 m door), count, constructionId]). Floors got storeyHeight (Geschosshöhe, null = lichte Höhe + 0.3) and
+windowHeight. src/lib/building/envelope.ts: evaluateEnvelope – inward normal by point-in-polygon probe, rooms' edges
+parallel (≤ 12°) behind the segment within the tolerance (wall thickness) → matches as fractions, then extendToExternal
+gives corner / partition gaps ≤ 2 × wall thickness to the adjacent rooms (Aussenmasse; larger gaps stay «uncovered» and
+are drawn red), bearing of the outward normal → 8 orientations, openings assigned by their centre; findPartitions –
+coincident parallel room edges (tolerance = wall thickness), normal facing away from room A. heat-link.ts deriveElements:
+per room walls (length × Geschosshöhe, deduction = openings), openings (width × height × count), partitions only towards
+passive rooms or heated rooms at another θ (neighbourMode «room» when the neighbour is linked in the calculation, else its
+θ); RoomElement.sourceId (w:<vertex>:<room>:<i>, o:<opening>, p:<a>:<b>:<edge>:a|b) – derived elements are regenerated
+on load, keep their ids, are read-only (link icon) and cannot be deleted in the heat editor; manual elements stay.
+Editor: tools Hülle (3, only while none exists; delete in the panel) and Öffnung (4, two clicks on a segment), segment
+selection (8 px), double-click inserts a vertex, segment panel (length, bearing → orientation, rooms behind with
+lengths, uncovered warning, construction from the heating catalogue, adjacency, orientation override, wall thickness,
+openings list with kind / width / height / count / construction / position), room panel lists its external walls.
+Deviation from the plan text: the construction catalogue stays in heating_plans.data (loaded into the Gebäude pages),
+g-value / frame share are added there for 380/1 in phase C. Verified with a synthetic 10 × 6 m two-room model
+(scratchpad test: 5.00 / 6.00 m walls, 3.9 m² window deduction, partition O / W).
+Next: phase C (floors / ceilings across storeys by polygon overlap, zones, SIA 380/1 calculation + PDF, climate sets).
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

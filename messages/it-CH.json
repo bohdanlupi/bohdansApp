@@ -2016,7 +2016,9 @@
       "deletePlanText": "Rimuovere la planimetria del piano «{name}»? I locali disegnati restano.",
       "noPlan": "nessuna planimetria",
       "delete": "Elimina piano",
-      "deleteText": "Eliminare il piano «{name}» con {rooms} locali e la sua planimetria?"
+      "deleteText": "Eliminare il piano «{name}» con {rooms} locali e la sua planimetria?",
+      "storeyHeight": "Altezza di piano [m]",
+      "windowHeight": "Altezza finestra [m]"
     },
     "upload": {
       "button": "Carica planimetria",
@@ -2049,7 +2051,11 @@
         "roomHint": "Tracciare un locale come poligono lungo le facce interne delle pareti (2)",
         "calibrateHint": "Cliccare due punti e inserire la distanza reale",
         "northHint": "Cliccare due punti: dal punto iniziale verso nord",
-        "measureHint": "Misurare la distanza tra due punti"
+        "measureHint": "Misurare la distanza tra due punti",
+        "envelope": "Involucro",
+        "envelopeHint": "Tracciare l’involucro termico come poligono lungo la faccia esterna (3)",
+        "opening": "Apertura",
+        "openingHint": "Finestra / porta: cliccare inizio e fine su un segmento dell’involucro (4)"
       },
       "ortho": "Orto",
       "orthoHint": "Nuovi lati orizzontali / verticali (Shift inverte, tasto o)",
@@ -2065,7 +2071,9 @@
         "room": "Clic: vertice · Clic sul primo punto, doppio clic o Invio: chiudi · Backspace: ultimo punto · Esc: annulla",
         "calibrate": "Cliccare due punti a distanza nota (p. es. una quota).",
         "north": "Cliccare il punto iniziale, poi un punto verso nord.",
-        "measure": "Cliccare due punti. Esc: torna alla selezione."
+        "measure": "Cliccare due punti. Esc: torna alla selezione.",
+        "envelope": "Clic: vertice dell’involucro lungo la faccia esterna · primo punto, doppio clic o Invio: chiudi · Esc: annulla",
+        "opening": "Cliccare inizio e fine dell’apertura su un segmento; altezza ed elemento poi nel pannello."
       },
       "plan": "Planimetria",
       "pageN": "Pagina {n}",
@@ -2082,7 +2090,19 @@
         "area": "Superficie netta",
         "perimeter": "Perimetro",
         "volume": "Volume",
-        "vertices": "Vertici"
+        "vertices": "Vertici",
+        "walls": "Pareti esterne",
+        "length": "Lunghezza",
+        "bearing": "Direzione",
+        "rooms": "Locali retrostanti",
+        "construction": "Elemento",
+        "adjacency": "Adiacente",
+        "orientation": "Orientamento",
+        "tolerance": "Spessore muro [m]",
+        "width": "Larghezza [m]",
+        "height": "Altezza [m]",
+        "count": "Numero",
+        "at": "Posizione"
       },
       "kinds": {
         "heated": "riscaldato",
@@ -2095,13 +2115,42 @@
       "help": {
         "pan": "Spostare: trascinare con il tasto centrale / destro o Alt + trascinare; zoom con la rotella.",
         "snap": "I punti si agganciano ai vertici esistenti; Orto mantiene i lati orizzontali / verticali.",
-        "keys": "Tasti: 1 seleziona, 2 locale, o orto, Ctrl+Z annulla, Esc interrompi."
+        "keys": "Tasti: 1 seleziona, 2 locale, o orto, Ctrl+Z annulla, Esc interrompi.",
+        "envelope": "Involucro: doppio clic su un segmento inserisce un vertice; scegliere un segmento per elemento, adiacenza e aperture."
       },
       "calibrateTitle": "Calibra la scala",
       "calibrateText": "Il segmento cliccato è lungo {px} px. Quanto misura in realtà?",
       "calibrateDistance": "Distanza [m]",
       "cancel": "Annulla",
-      "calibrateConfirm": "Applica"
+      "calibrateConfirm": "Applica",
+      "storeyHeight": "Altezza di piano",
+      "envelope": "Involucro",
+      "envelopeInfo": "{n} vertici",
+      "noEnvelope": "non tracciato",
+      "uncoveredTotal": "{m} m senza locale",
+      "northFirst": "Impostare il nord affinché gli elementi ricevano un orientamento.",
+      "deleteEnvelope": "Elimina involucro",
+      "noWalls": "nessuna (involucro mancante o parete fuori dallo spessore)",
+      "segment": "Segmento dell’involucro",
+      "removeVertex": "Rimuovi vertice",
+      "noMatch": "Nessun locale entro lo spessore del muro – verificare la tolleranza.",
+      "uncovered": "{m} m senza locale",
+      "noCatalog": "Il catalogo degli elementi è vuoto – inserirlo in Riscaldamento › Fabbisogno termico.",
+      "adjacency": {
+        "outside": "Esterno",
+        "unheated": "locale non riscaldato",
+        "ground": "Terreno"
+      },
+      "auto": "automatico",
+      "openings": "Aperture ({count})",
+      "addOpening": "Apertura",
+      "noOpenings": "Nessuna finestra o porta su questo segmento.",
+      "openingKinds": {
+        "window": "Finestra",
+        "door": "Porta"
+      },
+      "removeOpening": "Rimuovi apertura",
+      "openingNoRoom": "nessun locale dietro l’apertura"
     }
   },
   "heatingPlan": {
@@ -3104,7 +3153,8 @@
       "upToDate": "Tutti i locali del modello sono già ripresi.",
       "linked": "dal modello dell’edificio",
       "synced": "I locali collegati sono stati adeguati al modello dell’edificio – salvare.",
-      "none": "Il modello dell’edificio non ha ancora locali con superficie."
+      "none": "Il modello dell’edificio non ha ancora locali con superficie.",
+      "derived": "Derivato dal modello dell’edificio – modificare nell’editor della planimetria."
     }
   },
   "floorHeating": {

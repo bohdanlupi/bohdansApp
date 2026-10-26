@@ -51,6 +51,7 @@ const emptyElement = (): RoomElement => ({
   table4HighAirChange: false,
   height: null,
   heatedSurface: false,
+  sourceId: null,
 });
 
 /** Next room number: increments the trailing digits of the last number (E09 → E10). */
@@ -551,10 +552,14 @@ function RoomDetail({
               const er = result.elements[k];
               const c = catalog.find((x) => x.id === e.constructionId);
               const bridge = c?.kind === "linear" || c?.kind === "point";
+              const derived = e.sourceId !== null;
+              const ed = editable && !derived;
               return (
-                <tr key={e.id} className="border-b last:border-0">
+                <tr key={e.id} className={cn("border-b last:border-0", derived && "bg-brand/5")} title={derived ? t("model.derived") : undefined}>
                   <td className="px-2 py-0.5">
-                    <NativeSelect value={e.constructionId ?? ""} disabled={!editable} className="h-7 w-56 text-xs" aria-label={t("el.construction")} onChange={(ev) => setElement(e.id, { constructionId: ev.target.value || null })}>
+                    <div className="flex items-center gap-1">
+                    {derived && <Link2 className="size-3.5 shrink-0 text-brand" aria-label={t("model.derived")} />}
+                    <NativeSelect value={e.constructionId ?? ""} disabled={!ed} className="h-7 w-56 text-xs" aria-label={t("el.construction")} onChange={(ev) => setElement(e.id, { constructionId: ev.target.value || null })}>
                       <option value="">–</option>
                       {(["element", "ground", "linear", "point"] as const).map((kind) => {
                         const list = catalog.filter((x) => x.kind === kind);
@@ -569,9 +574,10 @@ function RoomDetail({
                         ) : null;
                       })}
                     </NativeSelect>
+                    </div>
                   </td>
                   <td className="px-1">
-                    <NativeSelect value={e.orientation} disabled={!editable} className="h-7 w-16 text-xs" aria-label={t("el.orientation")} onChange={(ev) => setElement(e.id, { orientation: ev.target.value })}>
+                    <NativeSelect value={e.orientation} disabled={!ed} className="h-7 w-16 text-xs" aria-label={t("el.orientation")} onChange={(ev) => setElement(e.id, { orientation: ev.target.value })}>
                       <option value="">–</option>
                       {orientations.map((o) => (
                         <option key={o}>{o}</option>
@@ -581,7 +587,7 @@ function RoomDetail({
                   <td className="px-1">
                     <NativeSelect
                       value={e.adjacency}
-                      disabled={!editable}
+                      disabled={!ed}
                       className="h-7 w-32 text-xs"
                       aria-label={t("el.adjacency")}
                       onChange={(ev) => {
@@ -603,7 +609,7 @@ function RoomDetail({
                           value={e[key]}
                           decimals={key === "count" ? 0 : 2}
                           label={t(`el.${key === "areaOverride" ? "area" : key}`)}
-                          disabled={!editable}
+                          disabled={!ed}
                           placeholder={key === "areaOverride" && !bridge ? fmt(er?.quantity, 2) : key === "count" ? "1" : undefined}
                           onChange={(v) => setElement(e.id, { [key]: v })}
                         />
@@ -613,16 +619,16 @@ function RoomDetail({
                   <td className="px-1">
                     {(e.adjacency === "unheated" || e.adjacency === "heated") && (
                       <div className="flex items-center gap-1">
-                        <NativeSelect value={e.neighbourMode} disabled={!editable} className="h-7 w-28 text-xs" aria-label={t("el.neighbour")} onChange={(ev) => setElement(e.id, { neighbourMode: ev.target.value as RoomElement["neighbourMode"] })}>
+                        <NativeSelect value={e.neighbourMode} disabled={!ed} className="h-7 w-28 text-xs" aria-label={t("el.neighbour")} onChange={(ev) => setElement(e.id, { neighbourMode: ev.target.value as RoomElement["neighbourMode"] })}>
                           <option value="temperature">{t("neighbour.temperature")}</option>
                           <option value="room">{t("neighbour.room")}</option>
                           {e.adjacency === "unheated" && <option value="table4">{t("neighbour.table4")}</option>}
                         </NativeSelect>
                         {e.neighbourMode === "temperature" && (
-                          <NumberField value={e.neighbourTemp} decimals={1} label={t("neighbour.temperature")} negative disabled={!editable} onChange={(v) => setElement(e.id, { neighbourTemp: v })} className="w-14" />
+                          <NumberField value={e.neighbourTemp} decimals={1} label={t("neighbour.temperature")} negative disabled={!ed} onChange={(v) => setElement(e.id, { neighbourTemp: v })} className="w-14" />
                         )}
                         {e.neighbourMode === "room" && (
-                          <NativeSelect value={e.neighbourRoomId ?? ""} disabled={!editable} className="h-7 w-36 text-xs" aria-label={t("neighbour.room")} onChange={(ev) => setElement(e.id, { neighbourRoomId: ev.target.value || null })}>
+                          <NativeSelect value={e.neighbourRoomId ?? ""} disabled={!ed} className="h-7 w-36 text-xs" aria-label={t("neighbour.room")} onChange={(ev) => setElement(e.id, { neighbourRoomId: ev.target.value || null })}>
                             <option value="">–</option>
                             {others.map((o) => (
                               <option key={o.id} value={o.id}>
@@ -633,7 +639,7 @@ function RoomDetail({
                         )}
                         {e.neighbourMode === "table4" && (
                           <>
-                            <NativeSelect value={e.table4} disabled={!editable} className="h-7 w-36 text-xs" aria-label={t("neighbour.table4")} onChange={(ev) => setElement(e.id, { table4: ev.target.value as RoomElement["table4"] })}>
+                            <NativeSelect value={e.table4} disabled={!ed} className="h-7 w-36 text-xs" aria-label={t("neighbour.table4")} onChange={(ev) => setElement(e.id, { table4: ev.target.value as RoomElement["table4"] })}>
                               {Object.keys(f1Table4).map((k) => (
                                 <option key={k} value={k}>
                                   {t(`table4.${k}` as never)}
@@ -641,7 +647,7 @@ function RoomDetail({
                               ))}
                             </NativeSelect>
                             <label className="flex items-center gap-1 whitespace-nowrap" title={t("neighbour.highAirChange")}>
-                              <input type="checkbox" checked={e.table4HighAirChange} disabled={!editable} onChange={(ev) => setElement(e.id, { table4HighAirChange: ev.target.checked })} />
+                              <input type="checkbox" checked={e.table4HighAirChange} disabled={!ed} onChange={(ev) => setElement(e.id, { table4HighAirChange: ev.target.checked })} />
                               {"n > 0.5"}
                             </label>
                           </>
@@ -651,11 +657,11 @@ function RoomDetail({
                   </td>
                   {high && (
                     <td className="w-14 px-1">
-                      <NumberField value={e.height} decimals={2} label={t("el.height")} disabled={!editable} onChange={(v) => setElement(e.id, { height: v })} />
+                      <NumberField value={e.height} decimals={2} label={t("el.height")} disabled={!ed} onChange={(v) => setElement(e.id, { height: v })} />
                     </td>
                   )}
                   <td className="px-1 text-center">
-                    <input type="checkbox" checked={e.heatedSurface} disabled={!editable} aria-label={t("el.heatedSurface")} onChange={(ev) => setElement(e.id, { heatedSurface: ev.target.checked })} />
+                    <input type="checkbox" checked={e.heatedSurface} disabled={!ed} aria-label={t("el.heatedSurface")} onChange={(ev) => setElement(e.id, { heatedSurface: ev.target.checked })} />
                   </td>
                   <td className="px-1 text-right tabular-nums">{er?.f1 === null || er === undefined ? "" : fmt(er.f1 + er.f2, 3)}</td>
                   <td className="px-1 text-right tabular-nums">{fmt(er?.h, 2)}</td>
@@ -670,7 +676,7 @@ function RoomDetail({
                     )}
                   </td>
                   <td className="pr-1 text-right">
-                    {editable && (
+                    {ed && (
                       <button type="button" className="rounded p-1 text-muted-foreground hover:bg-muted" aria-label={t("el.remove")} title={t("el.remove")} onClick={() => onChange({ elements: room.elements.filter((x) => x.id !== e.id) })}>
                         <Trash2 className="size-3.5" />
                       </button>

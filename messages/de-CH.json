@@ -2016,7 +2016,9 @@
       "deletePlanText": "Den Plan des Geschosses «{name}» entfernen? Die gezeichneten Räume bleiben erhalten.",
       "noPlan": "kein Plan",
       "delete": "Geschoss löschen",
-      "deleteText": "Das Geschoss «{name}» mit {rooms} Räumen und seinem Plan löschen?"
+      "deleteText": "Das Geschoss «{name}» mit {rooms} Räumen und seinem Plan löschen?",
+      "storeyHeight": "Geschosshöhe [m]",
+      "windowHeight": "Fensterhöhe [m]"
     },
     "upload": {
       "button": "Plan hochladen",
@@ -2049,7 +2051,11 @@
         "roomHint": "Raum als Polygon entlang der inneren Wandflächen zeichnen (2)",
         "calibrateHint": "Zwei Punkte klicken und die reale Distanz eingeben",
         "northHint": "Zwei Punkte klicken: vom Startpunkt in Richtung Norden",
-        "measureHint": "Distanz zwischen zwei Punkten messen"
+        "measureHint": "Distanz zwischen zwei Punkten messen",
+        "envelope": "Hülle",
+        "envelopeHint": "Thermische Gebäudehülle als Polygon entlang der Aussenkante zeichnen (3)",
+        "opening": "Öffnung",
+        "openingHint": "Fenster / Tür: Anfang und Ende auf einem Hüllen-Segment klicken (4)"
       },
       "ortho": "Ortho",
       "orthoHint": "Neue Kanten waagrecht / senkrecht (Shift kehrt um, Taste o)",
@@ -2065,7 +2071,9 @@
         "room": "Klick: Eckpunkt setzen · Klick auf den ersten Punkt, Doppelklick oder Enter: Raum schliessen · Backspace: letzter Punkt · Esc: abbrechen",
         "calibrate": "Zwei Punkte mit bekannter Distanz klicken (z. B. eine Masskette).",
         "north": "Startpunkt klicken, dann einen Punkt in Richtung Norden.",
-        "measure": "Zwei Punkte klicken. Esc: zurück zum Wählen."
+        "measure": "Zwei Punkte klicken. Esc: zurück zum Wählen.",
+        "envelope": "Klick: Eckpunkt der Gebäudehülle entlang der Aussenkante · erster Punkt, Doppelklick oder Enter: schliessen · Esc: abbrechen",
+        "opening": "Auf einem Hüllen-Segment Anfang und Ende der Öffnung klicken; Höhe und Bauteil danach im Panel."
       },
       "plan": "Plan",
       "pageN": "Seite {n}",
@@ -2082,7 +2090,19 @@
         "area": "Fläche netto",
         "perimeter": "Umfang",
         "volume": "Volumen",
-        "vertices": "Eckpunkte"
+        "vertices": "Eckpunkte",
+        "walls": "Aussenwände",
+        "length": "Länge",
+        "bearing": "Richtung",
+        "rooms": "Räume dahinter",
+        "construction": "Bauteil",
+        "adjacency": "Angrenzend",
+        "orientation": "Orientierung",
+        "tolerance": "Wanddicke [m]",
+        "width": "Breite [m]",
+        "height": "Höhe [m]",
+        "count": "Anzahl",
+        "at": "Position"
       },
       "kinds": {
         "heated": "beheizt",
@@ -2095,13 +2115,42 @@
       "help": {
         "pan": "Verschieben: Ziehen mit mittlerer / rechter Maustaste oder Alt + Ziehen; Zoom mit dem Mausrad.",
         "snap": "Punkte fangen an bestehenden Eckpunkten; Ortho hält Kanten waagrecht / senkrecht.",
-        "keys": "Tasten: 1 Wählen, 2 Raum, o Ortho, Ctrl+Z Rückgängig, Esc Abbrechen."
+        "keys": "Tasten: 1 Wählen, 2 Raum, o Ortho, Ctrl+Z Rückgängig, Esc Abbrechen.",
+        "envelope": "Hülle: Doppelklick auf ein Segment fügt einen Eckpunkt ein; Segment wählen für Bauteil, Angrenzung und Öffnungen."
       },
       "calibrateTitle": "Massstab kalibrieren",
       "calibrateText": "Die geklickte Strecke ist {px} px lang. Wie lang ist sie in Wirklichkeit?",
       "calibrateDistance": "Distanz [m]",
       "cancel": "Abbrechen",
-      "calibrateConfirm": "Übernehmen"
+      "calibrateConfirm": "Übernehmen",
+      "storeyHeight": "Geschosshöhe",
+      "envelope": "Hülle",
+      "envelopeInfo": "{n} Eckpunkte",
+      "noEnvelope": "nicht gezeichnet",
+      "uncoveredTotal": "{m} m ohne Raum",
+      "northFirst": "Norden setzen, damit die Bauteile eine Orientierung erhalten.",
+      "deleteEnvelope": "Hülle löschen",
+      "noWalls": "keine (Hülle fehlt oder Wand nicht innerhalb der Wanddicke)",
+      "segment": "Hüllen-Segment",
+      "removeVertex": "Eckpunkt entfernen",
+      "noMatch": "Kein Raum innerhalb der Wanddicke – Toleranz prüfen.",
+      "uncovered": "{m} m ohne Raum",
+      "noCatalog": "Der Bauteilkatalog ist leer – unter Heizung › Wärmebedarf erfassen.",
+      "adjacency": {
+        "outside": "Aussenklima",
+        "unheated": "unbeheizter Raum",
+        "ground": "Erdreich"
+      },
+      "auto": "automatisch",
+      "openings": "Öffnungen ({count})",
+      "addOpening": "Öffnung",
+      "noOpenings": "Keine Fenster oder Türen auf diesem Segment.",
+      "openingKinds": {
+        "window": "Fenster",
+        "door": "Tür"
+      },
+      "removeOpening": "Öffnung entfernen",
+      "openingNoRoom": "kein Raum hinter der Öffnung"
     }
   },
   "heatingPlan": {
@@ -3104,7 +3153,8 @@
       "upToDate": "Alle Räume des Gebäudemodells sind bereits übernommen.",
       "linked": "aus Gebäudemodell",
       "synced": "Die verknüpften Räume wurden an das Gebäudemodell angepasst – speichern.",
-      "none": "Das Gebäudemodell hat noch keine Räume mit Flächen."
+      "none": "Das Gebäudemodell hat noch keine Räume mit Flächen.",
+      "derived": "Aus dem Gebäudemodell abgeleitet – im Plan-Editor ändern."
     }
   },
   "floorHeating": {
