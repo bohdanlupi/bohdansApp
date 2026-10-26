@@ -2055,7 +2055,9 @@
         "envelope": "Hülle",
         "envelopeHint": "Thermische Gebäudehülle als Polygon entlang der Aussenkante zeichnen (3)",
         "opening": "Öffnung",
-        "openingHint": "Fenster / Tür: Anfang und Ende auf einem Hüllen-Segment klicken (4)"
+        "openingHint": "Fenster / Tür: Anfang und Ende auf einem Hüllen-Segment klicken (4)",
+        "origin": "Referenz",
+        "originHint": "Referenzpunkt klicken, den alle Geschosse teilen (zum Übereinanderlegen der Geschosse)"
       },
       "ortho": "Ortho",
       "orthoHint": "Neue Kanten waagrecht / senkrecht (Shift kehrt um, Taste o)",
@@ -2073,7 +2075,8 @@
         "north": "Startpunkt klicken, dann einen Punkt in Richtung Norden.",
         "measure": "Zwei Punkte klicken. Esc: zurück zum Wählen.",
         "envelope": "Klick: Eckpunkt der Gebäudehülle entlang der Aussenkante · erster Punkt, Doppelklick oder Enter: schliessen · Esc: abbrechen",
-        "opening": "Auf einem Hüllen-Segment Anfang und Ende der Öffnung klicken; Höhe und Bauteil danach im Panel."
+        "opening": "Auf einem Hüllen-Segment Anfang und Ende der Öffnung klicken; Höhe und Bauteil danach im Panel.",
+        "origin": "Einen Punkt klicken, der auf allen Geschossplänen vorhanden ist (z. B. eine Gebäudeecke oder einen Achsenschnittpunkt)."
       },
       "plan": "Plan",
       "pageN": "Seite {n}",
@@ -2102,7 +2105,15 @@
         "width": "Breite [m]",
         "height": "Höhe [m]",
         "count": "Anzahl",
-        "at": "Position"
+        "at": "Position",
+        "zone": "Zone SIA 380/1",
+        "unheatedCase": "Unbeheizter Raum (b-Wert)",
+        "shading": "Verschattung [°]",
+        "shadingHint": "Winkel nach SIA 380/1: Horizont, Überhang, Seitenblende links / rechts",
+        "horizon": "Horizont",
+        "overhang": "Überhang",
+        "finLeft": "Blende links",
+        "finRight": "Blende rechts"
       },
       "kinds": {
         "heated": "beheizt",
@@ -2150,7 +2161,167 @@
         "door": "Tür"
       },
       "removeOpening": "Öffnung entfernen",
-      "openingNoRoom": "kein Raum hinter der Öffnung"
+      "openingNoRoom": "kein Raum hinter der Öffnung",
+      "origin": "Referenzpunkt",
+      "originUnset": "nicht gesetzt",
+      "zoneAuto": "automatisch ({name})",
+      "zoneNone": "nicht zugeordnet"
+    },
+    "unheated": {
+      "case": "Unbeheizter Raum",
+      "insulated": "gedämmt",
+      "insulatedHint": "gedämmt und luftdicht (ΣA·U < 0.4 W/K pro m²) – kleinerer b-Wert nach Tabelle 17",
+      "cases": {
+        "attic": "Estrich / Schrägdach",
+        "cellarBelow": "Keller ganz im Erdreich",
+        "cellarAbove": "Keller teils über Erdreich",
+        "annex": "angebauter Raum",
+        "glazed": "Glasvorbau"
+      }
+    },
+    "slabs": {
+      "title": "Decken und Böden",
+      "description": "Was unter dem Boden und über der Decke liegt, wo kein Raum des Nachbargeschosses gezeichnet ist, und die Konstruktionen der Zwischendecken und Innenwände zwischen Räumen unterschiedlicher Temperatur.",
+      "floorAgainst": "Boden gegen",
+      "floorConstruction": "Boden-Bauteil",
+      "ceilingAgainst": "Decke gegen",
+      "ceilingConstruction": "Decken-Bauteil",
+      "slab": "Zwischendecke",
+      "partition": "Innenwand"
+    },
+    "zones": {
+      "title": "Nutzungszonen SIA 380/1",
+      "description": "Jede Zone hat eine Gebäudekategorie mit Standardnutzung. Räume werden im Plan-Editor einer Zone zugeordnet; bei einer einzigen Zone automatisch.",
+      "add": "Zone",
+      "none": "Noch keine Zone – für den Heizwärmebedarf nach SIA 380/1 eine Zone anlegen.",
+      "defaultName": "Zone {n}",
+      "defaultFirst": "Wohnen",
+      "name": "Name",
+      "category": "Gebäudekategorie",
+      "state": "Neubau / Umbau",
+      "states": {
+        "new": "Neubau",
+        "renovation": "Umbau"
+      },
+      "regulation": "Raumtemperaturregelung",
+      "regulations": {
+        "single": "Einzelraumregelung (0 K)",
+        "reference": "Referenzraum (1 K)",
+        "other": "übrige (2 K)"
+      },
+      "construction": "Bauweise",
+      "constructions": {
+        "heavy": "schwer (0.15)",
+        "medium": "mittel (0.08)",
+        "light": "leicht (0.03)",
+        "veryLight": "sehr leicht (0.01)"
+      },
+      "airflow": "Luftvolumenstrom eff. [m³/(h m²)]",
+      "wrg": "η WRG",
+      "bridgesPct": "Wärmebrücken-Zuschlag [%]",
+      "floorHeating": "θ VL Bodenheizung [°C]",
+      "roomCount": "{count} Räume",
+      "remove": "Zone löschen",
+      "removeText": "Die Zone «{name}» löschen? Ihre Räume bleiben ohne Zone.",
+      "bridges": "Wärmebrücken ({count})",
+      "addBridge": "Wärmebrücke",
+      "bridgeName": "Bezeichnung",
+      "removeBridge": "Wärmebrücke entfernen"
+    },
+    "climate": {
+      "title": "Klima",
+      "description": "Klimadatensatz und Station für SIA 380/1. Für den Nachweis gilt SIA 2028:2010; SIA 4028 ist der Vernehmlassungsentwurf der neuen Klimadaten.",
+      "set": "Datensatz",
+      "sets": {
+        "sia2028": "SIA 2028:2010",
+        "sia4028": "prSIA 4028 (Entwurf)"
+      },
+      "station": "Klimastation",
+      "facts": "Station",
+      "draftHint": "Entwurfsdaten – nicht für den behördlichen Nachweis."
+    },
+    "sia3801": {
+      "title": "Heizwärmebedarf SIA 380/1",
+      "link": "SIA 380/1",
+      "back": "Gebäudemodell",
+      "description": "Monatsbilanz pro Nutzungszone aus dem Gebäudemodell: Transmission, Lüftung, interne und solare Einträge, Ausnutzungsgrad, Grenz- und Zielwert.",
+      "pdf": "PDF",
+      "pdfTitle": "Heizwärmebedarf nach SIA 380/1:2016",
+      "pdfBuilding": "Gebäude",
+      "pdfMonths": "Monatsbilanz [kWh]",
+      "pdfNote": "Berechnung nach SIA 380/1:2016 (Monatsbilanz, SN EN ISO 13790). Flächen mit Aussenmassen aus dem Gebäudemodell; Standardnutzung nach Gebäudekategorie; Umbau-Grenzwert 150 % des Neubau-Grenzwerts, Zielwert Neubau 70 %.",
+      "climate": "Klimastation",
+      "sets": {
+        "sia2028": "SIA 2028:2010",
+        "sia4028": "prSIA 4028"
+      },
+      "months": "Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez",
+      "noZones": "Keine Zonen – im Gebäudemodell eine Nutzungszone anlegen.",
+      "warnings": {
+        "noStation": "Keine Klimastation gewählt.",
+        "noNorth": "Bei mindestens einem Plan ist Norden nicht gesetzt – die Bauteile haben keine Orientierung.",
+        "noZoneRooms": "Die Zone hat keine beheizten Räume.",
+        "unassignedRooms": "Beheizte Räume ohne Zone (bei mehreren Zonen muss jeder Raum zugeordnet sein).",
+        "noConstruction": "Bauteile ohne Konstruktion – im Plan-Editor bzw. in den Decken / Böden zuweisen.",
+        "noU": "Konstruktionen ohne U-Wert im Katalog.",
+        "noG": "Fenster ohne g-Wert im Katalog – kein solarer Eintrag.",
+        "noEnvelope": "Geschoss mit Räumen, aber ohne Gebäudehülle.",
+        "uncalibrated": "Ein Plan ist nicht kalibriert.",
+        "noArea": "Die Zone hat keine Fläche (Pläne kalibrieren)."
+      },
+      "building": {
+        "areaE": "EBF A_E",
+        "ath": "Hüllfläche A_th",
+        "qH": "Q_H",
+        "qHSpecific": "Q_H spezifisch",
+        "limit": "Grenzwert Q_H,li",
+        "target": "Zielwert Q_H,ta",
+        "targetHint": "Zielwert {target} kWh/m²",
+        "ok": "eingehalten",
+        "notOk": "überschritten"
+      },
+      "zone": {
+        "category": "Kategorie",
+        "thetaInt": "Raumtemperatur",
+        "airflow": "Luftvolumenstrom",
+        "rooms": "{count} Räume"
+      },
+      "cols": {
+        "month": "Monat",
+        "year": "Jahr",
+        "qT": "Q_T",
+        "qV": "Q_V",
+        "qIEl": "Q_i,el",
+        "qIP": "Q_i,P",
+        "qS": "Q_s",
+        "qG": "Q_g",
+        "gamma": "γ",
+        "eta": "η_g",
+        "qUg": "Q_ug",
+        "qH": "Q_H"
+      },
+      "elements": {
+        "title": "Bauteile ({count})",
+        "room": "Raum",
+        "kind": "Art",
+        "construction": "Konstruktion",
+        "orientation": "Orient.",
+        "adjacency": "gegen",
+        "kinds": {
+          "wall": "Aussenwand",
+          "window": "Fenster",
+          "door": "Tür",
+          "partition": "Innenwand",
+          "floor": "Boden",
+          "ceiling": "Decke / Dach"
+        },
+        "adjacencies": {
+          "outside": "Aussenklima",
+          "unheated": "unbeheizt",
+          "ground": "Erdreich",
+          "zone": "andere Zone"
+        }
+      }
     }
   },
   "heatingPlan": {

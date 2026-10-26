@@ -27,6 +27,8 @@ const blank = (kind: ConstructionKind, code: string, name: string, value: number
   perimeter: null,
   depth: null,
   ueqOverride: null,
+  gValue: null,
+  frameFactor: null,
   ...ground,
 });
 
@@ -137,6 +139,8 @@ export function HeatBasics({ projectId, initial, editable }: { projectId: string
                   <th className="px-1 font-medium">{t("catalog.name")}</th>
                   <th className="px-1 font-medium">{t("catalog.kind")}</th>
                   <th className="px-1 text-right font-medium">{t("catalog.value")}</th>
+                  <th className="px-1 text-right font-medium">g</th>
+                  <th className="px-1 text-right font-medium">f_F</th>
                   <th className="px-1 font-medium">{t("catalog.groundType")}</th>
                   <th className="px-1 text-right font-medium">{t("catalog.slabArea")}</th>
                   <th className="px-1 text-right font-medium">{t("catalog.perimeter")}</th>
@@ -161,6 +165,12 @@ export function HeatBasics({ projectId, initial, editable }: { projectId: string
                       <td className="px-1 whitespace-nowrap text-xs text-muted-foreground">{t(`kinds.${c.kind}`)}</td>
                       <td className="w-20 px-1">
                         <NumberField value={c.value} decimals={3} label={t(`valueOf.${c.kind}`)} disabled={!editable} onChange={(value) => setItem(c.id, { value })} />
+                      </td>
+                      <td className="w-16 px-1">
+                        {c.kind === "element" && <NumberField value={c.gValue} decimals={2} label="g" disabled={!editable} placeholder="–" onChange={(gValue) => setItem(c.id, { gValue })} />}
+                      </td>
+                      <td className="w-16 px-1">
+                        {c.kind === "element" && <NumberField value={c.frameFactor} decimals={2} label="f_F" disabled={!editable} placeholder="0.75" onChange={(frameFactor) => setItem(c.id, { frameFactor })} />}
                       </td>
                       <td className="px-1">
                         {ground && (

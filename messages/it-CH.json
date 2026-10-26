@@ -2055,7 +2055,9 @@
         "envelope": "Involucro",
         "envelopeHint": "Tracciare l’involucro termico come poligono lungo la faccia esterna (3)",
         "opening": "Apertura",
-        "openingHint": "Finestra / porta: cliccare inizio e fine su un segmento dell’involucro (4)"
+        "openingHint": "Finestra / porta: cliccare inizio e fine su un segmento dell’involucro (4)",
+        "origin": "Riferimento",
+        "originHint": "Cliccare il punto di riferimento comune a tutti i piani (per sovrapporre i piani)"
       },
       "ortho": "Orto",
       "orthoHint": "Nuovi lati orizzontali / verticali (Shift inverte, tasto o)",
@@ -2073,7 +2075,8 @@
         "north": "Cliccare il punto iniziale, poi un punto verso nord.",
         "measure": "Cliccare due punti. Esc: torna alla selezione.",
         "envelope": "Clic: vertice dell’involucro lungo la faccia esterna · primo punto, doppio clic o Invio: chiudi · Esc: annulla",
-        "opening": "Cliccare inizio e fine dell’apertura su un segmento; altezza ed elemento poi nel pannello."
+        "opening": "Cliccare inizio e fine dell’apertura su un segmento; altezza ed elemento poi nel pannello.",
+        "origin": "Cliccare un punto presente su tutte le planimetrie (p. es. uno spigolo dell’edificio o un incrocio di assi)."
       },
       "plan": "Planimetria",
       "pageN": "Pagina {n}",
@@ -2102,7 +2105,15 @@
         "width": "Larghezza [m]",
         "height": "Altezza [m]",
         "count": "Numero",
-        "at": "Posizione"
+        "at": "Posizione",
+        "zone": "Zona SIA 380/1",
+        "unheatedCase": "Locale non riscaldato (fattore b)",
+        "shading": "Ombreggiamento [°]",
+        "shadingHint": "Angoli secondo SIA 380/1: orizzonte, sporto, alette sinistra / destra",
+        "horizon": "Orizzonte",
+        "overhang": "Sporto",
+        "finLeft": "Aletta sinistra",
+        "finRight": "Aletta destra"
       },
       "kinds": {
         "heated": "riscaldato",
@@ -2150,7 +2161,167 @@
         "door": "Porta"
       },
       "removeOpening": "Rimuovi apertura",
-      "openingNoRoom": "nessun locale dietro l’apertura"
+      "openingNoRoom": "nessun locale dietro l’apertura",
+      "origin": "Punto di riferimento",
+      "originUnset": "non impostato",
+      "zoneAuto": "automatico ({name})",
+      "zoneNone": "non assegnato"
+    },
+    "unheated": {
+      "case": "Locale non riscaldato",
+      "insulated": "isolato",
+      "insulatedHint": "isolato e a tenuta d’aria (ΣA·U < 0.4 W/K per m²) – fattore b ridotto secondo tabella 17",
+      "cases": {
+        "attic": "Sottotetto / tetto inclinato",
+        "cellarBelow": "Cantina interamente interrata",
+        "cellarAbove": "Cantina in parte fuori terra",
+        "annex": "Locale annesso",
+        "glazed": "Veranda"
+      }
+    },
+    "slabs": {
+      "title": "Solette e tetti",
+      "description": "Cosa si trova sotto il pavimento e sopra il soffitto dove non è disegnato alcun locale del piano adiacente, e le costruzioni di solette e pareti interne tra locali a temperatura diversa.",
+      "floorAgainst": "Pavimento verso",
+      "floorConstruction": "Elemento pavimento",
+      "ceilingAgainst": "Soffitto verso",
+      "ceilingConstruction": "Elemento soffitto",
+      "slab": "Soletta intermedia",
+      "partition": "Parete interna"
+    },
+    "zones": {
+      "title": "Zone d’uso SIA 380/1",
+      "description": "Ogni zona ha una categoria d’edificio con uso standard. I locali si assegnano nell’editor della planimetria; con una sola zona automaticamente.",
+      "add": "Zona",
+      "none": "Nessuna zona – creare una zona per il fabbisogno termico secondo SIA 380/1.",
+      "defaultName": "Zona {n}",
+      "defaultFirst": "Abitazione",
+      "name": "Nome",
+      "category": "Categoria d’edificio",
+      "state": "Nuovo / ristrutturazione",
+      "states": {
+        "new": "Nuovo",
+        "renovation": "Ristrutturazione"
+      },
+      "regulation": "Regolazione della temperatura",
+      "regulations": {
+        "single": "per locale (0 K)",
+        "reference": "locale di riferimento (1 K)",
+        "other": "altri (2 K)"
+      },
+      "construction": "Tipo di costruzione",
+      "constructions": {
+        "heavy": "pesante (0.15)",
+        "medium": "media (0.08)",
+        "light": "leggera (0.03)",
+        "veryLight": "molto leggera (0.01)"
+      },
+      "airflow": "Portata d’aria eff. [m³/(h m²)]",
+      "wrg": "η recupero",
+      "bridgesPct": "Supplemento ponti termici [%]",
+      "floorHeating": "θ mandata risc. a pavimento [°C]",
+      "roomCount": "{count} locali",
+      "remove": "Elimina zona",
+      "removeText": "Eliminare la zona «{name}»? I suoi locali restano senza zona.",
+      "bridges": "Ponti termici ({count})",
+      "addBridge": "Ponte termico",
+      "bridgeName": "Denominazione",
+      "removeBridge": "Rimuovi ponte termico"
+    },
+    "climate": {
+      "title": "Clima",
+      "description": "Set di dati climatici e stazione per SIA 380/1. Per la verifica vale SIA 2028:2010; SIA 4028 è la bozza dei nuovi dati climatici.",
+      "set": "Set di dati",
+      "sets": {
+        "sia2028": "SIA 2028:2010",
+        "sia4028": "prSIA 4028 (bozza)"
+      },
+      "station": "Stazione climatica",
+      "facts": "Stazione",
+      "draftHint": "Dati di bozza – non per la verifica ufficiale."
+    },
+    "sia3801": {
+      "title": "Fabbisogno termico SIA 380/1",
+      "link": "SIA 380/1",
+      "back": "Modello dell’edificio",
+      "description": "Bilancio mensile per zona dal modello: trasmissione, ventilazione, apporti interni e solari, grado di utilizzo, valore limite e mirato.",
+      "pdf": "PDF",
+      "pdfTitle": "Fabbisogno termico per il riscaldamento secondo SIA 380/1:2016",
+      "pdfBuilding": "Edificio",
+      "pdfMonths": "Bilancio mensile [kWh]",
+      "pdfNote": "Calcolo secondo SIA 380/1:2016 (bilancio mensile, SN EN ISO 13790). Superfici con dimensioni esterne dal modello; uso standard per categoria; limite ristrutturazione 150 % del limite nuovo, valore mirato nuovo 70 %.",
+      "climate": "Stazione climatica",
+      "sets": {
+        "sia2028": "SIA 2028:2010",
+        "sia4028": "prSIA 4028"
+      },
+      "months": "Gen,Feb,Mar,Apr,Mag,Giu,Lug,Ago,Set,Ott,Nov,Dic",
+      "noZones": "Nessuna zona – creare una zona d’uso nel modello.",
+      "warnings": {
+        "noStation": "Nessuna stazione climatica scelta.",
+        "noNorth": "Su almeno una planimetria il nord non è impostato – gli elementi non hanno orientamento.",
+        "noZoneRooms": "La zona non ha locali riscaldati.",
+        "unassignedRooms": "Locali riscaldati senza zona (con più zone ogni locale va assegnato).",
+        "noConstruction": "Elementi senza costruzione – assegnare nell’editor o in Solette / Tetti.",
+        "noU": "Costruzioni senza valore U nel catalogo.",
+        "noG": "Finestre senza valore g nel catalogo – nessun apporto solare.",
+        "noEnvelope": "Piano con locali ma senza involucro.",
+        "uncalibrated": "Una planimetria non è calibrata.",
+        "noArea": "La zona non ha superficie (calibrare le planimetrie)."
+      },
+      "building": {
+        "areaE": "SRE A_E",
+        "ath": "Involucro A_th",
+        "qH": "Q_H",
+        "qHSpecific": "Q_H specifico",
+        "limit": "Valore limite Q_H,li",
+        "target": "Valore mirato Q_H,ta",
+        "targetHint": "Valore mirato {target} kWh/m²",
+        "ok": "rispettato",
+        "notOk": "superato"
+      },
+      "zone": {
+        "category": "Categoria",
+        "thetaInt": "Temperatura",
+        "airflow": "Portata d’aria",
+        "rooms": "{count} locali"
+      },
+      "cols": {
+        "month": "Mese",
+        "year": "Anno",
+        "qT": "Q_T",
+        "qV": "Q_V",
+        "qIEl": "Q_i,el",
+        "qIP": "Q_i,P",
+        "qS": "Q_s",
+        "qG": "Q_g",
+        "gamma": "γ",
+        "eta": "η_g",
+        "qUg": "Q_ug",
+        "qH": "Q_H"
+      },
+      "elements": {
+        "title": "Elementi ({count})",
+        "room": "Locale",
+        "kind": "Tipo",
+        "construction": "Costruzione",
+        "orientation": "Orient.",
+        "adjacency": "verso",
+        "kinds": {
+          "wall": "Parete esterna",
+          "window": "Finestra",
+          "door": "Porta",
+          "partition": "Parete interna",
+          "floor": "Pavimento",
+          "ceiling": "Soffitto / tetto"
+        },
+        "adjacencies": {
+          "outside": "Esterno",
+          "unheated": "non riscaldato",
+          "ground": "Terreno",
+          "zone": "altra zona"
+        }
+      }
     }
   },
   "heatingPlan": {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, DoorOpen, Hexagon, Maximize, MousePointer2, Pentagon, Plus, Ruler, Scaling, Trash2, TriangleAlert, Undo2 } from "lucide-react";
+import { Compass, Crosshair, DoorOpen, Hexagon, Maximize, MousePointer2, Pentagon, Plus, Ruler, Scaling, Trash2, TriangleAlert, Undo2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ import {
   type EnvelopeAdjacency,
   type EnvelopeVertex,
   envelopeAdjacencies,
+  newOpening,
   newVertex,
   type Opening,
   type OpeningKind,
@@ -31,8 +32,9 @@ import {
   type PlanInfo,
   type RoomKind,
   roomKinds,
-  shortId,
   storeyHeightOf,
+  type UnheatedCase,
+  unheatedCaseKeys,
 } from "@/lib/building/schema";
 import type { Construction } from "@/lib/heating/heat-load";
 import { parseNumber } from "@/lib/number-input";
@@ -40,7 +42,7 @@ import { cn } from "@/lib/utils";
 
 import { saveBuildingModel, saveBuildingPlanCalibration } from "../../actions";
 
-type Tool = "select" | "room" | "envelope" | "opening" | "calibrate" | "north" | "measure";
+type Tool = "select" | "room" | "envelope" | "opening" | "calibrate" | "north" | "origin" | "measure";
 type View = { cx: number; cy: number; zoom: number };
 type Selection = { type: "room"; id: string } | { type: "segment"; vertexId: string } | null;
 type Drag = { kind: "room"; roomId: string; index: number; before: BuildingModel } | { kind: "envelope"; index: number; before: BuildingModel };
@@ -50,7 +52,7 @@ const HIT_PX = 8;
 const HANDLE_PX = 5;
 const MAX_HISTORY = 50;
 
-const toolIcons = { select: MousePointer2, room: Pentagon, envelope: Hexagon, opening: DoorOpen, calibrate: Scaling, north: Compass, measure: Ruler } as const;
+const toolIcons = { select: MousePointer2, room: Pentagon, envelope: Hexagon, opening: DoorOpen, calibrate: Scaling, north: Compass, origin: Crosshair, measure: Ruler } as const;
 
 const adjacencyStroke: Record<EnvelopeAdjacency, string> = { outside: "stroke-blue-700", unheated: "stroke-slate-500", ground: "stroke-amber-800" };
 
@@ -91,6 +93,7 @@ export function PlanEditor({
   editable: boolean;
 }) {
   const t = useTranslations("building.editor");
+  const tu = useTranslations("building.unheated");
   const tForms = useTranslations("forms");
   const { plan: model, update, status } = usePlan(projectId, initial, editable, saveBuildingModel);
   const [plan, setPlan] = useState(initialPlan);
@@ -191,7 +194,19 @@ export function PlanEditor({
 
   // --- rooms -------------------------------------------------------------------------------------------------------
   const addRoom = (polygon: Point[]) => {
-    const room: BuildingRoom = { id: crypto.randomUUID(), number: nextRoomNumber(model.rooms, floor), name: "", floor: floorKey, polygon: polygon.map(r1), kind: "heated", thetaInt: 20, height: null };
+    const room: BuildingRoom = {
+      id: crypto.randomUUID(),
+      number: nextRoomNumber(model.rooms, floor),
+      name: "",
+      floor: floorKey,
+      polygon: polygon.map(r1),
+      kind: "heated",
+      thetaInt: 20,
+      height: null,
+      zoneId: model.zones.length === 1 ? model.zones[0].id : null,
+      unheatedCase: "cellarAbove",
+      unheatedInsulated: false,
+    };
     commit((m) => ({ ...m, rooms: [...m.rooms, room] }));
     setSelection({ type: "room", id: room.id });
   };
@@ -230,7 +245,7 @@ export function PlanEditor({
   const addOpening = (vertexId: string, at: number, width: number | null) => {
     const v = envelope?.vertices.find((x) => x.id === vertexId);
     if (!v) return;
-    const opening: Opening = { id: shortId(), kind: "window", at, width, height: null, count: null, constructionId: catalog.find((c) => /fenster|window|fen[êe]tre|finestr/i.test(c.name))?.id ?? null };
+    const opening = newOpening(at, width, catalog.find((c) => /fenster|window|fen[êe]tre|finestr/i.test(c.name))?.id ?? null);
     setEnvelope((vs) => vs.map((x) => (x.id === vertexId ? { ...x, openings: [...x.openings, opening] } : x)), true);
     setSelection({ type: "segment", vertexId });
   };
@@ -264,6 +279,12 @@ export function PlanEditor({
       return;
     }
     if (!editable && tool !== "measure") return;
+    if (tool === "origin") {
+      const p = snap(raw);
+      saveCalibration({ originX: Math.round(p[0] * 10) / 10, originY: Math.round(p[1] * 10) / 10 });
+      setTool("select");
+      return;
+    }
     if (tool === "opening") {
       const seg = nearestSegment(segments, raw, px(HIT_PX * 1.5));
       if (!seg) return;
@@ -419,7 +440,7 @@ export function PlanEditor({
   const roomWalls = selectedRoom ? segments.flatMap((s) => s.matches.filter((m) => m.roomId === selectedRoom.id).map((m) => ({ s, m }))) : [];
   const elementConstructions = catalog.filter((c) => c.kind === "element" || c.kind === "ground");
 
-  const tools: Tool[] = editable ? ["select", "room", "envelope", "opening", "calibrate", "north", "measure"] : ["select", "measure"];
+  const tools: Tool[] = editable ? ["select", "room", "envelope", "opening", "calibrate", "north", "origin", "measure"] : ["select", "measure"];
   const toolDisabled = (k: Tool) => (k === "envelope" && !!envelope) || (k === "opening" && !envelope);
 
   return (
@@ -561,6 +582,11 @@ export function PlanEditor({
                 </text>
               </g>
             )}
+            <g className="pointer-events-none">
+              <line x1={plan.originX - r * 3} y1={plan.originY} x2={plan.originX + r * 3} y2={plan.originY} className="stroke-fuchsia-600" strokeWidth={stroke} />
+              <line x1={plan.originX} y1={plan.originY - r * 3} x2={plan.originX} y2={plan.originY + r * 3} className="stroke-fuchsia-600" strokeWidth={stroke} />
+              <circle cx={plan.originX} cy={plan.originY} r={r * 1.5} fill="none" className="stroke-fuchsia-600" strokeWidth={stroke} />
+            </g>
             {openingStart && (() => {
               const s = segments.find((x) => x.vertex.id === openingStart.vertexId);
               if (!s) return null;
@@ -590,6 +616,8 @@ export function PlanEditor({
             <dd className={cn(!plan.scale && "text-amber-700 dark:text-amber-400")}>{plan.scale ? t("scaleInfo", { px: fmt(1 / plan.scale, 1) }) : t("uncalibrated")}</dd>
             <dt className="text-muted-foreground">{t("north")}</dt>
             <dd>{plan.north === null ? t("northUnset") : t("northSet")}</dd>
+            <dt className="text-muted-foreground">{t("origin")}</dt>
+            <dd className={cn(plan.originX === 0 && plan.originY === 0 && "text-amber-700 dark:text-amber-400")}>{plan.originX === 0 && plan.originY === 0 ? t("originUnset") : `${fmt(plan.originX, 0)} / ${fmt(plan.originY, 0)} px`}</dd>
             <dt className="text-muted-foreground">{t("floorHeight")}</dt>
             <dd>
               {floor?.height === null || floor?.height === undefined ? "–" : `${fmt(floor.height, 2)} m`} · {t("storeyHeight")} {storeyHeightOf(floor) === null ? "–" : `${fmt(storeyHeightOf(floor), 2)} m`}
@@ -678,6 +706,41 @@ export function PlanEditor({
                 </Label>
                 <NumberField id="rm-height" value={selectedRoom.height} decimals={2} label="h" disabled={!editable} placeholder={floor?.height === null || floor?.height === undefined ? "" : fmt(floor.height, 2)} onChange={(v) => setRoom(selectedRoom.id, { height: v })} className="h-8 rounded-lg" />
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="rm-zone" className="text-xs">
+                  {t("fields.zone")}
+                </Label>
+                <NativeSelect id="rm-zone" value={selectedRoom.zoneId ?? ""} disabled={!editable || selectedRoom.kind !== "heated"} className="h-8 text-xs" onChange={(e) => setRoom(selectedRoom.id, { zoneId: e.target.value || null })}>
+                  <option value="">{model.zones.length === 1 ? t("zoneAuto", { name: model.zones[0].name }) : t("zoneNone")}</option>
+                  {model.zones.map((zn) => (
+                    <option key={zn.id} value={zn.id}>
+                      {zn.name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </div>
+              {selectedRoom.kind === "passive" && (
+                <div className="space-y-1">
+                  <Label htmlFor="rm-unheated" className="text-xs">
+                    {t("fields.unheatedCase")}
+                  </Label>
+                  <div className="flex items-center gap-1">
+                    <NativeSelect id="rm-unheated" value={selectedRoom.unheatedCase} disabled={!editable} className="h-8 text-xs" onChange={(e) => setRoom(selectedRoom.id, { unheatedCase: e.target.value as UnheatedCase })}>
+                      {unheatedCaseKeys.map((k) => (
+                        <option key={k} value={k}>
+                          {tu(`cases.${k}`)}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                    <label className="flex items-center gap-1 whitespace-nowrap text-xs" title={tu("insulatedHint")}>
+                      <input type="checkbox" checked={selectedRoom.unheatedInsulated} disabled={!editable} onChange={(e) => setRoom(selectedRoom.id, { unheatedInsulated: e.target.checked })} />
+                      {tu("insulated")}
+                    </label>
+                  </div>
+                </div>
+              )}
             </div>
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
               <dt className="text-muted-foreground">{t("fields.area")}</dt>
@@ -793,6 +856,7 @@ function SegmentPanel({
   onRemoveVertex: () => void;
 }) {
   const t = useTranslations("building.editor");
+  const tu = useTranslations("building.unheated");
   const v = s.vertex;
   return (
     <section className="space-y-3 rounded-xl border p-3 text-sm">
@@ -871,6 +935,26 @@ function SegmentPanel({
           <NumberField id="sg-tolerance" value={v.tolerance} decimals={2} label={t("fields.tolerance")} disabled={!editable} placeholder={floor?.wallThickness === null || floor?.wallThickness === undefined ? "0.50" : fmt(floor.wallThickness, 2)} onChange={(tol) => onChange({ tolerance: tol })} className="h-8 rounded-lg" />
         </div>
       </div>
+      {v.adjacency === "unheated" && (
+        <div className="space-y-1">
+          <Label htmlFor="sg-unheated" className="text-xs">
+            {t("fields.unheatedCase")}
+          </Label>
+          <div className="flex items-center gap-1">
+            <NativeSelect id="sg-unheated" value={v.unheatedCase} disabled={!editable} className="h-8 text-xs" onChange={(e) => onChange({ unheatedCase: e.target.value as UnheatedCase })}>
+              {unheatedCaseKeys.map((k) => (
+                <option key={k} value={k}>
+                  {tu(`cases.${k}`)}
+                </option>
+              ))}
+            </NativeSelect>
+            <label className="flex items-center gap-1 whitespace-nowrap text-xs" title={tu("insulatedHint")}>
+              <input type="checkbox" checked={v.unheatedInsulated} disabled={!editable} onChange={(e) => onChange({ unheatedInsulated: e.target.checked })} />
+              {tu("insulated")}
+            </label>
+          </div>
+        </div>
+      )}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-medium">{t("openings", { count: v.openings.length })}</h3>
@@ -919,6 +1003,16 @@ function SegmentPanel({
                     </NativeSelect>
                     <NumberField value={o.at} decimals={2} label={t("fields.at")} disabled={!editable} onChange={(at) => onOpening(o.id, { at: Math.min(1, Math.max(0, at ?? 0)) })} />
                   </div>
+                  {o.kind === "window" && (
+                    <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr] items-center gap-1 text-xs">
+                      <span className="text-muted-foreground" title={t("fields.shadingHint")}>
+                        {t("fields.shading")}
+                      </span>
+                      {(["horizon", "overhang", "finLeft", "finRight"] as const).map((k) => (
+                        <NumberField key={k} value={o[k]} decimals={0} label={t(`fields.${k}`)} disabled={!editable} placeholder={t(`fields.${k}`)} onChange={(v) => onOpening(o.id, { [k]: v })} />
+                      ))}
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     {area === null ? "" : `${fmt(area, 2)} m² · `}
                     {room ? [room.number, room.name].filter(Boolean).join(" ") : <span className="text-amber-700 dark:text-amber-400">{t("openingNoRoom")}</span>}

@@ -56,6 +56,9 @@ export type Construction = {
   depth: number | null;
   /** Ueq calculated elsewhere (SN EN ISO 13370) instead of Gl. 19. */
   ueqOverride: number | null;
+  /** Windows (SIA 380/1): Gesamtenergiedurchlassgrad g of the glazing and glass share f_F (null = 0.75). */
+  gValue: number | null;
+  frameFactor: number | null;
 };
 
 export const adjacencies = ["outside", "unheated", "heated", "ground"] as const;

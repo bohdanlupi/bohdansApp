@@ -130,7 +130,7 @@ can read everything; write access by role.
 /projekte                      list + create
 /projekte/[id]                 overview, Beteiligte, documents
 /projekte/[id]/kostenplan      BKP / KV
-/projekte/[id]/gebaeude        (planned) Geschosse + Pläne, /plan/[floor] tracing editor, /zonen, /sia3801 + PDF /api/pdf/sia3801/[id]
+/projekte/[id]/gebaeude        Gebäudemodell: Geschosse + Pläne, Decken / Böden, Zonen, Klima; /plan/[floor] tracing editor; /sia3801 SIA 380/1 + PDF /api/pdf/sia3801/[id]
 /projekte/[id]/heizung         redirects to the first checklist (31); checklist PDF /api/pdf/heating-plan/[id]
 /projekte/[id]/heizung/[31…61] SIA 108 phase: checklists (SIA 384/1, 384/2, 384/6, 384/7, EN-103, HE301 refs)
 /projekte/[id]/heizung/erzeugung?anlage=  242 Wärmeerzeugung (one page), per Anlage
@@ -573,7 +573,33 @@ openings list with kind / width / height / count / construction / position), roo
 Deviation from the plan text: the construction catalogue stays in heating_plans.data (loaded into the Gebäude pages),
 g-value / frame share are added there for 380/1 in phase C. Verified with a synthetic 10 × 6 m two-room model
 (scratchpad test: 5.00 / 6.00 m walls, 3.9 m² window deduction, partition O / W).
-Next: phase C (floors / ceilings across storeys by polygon overlap, zones, SIA 380/1 calculation + PDF, climate sets).
+Phase C followed the same day (below).
+Phase C built 2026-10-26 (same day). Data: scripts/gen-sia3801-data.mjs → src/lib/building/sia3801-data.ts (GENERATED, committed):
+climate set «sia2028» = 40 stations of the Excel «Klima» sheet (monthly θe, G on S/O/W/N/horizontal in MJ/m², θe,avg,
+design θe), «sia4028» = 60 stations of the prSIA 4028 Kompaktdaten (Tabelle 4 Monatswerte, altitude from Tabellen 1 / 2,
+design θe = Tabelle 7 «4 Tage kalt», matched by abbreviation; the Monatswerte are stored as text in the xlsx), shading
+tables f_s1 / f_s2 / f_s3 (Excel «Daten» rows 101–333, 13 orientation groups), Standardnutzung of the 12 categories
+(«Daten» rows 5–16 incl. Q_H,li0 / ΔQ_H,li / Ph,li). Construction got gValue / frameFactor (catalogue columns g, f_F).
+Model (schema.ts): zones [category I–XII, Neubau / Umbau, θi override, Regelung 0/1/2 K, Bauweise C_R/A_E 0.15/0.08/
+0.03/0.01, airflow override, η WRG, Wärmebrücken % + list ψ·l·b, θ_VL Bodenheizung], room.zoneId (null = the only
+zone), climate {set, station}, floors: floorAdjacency / floorConstructionId / ceilingAdjacency / ceilingConstructionId /
+slabConstructionId / partitionConstructionId + Tabelle 17 b cases (attic 0.9/0.7, cellarBelow 0.7/0.5, cellarAbove
+0.8/0.7, annex 0.8/0.7, glazed 0.9) on floors, vertices and passive rooms; openings: horizon / overhang / finLeft /
+finRight angles. stack.ts: plan px → building metres (origin = reference point tool «Referenz», rotation from north),
+rooms above / below by grid-sampled polygon overlap (≤ 20 000 cells), slab areas × factor envelope area / Σ room areas
+(Aussenmasse), sampling residue < 1 % absorbed. heat-link.ts derives floors / ceilings (slab to rooms of another θ or
+passive, remainder to the Geschoss adjacency) besides walls / openings / partitions; the heat load gets them as
+areaOverride elements with orientation H. sia3801.ts: monthly balance per zone exactly as the Excel (Q_T with b, Bauteil-
+heizung (θ_HF − θi)/4 on floors, Q_V with ρc by altitude, Q_i from the Standardnutzung, Q_s with 16-direction geometric
+interpolation and shading factors, γ / τ = C_R/H / a = 1 + τ/15 / η_g, Q_H ≥ 0 per month), A_th, Q_H,li = (Q_H,li0 +
+ΔQ_H,li·A_th/A_E)·f_cor, Umbau × 1.5 and Zielwert Neubau 0.7 × li as in the Excel (the norm text of 2.3.10–2.3.12 is
+unreadable in the PDF – check against the norm when a readable copy is at hand), EBF-weighted building values, warnings.
+UI: Gebäude overview = building-view.tsx (Geschosse, «Decken und Böden», «Nutzungszonen SIA 380/1», «Klima»),
+/gebaeude/sia3801 results page (building tiles, per zone facts, monthly table, element list) + PDF /api/pdf/sia3801/<id>
+(src/pdf/sia3801-document.tsx). Editor: zone select and b case per room, b case per unheated segment, shading angles per
+window, tool «Referenz» (origin). Verified with a synthetic 2-storey 10 × 10 m model (scratchpad test): January Q_T / Q_V /
+Q_i / Q_s and the Grenzwert equal the hand formulas (47.9 kWh/m² at A_th/A_E 2.13, Zürich). No real 380/1 example yet.
+Next: phase D (plan overlay in the PDFs, text-layer suggestions, SIA 2024 room types) and the user's browser test.
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

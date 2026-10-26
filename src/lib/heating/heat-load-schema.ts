@@ -58,6 +58,8 @@ export const constructionSchema = z.object({
   perimeter: num(0, 100000),
   depth: num(0, 50),
   ueqOverride: num(0, 10),
+  gValue: num(0, 1),
+  frameFactor: num(0, 1),
 });
 
 export const catalogSchema = lenientArray(constructionSchema, 200);
