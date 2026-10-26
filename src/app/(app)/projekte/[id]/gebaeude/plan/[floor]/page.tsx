@@ -8,7 +8,7 @@ import { Notice } from "@/components/planning/fields";
 import { requireProfile } from "@/lib/auth";
 
 import { loadHeatingPlan } from "../../../heizung/load-plan";
-import { loadBuildingModel, loadBuildingPlans, snapshotUrl } from "../../load-model";
+import { loadBuildingModel, loadBuildingPlans } from "../../load-model";
 import { PlanEditor } from "./plan-editor";
 
 export async function generateMetadata({ params }: PageProps<"/projekte/[id]/gebaeude/plan/[floor]">): Promise<Metadata> {
@@ -26,7 +26,8 @@ export default async function PlanEditorPage({ params }: PageProps<"/projekte/[i
   const current = model.floors.find((f) => f.key === floor);
   if (!current) notFound();
   const plan = plans.find((p) => p.floor === floor) ?? null;
-  const url = plan ? await snapshotUrl(id, plan.id) : null;
+  // Stable image URL (a route that redirects to a signed URL): page re-renders must not reload the large snapshot.
+  const url = plan ? `/api/gebaeude/plan/${plan.id}` : null;
   const t = await getTranslations("building");
 
   return (

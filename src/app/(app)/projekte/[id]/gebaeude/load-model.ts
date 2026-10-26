@@ -34,12 +34,3 @@ export const loadBuildingPlans = cache(async (projectId: string): Promise<PlanIn
     originY: p.origin_y,
   }));
 });
-
-/** Signed URL (1 h) of the PNG snapshot of a plan, for the editor's background image. */
-export async function snapshotUrl(projectId: string, planId: string): Promise<string | null> {
-  const supabase = await createClient();
-  const { data: plan } = await supabase.from("building_plans").select("snapshot_path").eq("id", planId).eq("project_id", projectId).maybeSingle();
-  if (!plan) return null;
-  const { data } = await supabase.storage.from("plans").createSignedUrl(plan.snapshot_path, 3600);
-  return data?.signedUrl ?? null;
-}
