@@ -101,6 +101,7 @@ const roomSchema = z.object({
   tau: num(0, 10000),
   inertiaManual: num(-3, 0),
   elements: lenientArray(elementSchema, 200),
+  modelRoomId: z.string().min(1).max(40).nullable().catch(null),
 });
 
 export const heatLoadSchema = z.object({

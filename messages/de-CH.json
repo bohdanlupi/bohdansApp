@@ -153,6 +153,7 @@
       "fee": "Honorar",
       "lvs": "Leistungsverzeichnisse",
       "costPlan": "Kostenplan",
+      "building": "Gebäude",
       "heating": "Heizung",
       "ventilation": "Lüftung",
       "sanitary": "Sanitär"
@@ -1986,6 +1987,123 @@
       "listHint": "Rohre und Formstücke Optipress-Therm bzw. Optiflex-Flowpress von Nussbaum, Strangregulierventile IMI STAD, Dämmschalen von Meier Tobler (+20 % für Formstücke und Armaturen). Heizkörper, Heizkörperventile und Rücklaufverschraubungen neutral – Typ je nach Heizkörper. Die Fussbodenheizungs-Verteiler gehören zur Fussbodenheizung."
     }
   },
+  "building": {
+    "title": "Gebäudemodell",
+    "description": "Architektenpläne pro Geschoss hochladen, kalibrieren und die Räume entlang der inneren Wandflächen nachzeichnen. Die Flächen und Volumen speisen den Wärmebedarf SIA 384/2; die Gebäudehülle (SIA 380/1) folgt in einem nächsten Schritt.",
+    "summary": {
+      "floors": "Geschosse",
+      "rooms": "Räume",
+      "heatedArea": "Fläche beheizt",
+      "uncalibrated": "Ein Plan ist noch nicht kalibriert."
+    },
+    "floors": "Geschosse",
+    "addFloor": "Geschoss hinzufügen",
+    "noFloors": "Noch keine Geschosse.",
+    "draw": "Zeichnen",
+    "notes": "Bemerkungen",
+    "floor": {
+      "name": "Geschoss",
+      "level": "Lage",
+      "height": "Raumhöhe [m]",
+      "wall": "Aussenwand [m]",
+      "plan": "Plan",
+      "rooms": "Räume",
+      "area": "A beheizt [m²]",
+      "planPage": "Seite {page}",
+      "calibrated": "1 m = {scale} px",
+      "uncalibrated": "nicht kalibriert",
+      "deletePlan": "Plan entfernen",
+      "deletePlanText": "Den Plan des Geschosses «{name}» entfernen? Die gezeichneten Räume bleiben erhalten.",
+      "noPlan": "kein Plan",
+      "delete": "Geschoss löschen",
+      "deleteText": "Das Geschoss «{name}» mit {rooms} Räumen und seinem Plan löschen?"
+    },
+    "upload": {
+      "button": "Plan hochladen",
+      "replace": "Ersetzen",
+      "title": "Plan für {floor}",
+      "file": "Datei",
+      "fileHint": "PDF (eine Seite wird gewählt), PNG oder JPEG, bis 50 MB. Das PDF wird im Browser gerendert.",
+      "fileType": "Nur PDF, PNG oder JPEG.",
+      "fileSize": "Die Datei ist grösser als 50 MB.",
+      "renderFailed": "Das PDF konnte nicht gelesen werden.",
+      "uploadFailed": "Der Plan konnte nicht hochgeladen werden.",
+      "page": "Seite wählen ({count} Seiten)",
+      "pageN": "Seite {n}",
+      "name": "Bezeichnung",
+      "rendering": "Seite wird gerendert …",
+      "uploading": "Wird hochgeladen …",
+      "submit": "Hochladen",
+      "done": "Plan hochgeladen."
+    },
+    "editor": {
+      "title": "Plan zeichnen",
+      "noPlan": "Für das Geschoss «{floor}» ist kein Plan hochgeladen.",
+      "tools": {
+        "select": "Wählen",
+        "room": "Raum",
+        "calibrate": "Massstab",
+        "north": "Norden",
+        "measure": "Messen",
+        "selectHint": "Räume wählen, Eckpunkte verschieben, Plan verschieben (1)",
+        "roomHint": "Raum als Polygon entlang der inneren Wandflächen zeichnen (2)",
+        "calibrateHint": "Zwei Punkte klicken und die reale Distanz eingeben",
+        "northHint": "Zwei Punkte klicken: vom Startpunkt in Richtung Norden",
+        "measureHint": "Distanz zwischen zwei Punkten messen"
+      },
+      "ortho": "Ortho",
+      "orthoHint": "Neue Kanten waagrecht / senkrecht (Shift kehrt um, Taste o)",
+      "undo": "Rückgängig",
+      "fit": "Ganzer Plan",
+      "scaleInfo": "1 m = {px} px",
+      "uncalibrated": "nicht kalibriert",
+      "calibrationSaved": "Kalibrierung gespeichert.",
+      "northSet": "gesetzt",
+      "northUnset": "nicht gesetzt",
+      "hints": {
+        "select": "Klick: Raum wählen · Ziehen: Plan verschieben · Eckpunkte des gewählten Raums ziehen · Delete: Raum löschen",
+        "room": "Klick: Eckpunkt setzen · Klick auf den ersten Punkt, Doppelklick oder Enter: Raum schliessen · Backspace: letzter Punkt · Esc: abbrechen",
+        "calibrate": "Zwei Punkte mit bekannter Distanz klicken (z. B. eine Masskette).",
+        "north": "Startpunkt klicken, dann einen Punkt in Richtung Norden.",
+        "measure": "Zwei Punkte klicken. Esc: zurück zum Wählen."
+      },
+      "plan": "Plan",
+      "pageN": "Seite {n}",
+      "scale": "Massstab",
+      "north": "Norden",
+      "floorHeight": "Raumhöhe",
+      "calibrateFirst": "Zuerst den Massstab kalibrieren – sonst haben die Räume keine Flächen.",
+      "room": "Raum",
+      "deleteRoom": "Raum löschen",
+      "fields": {
+        "number": "Nr.",
+        "name": "Name",
+        "kind": "Art",
+        "area": "Fläche netto",
+        "perimeter": "Umfang",
+        "volume": "Volumen",
+        "vertices": "Eckpunkte"
+      },
+      "kinds": {
+        "heated": "beheizt",
+        "passive": "unbeheizt"
+      },
+      "noSelection": "Kein Raum gewählt. Werkzeug «Raum» und Eckpunkte klicken.",
+      "noSelectionReadOnly": "Kein Raum gewählt.",
+      "rooms": "Räume ({count})",
+      "noRooms": "Noch keine Räume auf diesem Geschoss.",
+      "help": {
+        "pan": "Verschieben: Ziehen mit mittlerer / rechter Maustaste oder Alt + Ziehen; Zoom mit dem Mausrad.",
+        "snap": "Punkte fangen an bestehenden Eckpunkten; Ortho hält Kanten waagrecht / senkrecht.",
+        "keys": "Tasten: 1 Wählen, 2 Raum, o Ortho, Ctrl+Z Rückgängig, Esc Abbrechen."
+      },
+      "calibrateTitle": "Massstab kalibrieren",
+      "calibrateText": "Die geklickte Strecke ist {px} px lang. Wie lang ist sie in Wirklichkeit?",
+      "calibrateDistance": "Distanz [m]",
+      "cancel": "Abbrechen",
+      "calibrateConfirm": "Übernehmen"
+    }
+  },
   "heatingPlan": {
     "title": "Heizungsplanung",
     "description": "Planung der Heizungsanlage nach den Phasen der SIA 108 – mit den Anforderungen der SIA 384/1, SIA 384/2, SIA 384/6 und SIA 384/7, der EnDK-Vollzugshilfe EN-103 und der SWKI HE301-01.",
@@ -2978,6 +3096,15 @@
       "perRoom": "je Raum unterschiedlich",
       "pdfRow": "Räume mit eigener Gebäudeträgheit",
       "pdfValue": "{count} (θe,0 je Raum in der Raumliste)"
+    },
+    "model": {
+      "import": "Räume aus Gebäudemodell",
+      "importHint": "Übernimmt alle noch nicht verknüpften Räume des Gebäudemodells; verknüpfte Räume folgen dem Modell (Nr., Name, Geschoss, Fläche, Höhe).",
+      "imported": "{count} Räume übernommen.",
+      "upToDate": "Alle Räume des Gebäudemodells sind bereits übernommen.",
+      "linked": "aus Gebäudemodell",
+      "synced": "Die verknüpften Räume wurden an das Gebäudemodell angepasst – speichern.",
+      "none": "Das Gebäudemodell hat noch keine Räume mit Flächen."
     }
   },
   "floorHeating": {

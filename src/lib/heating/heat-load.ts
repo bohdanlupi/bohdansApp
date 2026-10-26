@@ -149,6 +149,8 @@ export type HeatRoom = {
   tau: number | null;
   inertiaManual: number | null;
   elements: RoomElement[];
+  /** Room of the Gebäudemodell this room is taken from (name, floor, area, height follow the model); null = manual. */
+  modelRoomId: string | null;
 };
 
 export type HeatLoadData = {

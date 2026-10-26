@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight, Copy, CopyPlus, FileText, Plus, Save, Trash2, TriangleAlert } from "lucide-react";
+import { Building2, ChevronDown, ChevronRight, Copy, CopyPlus, FileText, Link2, Plus, Save, Trash2, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -8,10 +8,11 @@ import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
 import type { FormMessageKey } from "@/components/form";
 import { NativeSelect } from "@/components/form";
-import { fmt, NumberField, Result, Section } from "@/components/planning/fields";
+import { fmt, Notice, NumberField, Result, Section } from "@/components/planning/fields";
 import { OptionField } from "@/components/planning/plan-ui";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { importModelRooms, type ModelRoomInfo } from "@/lib/building/heat-link";
 import {
   adjacencies,
   type Construction,
@@ -70,6 +71,8 @@ export function HeatEditor({
   site,
   catalog,
   editable,
+  modelRooms,
+  savedData,
 }: {
   id: string;
   projectId: string;
@@ -78,12 +81,16 @@ export function HeatEditor({
   site: HeatSite;
   catalog: Construction[];
   editable: boolean;
+  /** Rooms of the Gebäudemodell (linked rooms follow them). */
+  modelRooms: ModelRoomInfo[];
+  /** Data as stored, when `initialData` was already adjusted to the model on load (the editor starts dirty). */
+  savedData?: HeatLoadData;
 }) {
   const t = useTranslations("heatLoad");
   const tForms = useTranslations("forms");
   const [name, setName] = useState(initialName);
   const [data, setData] = useState(initialData);
-  const [saved, setSaved] = useState({ name: initialName, data: initialData });
+  const [saved, setSaved] = useState({ name: initialName, data: savedData ?? initialData });
   const [open, setOpen] = useState<Set<string>>(() => new Set(initialData.rooms.slice(0, 1).map((r) => r.id)));
   const [pending, startTransition] = useTransition();
   const dirty = name !== saved.name || data !== saved.data;
@@ -109,9 +116,9 @@ export function HeatEditor({
       }
     });
 
-  const addRoom = () => {
+  const roomTemplate = (): HeatRoom => {
     const last = data.rooms.at(-1);
-    const room: HeatRoom = {
+    return {
       id: newId(),
       number: nextNumber(data.rooms),
       name: "",
@@ -130,12 +137,23 @@ export function HeatEditor({
       tau: last?.tau ?? null,
       inertiaManual: last?.inertiaManual ?? null,
       elements: [],
+      modelRoomId: null,
     };
+  };
+  const addRoom = () => {
+    const room = roomTemplate();
     set("rooms", [...data.rooms, room]);
     setOpen((o) => new Set([...o, room.id]));
   };
+  const importRooms = () => {
+    if (!modelRooms.length) return toast.error(t("model.none"));
+    const { data: next, added } = importModelRooms(data, modelRooms, () => ({ ...roomTemplate(), id: newId() }));
+    if (!added) return toast.message(t("model.upToDate"));
+    setData(next);
+    toast.success(t("model.imported", { count: added }));
+  };
   const duplicateRoom = (room: HeatRoom) => {
-    const copy = { ...room, id: newId(), number: nextNumber(data.rooms), elements: room.elements.map((e) => ({ ...e, id: newId() })) };
+    const copy = { ...room, id: newId(), number: nextNumber(data.rooms), modelRoomId: null, elements: room.elements.map((e) => ({ ...e, id: newId() })) };
     const index = data.rooms.findIndex((r) => r.id === room.id);
     set("rooms", [...data.rooms.slice(0, index + 1), copy, ...data.rooms.slice(index + 1)]);
   };
@@ -247,13 +265,24 @@ export function HeatEditor({
               </span>
             )}
             {editable && (
-              <Button size="sm" variant="outline" onClick={addRoom}>
-                <Plus />
-                {t("addRoom")}
-              </Button>
+              <>
+                <Button size="sm" variant="outline" onClick={importRooms} title={t("model.importHint")}>
+                  <Building2 />
+                  {t("model.import")}
+                </Button>
+                <Button size="sm" variant="outline" onClick={addRoom}>
+                  <Plus />
+                  {t("addRoom")}
+                </Button>
+              </>
             )}
           </div>
         </header>
+        {savedData && savedData !== initialData && dirty && (
+          <div className="border-b px-4 py-2">
+            <Notice tone="info">{t("model.synced")}</Notice>
+          </div>
+        )}
         {data.rooms.length === 0 ? (
           <p className="px-4 py-6 text-sm text-muted-foreground">{t("noRooms")}</p>
         ) : (
@@ -281,6 +310,8 @@ export function HeatEditor({
                 {data.rooms.map((room, index) => {
                   const r = result.rooms[index];
                   const isOpen = open.has(room.id);
+                  const linked = room.modelRoomId !== null;
+                  const geomEditable = editable && !linked;
                   return (
                     <Fragment key={room.id}>
                       <tr className={cn("border-b", isOpen && "bg-muted/30")}>
@@ -290,13 +321,16 @@ export function HeatEditor({
                           </button>
                         </td>
                         <td className="w-20 py-0.5 pr-1">
-                          <input className={inputCls} value={room.number} maxLength={20} disabled={!editable} aria-label={t("room.number")} onChange={(e) => setRoom(room.id, { number: e.target.value })} />
+                          <div className="flex items-center gap-1" title={linked ? t("model.linked") : undefined}>
+                            {linked && <Link2 className="size-3.5 shrink-0 text-brand" aria-label={t("model.linked")} />}
+                            <input className={inputCls} value={room.number} maxLength={20} disabled={!geomEditable} aria-label={t("room.number")} onChange={(e) => setRoom(room.id, { number: e.target.value })} />
+                          </div>
                         </td>
                         <td className="px-1">
-                          <input className={cn(inputCls, "min-w-40")} value={room.name} maxLength={120} disabled={!editable} aria-label={t("room.name")} onChange={(e) => setRoom(room.id, { name: e.target.value })} />
+                          <input className={cn(inputCls, "min-w-40")} value={room.name} maxLength={120} disabled={!geomEditable} aria-label={t("room.name")} onChange={(e) => setRoom(room.id, { name: e.target.value })} />
                         </td>
                         <td className="w-16 px-1">
-                          <input className={inputCls} value={room.floor} maxLength={20} disabled={!editable} aria-label={t("room.floor")} onChange={(e) => setRoom(room.id, { floor: e.target.value })} />
+                          <input className={inputCls} value={room.floor} maxLength={20} disabled={!geomEditable} aria-label={t("room.floor")} onChange={(e) => setRoom(room.id, { floor: e.target.value })} />
                         </td>
                         <td className="px-1">
                           <NativeSelect value={room.kind} disabled={!editable} className="h-7 text-xs" aria-label={t("room.kind")} onChange={(e) => setRoom(room.id, { kind: e.target.value as HeatRoom["kind"] })}>
@@ -314,10 +348,10 @@ export function HeatEditor({
                           )}
                         </td>
                         <td className="w-20 px-1">
-                          <NumberField value={room.area} decimals={2} label="A" disabled={!editable} onChange={(v) => setRoom(room.id, { area: v })} />
+                          <NumberField value={room.area} decimals={2} label="A" disabled={!geomEditable} onChange={(v) => setRoom(room.id, { area: v })} />
                         </td>
                         <td className="w-16 px-1">
-                          <NumberField value={room.height} decimals={2} label="h" disabled={!editable} onChange={(v) => setRoom(room.id, { height: v })} />
+                          <NumberField value={room.height} decimals={2} label="h" disabled={!geomEditable} onChange={(v) => setRoom(room.id, { height: v })} />
                         </td>
                         <td className="px-1">
                           {room.kind === "heated" && (

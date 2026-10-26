@@ -153,6 +153,7 @@
       "fee": "Onorario",
       "lvs": "Capitolati",
       "costPlan": "Piano dei costi",
+      "building": "Edificio",
       "heating": "Riscaldamento",
       "ventilation": "Ventilazione",
       "sanitary": "Sanitario"
@@ -1986,6 +1987,123 @@
       "listHint": "Tubi e raccordi Optipress-Therm o Optiflex-Flowpress di Nussbaum, valvole di regolazione IMI STAD, coppelle isolanti di Meier Tobler (+20 % per raccordi e rubinetteria). Radiatori, valvole dei radiatori e raccordi di ritorno neutri – tipo secondo il radiatore. I collettori del riscaldamento a pavimento fanno parte del riscaldamento a pavimento."
     }
   },
+  "building": {
+    "title": "Modello dell’edificio",
+    "description": "Caricare i piani dell’architetto per piano, calibrarli e tracciare i locali lungo le facce interne delle pareti. Superfici e volumi alimentano il fabbisogno termico SIA 384/2; l’involucro (SIA 380/1) seguirà.",
+    "summary": {
+      "floors": "Piani",
+      "rooms": "Locali",
+      "heatedArea": "Superficie riscaldata",
+      "uncalibrated": "Un piano non è ancora calibrato."
+    },
+    "floors": "Piani",
+    "addFloor": "Aggiungi piano",
+    "noFloors": "Nessun piano.",
+    "draw": "Disegna",
+    "notes": "Osservazioni",
+    "floor": {
+      "name": "Piano",
+      "level": "Livello",
+      "height": "Altezza [m]",
+      "wall": "Muro est. [m]",
+      "plan": "Planimetria",
+      "rooms": "Locali",
+      "area": "A riscaldata [m²]",
+      "planPage": "Pagina {page}",
+      "calibrated": "1 m = {scale} px",
+      "uncalibrated": "non calibrata",
+      "deletePlan": "Rimuovi planimetria",
+      "deletePlanText": "Rimuovere la planimetria del piano «{name}»? I locali disegnati restano.",
+      "noPlan": "nessuna planimetria",
+      "delete": "Elimina piano",
+      "deleteText": "Eliminare il piano «{name}» con {rooms} locali e la sua planimetria?"
+    },
+    "upload": {
+      "button": "Carica planimetria",
+      "replace": "Sostituisci",
+      "title": "Planimetria per {floor}",
+      "file": "File",
+      "fileHint": "PDF (si sceglie una pagina), PNG o JPEG, fino a 50 MB. Il PDF viene reso nel browser.",
+      "fileType": "Solo PDF, PNG o JPEG.",
+      "fileSize": "Il file supera 50 MB.",
+      "renderFailed": "Impossibile leggere il PDF.",
+      "uploadFailed": "Impossibile caricare la planimetria.",
+      "page": "Scegli la pagina ({count} pagine)",
+      "pageN": "Pagina {n}",
+      "name": "Denominazione",
+      "rendering": "Rendering della pagina …",
+      "uploading": "Caricamento …",
+      "submit": "Carica",
+      "done": "Planimetria caricata."
+    },
+    "editor": {
+      "title": "Disegna planimetria",
+      "noPlan": "Per il piano «{floor}» non è caricata alcuna planimetria.",
+      "tools": {
+        "select": "Seleziona",
+        "room": "Locale",
+        "calibrate": "Scala",
+        "north": "Nord",
+        "measure": "Misura",
+        "selectHint": "Selezionare locali, spostare vertici, spostare la planimetria (1)",
+        "roomHint": "Tracciare un locale come poligono lungo le facce interne delle pareti (2)",
+        "calibrateHint": "Cliccare due punti e inserire la distanza reale",
+        "northHint": "Cliccare due punti: dal punto iniziale verso nord",
+        "measureHint": "Misurare la distanza tra due punti"
+      },
+      "ortho": "Orto",
+      "orthoHint": "Nuovi lati orizzontali / verticali (Shift inverte, tasto o)",
+      "undo": "Annulla",
+      "fit": "Intera planimetria",
+      "scaleInfo": "1 m = {px} px",
+      "uncalibrated": "non calibrata",
+      "calibrationSaved": "Calibrazione salvata.",
+      "northSet": "impostato",
+      "northUnset": "non impostato",
+      "hints": {
+        "select": "Clic: scegli locale · Trascina: sposta planimetria · Trascina i vertici del locale scelto · Delete: elimina locale",
+        "room": "Clic: vertice · Clic sul primo punto, doppio clic o Invio: chiudi · Backspace: ultimo punto · Esc: annulla",
+        "calibrate": "Cliccare due punti a distanza nota (p. es. una quota).",
+        "north": "Cliccare il punto iniziale, poi un punto verso nord.",
+        "measure": "Cliccare due punti. Esc: torna alla selezione."
+      },
+      "plan": "Planimetria",
+      "pageN": "Pagina {n}",
+      "scale": "Scala",
+      "north": "Nord",
+      "floorHeight": "Altezza",
+      "calibrateFirst": "Calibrare prima la scala – altrimenti i locali non hanno superficie.",
+      "room": "Locale",
+      "deleteRoom": "Elimina locale",
+      "fields": {
+        "number": "N.",
+        "name": "Nome",
+        "kind": "Tipo",
+        "area": "Superficie netta",
+        "perimeter": "Perimetro",
+        "volume": "Volume",
+        "vertices": "Vertici"
+      },
+      "kinds": {
+        "heated": "riscaldato",
+        "passive": "non riscaldato"
+      },
+      "noSelection": "Nessun locale scelto. Strumento «Locale» e cliccare i vertici.",
+      "noSelectionReadOnly": "Nessun locale scelto.",
+      "rooms": "Locali ({count})",
+      "noRooms": "Nessun locale su questo piano.",
+      "help": {
+        "pan": "Spostare: trascinare con il tasto centrale / destro o Alt + trascinare; zoom con la rotella.",
+        "snap": "I punti si agganciano ai vertici esistenti; Orto mantiene i lati orizzontali / verticali.",
+        "keys": "Tasti: 1 seleziona, 2 locale, o orto, Ctrl+Z annulla, Esc interrompi."
+      },
+      "calibrateTitle": "Calibra la scala",
+      "calibrateText": "Il segmento cliccato è lungo {px} px. Quanto misura in realtà?",
+      "calibrateDistance": "Distanza [m]",
+      "cancel": "Annulla",
+      "calibrateConfirm": "Applica"
+    }
+  },
   "heatingPlan": {
     "title": "Progettazione del riscaldamento",
     "description": "Progettazione dell’impianto di riscaldamento secondo le fasi della SIA 108 – con le esigenze delle norme SIA 384/1, SIA 384/2, SIA 384/6 e SIA 384/7, dell’aiuto all’applicazione EnDK EN-103 e della direttiva SITC HE301-01.",
@@ -2978,6 +3096,15 @@
       "perRoom": "diversa per locale",
       "pdfRow": "Locali con inerzia propria",
       "pdfValue": "{count} (θe,0 per locale nella lista dei locali)"
+    },
+    "model": {
+      "import": "Locali dal modello dell’edificio",
+      "importHint": "Riprende tutti i locali del modello non ancora collegati; i locali collegati seguono il modello (n., nome, piano, superficie, altezza).",
+      "imported": "{count} locali ripresi.",
+      "upToDate": "Tutti i locali del modello sono già ripresi.",
+      "linked": "dal modello dell’edificio",
+      "synced": "I locali collegati sono stati adeguati al modello dell’edificio – salvare.",
+      "none": "Il modello dell’edificio non ha ancora locali con superficie."
     }
   },
   "floorHeating": {

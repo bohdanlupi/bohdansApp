@@ -14,6 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
+      building_models: {
+        Row: {
+          created_at: string
+          data: Json
+          project_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          project_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          project_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_models_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "project_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_models_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_models_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      building_plans: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_path: string
+          floor: string
+          height: number
+          id: string
+          name: string
+          north: number | null
+          origin_x: number
+          origin_y: number
+          page: number
+          project_id: string
+          rotation: number
+          scale: number | null
+          snapshot_path: string
+          updated_at: string
+          width: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_path: string
+          floor: string
+          height: number
+          id?: string
+          name?: string
+          north?: number | null
+          origin_x?: number
+          origin_y?: number
+          page?: number
+          project_id: string
+          rotation?: number
+          scale?: number | null
+          snapshot_path: string
+          updated_at?: string
+          width: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_path?: string
+          floor?: string
+          height?: number
+          id?: string
+          name?: string
+          north?: number | null
+          origin_x?: number
+          origin_y?: number
+          page?: number
+          project_id?: string
+          rotation?: number
+          scale?: number | null
+          snapshot_path?: string
+          updated_at?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_nodes: {
         Row: {
           article_number: string | null
