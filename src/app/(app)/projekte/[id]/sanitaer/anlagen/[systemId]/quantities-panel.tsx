@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { QuantityLine } from "@/lib/sanitary/quantities";
 
-import type { LvWithChapters } from "../../lueftung/anlagen/[systemId]/quantities-panel";
-import { insertSanitaryQuantities } from "../actions";
+import type { LvWithChapters } from "../../../lueftung/anlagen/[systemId]/quantities-panel";
+import { insertSanitaryQuantities } from "../../actions";
 
 const groups = ["pipes", "valves", "central", "insulation"] as const;
 type Group = (typeof groups)[number];

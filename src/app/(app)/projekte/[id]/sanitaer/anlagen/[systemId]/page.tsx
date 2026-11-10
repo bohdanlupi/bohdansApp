@@ -8,17 +8,17 @@ import { requireProfile } from "@/lib/auth";
 import { type I18nText, pickText } from "@/lib/i18n-text";
 import { createClient } from "@/lib/supabase/server";
 
-import { loadSanitarySystems } from "../load-systems";
+import { loadSanitarySystems } from "../../load-systems";
 import { SanitaryEditor } from "./system-editor";
 
-export async function generateMetadata({ params }: PageProps<"/projekte/[id]/sanitaer/[systemId]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/projekte/[id]/sanitaer/anlagen/[systemId]">): Promise<Metadata> {
   const { id, systemId } = await params;
   const system = (await loadSanitarySystems(id)).find((s) => s.id === systemId);
   const t = await getTranslations("sanitary");
   return { title: system ? `${system.name} · ${t("title")}` : t("title") };
 }
 
-export default async function SanitarySystemPage({ params }: PageProps<"/projekte/[id]/sanitaer/[systemId]">) {
+export default async function SanitarySystemPage({ params }: PageProps<"/projekte/[id]/sanitaer/anlagen/[systemId]">) {
   const { id, systemId } = await params;
   const profile = await requireProfile();
   const system = (await loadSanitarySystems(id)).find((s) => s.id === systemId);
@@ -42,7 +42,7 @@ export default async function SanitarySystemPage({ params }: PageProps<"/projekt
 
   return (
     <div className="space-y-4">
-      <Link href={`/projekte/${id}/sanitaer`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link href={`/projekte/${id}/sanitaer/anlagen`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" />
         {t("title")}
       </Link>

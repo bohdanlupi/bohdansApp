@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { mediumColors, type SanitarySchema } from "@/lib/sanitary/schema";
 
-import { SvgPrims } from "../../lueftung/anlagen/[systemId]/schema-view";
+import { SvgPrims } from "../../../lueftung/anlagen/[systemId]/schema-view";
 
 /** Pixels per schema unit: the element names (8 units) at about 10.5 px, the sizes and lengths (7 units) at 9 px. */
 const SCALE = 1.3;

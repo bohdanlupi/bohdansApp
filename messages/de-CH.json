@@ -1075,7 +1075,8 @@
       "done": "Erledigt",
       "na": "Nicht zutreffend",
       "note": "Notiz",
-      "ref": "Referenz:"
+      "ref": "Referenz:",
+      "excluded": "Nicht zutreffend gemäss Auslegungskriterien"
     },
     "criteria": {
       "title": "Auslegungskriterien",
@@ -3107,6 +3108,154 @@
       "storageTempNone": "– (keine VL-Temperatur der Heizgruppen)",
       "storageReturn": "Rücklauf zum Speicher",
       "storageTempHint": "Speicher mit der höchsten VL-Temperatur der Heizgruppen. Rücklauf = Mischung der Gruppen-Rückläufe mit ihren Volumenströmen auf der Verteilerseite V̇ = Φ / (ρ · cp · (T Speicher − T RL))."
+    }
+  },
+  "sanitaryPlan": {
+    "title": "Sanitärplanung",
+    "description": "Planung der Sanitäranlagen nach den Phasen der SIA 108 – Trinkwasser nach SVGW W3 (mit den Ergänzungen E1–E4), SIA 385/1 und SIA 385/2, Liegenschaftsentwässerung (Schmutz- und Regenwasser) nach SN 592000.",
+    "navLabel": "Sanitärplanung",
+    "overview": "Übersicht und Auslegungskriterien",
+    "phases": "Phasen SIA 108",
+    "phaseList": "Phasen",
+    "phaseLabel": "Phase {code}",
+    "phaseNotes": "Bemerkungen zur Phase",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Checkliste (PDF)",
+    "schema": "Sanitärschema",
+    "systemsNav": "Anlagen und Prinzipschema",
+    "hideNa": "Nicht zutreffende ausblenden ({n})",
+    "showNa": "Nicht zutreffende einblenden ({n})",
+    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf SVGW W3:2013 mit den Ergänzungen W3/E1–E4, SIA 385/1:2020, SIA 385/2:2015, SN 592000:2024 und SIA 108:2014. Massgebend ist der Normtext.",
+    "yes": "ja",
+    "no": "nein",
+    "criteria": {
+      "title": "Auslegungskriterien",
+      "description": "Grundlagen für Systemwahl und Bemessung. Sie bestimmen, welche Prüfpunkte in den Phasen gelten; nicht zutreffende Punkte bleiben markiert sichtbar und lassen sich je Phase ausblenden."
+    },
+    "systems": {
+      "title": "Anlagen im Sanitärschema",
+      "description": "Die Warmhaltung der erfassten Trinkwasseranlagen – zum Abgleich mit den Auslegungskriterien.",
+      "none": "Noch keine Anlage erfasst.",
+      "circulation": {
+        "none": "ohne Warmhaltung",
+        "conventional": "Zirkulation",
+        "rar": "Rohr an Rohr"
+      }
+    },
+    "params": {
+      "scope": "Gewerke im Auftrag",
+      "buildingType": "Gebäude",
+      "construction": "Vorhaben",
+      "use": "Nutzung",
+      "useHint": "Hygienisch sensible Nutzung nach SVGW W3/E3 und W3/E4: Spitäler, Alters- und Pflegeheime, Hotels, Bäder, Sportanlagen.",
+      "units": "Nutzeinheiten",
+      "unitsHint": "Wohnungen bzw. Mieteinheiten; leer = ohne Angabe.",
+      "dhw": "Wassererwärmung",
+      "heater": "Wassererwärmer",
+      "warmKeeping": "Warmhaltung Warmwasser",
+      "warmKeepingHint": "Zirkulation oder Begleitheizung (Warmhalteband, Rohr an Rohr) der Verteilleitungen.",
+      "heatSource": "Wärmequelle Warmwasser",
+      "more": "Weitere Merkmale Trinkwasser",
+      "pressureBoost": "Druckerhöhungsanlage",
+      "pressureReduce": "Druckminderer (Versorgungsdruck über 5 bar)",
+      "waterTreatment": "Enthärtung / Wasserbehandlung",
+      "rainwaterUse": "Regenwassernutzung im Gebäude",
+      "fireWater": "Wasserlöschposten / Innenhydranten",
+      "drainage": "Entwässerung",
+      "belowBackflowLevel": "Ablaufstellen unter der Rückstauebene",
+      "liftingStation": "Abwasserhebeanlage",
+      "separators": "Abscheider",
+      "infiltration": "Versickerung von Regenwasser",
+      "retention": "Retention / Rückhalt",
+      "flatRoof": "Flachdach (Notentwässerung)",
+      "undergroundGarage": "Tiefgarage / Rampe"
+    },
+    "options": {
+      "scope": {
+        "drinkingWater": "Trinkwasser",
+        "wastewater": "Schmutzwasser (Abwasser)",
+        "rainwater": "Regenwasser"
+      },
+      "buildingType": {
+        "efh": "Einfamilienhaus",
+        "mfh": "Mehrfamilienhaus",
+        "nonResidential": "Nichtwohnbau"
+      },
+      "construction": {
+        "new": "Neubau",
+        "renovation": "Umbau / Sanierung"
+      },
+      "use": {
+        "residential": "Wohnen / übliche Nutzung",
+        "sensitive": "Hygienisch sensibel (Spital, Heim, Hotel, Bad)"
+      },
+      "dhw": {
+        "central": "Zentral",
+        "decentral": "Dezentral (Durchlauferhitzer je Nutzeinheit)",
+        "mixed": "Zentral und dezentral"
+      },
+      "heater": {
+        "storage": "Speicher-Wassererwärmer",
+        "instant": "Durchfluss / Frischwasserstation"
+      },
+      "warmKeeping": {
+        "circulation": "Zirkulation",
+        "traceHeating": "Begleitheizung (Warmhalteband, Rohr an Rohr)",
+        "none": "Keine (nur Ausstossleitungen)"
+      },
+      "heatSource": {
+        "boiler": "Heizkessel / Wärmeerzeuger",
+        "heatPump": "Wärmepumpe",
+        "solar": "Solar (mit Nachwärmung)",
+        "electric": "Elektrisch",
+        "district": "Fernwärme"
+      },
+      "separators": {
+        "grease": "Fettabscheider",
+        "oil": "Mineralölabscheider"
+      }
+    },
+    "derived": {
+      "title": "Abgeleitete Anforderungen",
+      "description": "Grenzwerte, die sich aus den Auslegungskriterien ergeben (Trinkwasser nach SIA 385/1, SVGW W3 und W3/E4; Entwässerung nach SN 592000).",
+      "heaterOut": "Austritt Wassererwärmer",
+      "heaterOutWarm": "≥ 60 °C (Speicher ≥ 60 °C, warmgehaltene Leitungen ≥ 55 °C)",
+      "heaterOutCold": "≥ 55 °C (ohne warmgehaltene Leitungen)",
+      "tap": "Entnahmestelle warm",
+      "tapValue": "≥ 50 °C nach 7-facher Ausstosszeit",
+      "cold": "Kaltwasser",
+      "coldValue": "≤ 25 °C nach 30 s Vorlauf",
+      "flushTime": "Ausstosszeit bis 40 °C",
+      "flushWarm": "≤ 10 s (mit Warmhaltung)",
+      "flushCold": "≤ 15 s (ohne Warmhaltung)",
+      "restPressure": "Ruhedruck Entnahmestelle",
+      "restPressureValue": "≤ 500 kPa (Garten / Garage ≤ 1’000 kPa)",
+      "flowPressure": "Mindestfliessdruck",
+      "flowPressureValue": "≥ 100 kPa",
+      "velocity": "Fliessgeschwindigkeit (W3 2.1.3)",
+      "velocityValue": "Verteilleitung 2.0 · Stockwerk 3.0 · Ausstoss 4.0 m/s",
+      "houseConnection": "Hausanschlussleitung",
+      "houseConnectionValue": "≤ 40 kPa bis Zähler · min. DN 32 aussen / DN 25 innen",
+      "pump": "Zirkulationspumpe (SIA 385/1 5.6)",
+      "pumpValue": "≤ 8 W + 0.2 W/m · L_circ (Ziel 3 W + 0.1 W/m)",
+      "insulation": "Dämmung",
+      "insulationValue": "PWH nach SIA 385/1 Tabelle 3 · PWC lückenlos ≥ PIR 30 mm",
+      "pressureTest": "Druckprüfung (W3 11.1)",
+      "pressureTestValue": "1.5 × Betriebsdruck, min. 1’500 kPa, ≤ 10 kPa in 1 h",
+      "legionella": "Legionellen (W3/E4)",
+      "legionellaSensitive": "< 100 KBE/l Intensivpflege · < 1’000 KBE/l Duschen",
+      "legionellaStandard": "Höchstwert 1’000 KBE/l öffentlich zugängliche Duschen",
+      "control": "Kontrollintervalle (W3/E4 Tabelle 1)",
+      "controlSensitive": "Betrieb 2–4 Wochen · Temperatur 1–2 Monate · Beprobung jährlich",
+      "controlStandard": "Betrieb 1 Monat · Temperatur 3 Monate · Beprobung bei Verdacht",
+      "backflow": "Rückstauebene",
+      "backflowValue": "Strassenniveau am Anschlusspunkt, sofern die Gemeinde nichts anderes festlegt",
+      "backflowProtection": "Schutz unter der Rückstauebene",
+      "backflowProtectionValue": "Hebeanlage mit Rückstauschleife (Rückstauverschluss nur ausnahmsweise)",
+      "slope": "Mindestgefälle Grund-/Sammelleitungen",
+      "slopeValue": "Schmutzwasser 2 % (≥ 1 % ausnahmsweise) · Regenwasser 1 %",
+      "rainfall": "Regenspende Bemessung",
+      "rainfallValue": "r = 0.03 l/(s·m²) · Notentwässerung Flachdach zusätzlich"
     }
   },
   "heatLoad": {

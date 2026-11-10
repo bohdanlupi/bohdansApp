@@ -19,10 +19,10 @@ import { insulationMaterials, insulationStyle, sizeText } from "@/lib/sanitary/p
 import { systemQuantities } from "@/lib/sanitary/quantities";
 import { layoutSchema } from "@/lib/sanitary/schema";
 
-import type { LvWithChapters } from "../../lueftung/anlagen/[systemId]/quantities-panel";
-import { SchemaDxfButton } from "../../lueftung/anlagen/[systemId]/schema-dxf-button";
-import { SchemaPrintButton } from "../../lueftung/anlagen/[systemId]/schema-print-dialog";
-import { deleteSanitarySystem, saveSanitarySchemaPlan, saveSanitarySystem } from "../actions";
+import type { LvWithChapters } from "../../../lueftung/anlagen/[systemId]/quantities-panel";
+import { SchemaDxfButton } from "../../../lueftung/anlagen/[systemId]/schema-dxf-button";
+import { SchemaPrintButton } from "../../../lueftung/anlagen/[systemId]/schema-print-dialog";
+import { deleteSanitarySystem, saveSanitarySchemaPlan, saveSanitarySystem } from "../../actions";
 import { SanitaryQuantitiesPanel } from "./quantities-panel";
 import { SanitarySchemaView } from "./schema-view";
 import { TreeEditor } from "./tree-editor";

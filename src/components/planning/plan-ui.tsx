@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
 import { NumberField } from "./fields";
 import type { SaveStatus } from "./use-plan";
 
-type Item = { id: string; ref: string; text: L10n };
+/** `applies: false` marks an item excluded by the design criteria (shown struck through, not counted). */
+type Item = { id: string; ref: string; text: L10n; applies?: boolean };
 
 /** Lüftung references without a norm name are clauses of SIA 382/5. */
 const defaultRef = (ref: string) => (ref.startsWith("SIA") ? ref : `SIA 382/5 ${ref}`);
@@ -28,7 +29,10 @@ export function SaveIndicator({ status }: { status: SaveStatus }) {
   );
 }
 
-/** Checklist with done / not applicable states and a note per item. */
+/**
+ * Checklist with done / not applicable states and a note per item. Items the criteria exclude (`applies: false`)
+ * are marked, not counted; `hideNa` hides them together with the ones set to not applicable.
+ */
 export function Checklist({
   title,
   items,
@@ -37,6 +41,7 @@ export function Checklist({
   editable,
   onChange,
   formatRef = defaultRef,
+  hideNa = false,
 }: {
   title: string;
   items: Item[];
@@ -45,28 +50,31 @@ export function Checklist({
   editable: boolean;
   onChange: (id: string, value: CheckState | null) => void;
   formatRef?: (ref: string) => string;
+  hideNa?: boolean;
 }) {
   const t = useTranslations("kwlPlan.checklist");
-  const done = items.filter((item) => isHandled(checks[item.id])).length;
-  if (items.length === 0) return null;
+  const applicable = items.filter((item) => item.applies !== false);
+  const done = applicable.filter((item) => isHandled(checks[item.id])).length;
+  const shown = hideNa ? items.filter((item) => item.applies !== false && checks[item.id]?.s !== "na") : items;
+  if (items.length === 0 || shown.length === 0) return null;
 
   return (
     <section className="rounded-xl border">
       <header className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
         <h2 className="font-semibold">{title}</h2>
-        <span className={cn("text-xs tabular-nums", done === items.length ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground")}>
-          {done}/{items.length}
+        <span className={cn("text-xs tabular-nums", done === applicable.length ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground")}>
+          {done}/{applicable.length}
         </span>
       </header>
       <ul className="divide-y">
-        {items.map((item) => (
+        {shown.map((item) => (
           <ChecklistRow
             key={item.id}
             item={item}
             state={checks[item.id] ?? null}
             language={language}
             editable={editable}
-            labels={{ done: t("done"), na: t("na"), note: t("note"), ref: t("ref") }}
+            labels={{ done: t("done"), na: t("na"), note: t("note"), ref: t("ref"), excluded: t("excluded") }}
             formatRef={formatRef}
             onChange={(value) => onChange(item.id, value)}
           />
@@ -89,18 +97,20 @@ function ChecklistRow({
   state: CheckState | null;
   language: AppLanguage;
   editable: boolean;
-  labels: { done: string; na: string; note: string; ref: string };
+  labels: { done: string; na: string; note: string; ref: string; excluded: string };
   formatRef: (ref: string) => string;
   onChange: (value: CheckState | null) => void;
 }) {
   const [noteOpen, setNoteOpen] = useState(Boolean(state?.n));
   const id = useId();
+  const excluded = item.applies === false;
+  const struck = state?.s === "na" || excluded;
   // Unchecking keeps a note as an open item.
   const toggle = (s: "done" | "na") =>
     onChange(state?.s === s ? (state.n ? { s: "open", n: state.n } : null) : { s, n: state?.n });
 
   return (
-    <li className={cn("px-4 py-2", state?.s === "na" && "opacity-60")}>
+    <li className={cn("px-4 py-2", struck && "opacity-60")}>
       <div className="flex items-start gap-3">
         <button
           type="button"
@@ -116,9 +126,10 @@ function ChecklistRow({
           {state?.s === "done" && <Check className="size-3.5" />}
         </button>
         <div className="min-w-0 flex-1">
-          <p className={cn("text-sm", state?.s === "na" && "line-through")}>{item.text[language]}</p>
+          <p className={cn("text-sm", struck && "line-through")}>{item.text[language]}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {labels.ref} {formatRef(item.ref)}
+            {excluded && <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[11px]">{labels.excluded}</span>}
           </p>
           {noteOpen && (
             <textarea

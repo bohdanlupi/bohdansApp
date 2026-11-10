@@ -461,6 +461,21 @@ Apparategruppe for PWC and PWH with Verteileranschluss (84250) or Aquaplus-Über
 Editor order: Zentrale | Zirkulation | Berechnung; Schema with the Verteilung below it and the element panel (Leitung)
 to the right; Materialliste.
 
+Sanitärplanung (2026-11-10, table sanitary_plans, src/lib/sanitary/plan-schema.ts + phases.ts): the Sanitär tab now
+works like Heizung / Lüftung – nav «Übersicht und Auslegungskriterien», SIA 108 phases 31–61 with 281 checklist items,
+then «Sanitärschema» = the Anlagen (moved to /sanitaer/anlagen[/systemId]). Sources: SVGW W3:2013 with W3/E1
+(Rückflussverhinderung), E2 (Betrieb und Unterhalt), E3 (Hygiene), E4 (Selbstkontrolle – not Dimensionierung),
+SIA 385/1:2020, SIA 385/2:2015, SN 592000:2024 (Schmutz- und Regenwasser; no Gas, no Sprinkler – user decision).
+Criteria (scope Trinkwasser / Schmutzwasser / Regenwasser, building type, sensitive use, units, central / decentral
+DHW, storage / instant heater, warm keeping, heat source, pressure boost / reduce, water treatment, rainwater use,
+fire-hose posts, below backflow level, lifting station, separators, infiltration, retention, flat roof, garage) do not
+hide items: excluded items stay visible, struck through with a badge, counted as handled, and the planner hides them
+together with the «nicht zutreffend» ones per phase with a toggle (plan.hideNa; shared Checklist got `applies` and
+`hideNa`). Dossier / phase PDF at /api/pdf/sanitary-plan/<projectId>[?phase=] via PlanChecklistDocument. Derived facts
+of the overview are fixed norm values (temperatures 60/55/50 °C, PWC ≤ 25 °C, Ausstosszeit 10/15 s, W3 pressures and
+velocities, pump limit, insulation, Druckprüfung, Legionellen limits and W3/E4 intervals, Rückstauebene, Gefälle,
+Regenspende).
+
 243 Heizkörper (2026-10-10): per Anlage (heating_plants.radiators) and Heizgruppe, rooms from the Wärmebedarf with
 1..n Heizkörper (load split evenly or by share). Zehnder Charleston / Clinic / Turned / Nova Jet horizontal / vertikal:
 Φ50 and n from the technical catalogues, sized by Φ = Φ50 · ((θVL + θRL)/2 − θi) / 50)^n (arithmetic ΔT as Zehnder's

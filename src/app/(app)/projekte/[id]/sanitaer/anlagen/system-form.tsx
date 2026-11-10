@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { initialFormState } from "@/lib/form-state";
 
-import { createSanitarySystem } from "./actions";
+import { createSanitarySystem } from "../actions";
 
 export function NewSanitarySystemDialog({ projectId, defaultName }: { projectId: string; defaultName: string }) {
   const t = useTranslations();

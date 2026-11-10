@@ -1,74 +1,48 @@
-import { Droplets } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { EmptyState } from "@/components/page-header";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { localeToLanguage, type Locale } from "@/i18n/config";
 import { requireProfile } from "@/lib/auth";
-import { formatNumber } from "@/lib/number-input";
-import { evaluateSystem } from "@/lib/sanitary/network";
+import type { SanNode } from "@/lib/sanitary/network";
 
 import { loadProject } from "../load-project";
+import { loadSanitaryPlan } from "./load-plan";
 import { loadSanitarySystems } from "./load-systems";
-import { NewSanitarySystemDialog } from "./system-form";
+import { PlanOverview } from "./plan-overview";
+
+/** Warmhaltung of an Anlage: Rohr an Rohr if any pipe uses it, else Zirkulation if any, else none. */
+function circulationOf(nodes: SanNode[]): "none" | "conventional" | "rar" {
+  let found: "none" | "conventional" | "rar" = "none";
+  const walk = (list: SanNode[]) => {
+    for (const n of list) {
+      if (n.type === "pipe" && n.circulation === "rar") found = "rar";
+      else if (n.type === "pipe" && n.circulation === "conventional" && found === "none") found = "conventional";
+      walk(n.children);
+    }
+  };
+  walk(nodes);
+  return found;
+}
 
 export async function generateMetadata({ params }: PageProps<"/projekte/[id]/sanitaer">): Promise<Metadata> {
   const project = await loadProject((await params).id);
-  const t = await getTranslations("sanitary");
+  const t = await getTranslations("sanitaryPlan");
   return { title: project ? `${t("title")} · ${project.number}` : t("title") };
 }
 
-export default async function SanitaryPage({ params }: PageProps<"/projekte/[id]/sanitaer">) {
+export default async function SanitaryPlanPage({ params }: PageProps<"/projekte/[id]/sanitaer">) {
   const { id } = await params;
   const profile = await requireProfile();
-  const t = await getTranslations("sanitary");
-  const systems = await loadSanitarySystems(id);
+  const [plan, systems] = await Promise.all([loadSanitaryPlan(id), loadSanitarySystems(id)]);
+  const language = localeToLanguage((await getLocale()) as Locale);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">{t("title")}</h2>
-          <p className="max-w-3xl text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        {profile.role !== "viewer" && <NewSanitarySystemDialog projectId={id} defaultName={t("defaultName", { n: systems.length + 1 })} />}
-      </div>
-      {systems.length === 0 ? (
-        <EmptyState icon={Droplets} title={t("emptyTitle")} text={t("emptyText")} />
-      ) : (
-        <div className="rounded-xl border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-4">{t("name")}</TableHead>
-                <TableHead className="text-right">{t("results.lu")}</TableHead>
-                <TableHead className="text-right">{t("results.heatLoss")}</TableHead>
-                <TableHead className="pr-4">{t("results.pump")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {systems.map((s) => {
-                const r = evaluateSystem(s.data);
-                return (
-                  <TableRow key={s.id} className="relative">
-                    <TableCell className="pl-4">
-                      <Link href={`/projekte/${id}/sanitaer/${s.id}`} className="font-medium after:absolute after:inset-0">
-                        {s.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {r.lu.cold} / {r.lu.warm}
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">{r.pump ? `${formatNumber(r.pump.heatLoss, 2)} kWh/d` : "–"}</TableCell>
-                    <TableCell className="pr-4">{r.pump ? `${r.pump.chosen?.name ?? "–"} · ${formatNumber(r.pump.flow, 0)} l/h · ${formatNumber(r.pump.head, 0)} mbar` : "–"}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-    </div>
+    <PlanOverview
+      projectId={id}
+      initial={plan}
+      systems={systems.map((s) => ({ id: s.id, name: s.name, circulation: circulationOf(s.data.network) }))}
+      language={language}
+      editable={profile.role !== "viewer"}
+    />
   );
 }

@@ -9,6 +9,7 @@ import type { FormState } from "@/lib/form-state";
 import { initialsOf, nextRevisionIndex, parseSchemaPlan } from "@/lib/kwl/schema-plan";
 import { evaluateSystem } from "@/lib/sanitary/network";
 import { systemQuantities } from "@/lib/sanitary/quantities";
+import { parseSanitaryPlan } from "@/lib/sanitary/plan-schema";
 import { emptySanitaryData, parseSanitaryData } from "@/lib/sanitary/system-schema";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -34,7 +35,7 @@ export async function createSanitarySystem(_prev: FormState, formData: FormData)
   if (error || !row) return { error: "saveFailed" };
 
   revalidatePath(`/projekte/${projectId.data}/sanitaer`, "layout");
-  redirect(`/projekte/${projectId.data}/sanitaer/${row.id}`);
+  redirect(`/projekte/${projectId.data}/sanitaer/anlagen/${row.id}`);
 }
 
 export async function saveSanitarySystem(id: string, projectId: string, name: string, data: unknown): Promise<{ error?: string }> {
@@ -61,7 +62,7 @@ export async function deleteSanitarySystem(id: string, projectId: string): Promi
   const { error } = await supabase.from("sanitary_systems").delete().eq("id", id).eq("project_id", projectId);
   if (error) return { error: "deleteFailed" };
   revalidatePath(`/projekte/${projectId}/sanitaer`, "layout");
-  redirect(`/projekte/${projectId}/sanitaer`);
+  redirect(`/projekte/${projectId}/sanitaer/anlagen`);
 }
 
 const schemaPrintSchema = z.object({
@@ -97,7 +98,7 @@ export async function saveSanitarySchemaPlan(systemId: string, projectId: string
     .eq("id", systemId)
     .eq("project_id", projectId);
   if (error) return { error: "saveFailed" };
-  revalidatePath(`/projekte/${projectId}/sanitaer/${systemId}`);
+  revalidatePath(`/projekte/${projectId}/sanitaer/anlagen/${systemId}`);
   return {};
 }
 
@@ -220,4 +221,19 @@ export async function insertSanitaryQuantities(
   await renumberLv(lvId);
   revalidatePath(`/projekte/${projectId}/lv/${lvId}`, "layout");
   return { count: rows.length - (needsGroup ? 1 : 0) };
+}
+
+/** Saves the Sanitärplanung of a project (Auslegungskriterien, checklists, notes). */
+export async function saveSanitaryPlan(projectId: string, data: unknown): Promise<{ error?: string }> {
+  await assertRole("admin", "planer");
+  if (!z.uuid().safeParse(projectId).success) return { error: "invalidInput" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("sanitary_plans")
+    .upsert({ project_id: projectId, data: parseSanitaryPlan(data) as unknown as Json }, { onConflict: "project_id" });
+  if (error) return { error: "saveFailed" };
+
+  revalidatePath(`/projekte/${projectId}/sanitaer`, "layout");
+  return {};
 }

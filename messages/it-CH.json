@@ -1075,7 +1075,8 @@
       "done": "Fatto",
       "na": "Non pertinente",
       "note": "Nota",
-      "ref": "Riferimento:"
+      "ref": "Riferimento:",
+      "excluded": "Non applicabile secondo i criteri di dimensionamento"
     },
     "criteria": {
       "title": "Criteri di dimensionamento",
@@ -3107,6 +3108,154 @@
       "storageTempNone": "– (nessuna temperatura di mandata dei gruppi)",
       "storageReturn": "Ritorno all’accumulatore",
       "storageTempHint": "Accumulatore alla temperatura di mandata più alta dei gruppi. Ritorno = miscela dei ritorni dei gruppi con le loro portate lato distributore V̇ = Φ / (ρ · cp · (T accumulatore − T ritorno))."
+    }
+  },
+  "sanitaryPlan": {
+    "title": "Progettazione sanitaria",
+    "description": "Progettazione degli impianti sanitari secondo le fasi della SIA 108 – acqua potabile secondo SSIGA W3 (con i complementi E1–E4), SIA 385/1 e SIA 385/2, smaltimento delle acque dei fondi (acque luride e meteoriche) secondo SN 592000.",
+    "navLabel": "Progettazione sanitaria",
+    "overview": "Panoramica e criteri di dimensionamento",
+    "phases": "Fasi SIA 108",
+    "phaseList": "Fasi",
+    "phaseLabel": "Fase {code}",
+    "phaseNotes": "Osservazioni sulla fase",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Lista di controllo (PDF)",
+    "schema": "Schema sanitario",
+    "systemsNav": "Impianti e schema di principio",
+    "hideNa": "Nascondere i punti non applicabili ({n})",
+    "showNa": "Mostrare i punti non applicabili ({n})",
+    "normsHint": "Le liste di controllo riprendono le esigenze per analogia e rimandano a SSIGA W3:2013 con i complementi W3/E1–E4, SIA 385/1:2020, SIA 385/2:2015, SN 592000:2024 e SIA 108:2014. Fa stato il testo delle norme.",
+    "yes": "sì",
+    "no": "no",
+    "criteria": {
+      "title": "Criteri di dimensionamento",
+      "description": "Basi per la scelta del sistema e il dimensionamento. Determinano quali punti di controllo valgono nelle fasi; i punti non applicabili restano visibili, contrassegnati, e possono essere nascosti per fase."
+    },
+    "systems": {
+      "title": "Impianti dello schema sanitario",
+      "description": "Il mantenimento in temperatura degli impianti d’acqua potabile registrati – da confrontare con i criteri di dimensionamento.",
+      "none": "Nessun impianto registrato.",
+      "circulation": {
+        "none": "senza mantenimento in temperatura",
+        "conventional": "Circolazione",
+        "rar": "Tubo in tubo"
+      }
+    },
+    "params": {
+      "scope": "Opere del mandato",
+      "buildingType": "Edificio",
+      "construction": "Intervento",
+      "use": "Utilizzo",
+      "useHint": "Utilizzo sensibile dal punto di vista igienico secondo SSIGA W3/E3 e W3/E4: ospedali, case per anziani e di cura, alberghi, piscine, impianti sportivi.",
+      "units": "Unità d’uso",
+      "unitsHint": "Appartamenti o unità locative; vuoto = senza indicazione.",
+      "dhw": "Produzione d’acqua calda",
+      "heater": "Scaldacqua",
+      "warmKeeping": "Mantenimento in temperatura dell’acqua calda",
+      "warmKeepingHint": "Circolazione o riscaldamento d’accompagnamento (nastro riscaldante, tubo in tubo) delle condotte di distribuzione.",
+      "heatSource": "Fonte di calore acqua calda",
+      "more": "Altre caratteristiche acqua potabile",
+      "pressureBoost": "Impianto di sovrappressione",
+      "pressureReduce": "Riduttore di pressione (pressione di rete oltre 5 bar)",
+      "waterTreatment": "Addolcimento / trattamento dell’acqua",
+      "rainwaterUse": "Utilizzo dell’acqua piovana nell’edificio",
+      "fireWater": "Posti incendio / idranti interni",
+      "drainage": "Smaltimento delle acque",
+      "belowBackflowLevel": "Punti di scarico sotto il livello di rigurgito",
+      "liftingStation": "Stazione di sollevamento delle acque luride",
+      "separators": "Separatori",
+      "infiltration": "Infiltrazione delle acque meteoriche",
+      "retention": "Ritenzione",
+      "flatRoof": "Tetto piano (scarico d’emergenza)",
+      "undergroundGarage": "Autorimessa interrata / rampa"
+    },
+    "options": {
+      "scope": {
+        "drinkingWater": "Acqua potabile",
+        "wastewater": "Acque luride",
+        "rainwater": "Acque meteoriche"
+      },
+      "buildingType": {
+        "efh": "Casa unifamiliare",
+        "mfh": "Casa plurifamiliare",
+        "nonResidential": "Edificio non residenziale"
+      },
+      "construction": {
+        "new": "Nuova costruzione",
+        "renovation": "Trasformazione / risanamento"
+      },
+      "use": {
+        "residential": "Abitazione / utilizzo usuale",
+        "sensitive": "Sensibile dal punto di vista igienico (ospedale, casa di cura, albergo, piscina)"
+      },
+      "dhw": {
+        "central": "Centralizzata",
+        "decentral": "Decentralizzata (scaldacqua istantaneo per unità)",
+        "mixed": "Centralizzata e decentralizzata"
+      },
+      "heater": {
+        "storage": "Scaldacqua ad accumulo",
+        "instant": "Istantaneo / stazione d’acqua fresca"
+      },
+      "warmKeeping": {
+        "circulation": "Circolazione",
+        "traceHeating": "Riscaldamento d’accompagnamento (nastro riscaldante, tubo in tubo)",
+        "none": "Nessuno (solo condotte di prelievo)"
+      },
+      "heatSource": {
+        "boiler": "Caldaia / generatore di calore",
+        "heatPump": "Pompa di calore",
+        "solar": "Solare (con post-riscaldamento)",
+        "electric": "Elettrica",
+        "district": "Teleriscaldamento"
+      },
+      "separators": {
+        "grease": "Separatore di grassi",
+        "oil": "Separatore di oli minerali"
+      }
+    },
+    "derived": {
+      "title": "Esigenze derivate",
+      "description": "Valori limite che derivano dai criteri di dimensionamento (acqua potabile secondo SIA 385/1, SSIGA W3 e W3/E4; smaltimento secondo SN 592000).",
+      "heaterOut": "Uscita dello scaldacqua",
+      "heaterOutWarm": "≥ 60 °C (accumulo ≥ 60 °C, condotte mantenute in temperatura ≥ 55 °C)",
+      "heaterOutCold": "≥ 55 °C (senza condotte mantenute in temperatura)",
+      "tap": "Punto di prelievo acqua calda",
+      "tapValue": "≥ 50 °C dopo 7 volte il tempo di prelievo",
+      "cold": "Acqua fredda",
+      "coldValue": "≤ 25 °C dopo 30 s di scorrimento",
+      "flushTime": "Tempo di prelievo fino a 40 °C",
+      "flushWarm": "≤ 10 s (con mantenimento in temperatura)",
+      "flushCold": "≤ 15 s (senza mantenimento in temperatura)",
+      "restPressure": "Pressione statica al punto di prelievo",
+      "restPressureValue": "≤ 500 kPa (giardino / garage ≤ 1’000 kPa)",
+      "flowPressure": "Pressione di flusso minima",
+      "flowPressureValue": "≥ 100 kPa",
+      "velocity": "Velocità di flusso (W3 2.1.3)",
+      "velocityValue": "Distribuzione 2.0 · piano 3.0 · prelievo 4.0 m/s",
+      "houseConnection": "Condotta d’allacciamento",
+      "houseConnectionValue": "≤ 40 kPa fino al contatore · min. DN 32 esterno / DN 25 interno",
+      "pump": "Pompa di circolazione (SIA 385/1 5.6)",
+      "pumpValue": "≤ 8 W + 0.2 W/m · L_circ (obiettivo 3 W + 0.1 W/m)",
+      "insulation": "Isolamento",
+      "insulationValue": "PWH secondo SIA 385/1 tabella 3 · PWC senza interruzioni ≥ PIR 30 mm",
+      "pressureTest": "Prova di pressione (W3 11.1)",
+      "pressureTestValue": "1.5 × pressione d’esercizio, min. 1’500 kPa, ≤ 10 kPa in 1 h",
+      "legionella": "Legionelle (W3/E4)",
+      "legionellaSensitive": "< 100 UFC/l cure intensive · < 1’000 UFC/l docce",
+      "legionellaStandard": "Valore massimo 1’000 UFC/l per docce accessibili al pubblico",
+      "control": "Intervalli di controllo (W3/E4 tabella 1)",
+      "controlSensitive": "Esercizio 2–4 settimane · temperatura 1–2 mesi · campionamento annuale",
+      "controlStandard": "Esercizio 1 mese · temperatura 3 mesi · campionamento in caso di sospetto",
+      "backflow": "Livello di rigurgito",
+      "backflowValue": "Livello stradale al punto d’allacciamento, salvo diversa disposizione comunale",
+      "backflowProtection": "Protezione sotto il livello di rigurgito",
+      "backflowProtectionValue": "Stazione di sollevamento con ansa antirigurgito (valvola antirigurgito solo in via eccezionale)",
+      "slope": "Pendenza minima dei collettori",
+      "slopeValue": "Acque luride 2 % (≥ 1 % in via eccezionale) · acque meteoriche 1 %",
+      "rainfall": "Intensità di pioggia di dimensionamento",
+      "rainfallValue": "r = 0.03 l/(s·m²) · scarico d’emergenza supplementare per i tetti piani"
     }
   },
   "heatLoad": {
