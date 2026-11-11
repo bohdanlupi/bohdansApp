@@ -1,10 +1,10 @@
 "use client";
 
-import { FileText } from "lucide-react";
+import { Eye, EyeOff, FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { evaluateKwl, type SystemDrops } from "@/lib/kwl/evaluate";
 import { findPhase, type WidgetKey } from "@/lib/kwl/phases";
@@ -70,6 +70,9 @@ export function PhaseView({
   const { plan, update, status } = usePlan(projectId, initial, editable, savePlan);
   const evaluated = useMemo(() => calcs.map((c) => ({ ...c, result: evaluateKwl(c.data, c.system) })), [calcs]);
   const props: WidgetProps = { plan, update, projectId, calcs: evaluated, lvs, language, editable };
+  const hidden = phase.sections
+    .flatMap((s) => (s.kind === "checklist" ? s.items : []))
+    .filter((item) => (item.when && !item.when(plan.params)) || plan.checks[item.id]?.s === "na").length;
 
   return (
     <div className="space-y-4">
@@ -81,8 +84,18 @@ export function PhaseView({
           <h2 className="text-lg font-semibold">{phase.title[language]}</h2>
           <p className="max-w-3xl text-sm text-muted-foreground">{phase.goal[language]}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {editable && <SaveIndicator status={status} />}
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!editable}
+            aria-pressed={plan.hideNa}
+            onClick={() => update((d) => ({ ...d, hideNa: !d.hideNa }))}
+          >
+            {plan.hideNa ? <EyeOff /> : <Eye />}
+            {plan.hideNa ? t("showNa", { n: hidden }) : t("hideNa", { n: hidden })}
+          </Button>
           <a href={`/api/pdf/kwl-plan/${projectId}?phase=${phase.code}`} target="_blank" rel="noopener" className={buttonVariants({ variant: "outline" })}>
             <FileText />
             {t("pdfPhase")}
@@ -96,7 +109,7 @@ export function PhaseView({
           const Widget = widgets[section.widget];
           return <Widget key={`w-${section.widget}`} {...props} />;
         }
-        const items = section.items.filter((item) => !item.when || item.when(plan.params));
+        const items = section.items.map((item) => ({ ...item, applies: !item.when || item.when(plan.params) }));
         return (
           <Checklist
             key={`c-${section.key}-${index}`}
@@ -105,6 +118,7 @@ export function PhaseView({
             checks={plan.checks}
             language={language}
             editable={editable}
+            hideNa={plan.hideNa}
             onChange={(id, value) =>
               update((d) => {
                 const checks = { ...d.checks };

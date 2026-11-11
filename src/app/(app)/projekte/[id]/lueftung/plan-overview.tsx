@@ -86,12 +86,18 @@ export function PlanOverview({
           <OptionField label={t("params.kitchen")} value={p.kitchen} options={kitchenConcepts} optionLabel={o("kitchen")} editable={editable} onChange={(v) => set("kitchen", v)} />
           <OptionField label={t("params.airtightness")} value={p.airtightness} options={[...airtightnessClasses, "unknown"] as const} optionLabel={o("airtightness")} editable={editable} onChange={(v) => set("airtightness", v)} />
           <OptionField label={t("params.noise")} value={p.noise} options={noiseLevels} optionLabel={o("noise")} editable={editable} onChange={(v) => set("noise", v)} hint={t("params.noiseHint")} />
+          <OptionField label={t("params.usage")} value={p.usage} options={["residential", "nonResidential", "sensitive"] as const} optionLabel={o("usage")} editable={editable} onChange={(v) => set("usage", v)} hint={t("params.usageHint")} />
+          <OptionField label={t("params.odaClass")} value={p.odaClass} options={["oda1", "oda2", "oda3"] as const} optionLabel={o("odaClass")} editable={editable} onChange={(v) => set("odaClass", v)} hint={t("params.odaClassHint")} />
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           <Toggle label={t("params.radon")} checked={p.radon} editable={editable} onChange={(v) => set("radon", v)} />
           <Toggle label={t("params.strongWind")} checked={p.strongWind} editable={editable} onChange={(v) => set("strongWind", v)} />
           <Toggle label={t("params.fog")} checked={p.fog} editable={editable} onChange={(v) => set("fog", v)} />
           <Toggle label={t("params.publicIntake")} checked={p.publicIntake} editable={editable} onChange={(v) => set("publicIntake", v)} />
+          <Toggle label={t("params.humidifier")} checked={p.humidifier} editable={editable} onChange={(v) => set("humidifier", v)} />
+          <Toggle label={t("params.coolingCoil")} checked={p.coolingCoil} editable={editable} onChange={(v) => set("coolingCoil", v)} />
+          <Toggle label={t("params.earthTube")} checked={p.earthTube} editable={editable} onChange={(v) => set("earthTube", v)} />
+          <Toggle label={t("params.airHeating")} checked={p.airHeating} editable={editable} onChange={(v) => set("airHeating", v)} />
         </div>
       </Section>
 

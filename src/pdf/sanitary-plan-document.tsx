@@ -42,6 +42,7 @@ export function SanitaryPlanDocument({
     [t("params.construction"), o("construction", p.construction)],
     [t("params.use"), o("use", p.use)],
     [t("params.units"), p.units === null ? "-" : String(p.units)],
+    [t("params.noise"), o("noise", p.noise)],
     [t("params.dhw"), o("dhw", p.dhw)],
     [t("params.heater"), o("heater", p.heater)],
     [t("params.warmKeeping"), o("warmKeeping", p.warmKeeping)],

@@ -40,6 +40,7 @@ export function HeatingPlanDocument({
     [t("params.buildingType"), o("buildingType", p.buildingType)],
     [t("params.construction"), o("construction", p.construction)],
     [t("params.standard"), o("standard", p.standard)],
+    [t("params.noise"), o("noise", p.noise)],
     [t("params.power"), p.power === null ? "-" : `${p.power} kW`],
     [t("params.energyArea"), p.energyArea === null ? "-" : `${p.energyArea} m²`],
     [t("params.multiUnit"), yes(p.multiUnit)],

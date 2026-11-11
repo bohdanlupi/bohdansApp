@@ -8,7 +8,7 @@ import { requireProfile } from "@/lib/auth";
 import { deriveElements, modelRoomInfos, syncLinkedRooms } from "@/lib/building/heat-link";
 import { allRoomMetrics } from "@/lib/building/model";
 
-import { loadBuildingModel, loadBuildingPlans } from "../../../../gebaeude/load-model";
+import { loadBuildingModel, loadBuildingPlans } from "../../../gebaeude/load-model";
 import { loadHeatCalcs, loadHeatingPlan } from "../../../load-plan";
 import { HeatEditor } from "./heat-editor";
 

@@ -46,6 +46,12 @@ export function KwlPlanDocument({
     [t("params.kitchen"), o("kitchen", p.kitchen)],
     [t("params.airtightness"), o("airtightness", p.airtightness)],
     [t("params.noise"), o("noise", p.noise)],
+    [t("params.usage"), o("usage", p.usage)],
+    [t("params.odaClass"), o("odaClass", p.odaClass)],
+    [t("params.humidifier"), p.humidifier ? t("yes") : t("no")],
+    [t("params.coolingCoil"), p.coolingCoil ? t("yes") : t("no")],
+    [t("params.earthTube"), p.earthTube ? t("yes") : t("no")],
+    [t("params.airHeating"), p.airHeating ? t("yes") : t("no")],
   ];
 
   return (

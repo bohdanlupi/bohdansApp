@@ -36,6 +36,18 @@ export const planParamsSchema = z.object({
   fog: bool,
   publicIntake: bool,
   electricityPrice: num(0, 10, 0.3),
+  /** Use of the ventilated rooms: Wohnen, Nichtwohnbau (Büro, Schule …) or hygiene-sensitive (Labor, Behandlung) – SIA 382/1, SWKI VA104-01. */
+  usage: z.enum(["residential", "nonResidential", "sensitive"]).catch("residential"),
+  /** Outdoor air quality class AUL 1–3 at the intake (SN EN 16798-3 ODA, SWKI VA104-01 Tabelle 4). */
+  odaClass: z.enum(["oda1", "oda2", "oda3"]).catch("oda2"),
+  /** Air humidification in the system. */
+  humidifier: bool,
+  /** Cooling coil with dehumidification (condensate) in the unit. */
+  coolingCoil: bool,
+  /** Erdwärmeübertrager / earth tube on the outdoor air. */
+  earthTube: bool,
+  /** Heat emission through the supply air (Lufterhitzer in the unit) – SIA 382/1 5.3.3, 5.4. */
+  airHeating: bool,
 });
 
 export const dwellingTypeSchema = z.object({
@@ -80,6 +92,8 @@ export const planDataSchema = z.object({
     40,
   ),
   notes: lenientRecord(z.string().max(4000), 10),
+  /** Items set to «nicht zutreffend» or excluded by the criteria are hidden in the phase pages. */
+  hideNa: bool,
 });
 
 export type PlanData = z.infer<typeof planDataSchema>;

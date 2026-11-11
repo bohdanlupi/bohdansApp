@@ -153,7 +153,6 @@
       "fee": "Honoraires",
       "lvs": "Descriptifs",
       "costPlan": "Plan des coûts",
-      "building": "Bâtiment",
       "heating": "Chauffage",
       "ventilation": "Ventilation",
       "sanitary": "Sanitaire"
@@ -1041,7 +1040,7 @@
   },
   "kwlPlan": {
     "title": "Planification VMC",
-    "description": "Planification de la ventilation contrôlée selon les phases de la SIA 108 – avec les exigences, calculs et diagrammes de la SIA 382/5 – jusqu’à l’appel d’offres et au-delà.",
+    "description": "Planification de l’installation de ventilation selon les phases de la SIA 108 – ventilation de logement contrôlée selon SIA 382/5 avec calculs et diagrammes, exigences générales de la SIA 382/1, hygiène selon SICC VA104-01, protection contre le bruit selon SIA 181 – jusqu’à l’appel d’offres et au-delà.",
     "navLabel": "Planification VMC",
     "overview": "Aperçu et critères de dimensionnement",
     "phases": "Phases SIA 108",
@@ -1062,7 +1061,7 @@
       "hint": "Étape 3 = plus grande valeur entre 30 m³/h par chambre et l’air repris selon tableau 3. Ventilation de base = 0.1 h⁻¹ du volume, comparée au débit minimal. Pression externe selon tableau 7."
     },
     "phaseList": "Phases",
-    "normsHint": "Les listes de contrôle reprennent le sens des exigences et renvoient aux chiffres de la SIA 382/5:2021 ou SIA 108:2014. Le texte de la norme fait foi.",
+    "normsHint": "Les listes de contrôle reprennent les exigences par analogie et renvoient aux chiffres de la SIA 382/5:2021 (chiffres seuls), SIA 382/1:2014, SICC VA104-01:2019, SIA 181:2020, EnDK EN-105 / EN-110 ou SIA 108:2014. Le texte de la norme fait foi.",
     "phaseLabel": "Phase {code}",
     "phaseNotes": "Remarques sur la phase",
     "save": {
@@ -1080,7 +1079,7 @@
     },
     "criteria": {
       "title": "Critères de dimensionnement",
-      "description": "Bases pour le choix du système et le dimensionnement (SIA 382/5 chapitre 3). Ils déterminent les points de contrôle et valeurs limites des phases et doivent être consignés par écrit avec le maître d’ouvrage."
+      "description": "Bases pour le choix du système et le dimensionnement (SIA 382/5 chapitre 3). Elles déterminent les points de contrôle et les valeurs limites valables dans les phases ; les points non applicables restent visibles, marqués, et peuvent être masqués par phase. Elles doivent être consignées par écrit avec le maître d’ouvrage."
     },
     "params": {
       "buildingType": "Bâtiment",
@@ -1105,7 +1104,15 @@
       "radon": "Zone radon (probabilité > 10 %)",
       "strongWind": "Zone de vents forts / immeuble tour",
       "fog": "Zone de brouillard fréquent",
-      "publicIntake": "Prise d’air sur terrain accessible au public"
+      "publicIntake": "Prise d’air sur terrain accessible au public",
+      "usage": "Utilisation",
+      "usageHint": "Détermine la classe de propreté et d’étanchéité (SICC VA104-01 tableau 1) et les exigences de la SIA 382/1 pour les bâtiments non résidentiels.",
+      "odaClass": "Qualité de l’air extérieur",
+      "odaClassHint": "QA 1 propre · QA 2 pollué (ville, trafic) · QA 3 très pollué ; détermine les étages de filtration (SICC VA104-01 tableau 4).",
+      "humidifier": "Humidification de l’air",
+      "coolingCoil": "Batterie froide déshumidifiante (condensat)",
+      "earthTube": "Échangeur air-sol",
+      "airHeating": "Chauffage à air (émission de chaleur par l’air pulsé)"
     },
     "options": {
       "buildingType": {
@@ -1159,6 +1166,16 @@
       "noise": {
         "minimum": "Exigences minimales",
         "increased": "Exigences accrues"
+      },
+      "usage": {
+        "residential": "Habitation",
+        "nonResidential": "Non résidentiel (bureau, école, administration)",
+        "sensitive": "Exigences d’hygiène accrues (laboratoire, soins)"
+      },
+      "odaClass": {
+        "oda1": "QA 1 – propre",
+        "oda2": "QA 2 – pollué",
+        "oda3": "QA 3 – très pollué"
       }
     },
     "derived": {
@@ -1456,7 +1473,11 @@
     "dwellingsNav": "Concepts",
     "pdf": "Dossier (PDF)",
     "pdfPhase": "Liste de contrôle (PDF)",
-    "systemsNav": "Dimensionnement"
+    "systemsNav": "Dimensionnement",
+    "hideNa": "Masquer les points non applicables ({n})",
+    "showNa": "Afficher les points non applicables ({n})",
+    "yes": "oui",
+    "no": "non"
   },
   "kwlSystem": {
     "title": "Installations de ventilation",
@@ -2349,9 +2370,9 @@
   },
   "heatingPlan": {
     "title": "Planification du chauffage",
-    "description": "Planification de l’installation de chauffage selon les phases de la SIA 108 – avec les exigences des normes SIA 384/1, SIA 384/2, SIA 384/6 et SIA 384/7, de l’aide à l’application EnDK EN-103 et de la directive SICC HE301-01.",
+    "description": "Planification de l’installation de chauffage selon les phases de la SIA 108 – avec les exigences des SIA 384/1, SIA 384/2, SIA 384/6 et SIA 384/7, de l’aide à l’exécution EnDK EN-103, de la SICC HE301-01 et de la protection contre le bruit selon SIA 181.",
     "navLabel": "Planification du chauffage",
-    "overview": "Vue d’ensemble et bases de planification",
+    "overview": "Vue d’ensemble et critères de dimensionnement",
     "phases": "Phases SIA 108",
     "phaseList": "Phases",
     "phaseLabel": "Phase {code}",
@@ -2359,12 +2380,12 @@
     "pdf": "Dossier (PDF)",
     "pdfPhase": "Liste de contrôle (PDF)",
     "chooseGenerators": "Choisir la production et l’émission de chaleur dans la vue d’ensemble pour afficher les points de contrôle correspondants.",
-    "normsHint": "Les listes de contrôle reprennent les exigences par analogie et renvoient aux normes SIA 384/1:2022, SIA 384/2:2020, SIA 384/6:2021, SIA 384/7:2015, EnDK EN-103 (2020), SICC HE301-01 et SIA 108:2014. Le texte des normes fait foi. L’eau chaude suivra avec la planification sanitaire.",
+    "normsHint": "Les listes de contrôle reprennent les exigences par analogie et renvoient aux SIA 384/1:2022, SIA 384/2:2020, SIA 384/6:2021, SIA 384/7:2015, EnDK EN-103 (2020), SICC HE301-01, SIA 181:2020 et SIA 108:2014. Le texte de la norme fait foi. L’eau chaude relève de la planification sanitaire.",
     "yes": "oui",
     "no": "non",
     "criteria": {
-      "title": "Bases de planification",
-      "description": "Bases pour le choix du système et le dimensionnement (SIA 384/1 chapitre 2). Elles déterminent les points de contrôle valables dans les phases et doivent être consignées par écrit avec le maître d’ouvrage."
+      "title": "Critères de dimensionnement",
+      "description": "Bases pour le choix du système et le dimensionnement (SIA 384/1 chapitre 2). Elles déterminent les points de contrôle valables dans les phases ; les points non applicables restent visibles, marqués, et peuvent être masqués par phase. Producteurs de chaleur, émission et puissance sont fixés ici à la main – les installations des chapitres 242 / 243 servent à la comparaison."
     },
     "params": {
       "buildingType": "Bâtiment",
@@ -2379,7 +2400,9 @@
       "more": "Autres caractéristiques",
       "multiUnit": "Plusieurs unités d’utilisation (comptage de chaleur, décompte des frais)",
       "storage": "Accumulateur (technique)",
-      "cooling": "Refroidissement par le système de chauffage"
+      "cooling": "Refroidissement par le système de chauffage",
+      "noise": "Protection contre le bruit",
+      "noiseHint": "SIA 181 ch. 2.2.2 : exigences accrues obligatoires pour les maisons individuelles, jumelées et en rangée neuves ainsi qu’en propriété par étages ; sinon sur convention."
     },
     "options": {
       "buildingType": {
@@ -2410,6 +2433,10 @@
         "radiators": "Radiateurs",
         "tabs": "Éléments thermoactifs (TABS)",
         "air": "Aérothermes / convecteurs"
+      },
+      "noise": {
+        "minimum": "Exigences minimales",
+        "increased": "Exigences accrues"
       }
     },
     "derived": {
@@ -2438,7 +2465,12 @@
       "insulationValue": "EN-103 tableau 2, aucune sous 26 °C",
       "measureConcept": "Concept de mesure",
       "measureConceptValue": "SICC 98-1 (SRE supérieure à 2000 m²)",
-      "none": "pas nécessaire"
+      "none": "pas nécessaire",
+      "noise": "Protection contre le bruit SIA 181",
+      "noiseMinimum": "L_H bruit de fonctionnement 38 / 33 / 28 dB, bruit d’utilisation 43 / 38 / 33 dB, bruit continu 33 / 28 / 25 dB (sensibilité au bruit faible / moyenne / élevée)",
+      "noiseIncreased": "L_H bruit de fonctionnement 34 / 29 / 25 dB, bruit d’utilisation 39 / 34 / 29 dB, bruit continu 29 / 25 / 25 dB (sensibilité au bruit faible / moyenne / élevée)",
+      "heatLoad": "Charge thermique du besoin de chaleur (243)",
+      "heatLoadNone": "pas encore de calcul"
     },
     "calculations": "Installations",
     "conceptsNav": "Concepts",
@@ -2450,7 +2482,10 @@
       "heatDemand": "Besoins de chaleur SIA 384/2",
       "floorHeating": "Chauffage au sol",
       "radiators": "Radiateurs",
-      "schemaDistribution": "Schéma de principe distribution"
+      "schemaDistribution": "Schéma de principe distribution",
+      "building": "Bâtiment",
+      "buildingModel": "Modèle du bâtiment",
+      "sia3801": "Besoin de chaleur SIA 380/1"
     },
     "plant": {
       "label": "Installation",
@@ -2468,14 +2503,10 @@
       "unassigned": "non attribué"
     },
     "system": {
-      "building": "Bâtiment",
-      "buildingHint": "Valable pour toutes les installations du projet. Avec les chapitres (producteurs, accumulateur, chauffage au sol, besoins de chaleur), ces données déterminent les points applicables des listes de contrôle.",
       "generators": "Producteurs de chaleur",
       "generatorsHint": "Les producteurs de toutes les installations pilotent les listes de contrôle (p. ex. sondes géothermiques, évacuation des gaz).",
       "more": "Autres",
       "cooling": "L’installation refroidit aussi (PAC réversible, free cooling)",
-      "power": "Puissance de chauffage selon les besoins de chaleur",
-      "powerNone": "Pas encore de calcul des besoins de chaleur – les seuils des listes de contrôle s’appliquent par précaution.",
       "notes": "Notes"
     },
     "storageToggle": "Accumulateur d’énergie présent",
@@ -3108,11 +3139,19 @@
       "storageTempNone": "– (pas de température de départ des groupes)",
       "storageReturn": "Retour vers l’accumulateur",
       "storageTempHint": "Accumulateur à la température de départ la plus élevée des groupes. Retour = mélange des retours des groupes avec leurs débits côté distributeur V̇ = Φ / (ρ · cp · (T accumulateur − T retour))."
+    },
+    "hideNa": "Masquer les points non applicables ({n})",
+    "showNa": "Afficher les points non applicables ({n})",
+    "systems": {
+      "title": "Installations (242) et besoin de chaleur (243)",
+      "description": "Pour la comparaison avec les critères de dimensionnement : producteurs de chaleur, émission, accumulateur et refroidissement des installations saisies ainsi que la charge thermique calculée.",
+      "none": "Aucune installation saisie.",
+      "differs": "diffère"
     }
   },
   "sanitaryPlan": {
     "title": "Planification sanitaire",
-    "description": "Planification des installations sanitaires selon les phases de la SIA 108 – eau potable selon SSIGE W3 (avec les compléments E1–E4), SIA 385/1 et SIA 385/2, évacuation des eaux des biens-fonds (eaux usées et pluviales) selon SN 592000.",
+    "description": "Planification des installations sanitaires selon les phases de la SIA 108 – eau potable selon SSIGE W3 (avec les compléments E1–E4), SIA 385/1 et SIA 385/2, évacuation des eaux des biens-fonds (eaux usées et pluviales) selon SN 592000, protection contre le bruit selon SIA 181.",
     "navLabel": "Planification sanitaire",
     "overview": "Vue d’ensemble et critères de dimensionnement",
     "phases": "Phases SIA 108",
@@ -3125,7 +3164,7 @@
     "systemsNav": "Installations et schéma de principe",
     "hideNa": "Masquer les points non applicables ({n})",
     "showNa": "Afficher les points non applicables ({n})",
-    "normsHint": "Les listes de contrôle reprennent les exigences par analogie et renvoient à SSIGE W3:2013 avec les compléments W3/E1–E4, SIA 385/1:2020, SIA 385/2:2015, SN 592000:2024 et SIA 108:2014. Le texte des normes fait foi.",
+    "normsHint": "Les listes de contrôle reprennent les exigences par analogie et renvoient à SSIGE W3:2013 avec les compléments W3/E1–E4, SIA 385/1:2020, SIA 385/2:2015, SN 592000:2024, SIA 181:2020 et SIA 108:2014. Le texte de la norme fait foi.",
     "yes": "oui",
     "no": "non",
     "criteria": {
@@ -3168,7 +3207,9 @@
       "infiltration": "Infiltration des eaux pluviales",
       "retention": "Rétention",
       "flatRoof": "Toit plat (évacuation de secours)",
-      "undergroundGarage": "Parking souterrain / rampe"
+      "undergroundGarage": "Parking souterrain / rampe",
+      "noise": "Protection contre le bruit",
+      "noiseHint": "SIA 181 ch. 2.2.2 : exigences accrues obligatoires pour les maisons individuelles, jumelées et en rangée neuves ainsi qu’en propriété par étages ; sinon sur convention."
     },
     "options": {
       "scope": {
@@ -3213,6 +3254,10 @@
       "separators": {
         "grease": "Séparateur de graisse",
         "oil": "Séparateur d’hydrocarbures"
+      },
+      "noise": {
+        "minimum": "Exigences minimales",
+        "increased": "Exigences accrues"
       }
     },
     "derived": {

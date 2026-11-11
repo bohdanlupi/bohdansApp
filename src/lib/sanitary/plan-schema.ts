@@ -49,6 +49,8 @@ export const sanitaryParamsSchema = z.object({
   retention: bool,
   flatRoof: bool,
   undergroundGarage: bool,
+  /** Schallschutz requirement level after SIA 181 (Mindestanforderungen or erhöhte Anforderungen). */
+  noise: z.enum(["minimum", "increased"]).catch("minimum"),
 });
 
 export const sanitaryPlanSchema = z.object({

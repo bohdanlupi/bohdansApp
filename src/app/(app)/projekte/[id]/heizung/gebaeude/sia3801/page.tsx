@@ -11,16 +11,16 @@ import { evaluateSia3801, type ZoneResult } from "@/lib/building/sia3801";
 import { usageCategories } from "@/lib/building/sia3801-data";
 import { cn } from "@/lib/utils";
 
-import { loadHeatingPlan } from "../../heizung/load-plan";
+import { loadHeatingPlan } from "../../load-plan";
 import { loadBuildingModel, loadBuildingPlans } from "../load-model";
 
-export async function generateMetadata({ params }: PageProps<"/projekte/[id]/gebaeude/sia3801">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/projekte/[id]/heizung/gebaeude/sia3801">): Promise<Metadata> {
   const t = await getTranslations("building.sia3801");
   void (await params);
   return { title: t("title") };
 }
 
-export default async function Sia3801Page({ params }: PageProps<"/projekte/[id]/gebaeude/sia3801">) {
+export default async function Sia3801Page({ params }: PageProps<"/projekte/[id]/heizung/gebaeude/sia3801">) {
   const { id } = await params;
   await requireProfile();
   const t = await getTranslations("building.sia3801");
@@ -31,7 +31,7 @@ export default async function Sia3801Page({ params }: PageProps<"/projekte/[id]/
 
   return (
     <div className="space-y-4">
-      <Link href={`/projekte/${id}/gebaeude`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link href={`/projekte/${id}/heizung/gebaeude`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" />
         {t("back")}
       </Link>

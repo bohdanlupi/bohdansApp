@@ -37,6 +37,8 @@ export const heatingParamsSchema = z.object({
   multiUnit: bool,
   storage: bool,
   cooling: bool,
+  /** Schallschutz requirement level after SIA 181 (Mindestanforderungen or erhöhte Anforderungen). */
+  noise: z.enum(["minimum", "increased"]).catch("minimum"),
 });
 
 export const heatingPlanSchema = z.object({
@@ -44,6 +46,8 @@ export const heatingPlanSchema = z.object({
   /** Checklist item id → state. Missing = open. */
   checks: lenientRecord(checkSchema),
   notes: lenientRecord(z.string().max(4000), 10),
+  /** Items set to «nicht zutreffend» or excluded by the criteria are hidden in the phase pages. */
+  hideNa: bool,
   /** Heat load after SIA 384/2: site and climate, catalogue of constructions (U, Ueq, ψ, χ). */
   site: heatSiteSchema.catch(() => defaultHeatSite),
   catalog: catalogSchema,

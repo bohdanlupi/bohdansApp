@@ -130,15 +130,16 @@ can read everything; write access by role.
 /projekte                      list + create
 /projekte/[id]                 overview, Beteiligte, documents
 /projekte/[id]/kostenplan      BKP / KV
-/projekte/[id]/gebaeude        Gebäudemodell: Geschosse + Pläne, Decken / Böden, Zonen, Klima; /plan/[floor] tracing editor; /sia3801 SIA 380/1 + PDF /api/pdf/sia3801/[id]
-/projekte/[id]/heizung         redirects to the first checklist (31); checklist PDF /api/pdf/heating-plan/[id]
-/projekte/[id]/heizung/[31…61] SIA 108 phase: checklists (SIA 384/1, 384/2, 384/6, 384/7, EN-103, HE301 refs)
+/projekte/[id]/heizung         Heizungsplanung: manual Auslegungskriterien + derived limits + Anlagen comparison + phase progress, PDF /api/pdf/heating-plan/[id]
+/projekte/[id]/heizung/[31…61] SIA 108 phase: checklists (SIA 384/1, 384/2, 384/6, 384/7, EN-103, HE301, SIA 181 refs)
+/projekte/[id]/heizung/gebaeude  Gebäudemodell (chapter «Gebäude» of the Heizung): Geschosse + Pläne, Decken / Böden, Zonen, Klima; /plan/[floor] tracing editor; /sia3801 SIA 380/1 + PDF /api/pdf/sia3801/[id]
 /projekte/[id]/heizung/erzeugung?anlage=  242 Wärmeerzeugung (one page), per Anlage
 /projekte/[id]/heizung/verteilung/waermebedarf[/calcId]  243 Wärmebedarf SIA 384/2 (project-wide), PDF /api/pdf/heat-load/[calcId]
 /projekte/[id]/heizung/verteilung/{fussbodenheizung[/systemId],heizkoerper,schema}?anlage=  243, per Anlage
 /projekte/[id]/lueftung        KWL-Planung: design criteria + phase progress, PDF /api/pdf/kwl-plan/[id]
-/projekte/[id]/lueftung/[31…61] SIA 108 phase: checklists (SIA 382/5 refs) + calculations + diagrams
+/projekte/[id]/lueftung/[31…61] SIA 108 phase: checklists (SIA 382/5, SIA 382/1, SWKI VA104-01, SIA 181 refs) + calculations + diagrams
 /projekte/[id]/lueftung/wohnungen[/calcId]  dwelling calculations, PDF /api/pdf/kwl/[calcId]
+/projekte/[id]/sanitaer        Sanitärplanung: Auslegungskriterien + phases 31…61 (SVGW W3, SIA 385/1, 385/2, SN 592000, SIA 181 refs) + /anlagen Sanitärschema, PDF /api/pdf/sanitary-plan/[id]
 /projekte/[id]/lv/[lvId]       LV editor (tree + detail panel, Vorausmass tab)
 /projekte/[id]/lv/[lvId]/offerten        bidders, price entry per offer
 /projekte/[id]/lv/[lvId]/vergleich       Angebotsvergleich + Vergabeantrag
@@ -630,6 +631,24 @@ day: autosave revalidated the whole layout → the editor reloaded the 7000 px s
 now the editor loads /api/gebaeude/plan/<planId> (redirect to a 5-min signed URL) and the actions revalidate only the
 overview page. Open: cooling (SIA 382/2 with SIA 2024 data, needs hourly climate), SIA 380/1 check against a real
 example, the Umbau 1.5 / Zielwert 0.7 factors against the printed norm.
+
+Trades unified (2026-11-11): Heizung, Lüftung and Sanitär now work the same way – overview «Übersicht und Auslegungskriterien»
+with manual criteria (the Heizung no longer derives generators / emitters / power from the Anlagen; effectiveHeatingParams and
+src/lib/heating/params.ts are gone, the building fields left the 242 page), items excluded by the criteria stay visible struck
+through and the «Nicht zutreffende ausblenden» toggle (plan.hideNa) exists in all three. The Heizung overview lists the Anlagen of
+242 (generators, emitters, storage, cooling, badge «weicht ab» when they differ from the criteria) and the heat load of 243 for
+comparison. The top-level tab «Gebäude» is gone: the Gebäudemodell and SIA 380/1 live under /heizung/gebaeude as nav section
+«Gebäude» of the Heizung (routes and revalidation paths moved; API /api/gebaeude/plan unchanged). New norms (PDFs in
+Berechnungsvorlagen/Lüftung KWL/, read by subagents – SIA 382/1 and SIA 181 are scanned / outlined PDFs rendered to PNG with
+pdf.js + @napi-rs/canvas incl. the JBIG2 wasm; VA104-01 has a text layer): SWKI VA104-01:2019 → 47 hygiene items (`h<phase>.*`,
+sections «hygiene») in the Lüftung, SIA 382/1:2014 → 69 general RLT items (`g<phase>.*`, sections g31basics … g61operation,
+mostly gated with usage ≠ Wohnen), SIA 181:2020 → 17 Heizung / 18 Lüftung / 18 Sanitär Schallschutz items (`hn|ln|sn<phase>.*`,
+sections «sia181»; Tabelle 6 values L_H 38/33/28 · 43/38/33 · 33/28/25 dB, erhöht 34/29/25 · 39/34/29 · 29/25/25). Totals: Heizung
+256, Lüftung 291, Sanitär 299 items. New criteria: Lüftung usage (Wohnen / Nichtwohnbau / erhöhte Hygiene), odaClass AUL 1–3,
+humidifier, coolingCoil, earthTube, airHeating; Heizung and Sanitär noise (SIA 181 Mindest- / erhöhte Anforderungen, default
+minimum; 2.2.2 makes erhöht mandatory for new EFH / DEFH / REFH and Stockwerkeigentum – not auto-set). Five SIA 382/5 items that
+only pointed to VA104-01 were replaced (p41.cleaning, p51.accessibility, p52.clean, p53.hygiene, p61.hygiene). Brandschutz chapter
+planned next (user); item texts of the three new norms not yet clicked through by the user. No migration needed (jsonb fields).
 
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete

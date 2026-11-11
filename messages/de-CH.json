@@ -153,7 +153,6 @@
       "fee": "Honorar",
       "lvs": "Leistungsverzeichnisse",
       "costPlan": "Kostenplan",
-      "building": "Gebäude",
       "heating": "Heizung",
       "ventilation": "Lüftung",
       "sanitary": "Sanitär"
@@ -1041,7 +1040,7 @@
   },
   "kwlPlan": {
     "title": "KWL-Planung",
-    "description": "Planung der kontrollierten Wohnungslüftung nach den Phasen der SIA 108 – mit den Anforderungen, Berechnungen und Diagrammen der SIA 382/5 – bis zur Ausschreibung und darüber hinaus.",
+    "description": "Planung der Lüftungsanlage nach den Phasen der SIA 108 – kontrollierte Wohnungslüftung nach SIA 382/5 mit Berechnungen und Diagrammen, allgemeine Anforderungen der SIA 382/1, Hygiene nach SWKI VA104-01, Schallschutz nach SIA 181 – bis zur Ausschreibung und darüber hinaus.",
     "navLabel": "KWL-Planung",
     "overview": "Übersicht und Auslegungskriterien",
     "phases": "Phasen SIA 108",
@@ -1062,7 +1061,7 @@
       "hint": "Schritt 3 = grösserer Wert aus 30 m³/h je Zimmer und Abluft nach Tabelle 3. Grundlüftung = 0.1 h⁻¹ des Wohnungsvolumens, verglichen mit der Mindestluftmenge. Externer Druck nach Tabelle 7."
     },
     "phaseList": "Phasen",
-    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf die Ziffern der SIA 382/5:2021 bzw. SIA 108:2014. Massgebend ist der Normtext.",
+    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf die Ziffern der SIA 382/5:2021 (blosse Ziffern), SIA 382/1:2014, SWKI VA104-01:2019, SIA 181:2020, EnDK EN-105 / EN-110 bzw. SIA 108:2014. Massgebend ist der Normtext.",
     "phaseLabel": "Phase {code}",
     "phaseNotes": "Bemerkungen zur Phase",
     "save": {
@@ -1080,7 +1079,7 @@
     },
     "criteria": {
       "title": "Auslegungskriterien",
-      "description": "Grundlagen für Systemwahl und Bemessung (SIA 382/5 Kapitel 3). Sie steuern, welche Prüfpunkte und Grenzwerte in den Phasen gelten, und sind mit der Bauherrschaft schriftlich festzuhalten."
+      "description": "Grundlagen für Systemwahl und Bemessung (SIA 382/5 Kapitel 3). Sie steuern, welche Prüfpunkte und Grenzwerte in den Phasen gelten; nicht zutreffende Punkte bleiben markiert sichtbar und lassen sich je Phase ausblenden. Sie sind mit der Bauherrschaft schriftlich festzuhalten."
     },
     "params": {
       "buildingType": "Gebäude",
@@ -1105,7 +1104,15 @@
       "radon": "Radongebiet (Wahrscheinlichkeit > 10 %)",
       "strongWind": "Starkwindgebiet / Hochhaus",
       "fog": "Gebiet mit starkem Nebel",
-      "publicIntake": "Aussenluft-Durchlass auf öffentlich zugänglichem Grund"
+      "publicIntake": "Aussenluft-Durchlass auf öffentlich zugänglichem Grund",
+      "usage": "Nutzung",
+      "usageHint": "Steuert Sauberkeits- und Dichtheitsklasse (SWKI VA104-01 Tabelle 1) und die Anforderungen der SIA 382/1 für Nichtwohnbauten.",
+      "odaClass": "Aussenluftqualität",
+      "odaClassHint": "AUL 1 sauber · AUL 2 belastet (Stadt, Verkehr) · AUL 3 hoch belastet; bestimmt die Filterstufen (SWKI VA104-01 Tabelle 4).",
+      "humidifier": "Luftbefeuchtung",
+      "coolingCoil": "Kühler mit Entfeuchtung (Kondensat)",
+      "earthTube": "Erdwärmeübertrager / Erdregister",
+      "airHeating": "Luftheizung (Wärmeabgabe über die Zuluft)"
     },
     "options": {
       "buildingType": {
@@ -1159,6 +1166,16 @@
       "noise": {
         "minimum": "Mindestanforderungen",
         "increased": "Erhöhte Anforderungen"
+      },
+      "usage": {
+        "residential": "Wohnen",
+        "nonResidential": "Nichtwohnbau (Büro, Schule, Verwaltung)",
+        "sensitive": "Erhöhte Hygieneanforderungen (Labor, Behandlung)"
+      },
+      "odaClass": {
+        "oda1": "AUL 1 – sauber",
+        "oda2": "AUL 2 – belastet",
+        "oda3": "AUL 3 – hoch belastet"
       }
     },
     "derived": {
@@ -1456,7 +1473,11 @@
     "dwellingsNav": "Konzepte",
     "pdf": "Dossier (PDF)",
     "pdfPhase": "Checkliste (PDF)",
-    "systemsNav": "Dimensionierung"
+    "systemsNav": "Dimensionierung",
+    "hideNa": "Nicht zutreffende ausblenden ({n})",
+    "showNa": "Nicht zutreffende einblenden ({n})",
+    "yes": "ja",
+    "no": "nein"
   },
   "kwlSystem": {
     "title": "Lüftungsanlagen",
@@ -2349,9 +2370,9 @@
   },
   "heatingPlan": {
     "title": "Heizungsplanung",
-    "description": "Planung der Heizungsanlage nach den Phasen der SIA 108 – mit den Anforderungen der SIA 384/1, SIA 384/2, SIA 384/6 und SIA 384/7, der EnDK-Vollzugshilfe EN-103 und der SWKI HE301-01.",
+    "description": "Planung der Heizungsanlage nach den Phasen der SIA 108 – mit den Anforderungen der SIA 384/1, SIA 384/2, SIA 384/6 und SIA 384/7, der EnDK-Vollzugshilfe EN-103, der SWKI HE301-01 und dem Schallschutz nach SIA 181.",
     "navLabel": "Heizungsplanung",
-    "overview": "Übersicht und Planungsgrundlagen",
+    "overview": "Übersicht und Auslegungskriterien",
     "phases": "Phasen SIA 108",
     "phaseList": "Phasen",
     "phaseLabel": "Phase {code}",
@@ -2359,12 +2380,12 @@
     "pdf": "Dossier (PDF)",
     "pdfPhase": "Checkliste (PDF)",
     "chooseGenerators": "Wärmeerzeugung und Wärmeabgabe in der Übersicht wählen, damit die zugehörigen Prüfpunkte erscheinen.",
-    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf SIA 384/1:2022, SIA 384/2:2020, SIA 384/6:2021, SIA 384/7:2015, EnDK EN-103 (2020), SWKI HE301-01 und SIA 108:2014. Massgebend ist der Normtext. Warmwasser folgt mit der Sanitärplanung.",
+    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf SIA 384/1:2022, SIA 384/2:2020, SIA 384/6:2021, SIA 384/7:2015, EnDK EN-103 (2020), SWKI HE301-01, SIA 181:2020 und SIA 108:2014. Massgebend ist der Normtext. Warmwasser gehört zur Sanitärplanung.",
     "yes": "ja",
     "no": "nein",
     "criteria": {
-      "title": "Planungsgrundlagen",
-      "description": "Grundlagen für Systemwahl und Bemessung (SIA 384/1 Kapitel 2). Sie steuern, welche Prüfpunkte in den Phasen gelten, und sind mit der Bauherrschaft schriftlich festzuhalten."
+      "title": "Auslegungskriterien",
+      "description": "Grundlagen für Systemwahl und Bemessung (SIA 384/1 Kapitel 2). Sie bestimmen, welche Prüfpunkte in den Phasen gelten; nicht zutreffende Punkte bleiben markiert sichtbar und lassen sich je Phase ausblenden. Wärmeerzeuger, Wärmeabgabe und Leistung werden hier von Hand festgelegt – die Anlagen in 242 / 243 dienen dem Abgleich."
     },
     "params": {
       "buildingType": "Gebäude",
@@ -2379,7 +2400,9 @@
       "more": "Weitere Merkmale",
       "multiUnit": "Mehrere Nutzeinheiten (Wärmezählung, Heizkostenabrechnung)",
       "storage": "Wärmespeicher (technischer Speicher)",
-      "cooling": "Kühlung über das Heizsystem"
+      "cooling": "Kühlung über das Heizsystem",
+      "noise": "Schallschutz",
+      "noiseHint": "SIA 181 Ziffer 2.2.2: erhöhte Anforderungen zwingend bei neuen EFH, Doppel- und Reiheneinfamilienhäusern sowie bei Stockwerkeigentum; sonst nach Vereinbarung."
     },
     "options": {
       "buildingType": {
@@ -2410,6 +2433,10 @@
         "radiators": "Heizkörper",
         "tabs": "Thermoaktive Bauteile (TABS)",
         "air": "Lufterhitzer / Konvektoren"
+      },
+      "noise": {
+        "minimum": "Mindestanforderungen",
+        "increased": "Erhöhte Anforderungen"
       }
     },
     "derived": {
@@ -2438,7 +2465,12 @@
       "insulationValue": "EN-103 Tabelle 2, unter 26 °C keine",
       "measureConcept": "Messkonzept",
       "measureConceptValue": "SWKI 98-1 (EBF über 2000 m²)",
-      "none": "nicht erforderlich"
+      "none": "nicht erforderlich",
+      "noise": "Schallschutz SIA 181",
+      "noiseMinimum": "L_H Funktionsgeräusch 38 / 33 / 28 dB, Benutzungsgeräusch 43 / 38 / 33 dB, Dauergeräusch 33 / 28 / 25 dB (Lärmempfindlichkeit gering / mittel / hoch)",
+      "noiseIncreased": "L_H Funktionsgeräusch 34 / 29 / 25 dB, Benutzungsgeräusch 39 / 34 / 29 dB, Dauergeräusch 29 / 25 / 25 dB (Lärmempfindlichkeit gering / mittel / hoch)",
+      "heatLoad": "Heizlast aus Wärmebedarf (243)",
+      "heatLoadNone": "noch keine Berechnung"
     },
     "calculations": "Anlagen",
     "conceptsNav": "Konzepte",
@@ -2450,7 +2482,10 @@
       "heatDemand": "Wärmebedarf SIA 384/2",
       "floorHeating": "Fussbodenheizung",
       "radiators": "Heizkörper",
-      "schemaDistribution": "Prinzipschema Wärmeverteilung"
+      "schemaDistribution": "Prinzipschema Wärmeverteilung",
+      "building": "Gebäude",
+      "buildingModel": "Gebäudemodell",
+      "sia3801": "Heizwärmebedarf SIA 380/1"
     },
     "plant": {
       "label": "Anlage",
@@ -2468,14 +2503,10 @@
       "unassigned": "keiner Anlage zugeordnet"
     },
     "system": {
-      "building": "Gebäude",
-      "buildingHint": "Gilt für alle Anlagen des Projekts. Zusammen mit den Kapiteln (Wärmeerzeuger, Speicher, Fussbodenheizung, Wärmebedarf) bestimmen diese Angaben, welche Punkte der Checklisten gelten.",
       "generators": "Wärmeerzeuger",
       "generatorsHint": "Die Wärmeerzeuger aller Anlagen steuern die Checklisten (z. B. Erdwärmesonden, Abgasanlage).",
       "more": "Weiteres",
       "cooling": "Anlage kühlt auch (reversible WP, Freecooling)",
-      "power": "Heizleistung aus dem Wärmebedarf",
-      "powerNone": "Noch keine Wärmebedarfsberechnung – Schwellenwerte der Checklisten gelten vorsichtshalber.",
       "notes": "Notizen"
     },
     "storageToggle": "Energiespeicher vorhanden",
@@ -3108,11 +3139,19 @@
       "storageTempNone": "– (keine VL-Temperatur der Heizgruppen)",
       "storageReturn": "Rücklauf zum Speicher",
       "storageTempHint": "Speicher mit der höchsten VL-Temperatur der Heizgruppen. Rücklauf = Mischung der Gruppen-Rückläufe mit ihren Volumenströmen auf der Verteilerseite V̇ = Φ / (ρ · cp · (T Speicher − T RL))."
+    },
+    "hideNa": "Nicht zutreffende ausblenden ({n})",
+    "showNa": "Nicht zutreffende einblenden ({n})",
+    "systems": {
+      "title": "Anlagen (242) und Wärmebedarf (243)",
+      "description": "Zum Abgleich mit den Auslegungskriterien: Wärmeerzeuger, Wärmeabgabe, Speicher und Kühlung der erfassten Anlagen sowie die berechnete Heizlast.",
+      "none": "Noch keine Anlage erfasst.",
+      "differs": "weicht ab"
     }
   },
   "sanitaryPlan": {
     "title": "Sanitärplanung",
-    "description": "Planung der Sanitäranlagen nach den Phasen der SIA 108 – Trinkwasser nach SVGW W3 (mit den Ergänzungen E1–E4), SIA 385/1 und SIA 385/2, Liegenschaftsentwässerung (Schmutz- und Regenwasser) nach SN 592000.",
+    "description": "Planung der Sanitäranlagen nach den Phasen der SIA 108 – Trinkwasser nach SVGW W3 (mit den Ergänzungen E1–E4), SIA 385/1 und SIA 385/2, Liegenschaftsentwässerung (Schmutz- und Regenwasser) nach SN 592000, Schallschutz nach SIA 181.",
     "navLabel": "Sanitärplanung",
     "overview": "Übersicht und Auslegungskriterien",
     "phases": "Phasen SIA 108",
@@ -3125,7 +3164,7 @@
     "systemsNav": "Anlagen und Prinzipschema",
     "hideNa": "Nicht zutreffende ausblenden ({n})",
     "showNa": "Nicht zutreffende einblenden ({n})",
-    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf SVGW W3:2013 mit den Ergänzungen W3/E1–E4, SIA 385/1:2020, SIA 385/2:2015, SN 592000:2024 und SIA 108:2014. Massgebend ist der Normtext.",
+    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf SVGW W3:2013 mit den Ergänzungen W3/E1–E4, SIA 385/1:2020, SIA 385/2:2015, SN 592000:2024, SIA 181:2020 und SIA 108:2014. Massgebend ist der Normtext.",
     "yes": "ja",
     "no": "nein",
     "criteria": {
@@ -3168,7 +3207,9 @@
       "infiltration": "Versickerung von Regenwasser",
       "retention": "Retention / Rückhalt",
       "flatRoof": "Flachdach (Notentwässerung)",
-      "undergroundGarage": "Tiefgarage / Rampe"
+      "undergroundGarage": "Tiefgarage / Rampe",
+      "noise": "Schallschutz",
+      "noiseHint": "SIA 181 Ziffer 2.2.2: erhöhte Anforderungen zwingend bei neuen EFH, Doppel- und Reiheneinfamilienhäusern sowie bei Stockwerkeigentum; sonst nach Vereinbarung."
     },
     "options": {
       "scope": {
@@ -3213,6 +3254,10 @@
       "separators": {
         "grease": "Fettabscheider",
         "oil": "Mineralölabscheider"
+      },
+      "noise": {
+        "minimum": "Mindestanforderungen",
+        "increased": "Erhöhte Anforderungen"
       }
     },
     "derived": {

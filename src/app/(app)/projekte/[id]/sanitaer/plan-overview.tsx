@@ -70,6 +70,7 @@ export function PlanOverview({
           <OptionField label={t("params.construction")} value={p.construction} options={["new", "renovation"] as const} optionLabel={o("construction")} editable={editable} onChange={(v) => set("construction", v)} />
           <OptionField label={t("params.use")} value={p.use} options={["residential", "sensitive"] as const} optionLabel={o("use")} editable={editable} onChange={(v) => set("use", v)} hint={t("params.useHint")} />
           <NumberParam label={t("params.units")} value={p.units} editable={editable} onChange={(v) => set("units", v)} hint={t("params.unitsHint")} />
+          <OptionField label={t("params.noise")} value={p.noise} options={["minimum", "increased"] as const} optionLabel={o("noise")} editable={editable} onChange={(v) => set("noise", v)} hint={t("params.noiseHint")} />
           {water && (
             <>
               <OptionField label={t("params.dhw")} value={p.dhw} options={["central", "decentral", "mixed"] as const} optionLabel={o("dhw")} editable={editable} onChange={(v) => set("dhw", v)} />

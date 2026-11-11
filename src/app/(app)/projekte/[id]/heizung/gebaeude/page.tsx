@@ -3,18 +3,18 @@ import { getTranslations } from "next-intl/server";
 
 import { requireProfile } from "@/lib/auth";
 
-import { loadHeatingPlan } from "../heizung/load-plan";
-import { loadProject } from "../load-project";
+import { loadHeatingPlan } from "../load-plan";
+import { loadProject } from "../../load-project";
 import { BuildingView } from "./building-view";
 import { loadBuildingModel, loadBuildingPlans } from "./load-model";
 
-export async function generateMetadata({ params }: PageProps<"/projekte/[id]/gebaeude">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/projekte/[id]/heizung/gebaeude">): Promise<Metadata> {
   const project = await loadProject((await params).id);
   const t = await getTranslations("building");
   return { title: project ? `${t("title")} · ${project.number}` : t("title") };
 }
 
-export default async function BuildingPage({ params }: PageProps<"/projekte/[id]/gebaeude">) {
+export default async function BuildingPage({ params }: PageProps<"/projekte/[id]/heizung/gebaeude">) {
   const { id } = await params;
   const profile = await requireProfile();
   const t = await getTranslations("building");

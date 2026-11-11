@@ -11,7 +11,6 @@ const tabs = [
   { path: "/honorar", key: "fee" },
   { path: "/lv", key: "lvs" },
   { path: "/kostenplan", key: "costPlan" },
-  { path: "/gebaeude", key: "building" },
   { path: "/heizung", key: "heating" },
   { path: "/lueftung", key: "ventilation" },
   { path: "/sanitaer", key: "sanitary" },

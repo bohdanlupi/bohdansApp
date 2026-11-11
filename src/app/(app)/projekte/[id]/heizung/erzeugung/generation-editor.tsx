@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { buildGenerationSchema, generationLabels } from "@/lib/heating/generation-schema";
-import { emitterTypes, generatorTypes, type HeatingParams, type HeatingPlan } from "@/lib/heating/plan-schema";
+import { emitterTypes, generatorTypes, type HeatingPlan } from "@/lib/heating/plan-schema";
 import { storageTemperatures } from "@/lib/heating/hydraulics";
 import {
   circuitMismatch,
@@ -76,9 +76,7 @@ export function GenerationEditor({
   const building = usePlan(projectId, initialPlan, editable, saveHeatingPlan);
   const savePlant = useCallback((pid: string, data: unknown) => saveHeatingPlant(plant.id, pid, plant.name, data), [plant.id, plant.name]);
   const anlage = usePlan(projectId, plant.data, editable, savePlant);
-  const p = building.plan.params;
   const d = anlage.plan;
-  const setParam = <K extends keyof HeatingParams>(key: K, value: HeatingParams[K]) => building.update((x) => ({ ...x, params: { ...x.params, [key]: value } }));
   const setPlant = (patch: Partial<PlantData>) => anlage.update((x) => ({ ...x, ...patch }));
   const setUnit = (id: string, patch: Partial<GeneratorUnit>) => anlage.update((x) => ({ ...x, generators: x.generators.map((u) => (u.id === id ? { ...u, ...patch } : u)) }));
   const unitName = (u: GeneratorUnit) => generatorName(d.generators, u, (g) => tg(`short.${g}` as never));
@@ -103,19 +101,6 @@ export function GenerationEditor({
           <SaveIndicator status={status} />
         </div>
       )}
-      <Section title={t("system.building")} description={t("system.buildingHint")} collapseKey="heating-generation:building">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <OptionField label={t("params.buildingType")} value={p.buildingType} options={["efh", "mfh", "nonResidential"] as const} optionLabel={o("buildingType")} editable={editable} onChange={(v) => setParam("buildingType", v)} />
-          <OptionField label={t("params.construction")} value={p.construction} options={["new", "renovation", "replacement"] as const} optionLabel={o("construction")} editable={editable} onChange={(v) => setParam("construction", v)} />
-          <OptionField label={t("params.standard")} value={p.standard} options={["standard", "minergie"] as const} optionLabel={o("standard")} editable={editable} onChange={(v) => setParam("standard", v)} />
-          <NumberParam label={t("params.energyArea")} value={p.energyArea} editable={editable} onChange={(v) => setParam("energyArea", v)} />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Toggle label={t("params.multiUnit")} checked={p.multiUnit} editable={editable} onChange={(v) => setParam("multiUnit", v)} />
-          <Fact label={t("system.power")} value={power !== null ? `${formatNumber(power, 1)} kW` : t("system.powerNone")} />
-        </div>
-      </Section>
-
       <Section title={`1 · ${tg("sectors.source")}`} description={t("system.generatorsHint")} collapseKey="heating-generation:source">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">

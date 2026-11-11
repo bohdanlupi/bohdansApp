@@ -22,7 +22,7 @@ export async function saveBuildingModel(projectId: string, data: unknown): Promi
     .upsert({ project_id: projectId, data: parseBuildingModel(data) as unknown as Json }, { onConflict: "project_id" });
   if (error) return { error: "saveFailed" };
 
-  revalidatePath(`/projekte/${projectId}/gebaeude`);
+  revalidatePath(`/projekte/${projectId}/heizung/gebaeude`);
   return {};
 }
 
@@ -73,7 +73,7 @@ export async function createBuildingPlan(projectId: string, input: unknown): Pro
   });
   if (error) return { error: "saveFailed" };
 
-  revalidatePath(`/projekte/${projectId}/gebaeude`);
+  revalidatePath(`/projekte/${projectId}/heizung/gebaeude`);
   return {};
 }
 
@@ -99,7 +99,7 @@ export async function saveBuildingPlanCalibration(planId: string, projectId: str
     .eq("project_id", projectId);
   if (error) return { error: "saveFailed" };
 
-  revalidatePath(`/projekte/${projectId}/gebaeude`);
+  revalidatePath(`/projekte/${projectId}/heizung/gebaeude`);
   return {};
 }
 
@@ -115,6 +115,6 @@ export async function deleteBuildingPlan(planId: string, projectId: string): Pro
   if (error) return { error: "deleteFailed" };
   await supabase.storage.from("plans").remove([plan.file_path, plan.snapshot_path, ...(plan.preview_path ? [plan.preview_path] : [])]);
 
-  revalidatePath(`/projekte/${projectId}/gebaeude`);
+  revalidatePath(`/projekte/${projectId}/heizung/gebaeude`);
   return {};
 }

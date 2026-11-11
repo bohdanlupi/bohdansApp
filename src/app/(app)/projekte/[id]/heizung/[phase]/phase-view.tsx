@@ -1,40 +1,45 @@
 "use client";
 
-import { FileText } from "lucide-react";
+import { Eye, EyeOff, FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Section } from "@/components/planning/fields";
 import { Checklist, SaveIndicator } from "@/components/planning/plan-ui";
 import { usePlan } from "@/components/planning/use-plan";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { findHeatingPhase } from "@/lib/heating/phases";
-import type { HeatingParams, HeatingPlan } from "@/lib/heating/plan-schema";
+import type { HeatingPlan } from "@/lib/heating/plan-schema";
 import type { AppLanguage } from "@/lib/supabase/types";
 
 import { saveHeatingPlan } from "../actions";
 
 const fullRef = (ref: string) => ref;
 
+/**
+ * Checklists of one SIA 108 phase. Items excluded by the Auslegungskriterien stay visible but are marked as not
+ * applicable; the planner hides them (and the ones set to «nicht zutreffend») with the toggle.
+ */
 export function HeatingPhaseView({
   code,
   projectId,
   initial,
-  params,
   language,
   editable,
 }: {
   code: string;
   projectId: string;
   initial: HeatingPlan;
-  /** Checklist parameters taken from the chapters (242 / 243). */
-  params: HeatingParams;
   language: AppLanguage;
   editable: boolean;
 }) {
   const t = useTranslations("heatingPlan");
   const phase = findHeatingPhase(code)!;
   const { plan, update, status } = usePlan(projectId, initial, editable, saveHeatingPlan);
+  const params = plan.params;
+  const hidden = phase.sections
+    .flatMap((s) => s.items)
+    .filter((item) => (item.when && !item.when(params)) || plan.checks[item.id]?.s === "na").length;
 
   return (
     <div className="space-y-4">
@@ -46,8 +51,18 @@ export function HeatingPhaseView({
           <h2 className="text-lg font-semibold">{phase.title[language]}</h2>
           <p className="max-w-3xl text-sm text-muted-foreground">{phase.goal[language]}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {editable && <SaveIndicator status={status} />}
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!editable}
+            aria-pressed={plan.hideNa}
+            onClick={() => update((d) => ({ ...d, hideNa: !d.hideNa }))}
+          >
+            {plan.hideNa ? <EyeOff /> : <Eye />}
+            {plan.hideNa ? t("showNa", { n: hidden }) : t("hideNa", { n: hidden })}
+          </Button>
           <a href={`/api/pdf/heating-plan/${projectId}?phase=${phase.code}`} target="_blank" rel="noopener" className={buttonVariants({ variant: "outline" })}>
             <FileText />
             {t("pdfPhase")}
@@ -61,11 +76,12 @@ export function HeatingPhaseView({
         <Checklist
           key={section.key}
           title={section.title[language]}
-          items={section.items.filter((item) => !item.when || item.when(params))}
+          items={section.items.map((item) => ({ ...item, applies: !item.when || item.when(params) }))}
           checks={plan.checks}
           language={language}
           editable={editable}
           formatRef={fullRef}
+          hideNa={plan.hideNa}
           onChange={(id, value) =>
             update((d) => {
               const checks = { ...d.checks };

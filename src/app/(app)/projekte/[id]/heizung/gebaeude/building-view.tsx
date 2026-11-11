@@ -62,7 +62,7 @@ export function BuildingView({ projectId, initial, plans, catalog, editable }: {
             <FileText />
             {t("planPdf.link")}
           </a>
-          <Link href={`/projekte/${projectId}/gebaeude/sia3801`} className={buttonVariants({ variant: "outline" })}>
+          <Link href={`/projekte/${projectId}/heizung/gebaeude/sia3801`} className={buttonVariants({ variant: "outline" })}>
             {t("sia3801.link")}
             <ChevronRight />
           </Link>
@@ -207,7 +207,7 @@ function FloorsTable({ projectId, plans, status, model, update, editable }: Shar
                 <td className="px-1 text-right tabular-nums">{heatedArea === null ? "–" : fmt(heatedArea, 1)}</td>
                 <td className="py-1 pr-4">
                   <div className="flex items-center justify-end gap-1">
-                    <Link href={`/projekte/${projectId}/gebaeude/plan/${floor.key}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), !plan && "pointer-events-none opacity-50")} aria-disabled={!plan}>
+                    <Link href={`/projekte/${projectId}/heizung/gebaeude/plan/${floor.key}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), !plan && "pointer-events-none opacity-50")} aria-disabled={!plan}>
                       <PenLine />
                       {t("draw")}
                     </Link>

@@ -14,10 +14,16 @@ export const distributionChapters = [
   ["verteilung/heizkoerper", "radiators"],
   ["verteilung/schema", "schemaDistribution"],
 ] as const;
+/** Gebäude: the building model (plans, rooms, envelope) and the SIA 380/1 heat demand built on it. */
+export const buildingChapters = [
+  ["gebaeude", "buildingModel"],
+  ["gebaeude/sia3801", "sia3801"],
+] as const;
 
 /**
- * Side navigation of the Heizung: SIA 108 checklists with their progress, then 242 Wärmeerzeugung and 243
- * Wärmeverteilung with their subchapters. The chosen Anlage (?anlage=) is kept when switching subchapters.
+ * Side navigation of the Heizung: overview with the Auslegungskriterien, SIA 108 checklists with their progress,
+ * then the chapters Gebäude, 242 Wärmeerzeugung and 243 Wärmeverteilung. The chosen Anlage (?anlage=) is kept
+ * when switching subchapters.
  */
 export function HeatingNav({
   projectId,
@@ -49,9 +55,16 @@ export function HeatingNav({
     const href = `${base}/${path}`;
     return link(plant ? `${href}?anlage=${plant}` : href, t(`chapters.${key}` as never), pathname === href || pathname.startsWith(`${href}/`));
   };
+  // The building model is active for its plan editor too, but not for the SIA 380/1 page below it.
+  const building = ([path, key]: readonly [string, string]) => {
+    const href = `${base}/${path}`;
+    const active = path === "gebaeude" ? pathname.startsWith(href) && !pathname.startsWith(`${href}/sia3801`) : pathname.startsWith(href);
+    return link(href, t(`chapters.${key}` as never), active);
+  };
 
   return (
     <nav aria-label={t("navLabel")} className="flex flex-col gap-0.5 lg:sticky lg:top-4 lg:self-start">
+      {link(base, t("overview"), pathname === base)}
       {heading(t("phases"))}
       {phases.map((p) =>
         link(
@@ -73,6 +86,8 @@ export function HeatingNav({
           ),
         ),
       )}
+      {heading(t("chapters.building"))}
+      {buildingChapters.map(building)}
       {heading(t("chapters.generation"))}
       {chapter(generationChapter)}
       {heading(t("chapters.distribution"))}
