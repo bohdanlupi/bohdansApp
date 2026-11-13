@@ -10,6 +10,7 @@ import { AddressAndMeta, colors, LetterPage, styles, type LogoSource } from "./l
 export const planWinAnsi = (text: string) =>
   text
     .replace(/→/g, "->")
+    .replace(/↔/g, "<->")
     .replace(/≤/g, "<=")
     .replace(/≥/g, ">=")
     .replace(/[₂]/g, "2")

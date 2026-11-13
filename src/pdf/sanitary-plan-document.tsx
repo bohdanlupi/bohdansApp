@@ -52,6 +52,7 @@ export function SanitaryPlanDocument({
     [t("params.waterTreatment"), yes(p.waterTreatment)],
     [t("params.rainwaterUse"), yes(p.rainwaterUse)],
     [t("params.fireWater"), yes(p.fireWater)],
+    [t("params.sprinklerSupply"), yes(p.sprinklerSupply)],
     [t("params.belowBackflowLevel"), yes(p.belowBackflowLevel)],
     [t("params.liftingStation"), yes(p.liftingStation)],
     [t("params.separators"), many("separators", p.separators)],

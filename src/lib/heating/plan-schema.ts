@@ -39,6 +39,10 @@ export const heatingParamsSchema = z.object({
   cooling: bool,
   /** Schallschutz requirement level after SIA 181 (Mindestanforderungen or erhöhte Anforderungen). */
   noise: z.enum(["minimum", "increased"]).catch("minimum"),
+  /** Brandschutz (VKF BSR 24-15, 26-15): fuel of a Gas/Öl generator, Heizöltank in the building, Cheminée / Einzelraumfeuerung. */
+  fuel: z.enum(["oil", "gas"]).catch("oil"),
+  oilTank: bool,
+  fireplace: bool,
 });
 
 export const heatingPlanSchema = z.object({

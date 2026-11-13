@@ -155,7 +155,8 @@
       "costPlan": "Kostenplan",
       "heating": "Heizung",
       "ventilation": "Lüftung",
-      "sanitary": "Sanitär"
+      "sanitary": "Sanitär",
+      "fire": "Brandschutz"
     }
   },
   "addresses": {
@@ -1112,7 +1113,10 @@
       "humidifier": "Luftbefeuchtung",
       "coolingCoil": "Kühler mit Entfeuchtung (Kondensat)",
       "earthTube": "Erdwärmeübertrager / Erdregister",
-      "airHeating": "Luftheizung (Wärmeabgabe über die Zuluft)"
+      "airHeating": "Luftheizung (Wärmeabgabe über die Zuluft)",
+      "fireCompartments": "Lüftungsanlage über mehrere Brandabschnitte",
+      "commercialKitchen": "Gewerbliche Küchenabluft",
+      "parkingVentilation": "Lüftung / Entrauchung Parking"
     },
     "options": {
       "buildingType": {
@@ -2402,7 +2406,11 @@
       "storage": "Wärmespeicher (technischer Speicher)",
       "cooling": "Kühlung über das Heizsystem",
       "noise": "Schallschutz",
-      "noiseHint": "SIA 181 Ziffer 2.2.2: erhöhte Anforderungen zwingend bei neuen EFH, Doppel- und Reiheneinfamilienhäusern sowie bei Stockwerkeigentum; sonst nach Vereinbarung."
+      "noiseHint": "SIA 181 Ziffer 2.2.2: erhöhte Anforderungen zwingend bei neuen EFH, Doppel- und Reiheneinfamilienhäusern sowie bei Stockwerkeigentum; sonst nach Vereinbarung.",
+      "fuel": "Brennstoff Gas/Öl",
+      "oilTank": "Heizöltank im Gebäude",
+      "fireplace": "Cheminée / Einzelraumfeuerung",
+      "fireHint": "Brennstoff, Tank und Cheminée steuern die Brandschutzpunkte (VKF BSR 24-15, 26-15)."
     },
     "options": {
       "buildingType": {
@@ -2437,6 +2445,10 @@
       "noise": {
         "minimum": "Mindestanforderungen",
         "increased": "Erhöhte Anforderungen"
+      },
+      "fuel": {
+        "oil": "Heizöl",
+        "gas": "Gas"
       }
     },
     "derived": {
@@ -3209,7 +3221,8 @@
       "flatRoof": "Flachdach (Notentwässerung)",
       "undergroundGarage": "Tiefgarage / Rampe",
       "noise": "Schallschutz",
-      "noiseHint": "SIA 181 Ziffer 2.2.2: erhöhte Anforderungen zwingend bei neuen EFH, Doppel- und Reiheneinfamilienhäusern sowie bei Stockwerkeigentum; sonst nach Vereinbarung."
+      "noiseHint": "SIA 181 Ziffer 2.2.2: erhöhte Anforderungen zwingend bei neuen EFH, Doppel- und Reiheneinfamilienhäusern sowie bei Stockwerkeigentum; sonst nach Vereinbarung.",
+      "sprinklerSupply": "Wasserversorgung Sprinkleranlage"
     },
     "options": {
       "scope": {
@@ -3301,6 +3314,134 @@
       "slopeValue": "Schmutzwasser 2 % (≥ 1 % ausnahmsweise) · Regenwasser 1 %",
       "rainfall": "Regenspende Bemessung",
       "rainfallValue": "r = 0.03 l/(s·m²) · Notentwässerung Flachdach zusätzlich"
+    }
+  },
+  "firePlan": {
+    "title": "Brandschutzplanung",
+    "description": "Brandschutz nach den Phasen der SIA 108 – VKF Brandschutzvorschriften 2015 (Brandschutznorm 1-15 und Brandschutzrichtlinien 10-15 bis 28-15). Die Brandschutzpunkte der Heizung, Lüftung und Sanitär erscheinen hier mit ihrem Stand im jeweiligen Gewerk.",
+    "navLabel": "Brandschutzplanung",
+    "overview": "Übersicht und Auslegungskriterien",
+    "phases": "Phasen SIA 108",
+    "phaseList": "Phasen",
+    "phaseLabel": "Phase {code}",
+    "phaseNotes": "Bemerkungen zur Phase",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Checkliste (PDF)",
+    "hideNa": "Nicht zutreffende ausblenden ({n})",
+    "showNa": "Nicht zutreffende einblenden ({n})",
+    "fromTrade": "Geteilt mit",
+    "normsHint": "Die Checklisten geben die Anforderungen sinngemäss wieder und verweisen auf die VKF Brandschutzvorschriften 2015 (Stand 01.01.2017) und SIA 108:2014. Massgebend sind der Normtext und die Auflagen der Brandschutzbehörde.",
+    "yes": "ja",
+    "no": "nein",
+    "trades": {
+      "heating": "Heizung",
+      "ventilation": "Lüftung",
+      "sanitary": "Sanitär"
+    },
+    "criteria": {
+      "title": "Auslegungskriterien",
+      "description": "Grundlagen nach VKF-Brandschutznorm. Sie bestimmen, welche Prüfpunkte in den Phasen gelten; nicht zutreffende Punkte bleiben markiert sichtbar und lassen sich je Phase ausblenden."
+    },
+    "params": {
+      "height": "Gebäudehöhe",
+      "heightHint": "Gesamthöhe nach BSN 1-15 Art. 13 bzw. BSR 10-15.",
+      "construction": "Vorhaben",
+      "concept": "Brandschutzkonzept",
+      "qss": "Qualitätssicherungsstufe",
+      "qssHint": "Legt die Brandschutzbehörde fest; nach BSR 11-15 Tabellen 3.3.1 / 3.4.1 ergibt sich QSS {n}.",
+      "usages": "Nutzungen",
+      "project": "Projekt und Bauweise",
+      "qsRole": "Büro ist QS-Verantwortliche Brandschutz",
+      "timber": "Holzbau / brennbare Tragwerke oder brandabschnittsbildende Bauteile",
+      "systems": "Technischer Brandschutz",
+      "sprinkler": "Sprinkleranlage",
+      "fireAlarm": "Brandmeldeanlage (BMA)",
+      "lightning": "Blitzschutzsystem",
+      "safetyLighting": "Sicherheitsbeleuchtung / Sicherheitsstromversorgung",
+      "lifts": "Aufzüge",
+      "smokeExtraction": "Rauch- und Wärmeabzug (RWA)"
+    },
+    "options": {
+      "height": {
+        "low": "Gebäude geringer Höhe (bis 11 m)",
+        "medium": "Gebäude mittlerer Höhe (bis 30 m)",
+        "highRise": "Hochhaus (über 30 m)"
+      },
+      "construction": {
+        "new": "Neubau",
+        "renovation": "Umbau / Nutzungsänderung"
+      },
+      "concept": {
+        "standard": "Standardkonzept",
+        "sprinkler": "Sprinkler-Vollschutz",
+        "performance": "Nachweisverfahren (BSR 27-15)"
+      },
+      "usages": {
+        "residential": "Wohnen",
+        "office": "Büro",
+        "school": "Schule",
+        "retail": "Verkaufsgeschäft",
+        "hospitalityA": "Beherbergung [a] (Spital, Pflegeheim)",
+        "hospitalityB": "Beherbergung [b] (Hotel, Heim)",
+        "hospitalityC": "Beherbergung [c] (Berghütte, Lager)",
+        "assembly": "Räume mit grosser Personenbelegung (> 300)",
+        "industry": "Industrie und Gewerbe",
+        "parking": "Parking / Einstellhalle",
+        "agriculture": "Landwirtschaft"
+      },
+      "smokeExtraction": {
+        "none": "Keine",
+        "natural": "Natürlich",
+        "mechanical": "Maschinell"
+      },
+      "fuel": {
+        "oil": "Heizöl",
+        "gas": "Gas"
+      }
+    },
+    "hlks": {
+      "title": "Kriterien Heizung, Lüftung, Sanitär",
+      "description": "Diese Angaben sind dieselben wie in den Übersichten der Gewerke: eine Änderung hier gilt auch dort und steuert die Brandschutzpunkte beider Seiten.",
+      "generators": "Wärmeerzeugung",
+      "fuel": "Brennstoff Gas/Öl",
+      "power": "Nennwärmeleistung [kW]",
+      "powerHint": "Grenze 70 kW für Heizräume nach BSR 24-15.",
+      "oilTank": "Heizöltank im Gebäude",
+      "fireplace": "Cheminée / Einzelraumfeuerung",
+      "fireCompartments": "Lüftungsanlage über mehrere Brandabschnitte",
+      "commercialKitchen": "Gewerbliche Küchenabluft",
+      "parkingVentilation": "Lüftung / Entrauchung Parking",
+      "fireWater": "Wasserlöschposten / Innenhydranten",
+      "sprinklerSupply": "Wasserversorgung Sprinkleranlage"
+    },
+    "derived": {
+      "title": "Abgeleitete Anforderungen",
+      "description": "Grenzwerte und Unterlagen, die sich aus den Auslegungskriterien ergeben (BSN 1-15, BSR 11-15, BSR 24-15).",
+      "height": "Gebäudehöhe",
+      "heightValue": {
+        "low": "Gesamthöhe bis 11 m",
+        "medium": "Gesamthöhe bis 30 m",
+        "highRise": "Gesamthöhe über 30 m"
+      },
+      "qss": "QSS nach Tabelle",
+      "qssValue": "QSS {n} (gewählt: QSS {chosen})",
+      "documents": "Brandschutzunterlagen",
+      "documentsValue": {
+        "1": "Einfache Brandschutzpläne, Standardkonzept",
+        "2": "Brandschutzpläne, bei Abweichung Brandschutzkonzept",
+        "3": "Brandschutzpläne und ggf. Brandschutzkonzept",
+        "4": "Brandschutzpläne, Brandschutzkonzept, Kontrollorgan"
+      },
+      "control": "Kontrollorgan (QSS 4)",
+      "controlValue": "Unabhängige Prüfung nach Vorgabe der Behörde",
+      "heatRoom": "Heizraum (BSR 24-15)",
+      "heatRoomSmall": "Bis 70 kW: Feuerwiderstand wie Nutzung",
+      "heatRoomBig": "Über 70 kW: mindestens EI 60",
+      "heatRoomDoor": "Heizraumtüre",
+      "heatRoomDoorSmall": "EI 30",
+      "heatRoomDoorBig": "EI 30, in Fluchtrichtung öffnend",
+      "handover": "Vor Bezug",
+      "handoverValue": "Vorabzug der Revisionsunterlagen an die Eigentümerschaft"
     }
   },
   "heatLoad": {

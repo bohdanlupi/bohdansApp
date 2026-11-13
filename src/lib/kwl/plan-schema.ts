@@ -48,6 +48,10 @@ export const planParamsSchema = z.object({
   earthTube: bool,
   /** Heat emission through the supply air (Lufterhitzer in the unit) – SIA 382/1 5.3.3, 5.4. */
   airHeating: bool,
+  /** Brandschutz (VKF BSR 25-15, 21-15): system across several Brandabschnitte, gewerbliche Küchenabluft, Lüftung / Entrauchung of a Parking. */
+  fireCompartments: bool,
+  commercialKitchen: bool,
+  parkingVentilation: bool,
 });
 
 export const dwellingTypeSchema = z.object({

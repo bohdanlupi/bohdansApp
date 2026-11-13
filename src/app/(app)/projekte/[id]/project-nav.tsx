@@ -14,6 +14,7 @@ const tabs = [
   { path: "/heizung", key: "heating" },
   { path: "/lueftung", key: "ventilation" },
   { path: "/sanitaer", key: "sanitary" },
+  { path: "/brandschutz", key: "fire" },
 ] as const;
 
 export function ProjectNav({ projectId }: { projectId: string }) {

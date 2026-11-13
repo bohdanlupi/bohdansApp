@@ -89,6 +89,7 @@ export function PlanOverview({
               <Toggle label={t("params.waterTreatment")} checked={p.waterTreatment} editable={editable} onChange={(v) => set("waterTreatment", v)} />
               <Toggle label={t("params.rainwaterUse")} checked={p.rainwaterUse} editable={editable} onChange={(v) => set("rainwaterUse", v)} />
               <Toggle label={t("params.fireWater")} checked={p.fireWater} editable={editable} onChange={(v) => set("fireWater", v)} />
+              <Toggle label={t("params.sprinklerSupply")} checked={p.sprinklerSupply} editable={editable} onChange={(v) => set("sprinklerSupply", v)} />
             </div>
           </>
         )}

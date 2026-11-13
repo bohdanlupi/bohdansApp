@@ -52,6 +52,9 @@ export function KwlPlanDocument({
     [t("params.coolingCoil"), p.coolingCoil ? t("yes") : t("no")],
     [t("params.earthTube"), p.earthTube ? t("yes") : t("no")],
     [t("params.airHeating"), p.airHeating ? t("yes") : t("no")],
+    [t("params.fireCompartments"), p.fireCompartments ? t("yes") : t("no")],
+    [t("params.commercialKitchen"), p.commercialKitchen ? t("yes") : t("no")],
+    [t("params.parkingVentilation"), p.parkingVentilation ? t("yes") : t("no")],
   ];
 
   return (

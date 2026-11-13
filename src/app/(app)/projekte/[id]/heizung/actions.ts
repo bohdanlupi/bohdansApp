@@ -42,6 +42,7 @@ export async function saveHeatingPlan(projectId: string, data: unknown): Promise
   if (error) return { error: "saveFailed" };
 
   revalidatePath(`/projekte/${projectId}/heizung`, "layout");
+  revalidatePath(`/projekte/${projectId}/brandschutz`, "layout");
   return {};
 }
 

@@ -99,6 +99,12 @@ export function HeatingOverview({
             <Toggle label={t("params.multiUnit")} checked={p.multiUnit} editable={editable} onChange={(v) => set("multiUnit", v)} />
             <Toggle label={t("params.storage")} checked={p.storage} editable={editable} onChange={(v) => set("storage", v)} />
             <Toggle label={t("params.cooling")} checked={p.cooling} editable={editable} onChange={(v) => set("cooling", v)} />
+            <Toggle label={t("params.oilTank")} checked={p.oilTank} editable={editable} onChange={(v) => set("oilTank", v)} />
+            <Toggle label={t("params.fireplace")} checked={p.fireplace} editable={editable} onChange={(v) => set("fireplace", v)} />
+            {p.generators.includes("gasOil") && (
+              <OptionField label={t("params.fuel")} value={p.fuel} options={["oil", "gas"] as const} optionLabel={o("fuel")} editable={editable} onChange={(v) => set("fuel", v)} />
+            )}
+            <p className="text-xs text-muted-foreground">{t("params.fireHint")}</p>
           </fieldset>
         </div>
       </Section>

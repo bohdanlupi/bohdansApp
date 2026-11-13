@@ -48,6 +48,9 @@ export function HeatingPlanDocument({
     [t("params.emitters"), many("emitters", p.emitters)],
     [t("params.storage"), yes(p.storage)],
     [t("params.cooling"), yes(p.cooling)],
+    [t("params.fuel"), p.generators.includes("gasOil") ? o("fuel", p.fuel) : "-"],
+    [t("params.oilTank"), yes(p.oilTank)],
+    [t("params.fireplace"), yes(p.fireplace)],
   ];
 
   return (

@@ -95,5 +95,6 @@ export async function savePlan(projectId: string, data: unknown): Promise<{ erro
   if (error) return { error: "saveFailed" };
 
   revalidatePath(`/projekte/${projectId}/lueftung`, "layout");
+  revalidatePath(`/projekte/${projectId}/brandschutz`, "layout");
   return {};
 }

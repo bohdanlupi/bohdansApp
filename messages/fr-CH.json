@@ -155,7 +155,8 @@
       "costPlan": "Plan des coûts",
       "heating": "Chauffage",
       "ventilation": "Ventilation",
-      "sanitary": "Sanitaire"
+      "sanitary": "Sanitaire",
+      "fire": "Protection incendie"
     }
   },
   "addresses": {
@@ -1112,7 +1113,10 @@
       "humidifier": "Humidification de l’air",
       "coolingCoil": "Batterie froide déshumidifiante (condensat)",
       "earthTube": "Échangeur air-sol",
-      "airHeating": "Chauffage à air (émission de chaleur par l’air pulsé)"
+      "airHeating": "Chauffage à air (émission de chaleur par l’air pulsé)",
+      "fireCompartments": "Installation de ventilation sur plusieurs compartiments coupe-feu",
+      "commercialKitchen": "Air extrait de cuisine professionnelle",
+      "parkingVentilation": "Ventilation / désenfumage de parking"
     },
     "options": {
       "buildingType": {
@@ -2402,7 +2406,11 @@
       "storage": "Accumulateur (technique)",
       "cooling": "Refroidissement par le système de chauffage",
       "noise": "Protection contre le bruit",
-      "noiseHint": "SIA 181 ch. 2.2.2 : exigences accrues obligatoires pour les maisons individuelles, jumelées et en rangée neuves ainsi qu’en propriété par étages ; sinon sur convention."
+      "noiseHint": "SIA 181 ch. 2.2.2 : exigences accrues obligatoires pour les maisons individuelles, jumelées et en rangée neuves ainsi qu’en propriété par étages ; sinon sur convention.",
+      "fuel": "Combustible gaz/mazout",
+      "oilTank": "Citerne à mazout dans le bâtiment",
+      "fireplace": "Cheminée / foyer individuel",
+      "fireHint": "Le combustible, la citerne et la cheminée pilotent les points de protection incendie (AEAI DPI 24-15, 26-15)."
     },
     "options": {
       "buildingType": {
@@ -2437,6 +2445,10 @@
       "noise": {
         "minimum": "Exigences minimales",
         "increased": "Exigences accrues"
+      },
+      "fuel": {
+        "oil": "Mazout",
+        "gas": "Gaz"
       }
     },
     "derived": {
@@ -3209,7 +3221,8 @@
       "flatRoof": "Toit plat (évacuation de secours)",
       "undergroundGarage": "Parking souterrain / rampe",
       "noise": "Protection contre le bruit",
-      "noiseHint": "SIA 181 ch. 2.2.2 : exigences accrues obligatoires pour les maisons individuelles, jumelées et en rangée neuves ainsi qu’en propriété par étages ; sinon sur convention."
+      "noiseHint": "SIA 181 ch. 2.2.2 : exigences accrues obligatoires pour les maisons individuelles, jumelées et en rangée neuves ainsi qu’en propriété par étages ; sinon sur convention.",
+      "sprinklerSupply": "Alimentation en eau de l’installation sprinkler"
     },
     "options": {
       "scope": {
@@ -3301,6 +3314,134 @@
       "slopeValue": "Eaux usées 2 % (≥ 1 % à titre exceptionnel) · eaux pluviales 1 %",
       "rainfall": "Intensité de pluie de dimensionnement",
       "rainfallValue": "r = 0.03 l/(s·m²) · évacuation de secours supplémentaire pour les toits plats"
+    }
+  },
+  "firePlan": {
+    "title": "Planification de la protection incendie",
+    "description": "Protection incendie selon les phases SIA 108 – prescriptions de protection incendie AEAI 2015 (norme 1-15 et directives 10-15 à 28-15). Les points de protection incendie du chauffage, de la ventilation et du sanitaire apparaissent ici avec leur état dans la discipline concernée.",
+    "navLabel": "Planification protection incendie",
+    "overview": "Aperçu et critères de dimensionnement",
+    "phases": "Phases SIA 108",
+    "phaseList": "Phases",
+    "phaseLabel": "Phase {code}",
+    "phaseNotes": "Remarques sur la phase",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Check-list (PDF)",
+    "hideNa": "Masquer les points non applicables ({n})",
+    "showNa": "Afficher les points non applicables ({n})",
+    "fromTrade": "Partagé avec",
+    "normsHint": "Les check-lists reprennent les exigences par analogie et renvoient aux prescriptions de protection incendie AEAI 2015 (état au 01.01.2017) et à la SIA 108:2014. Font foi le texte normatif et les charges de l’autorité de protection incendie.",
+    "yes": "oui",
+    "no": "non",
+    "trades": {
+      "heating": "Chauffage",
+      "ventilation": "Ventilation",
+      "sanitary": "Sanitaire"
+    },
+    "criteria": {
+      "title": "Critères de dimensionnement",
+      "description": "Bases selon la norme de protection incendie AEAI. Elles déterminent les points de contrôle applicables par phase ; les points non applicables restent visibles et marqués et peuvent être masqués par phase."
+    },
+    "params": {
+      "height": "Hauteur du bâtiment",
+      "heightHint": "Hauteur totale selon NPI 1-15 art. 13 ou DPI 10-15.",
+      "construction": "Projet",
+      "concept": "Concept de protection incendie",
+      "qss": "Degré d’assurance qualité",
+      "qssHint": "Fixé par l’autorité ; selon DPI 11-15 tableaux 3.3.1 / 3.4.1 : DAQ {n}.",
+      "usages": "Affectations",
+      "project": "Projet et mode de construction",
+      "qsRole": "Le bureau est responsable AQ en protection incendie",
+      "timber": "Construction en bois / structures porteuses ou éléments formant compartiment combustibles",
+      "systems": "Protection incendie technique",
+      "sprinkler": "Installation sprinkler",
+      "fireAlarm": "Installation de détection d’incendie (IDI)",
+      "lightning": "Système de protection contre la foudre",
+      "safetyLighting": "Éclairage de sécurité / alimentation de sécurité",
+      "lifts": "Ascenseurs",
+      "smokeExtraction": "Extraction de fumée et de chaleur (EFC)"
+    },
+    "options": {
+      "height": {
+        "low": "Bâtiment de faible hauteur (jusqu’à 11 m)",
+        "medium": "Bâtiment de moyenne hauteur (jusqu’à 30 m)",
+        "highRise": "Bâtiment élevé (plus de 30 m)"
+      },
+      "construction": {
+        "new": "Construction neuve",
+        "renovation": "Transformation / changement d’affectation"
+      },
+      "concept": {
+        "standard": "Concept standard",
+        "sprinkler": "Protection totale sprinkler",
+        "performance": "Méthodes de preuves (DPI 27-15)"
+      },
+      "usages": {
+        "residential": "Habitation",
+        "office": "Bureaux",
+        "school": "École",
+        "retail": "Commerce",
+        "hospitalityA": "Établissement d’hébergement [a] (hôpital, EMS)",
+        "hospitalityB": "Établissement d’hébergement [b] (hôtel, foyer)",
+        "hospitalityC": "Établissement d’hébergement [c] (cabane, colonie)",
+        "assembly": "Locaux à forte occupation (> 300)",
+        "industry": "Industrie et artisanat",
+        "parking": "Parking",
+        "agriculture": "Agriculture"
+      },
+      "smokeExtraction": {
+        "none": "Aucune",
+        "natural": "Naturelle",
+        "mechanical": "Mécanique"
+      },
+      "fuel": {
+        "oil": "Mazout",
+        "gas": "Gaz"
+      }
+    },
+    "hlks": {
+      "title": "Critères chauffage, ventilation, sanitaire",
+      "description": "Ces données sont les mêmes que dans les aperçus des disciplines : une modification ici s’applique aussi là-bas et pilote les points de protection incendie des deux côtés.",
+      "generators": "Production de chaleur",
+      "fuel": "Combustible gaz/mazout",
+      "power": "Puissance calorifique nominale [kW]",
+      "powerHint": "Seuil de 70 kW pour les chaufferies selon DPI 24-15.",
+      "oilTank": "Citerne à mazout dans le bâtiment",
+      "fireplace": "Cheminée / foyer individuel",
+      "fireCompartments": "Installation de ventilation sur plusieurs compartiments coupe-feu",
+      "commercialKitchen": "Air extrait de cuisine professionnelle",
+      "parkingVentilation": "Ventilation / désenfumage de parking",
+      "fireWater": "Postes d’incendie / hydrants intérieurs",
+      "sprinklerSupply": "Alimentation en eau de l’installation sprinkler"
+    },
+    "derived": {
+      "title": "Exigences dérivées",
+      "description": "Valeurs limites et documents qui découlent des critères (NPI 1-15, DPI 11-15, DPI 24-15).",
+      "height": "Hauteur du bâtiment",
+      "heightValue": {
+        "low": "Hauteur totale jusqu’à 11 m",
+        "medium": "Hauteur totale jusqu’à 30 m",
+        "highRise": "Hauteur totale supérieure à 30 m"
+      },
+      "qss": "DAQ selon tableau",
+      "qssValue": "DAQ {n} (choisi : DAQ {chosen})",
+      "documents": "Documents de protection incendie",
+      "documentsValue": {
+        "1": "Plans simples, concept standard",
+        "2": "Plans, concept en cas de dérogation",
+        "3": "Plans et le cas échéant concept",
+        "4": "Plans, concept, organe de contrôle"
+      },
+      "control": "Organe de contrôle (DAQ 4)",
+      "controlValue": "Contrôle indépendant selon l’autorité",
+      "heatRoom": "Chaufferie (DPI 24-15)",
+      "heatRoomSmall": "Jusqu’à 70 kW : résistance comme l’affectation",
+      "heatRoomBig": "Plus de 70 kW : au moins EI 60",
+      "heatRoomDoor": "Porte de chaufferie",
+      "heatRoomDoorSmall": "EI 30",
+      "heatRoomDoorBig": "EI 30, s’ouvrant dans le sens de la fuite",
+      "handover": "Avant l’occupation",
+      "handoverValue": "Pré-tirage des documents de révision au propriétaire"
     }
   },
   "heatLoad": {

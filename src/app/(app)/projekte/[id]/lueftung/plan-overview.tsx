@@ -98,6 +98,9 @@ export function PlanOverview({
           <Toggle label={t("params.coolingCoil")} checked={p.coolingCoil} editable={editable} onChange={(v) => set("coolingCoil", v)} />
           <Toggle label={t("params.earthTube")} checked={p.earthTube} editable={editable} onChange={(v) => set("earthTube", v)} />
           <Toggle label={t("params.airHeating")} checked={p.airHeating} editable={editable} onChange={(v) => set("airHeating", v)} />
+          <Toggle label={t("params.fireCompartments")} checked={p.fireCompartments} editable={editable} onChange={(v) => set("fireCompartments", v)} />
+          <Toggle label={t("params.commercialKitchen")} checked={p.commercialKitchen} editable={editable} onChange={(v) => set("commercialKitchen", v)} />
+          <Toggle label={t("params.parkingVentilation")} checked={p.parkingVentilation} editable={editable} onChange={(v) => set("parkingVentilation", v)} />
         </div>
       </Section>
 

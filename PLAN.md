@@ -650,6 +650,25 @@ minimum; 2.2.2 makes erhöht mandatory for new EFH / DEFH / REFH and Stockwerkei
 only pointed to VA104-01 were replaced (p41.cleaning, p51.accessibility, p52.clean, p53.hygiene, p61.hygiene). Brandschutz chapter
 planned next (user); item texts of the three new norms not yet clicked through by the user. No migration needed (jsonb fields).
 
+Brandschutz (2026-11-13): new project tab «Brandschutz» right of Sanitär (/projekte/[id]/brandschutz), same structure as the
+trades – overview «Übersicht und Auslegungskriterien», phases 31–61 with checklists, hideNa toggle, dossier and phase PDFs
+(/api/pdf/fire-plan/<projectId>[?phase=]). Source: VKF Brandschutzvorschriften 2015 (BSN 1-15, BSR 10-15 … 28-15, Stand
+01.01.2017) in Berechnungsvorlagen/Brandschutz/, text extracted with pdftotext and paraphrased by subagents. Table fire_plans
+(migration 20261113100000_fire_plans.sql, same RLS as sanitary_plans) holds the fire criteria (height, usages, construction,
+concept, QSS 1–4, qsRole, timber, sprinkler, fireAlarm, smokeExtraction none/natural/mechanical, lightning, safetyLighting,
+lifts), own checks and notes. Own items (src/lib/fire/phases.ts): 68 process/QS (`bq*`, BSN 1-15, BSR 11/12/27/28-15), 67
+baulicher Brandschutz (`bg*`, BSR 13–17-15), 72 technical systems and dangerous substances (`ba*`, BSR 18–23-15, 26-15).
+HLKS items live in the trades as sections flagged `fire` (fireList): Heizung 83 (`hb*`, BSR 24-15 / 26-15), Lüftung 83
+(`lb*`, BSR 25-15 / 21-15 / 20-15), Sanitär 51 (`sb*`, BSR 18-15 / 19-15). The Brandschutz phases mirror those sections with
+shared checks (user decision): the fire pages read the trade plans and write single keys back via patchTradePlan
+(read-modify-write, so parallel trade editing is kept). New trade criteria, also editable in the fire overview: Heizung fuel
+oil/gas, oilTank, fireplace; Lüftung fireCompartments, commercialKitchen, parkingVentilation; Sanitär sprinklerSupply. The
+overview suggests the QSS from BSR 11-15 Tabelle 3.3.1 / 3.4.1 (src/lib/fire/qss.ts). Open: user click-through; several VKF
+tables were garbled in the text extract and reconstructed by the agents (BSR 11-15 3.4.1, 14-15 5.1.2 Rohre, 15-15 Tabellen
+1–3, 18-15 Anhang Löschposten, 19-15 Nennwirkzeit, 21-15 3.1 thresholds and Parking-MRWA 8-facher Luftwechsel, 26-15 3.2
+quantities); Hochhaus-only items in the trades are gated with multi/mfh because the trades have no height criterion; FR/IT
+VKF terms not checked against the official editions.
+
 Open / ideas for later:
 - BKP / eBKP-H lists are only preloaded with main levels + HLKSE details – user should check/complete
   them (Einstellungen → Kostenpläne); eBKP-H element names were entered from memory.

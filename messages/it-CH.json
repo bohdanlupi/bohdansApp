@@ -155,7 +155,8 @@
       "costPlan": "Piano dei costi",
       "heating": "Riscaldamento",
       "ventilation": "Ventilazione",
-      "sanitary": "Sanitario"
+      "sanitary": "Sanitario",
+      "fire": "Antincendio"
     }
   },
   "addresses": {
@@ -1112,7 +1113,10 @@
       "humidifier": "Umidificazione dell’aria",
       "coolingCoil": "Batteria fredda deumidificante (condensa)",
       "earthTube": "Scambiatore aria-terreno",
-      "airHeating": "Riscaldamento ad aria (emissione di calore tramite l’aria immessa)"
+      "airHeating": "Riscaldamento ad aria (emissione di calore tramite l’aria immessa)",
+      "fireCompartments": "Impianto di ventilazione su più compartimenti tagliafuoco",
+      "commercialKitchen": "Aria di scarico di cucina professionale",
+      "parkingVentilation": "Ventilazione / evacuazione fumo autorimessa"
     },
     "options": {
       "buildingType": {
@@ -2402,7 +2406,11 @@
       "storage": "Accumulo (tecnico)",
       "cooling": "Raffrescamento tramite il sistema di riscaldamento",
       "noise": "Protezione dal rumore",
-      "noiseHint": "SIA 181 cifra 2.2.2: esigenze elevate obbligatorie per case unifamiliari, bifamiliari e a schiera nuove e per la proprietà per piani; altrimenti su accordo."
+      "noiseHint": "SIA 181 cifra 2.2.2: esigenze elevate obbligatorie per case unifamiliari, bifamiliari e a schiera nuove e per la proprietà per piani; altrimenti su accordo.",
+      "fuel": "Combustibile gas/olio",
+      "oilTank": "Serbatoio di olio combustibile nell’edificio",
+      "fireplace": "Camino / focolare singolo",
+      "fireHint": "Combustibile, serbatoio e camino determinano i punti antincendio (AICAA DA 24-15, 26-15)."
     },
     "options": {
       "buildingType": {
@@ -2437,6 +2445,10 @@
       "noise": {
         "minimum": "Esigenze minime",
         "increased": "Esigenze elevate"
+      },
+      "fuel": {
+        "oil": "Olio combustibile",
+        "gas": "Gas"
       }
     },
     "derived": {
@@ -3209,7 +3221,8 @@
       "flatRoof": "Tetto piano (scarico d’emergenza)",
       "undergroundGarage": "Autorimessa interrata / rampa",
       "noise": "Protezione dal rumore",
-      "noiseHint": "SIA 181 cifra 2.2.2: esigenze elevate obbligatorie per case unifamiliari, bifamiliari e a schiera nuove e per la proprietà per piani; altrimenti su accordo."
+      "noiseHint": "SIA 181 cifra 2.2.2: esigenze elevate obbligatorie per case unifamiliari, bifamiliari e a schiera nuove e per la proprietà per piani; altrimenti su accordo.",
+      "sprinklerSupply": "Alimentazione idrica dell’impianto sprinkler"
     },
     "options": {
       "scope": {
@@ -3301,6 +3314,134 @@
       "slopeValue": "Acque luride 2 % (≥ 1 % in via eccezionale) · acque meteoriche 1 %",
       "rainfall": "Intensità di pioggia di dimensionamento",
       "rainfallValue": "r = 0.03 l/(s·m²) · scarico d’emergenza supplementare per i tetti piani"
+    }
+  },
+  "firePlan": {
+    "title": "Pianificazione antincendio",
+    "description": "Protezione antincendio secondo le fasi SIA 108 – prescrizioni antincendio AICAA 2015 (norma 1-15 e direttive 10-15 a 28-15). I punti antincendio di riscaldamento, ventilazione e sanitario compaiono qui con il loro stato nella rispettiva disciplina.",
+    "navLabel": "Pianificazione antincendio",
+    "overview": "Panoramica e criteri di dimensionamento",
+    "phases": "Fasi SIA 108",
+    "phaseList": "Fasi",
+    "phaseLabel": "Fase {code}",
+    "phaseNotes": "Osservazioni sulla fase",
+    "pdf": "Dossier (PDF)",
+    "pdfPhase": "Lista di controllo (PDF)",
+    "hideNa": "Nascondi i punti non pertinenti ({n})",
+    "showNa": "Mostra i punti non pertinenti ({n})",
+    "fromTrade": "Condiviso con",
+    "normsHint": "Le liste di controllo riportano i requisiti per analogia e rimandano alle prescrizioni antincendio AICAA 2015 (stato 01.01.2017) e alla SIA 108:2014. Fanno stato il testo normativo e le condizioni dell’autorità antincendio.",
+    "yes": "sì",
+    "no": "no",
+    "trades": {
+      "heating": "Riscaldamento",
+      "ventilation": "Ventilazione",
+      "sanitary": "Sanitario"
+    },
+    "criteria": {
+      "title": "Criteri di dimensionamento",
+      "description": "Basi secondo la norma antincendio AICAA. Determinano quali punti di controllo valgono nelle fasi; i punti non pertinenti restano visibili contrassegnati e possono essere nascosti per fase."
+    },
+    "params": {
+      "height": "Altezza dell’edificio",
+      "heightHint": "Altezza totale secondo NA 1-15 art. 13 o DA 10-15.",
+      "construction": "Progetto",
+      "concept": "Concetto antincendio",
+      "qss": "Grado di garanzia della qualità",
+      "qssHint": "Stabilito dall’autorità; secondo DA 11-15 tabelle 3.3.1 / 3.4.1: GGQ {n}.",
+      "usages": "Destinazioni d’uso",
+      "project": "Progetto e tipo di costruzione",
+      "qsRole": "Lo studio è responsabile QS antincendio",
+      "timber": "Costruzione in legno / strutture portanti o elementi tagliafuoco combustibili",
+      "systems": "Protezione antincendio tecnica",
+      "sprinkler": "Impianto sprinkler",
+      "fireAlarm": "Impianto di rivelazione incendio (IRI)",
+      "lightning": "Sistema di protezione contro i fulmini",
+      "safetyLighting": "Illuminazione di sicurezza / alimentazione di sicurezza",
+      "lifts": "Ascensori",
+      "smokeExtraction": "Evacuazione di fumo e calore (EFC)"
+    },
+    "options": {
+      "height": {
+        "low": "Edificio di altezza ridotta (fino a 11 m)",
+        "medium": "Edificio di media altezza (fino a 30 m)",
+        "highRise": "Edificio alto (oltre 30 m)"
+      },
+      "construction": {
+        "new": "Nuova costruzione",
+        "renovation": "Trasformazione / cambio di destinazione"
+      },
+      "concept": {
+        "standard": "Concetto standard",
+        "sprinkler": "Protezione totale sprinkler",
+        "performance": "Metodi di verifica (DA 27-15)"
+      },
+      "usages": {
+        "residential": "Abitazione",
+        "office": "Uffici",
+        "school": "Scuola",
+        "retail": "Negozio",
+        "hospitalityA": "Struttura ricettiva [a] (ospedale, casa di cura)",
+        "hospitalityB": "Struttura ricettiva [b] (albergo, istituto)",
+        "hospitalityC": "Struttura ricettiva [c] (capanna, colonia)",
+        "assembly": "Locali con grande numero di persone (> 300)",
+        "industry": "Industria e artigianato",
+        "parking": "Autorimessa",
+        "agriculture": "Agricoltura"
+      },
+      "smokeExtraction": {
+        "none": "Nessuna",
+        "natural": "Naturale",
+        "mechanical": "Meccanica"
+      },
+      "fuel": {
+        "oil": "Olio combustibile",
+        "gas": "Gas"
+      }
+    },
+    "hlks": {
+      "title": "Criteri riscaldamento, ventilazione, sanitario",
+      "description": "Questi dati sono gli stessi delle panoramiche delle discipline: una modifica qui vale anche là e determina i punti antincendio di entrambe le parti.",
+      "generators": "Produzione di calore",
+      "fuel": "Combustibile gas/olio",
+      "power": "Potenza termica nominale [kW]",
+      "powerHint": "Soglia di 70 kW per i locali caldaia secondo DA 24-15.",
+      "oilTank": "Serbatoio di olio combustibile nell’edificio",
+      "fireplace": "Camino / focolare singolo",
+      "fireCompartments": "Impianto di ventilazione su più compartimenti tagliafuoco",
+      "commercialKitchen": "Aria di scarico di cucina professionale",
+      "parkingVentilation": "Ventilazione / evacuazione fumo autorimessa",
+      "fireWater": "Posti di spegnimento / idranti interni",
+      "sprinklerSupply": "Alimentazione idrica dell’impianto sprinkler"
+    },
+    "derived": {
+      "title": "Requisiti derivati",
+      "description": "Valori limite e documenti che risultano dai criteri (NA 1-15, DA 11-15, DA 24-15).",
+      "height": "Altezza dell’edificio",
+      "heightValue": {
+        "low": "Altezza totale fino a 11 m",
+        "medium": "Altezza totale fino a 30 m",
+        "highRise": "Altezza totale oltre 30 m"
+      },
+      "qss": "GGQ secondo tabella",
+      "qssValue": "GGQ {n} (scelto: GGQ {chosen})",
+      "documents": "Documenti antincendio",
+      "documentsValue": {
+        "1": "Piani semplici, concetto standard",
+        "2": "Piani, concetto in caso di deroga",
+        "3": "Piani ed eventualmente concetto",
+        "4": "Piani, concetto, organo di controllo"
+      },
+      "control": "Organo di controllo (GGQ 4)",
+      "controlValue": "Verifica indipendente secondo l’autorità",
+      "heatRoom": "Locale caldaia (DA 24-15)",
+      "heatRoomSmall": "Fino a 70 kW: resistenza come la destinazione",
+      "heatRoomBig": "Oltre 70 kW: almeno EI 60",
+      "heatRoomDoor": "Porta del locale caldaia",
+      "heatRoomDoorSmall": "EI 30",
+      "heatRoomDoorBig": "EI 30, apribile nel senso di fuga",
+      "handover": "Prima dell’occupazione",
+      "handoverValue": "Bozza dei documenti di revisione alla proprietà"
     }
   },
   "heatLoad": {

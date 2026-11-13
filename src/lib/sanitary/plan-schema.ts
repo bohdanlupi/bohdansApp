@@ -41,6 +41,8 @@ export const sanitaryParamsSchema = z.object({
   rainwaterUse: bool,
   /** Wasserlöschposten / Innenhydranten after SVGW W3 Kapitel 9 (no sprinklers). */
   fireWater: bool,
+  /** Wasserversorgung einer Sprinkleranlage im Auftrag (VKF BSR 19-15). */
+  sprinklerSupply: bool,
   /** Entwässerung: Ablaufstellen unterhalb der Rückstauebene. */
   belowBackflowLevel: bool,
   liftingStation: bool,

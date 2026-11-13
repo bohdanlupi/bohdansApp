@@ -235,5 +235,6 @@ export async function saveSanitaryPlan(projectId: string, data: unknown): Promis
   if (error) return { error: "saveFailed" };
 
   revalidatePath(`/projekte/${projectId}/sanitaer`, "layout");
+  revalidatePath(`/projekte/${projectId}/brandschutz`, "layout");
   return {};
 }
