@@ -379,7 +379,13 @@
       "setPasswordFor": "Neues Passwort für {name}"
     },
     "profile": {
-      "title": "Persönliche Angaben"
+      "title": "Persönliche Angaben",
+      "theme": "Darstellung",
+      "themes": {
+        "system": "Wie Betriebssystem",
+        "light": "Hell",
+        "dark": "Dunkel"
+      }
     },
     "costPlans": {
       "description": "Code-Listen für Kostenpläne. BKP und eBKP-H sind mit den Hauptgruppen und den Details für HLKSE vorbelegt – bitte prüfen und nach Bedarf ergänzen.",

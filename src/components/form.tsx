@@ -31,7 +31,7 @@ export function FormMessage({ state }: { state: FormState }) {
       role={state.error ? "alert" : "status"}
       className={cn(
         "rounded-md px-3 py-2 text-sm",
-        state.error ? "bg-destructive/10 text-destructive" : "bg-emerald-50 text-emerald-800",
+        state.error ? "bg-destructive/10 text-destructive" : "bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
       )}
     >
       {t((state.error ?? state.success) as FormMessageKey)}

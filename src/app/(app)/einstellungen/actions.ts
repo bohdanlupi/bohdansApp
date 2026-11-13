@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { languageToLocale, LOCALE_COOKIE } from "@/i18n/config";
+import { THEME_COOKIE, themeCookie, themeSchema } from "@/lib/theme";
 import { assertRole, getCurrentProfile } from "@/lib/auth";
 import type { FormState } from "@/lib/form-state";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
@@ -127,6 +128,7 @@ export async function updateUser(_prev: FormState, formData: FormData): Promise<
 const profileSchema = z.object({
   full_name: z.string().trim().min(1),
   language: languageSchema,
+  theme: themeSchema,
 });
 
 export async function updateOwnProfile(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -145,6 +147,8 @@ export async function updateOwnProfile(_prev: FormState, formData: FormData): Pr
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
   });
+
+  (await cookies()).set(THEME_COOKIE, parsed.data.theme, themeCookie);
 
   revalidatePath("/", "layout");
   return { success: "saved" };

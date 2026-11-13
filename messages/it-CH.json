@@ -379,7 +379,13 @@
       "setPasswordFor": "Nuova password per {name}"
     },
     "profile": {
-      "title": "Dati personali"
+      "title": "Dati personali",
+      "theme": "Aspetto",
+      "themes": {
+        "system": "Come il sistema",
+        "light": "Chiaro",
+        "dark": "Scuro"
+      }
     },
     "costPlans": {
       "description": "Liste di codici per i piani dei costi. CCC ed eCCC-E sono precompilati con i gruppi principali e i dettagli RVCSE – verificare e completare secondo necessità.",

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { initialFormState } from "@/lib/form-state";
 import type { Profile } from "@/lib/supabase/types";
+import { parseTheme, themes } from "@/lib/theme";
 
 import { setPassword } from "../../../(auth)/actions";
 import { updateOwnProfile } from "../actions";
@@ -40,6 +41,16 @@ export function ProfileForm({ profile }: { profile: Profile }) {
                 <option value="de">{t("languages.de")}</option>
                 <option value="fr">{t("languages.fr")}</option>
                 <option value="it">{t("languages.it")}</option>
+              </NativeSelect>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="theme">{t("settings.profile.theme")}</Label>
+              <NativeSelect id="theme" name="theme" defaultValue={parseTheme(profile.theme)}>
+                {themes.map((theme) => (
+                  <option key={theme} value={theme}>
+                    {t(`settings.profile.themes.${theme}`)}
+                  </option>
+                ))}
               </NativeSelect>
             </div>
             <div className="space-y-2">

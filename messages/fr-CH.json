@@ -379,7 +379,13 @@
       "setPasswordFor": "Nouveau mot de passe pour {name}"
     },
     "profile": {
-      "title": "Données personnelles"
+      "title": "Données personnelles",
+      "theme": "Affichage",
+      "themes": {
+        "system": "Comme le système",
+        "light": "Clair",
+        "dark": "Sombre"
+      }
     },
     "costPlans": {
       "description": "Listes de codes pour les plans des coûts. Le CFC et l'eCCC-Bât sont préremplis avec les groupes principaux et les détails CVSE – veuillez vérifier et compléter selon les besoins.",

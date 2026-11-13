@@ -1510,6 +1510,7 @@ export type Database = {
           id: string
           language: Database["public"]["Enums"]["app_language"]
           role: Database["public"]["Enums"]["app_role"]
+          theme: string
           updated_at: string
         }
         Insert: {
@@ -1520,6 +1521,7 @@ export type Database = {
           id: string
           language?: Database["public"]["Enums"]["app_language"]
           role?: Database["public"]["Enums"]["app_role"]
+          theme?: string
           updated_at?: string
         }
         Update: {
@@ -1530,6 +1532,7 @@ export type Database = {
           id?: string
           language?: Database["public"]["Enums"]["app_language"]
           role?: Database["public"]["Enums"]["app_role"]
+          theme?: string
           updated_at?: string
         }
         Relationships: []

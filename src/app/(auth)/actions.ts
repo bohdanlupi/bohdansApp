@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { languageToLocale, LOCALE_COOKIE } from "@/i18n/config";
 import type { FormState } from "@/lib/form-state";
+import { parseTheme, THEME_COOKIE, themeCookie } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
 
 const loginSchema = z.object({
@@ -30,7 +31,7 @@ export async function signIn(_prev: FormState, formData: FormData): Promise<Form
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("active, language")
+    .select("active, language, theme")
     .eq("id", data.user.id)
     .maybeSingle();
 
@@ -44,6 +45,8 @@ export async function signIn(_prev: FormState, formData: FormData): Promise<Form
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
   });
+
+  (await cookies()).set(THEME_COOKIE, parseTheme(profile.theme), themeCookie);
 
   redirect(safeNext(parsed.data.next));
 }
